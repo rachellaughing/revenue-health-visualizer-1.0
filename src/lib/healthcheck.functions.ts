@@ -334,3 +334,35 @@ export const saveResponse = createServerFn({ method: "POST" })
 
     return { ok: true, completion_pct: pct, completed: isComplete };
   });
+
+const selectionSchema = z.object({
+  assessment_id: z.string().uuid(),
+  selected_child_ids: z.array(z.string().min(1).max(64)).max(50),
+});
+
+export const updateSelectedChildIds = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => selectionSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+    const { data: asmt, error: oErr } = await supabaseAdmin
+      .from("assessments")
+      .select("id,user_id,status")
+      .eq("id", data.assessment_id)
+      .maybeSingle();
+    if (oErr) throw new Error(oErr.message);
+    if (!asmt || asmt.user_id !== userId) throw new Error("Forbidden");
+    if (asmt.status === "completed") throw new Error("Assessment already completed");
+
+    const { error: uErr } = await supabaseAdmin
+      .from("assessments")
+      .update({
+        selected_child_ids: data.selected_child_ids,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.assessment_id);
+    if (uErr) throw new Error(uErr.message);
+
+    return { ok: true, selected_child_ids: data.selected_child_ids };
+  });
+
