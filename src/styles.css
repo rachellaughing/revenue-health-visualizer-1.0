@@ -64,6 +64,13 @@
   --mm-mid: #888880;
   --mm-ink: #111111;
 
+  /* System colors */
+  --mm-sys-positioning: #F9A11E;
+  --mm-sys-authority: #2BB457;
+  --mm-sys-conversion: #05A4A3;
+  --mm-sys-lifecycle: #223F99;
+  --mm-sys-visibility: #DE1A58;
+
   --background: #FFFEFA;
   --foreground: #111111;
   --card: #FFFEFA;
