@@ -439,8 +439,41 @@ function HealthCheckShell({
         </div>
       </div>
 
+      {/* Tier indicator bar */}
+      <div
+        style={{
+          height: 32,
+          background: T.offWhite,
+          display: "flex",
+          alignItems: "center",
+          padding: "0 24px",
+          fontSize: 11,
+          color: T.mid,
+          flexShrink: 0,
+        }}
+      >
+        {tier === "starter" && (
+          <span>
+            Revenue Health Snapshot™ · 15 subsystems ·{" "}
+            <a
+              href="/upgrade"
+              style={{ color: T.teal, textDecoration: "none", fontWeight: 500 }}
+            >
+              Upgrade for full access ↗
+            </a>
+          </span>
+        )}
+        {tier === "pro" && (
+          <span>Revenue Health Assessment™ · All 50 subsystems unlocked</span>
+        )}
+        {tier === "diagnostic" && (
+          <span>Revenue Health Diagnostic™ · All 50 subsystems unlocked</span>
+        )}
+      </div>
+
       {/* Body */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+
         {/* Left nav */}
         <div
           style={{
