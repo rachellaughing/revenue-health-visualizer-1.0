@@ -29,8 +29,8 @@ const sections: NavSection[] = [
     label: "HOME",
     items: [
       { title: "Dashboard", url: "/", icon: LayoutDashboard },
-      { title: "Personal Profile", url: "/personal-profile", icon: User },
-      { title: "Company Profile", url: "/company-profile", icon: Building2 },
+      { title: "Personal Profile", url: "/profile/personal", icon: User },
+      { title: "Company Profile", url: "/profile/company", icon: Building2 },
     ],
   },
   {
