@@ -145,13 +145,12 @@ export type SymptomCategory = {
 
 export const getSymptomCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async (): Promise<SymptomCategory[]> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await (supabaseAdmin as any)
+  .handler(async ({ context }): Promise<SymptomCategory[]> => {
+    const { data, error } = await (context.supabase as any)
       .schema("revhealth2")
       .from("symptom_map")
-      .select("symptom_code,symptom,category")
-      .order("symptom_code", { ascending: true });
+      .select("symptom_code,category,symptom")
+      .order("category");
     if (error) throw new Error(error.message);
     const byCat = new Map<string, SymptomCategory>();
     for (const row of data ?? []) {
