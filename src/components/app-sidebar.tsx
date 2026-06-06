@@ -18,17 +18,39 @@ import {
   CreditCard,
   UserCog,
   ChevronDown,
+  Lock,
 } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getDashboardData } from "@/lib/dashboard.functions";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-type NavItem = { title: string; url: string; icon: React.ComponentType<{ className?: string }> };
+type LockKind =
+  | "profile"
+  | "assessment_complete"
+  | "two_assessments"
+  | "pro_or_diagnostic"
+  | "diagnostic"
+  | null;
+
+type NavItem = {
+  title: string;
+  url: string;
+  icon: React.ComponentType<{ className?: string }>;
+  lock?: LockKind;
+};
 type NavSection = { label: string; items: NavItem[] };
 
 const sections: NavSection[] = [
   {
     label: "HOME",
     items: [
-      { title: "Dashboard", url: "/", icon: LayoutDashboard },
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
       { title: "Personal Profile", url: "/profile/personal", icon: User },
       { title: "Company Profile", url: "/profile/company", icon: Building2 },
     ],
@@ -36,27 +58,27 @@ const sections: NavSection[] = [
   {
     label: "HEALTH CHECK",
     items: [
-      { title: "Start / Resume", url: "/health-check/start", icon: PlayCircle },
-      { title: "Health Check History", url: "/health-check/history", icon: History },
+      { title: "Start / Resume", url: "/health-check/start", icon: PlayCircle, lock: "profile" },
+      { title: "Health Check History", url: "/health-check/history", icon: History, lock: "two_assessments" },
     ],
   },
   {
     label: "REPORTS",
     items: [
-      { title: "Executive Summary", url: "/reports/executive-summary", icon: FileText },
-      { title: "Revenue System Health", url: "/reports/revenue-system-health", icon: Activity },
-      { title: "Top Opportunities", url: "/reports/top-opportunities", icon: Target },
-      { title: "Revenue at Risk", url: "/reports/revenue-at-risk", icon: AlertTriangle },
-      { title: "Team Alignment", url: "/reports/team-alignment", icon: Users },
-      { title: "Founder Dependency", url: "/reports/founder-dependency", icon: Crown },
+      { title: "Executive Summary", url: "/reports/executive-summary", icon: FileText, lock: "assessment_complete" },
+      { title: "Revenue System Health", url: "/reports/revenue-system-health", icon: Activity, lock: "assessment_complete" },
+      { title: "Top Opportunities", url: "/reports/top-opportunities", icon: Target, lock: "assessment_complete" },
+      { title: "Revenue at Risk", url: "/reports/revenue-at-risk", icon: AlertTriangle, lock: "assessment_complete" },
+      { title: "Team Alignment", url: "/reports/team-alignment", icon: Users, lock: "diagnostic" },
+      { title: "Founder Dependency", url: "/reports/founder-dependency", icon: Crown, lock: "diagnostic" },
     ],
   },
   {
     label: "REVENUE INTELLIGENCE",
     items: [
-      { title: "Matrix Map", url: "/revenue/matrix-map", icon: Grid3x3 },
-      { title: "Shadow Systems", url: "/revenue/shadow-systems", icon: Eye },
-      { title: "Roadmap Builder", url: "/revenue/roadmap-builder", icon: Map },
+      { title: "Matrix Map", url: "/revenue/matrix-map", icon: Grid3x3, lock: "assessment_complete" },
+      { title: "Shadow Systems", url: "/revenue/shadow-systems", icon: Eye, lock: "diagnostic" },
+      { title: "Roadmap Builder", url: "/revenue/roadmap-builder", icon: Map, lock: "diagnostic" },
     ],
   },
   {
@@ -64,10 +86,44 @@ const sections: NavSection[] = [
     items: [
       { title: "Account", url: "/settings/account", icon: Settings },
       { title: "Billing & Plan", url: "/settings/billing", icon: CreditCard },
-      { title: "Team", url: "/settings/team", icon: UserCog },
+      { title: "Team", url: "/settings/team", icon: UserCog, lock: "pro_or_diagnostic" },
     ],
   },
 ];
+
+const LOCK_REASON: Record<Exclude<LockKind, null>, string> = {
+  profile: "Complete both profiles to unlock",
+  assessment_complete: "Complete your Health Check to unlock",
+  two_assessments: "Complete your next quarterly Health Check to unlock",
+  pro_or_diagnostic: "Revenue Health Assessment™ or higher",
+  diagnostic: "Revenue Health Diagnostic™",
+};
+
+function evalLock(
+  lock: LockKind,
+  gating: {
+    profile_complete: boolean;
+    company_profile_complete: boolean;
+    assessment_status: string;
+    completedCount: number;
+    tier: string;
+  } | null,
+): boolean {
+  if (!lock) return false;
+  if (!gating) return false; // unknown — render as unlocked while loading
+  switch (lock) {
+    case "profile":
+      return !(gating.profile_complete && gating.company_profile_complete);
+    case "assessment_complete":
+      return gating.assessment_status !== "complete" && gating.assessment_status !== "completed";
+    case "two_assessments":
+      return gating.completedCount < 2;
+    case "pro_or_diagnostic":
+      return gating.tier !== "pro" && gating.tier !== "diagnostic";
+    case "diagnostic":
+      return gating.tier !== "diagnostic";
+  }
+}
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -75,79 +131,124 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
     Object.fromEntries(sections.map((s) => [s.label, true])),
   );
 
+  const { data } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: () => getDashboardData(),
+    staleTime: 30_000,
+  });
+
+  const gating = data?.profile
+    ? {
+        profile_complete: data.profile.profile_complete,
+        company_profile_complete: data.profile.company_profile_complete,
+        assessment_status: data.profile.assessment_status,
+        completedCount: data.completedCount,
+        tier: data.profile.tier,
+      }
+    : null;
+
   const toggle = (label: string) =>
     setOpenSections((prev) => ({ ...prev, [label]: !prev[label] }));
 
   return (
-    <aside
-      className="flex h-screen flex-col text-white transition-all duration-200"
-      style={{
-        backgroundColor: "var(--mm-abyss)",
-        width: collapsed ? 64 : 240,
-        minWidth: collapsed ? 64 : 240,
-      }}
-    >
-      <div
-        className="flex h-14 items-center px-4"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+    <TooltipProvider delayDuration={150}>
+      <aside
+        className="flex h-screen flex-col text-white transition-all duration-200"
+        style={{
+          backgroundColor: "var(--mm-abyss)",
+          width: collapsed ? 64 : 240,
+          minWidth: collapsed ? 64 : 240,
+        }}
       >
-        <span
-          className="font-display text-lg"
-          style={{ color: "#FFFEFA", opacity: collapsed ? 0 : 1 }}
+        <div
+          className="flex h-14 items-center px-4"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
         >
-          Revenue Health
-        </span>
-      </div>
+          <span
+            className="font-display text-lg"
+            style={{ color: "#FFFEFA", opacity: collapsed ? 0 : 1 }}
+          >
+            Revenue Health
+          </span>
+        </div>
 
-      <nav className="flex-1 overflow-y-auto py-4">
-        {sections.map((section) => {
-          const isOpen = openSections[section.label];
-          return (
-            <div key={section.label} className="mb-2">
-              {!collapsed && (
-                <button
-                  onClick={() => toggle(section.label)}
-                  className="flex w-full items-center justify-between px-4 py-2 text-[11px] font-medium tracking-wider transition-colors hover:text-white/80"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
-                >
-                  <span>{section.label}</span>
-                  <ChevronDown
-                    className="h-3 w-3 transition-transform"
-                    style={{ transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
-                  />
-                </button>
-              )}
-              {(isOpen || collapsed) && (
-                <ul className="mt-1">
-                  {section.items.map((item) => {
-                    const active = pathname === item.url;
-                    const Icon = item.icon;
-                    return (
-                      <li key={item.url}>
-                        <Link
-                          to={item.url}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {sections.map((section) => {
+            const isOpen = openSections[section.label];
+            return (
+              <div key={section.label} className="mb-2">
+                {!collapsed && (
+                  <button
+                    onClick={() => toggle(section.label)}
+                    className="flex w-full items-center justify-between px-4 py-2 text-[11px] font-medium tracking-wider transition-colors hover:text-white/80"
+                    style={{ color: "rgba(255,255,255,0.5)" }}
+                  >
+                    <span>{section.label}</span>
+                    <ChevronDown
+                      className="h-3 w-3 transition-transform"
+                      style={{ transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+                    />
+                  </button>
+                )}
+                {(isOpen || collapsed) && (
+                  <ul className="mt-1">
+                    {section.items.map((item) => {
+                      const active = pathname === item.url;
+                      const locked = evalLock(item.lock ?? null, gating);
+                      const Icon = item.icon;
+
+                      const baseRow = (
+                        <div
                           className="relative flex items-center gap-3 px-4 py-2 text-sm transition-colors"
                           style={{
-                            color: active ? "#FFFFFF" : "rgba(255,255,255,0.7)",
-                            backgroundColor: active ? "rgba(255,255,255,0.05)" : "transparent",
-                            borderLeft: active
-                              ? "3px solid var(--mm-ember)"
-                              : "3px solid transparent",
-                            paddingLeft: active ? "calc(1rem - 3px)" : "1rem",
+                            color: locked
+                              ? "rgba(255,255,255,0.3)"
+                              : active
+                                ? "#FFFFFF"
+                                : "rgba(255,255,255,0.7)",
+                            backgroundColor: active && !locked ? "rgba(255,255,255,0.05)" : "transparent",
+                            borderLeft:
+                              active && !locked
+                                ? "3px solid var(--mm-ember)"
+                                : "3px solid transparent",
+                            paddingLeft: active && !locked ? "calc(1rem - 3px)" : "1rem",
+                            cursor: locked ? "not-allowed" : "pointer",
                           }}
                         >
                           <Icon className="h-4 w-4 shrink-0" />
-                          {!collapsed && <span className="truncate">{item.title}</span>}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          );
-        })}
-      </nav>
-    </aside>
+                          {!collapsed && (
+                            <>
+                              <span className="truncate flex-1">{item.title}</span>
+                              {locked && <Lock className="h-3 w-3 shrink-0 opacity-70" />}
+                            </>
+                          )}
+                        </div>
+                      );
+
+                      return (
+                        <li key={item.url}>
+                          {locked ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="block select-none">{baseRow}</span>
+                              </TooltipTrigger>
+                              <TooltipContent side="right">
+                                {LOCK_REASON[item.lock as Exclude<LockKind, null>]}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : (
+                            <Link to={item.url}>{baseRow}</Link>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
+        </nav>
+      </aside>
+    </TooltipProvider>
   );
 }
