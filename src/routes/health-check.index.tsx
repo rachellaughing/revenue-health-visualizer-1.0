@@ -140,12 +140,68 @@ function HealthCheckShell({
     return m;
   }, [areas]);
 
-  // pre-select first parent, first unlocked child
+  // Selection state (starter tier only — pro/diagnostic ignore this)
+  const [selectedCodes, setSelectedCodes] = useState<string[]>(
+    assessment.selected_child_ids ?? [],
+  );
+
+  const codeById = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of children) m.set(c.id, c.code);
+    return m;
+  }, [children]);
+
+  const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
+
+  const isChildSelected = useCallback(
+    (c: ChildSystem) => selectedSet.has(c.code),
+    [selectedSet],
+  );
+
+  const selectedForParent = useCallback(
+    (parentId: string) => {
+      const list = childrenByParent.get(parentId) ?? [];
+      return list.filter((c) => selectedSet.has(c.code));
+    },
+    [childrenByParent, selectedSet],
+  );
+
+  const childHasResponses = useCallback(
+    (c: ChildSystem) => {
+      const arr = areasByChild.get(c.id) ?? [];
+      return arr.some((a) => {
+        const r = responses[a.question_id];
+        return r && r.health !== null;
+      });
+    },
+    [areasByChild, responses],
+  );
+
+  // Tier-aware lock predicate
+  const isChildLocked = useCallback(
+    (c: ChildSystem) => {
+      if (tier !== "starter") return false;
+      const parentSelected = selectedForParent(c.parent_system_id);
+      // selection complete: only the 3 selected are unlocked
+      if (parentSelected.length >= 3) return !selectedSet.has(c.code);
+      // mid-selection: nothing is "locked" — chip is selectable
+      return false;
+    },
+    [tier, selectedForParent, selectedSet],
+  );
+
+  // pre-select first parent, first available child for that parent
   const firstParent = parents[0];
   const initialChild = useMemo(() => {
     if (!firstParent) return null;
     const list = childrenByParent.get(firstParent.id) ?? [];
-    return list.find((c) => c.access_tier === "free" || tier !== "starter") ?? list[0];
+    if (tier === "starter") {
+      const selFor = list.filter((c) => selectedSet.has(c.code));
+      if (selFor.length === 0) return null; // selection mode, no card shown
+      return selFor[0];
+    }
+    return list[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstParent, childrenByParent, tier]);
 
   const [activeParentId, setActiveParentId] = useState<string | null>(
@@ -158,10 +214,50 @@ function HealthCheckShell({
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  const isChildLocked = useCallback(
-    (c: ChildSystem) => c.access_tier === "paid" && tier === "starter",
-    [tier],
+  // Persist selection helper (debounced lightly)
+  const selTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const persistSelection = useCallback(
+    (codes: string[]) => {
+      if (selTimer.current) clearTimeout(selTimer.current);
+      selTimer.current = setTimeout(() => {
+        updateSelFn({
+          data: { assessment_id: assessment.id, selected_child_ids: codes },
+        }).catch((e) => console.error(e));
+      }, 300);
+    },
+    [assessment.id, updateSelFn],
   );
+
+  function toggleChipSelection(c: ChildSystem) {
+    if (tier !== "starter") return;
+    const parentSel = selectedForParent(c.parent_system_id);
+    const isSelected = selectedSet.has(c.code);
+    let next: string[];
+    if (isSelected) {
+      if (childHasResponses(c)) return; // in progress, cannot deselect
+      next = selectedCodes.filter((code) => code !== c.code);
+    } else {
+      if (parentSel.length >= 3) return; // cap reached
+      next = [...selectedCodes, c.code];
+    }
+    setSelectedCodes(next);
+    persistSelection(next);
+    // when this completes the parent selection, focus first selected child
+    if (!isSelected) {
+      const newParentSel = [...parentSel.map((x) => x.code), c.code];
+      if (newParentSel.length === 3) {
+        const list = childrenByParent.get(c.parent_system_id) ?? [];
+        const firstSel = list.find((x) => newParentSel.includes(x.code));
+        if (firstSel) setActiveChildId(firstSel.id);
+      } else if (parentSel.length === 0) {
+        // first pick — surface its card
+        setActiveChildId(c.id);
+      }
+    } else if (activeChildId === c.id) {
+      setActiveChildId(null);
+    }
+  }
+
 
   // Overall completion
   const totalUnlocked = data.totalUnlockedAreas;
