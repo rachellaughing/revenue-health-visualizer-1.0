@@ -1,19 +1,10 @@
-The file `src/integrations/supabase/auth-middleware.ts` reads server-side Supabase credentials using the wrong environment variable names. The runtime only exposes `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, but the middleware currently looks for `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`, causing initialization failures and blank profile pages.
+Update only `src/integrations/supabase/auth-middleware.ts`.
 
-**Change:**
+Changes:
+- Replace the invalid `supabase.auth.getClaims(token)` call with `supabase.auth.getUser(token)`.
+- Treat `error` or missing `data.user` as `Unauthorized: Invalid token`.
+- Remove the `data.claims.sub` check entirely.
+- Pass `data.user.id` as `userId` in middleware context.
+- Pass `data.user` as `claims` to preserve the existing context field name.
 
-In `src/integrations/supabase/auth-middleware.ts`, replace:
-
-```typescript
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
-```
-
-With:
-
-```typescript
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_PUBLISHABLE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
-```
-
-No other changes needed.
+No other files or behavior will be changed.
