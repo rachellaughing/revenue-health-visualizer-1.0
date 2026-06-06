@@ -4,6 +4,8 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
+  useNavigate,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -13,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { TopBar } from "../components/top-bar";
+import { AuthProvider, useAuth } from "../lib/auth-context";
 
 function NotFoundComponent() {
   return (
@@ -114,19 +117,48 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [collapsed, setCollapsed] = useState(false);
-
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-screen w-full" style={{ backgroundColor: "var(--mm-paper)" }}>
-        <AppSidebar collapsed={collapsed} />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar onToggleSidebar={() => setCollapsed((c) => !c)} />
-          <main className="flex-1 overflow-y-auto p-8">
-            <Outlet />
-          </main>
-        </div>
-      </div>
+      <AuthProvider>
+        <AuthGate />
+      </AuthProvider>
     </QueryClientProvider>
+  );
+}
+
+const PUBLIC_ROUTES = ["/login", "/signup"];
+
+function AuthGate() {
+  const [collapsed, setCollapsed] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const { session, loading } = useAuth();
+  const isPublic = PUBLIC_ROUTES.includes(pathname);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!session && !isPublic) navigate({ to: "/login", replace: true });
+  }, [loading, session, isPublic, navigate]);
+
+  if (isPublic) return <Outlet />;
+
+  if (loading || !session) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center" style={{ backgroundColor: "var(--mm-paper)" }}>
+        <p className="text-sm" style={{ color: "var(--mm-mid)" }}>Loading…</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-screen w-full" style={{ backgroundColor: "var(--mm-paper)" }}>
+      <AppSidebar collapsed={collapsed} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBar onToggleSidebar={() => setCollapsed((c) => !c)} />
+        <main className="flex-1 overflow-y-auto p-8">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 }
