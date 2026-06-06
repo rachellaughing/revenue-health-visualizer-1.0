@@ -9,7 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PersonalProfileRouteImport } from './routes/personal-profile'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CompanyProfileRouteImport } from './routes/company-profile'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsTeamRouteImport } from './routes/settings.team'
@@ -24,12 +27,28 @@ import { Route as ReportsRevenueSystemHealthRouteImport } from './routes/reports
 import { Route as ReportsRevenueAtRiskRouteImport } from './routes/reports.revenue-at-risk'
 import { Route as ReportsFounderDependencyRouteImport } from './routes/reports.founder-dependency'
 import { Route as ReportsExecutiveSummaryRouteImport } from './routes/reports.executive-summary'
+import { Route as ProfilePersonalRouteImport } from './routes/profile.personal'
 import { Route as HealthCheckStartRouteImport } from './routes/health-check.start'
 import { Route as HealthCheckHistoryRouteImport } from './routes/health-check.history'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PersonalProfileRoute = PersonalProfileRouteImport.update({
   id: '/personal-profile',
   path: '/personal-profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyProfileRoute = CompanyProfileRouteImport.update({
@@ -104,6 +123,11 @@ const ReportsExecutiveSummaryRoute = ReportsExecutiveSummaryRouteImport.update({
   path: '/reports/executive-summary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilePersonalRoute = ProfilePersonalRouteImport.update({
+  id: '/profile/personal',
+  path: '/profile/personal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealthCheckStartRoute = HealthCheckStartRouteImport.update({
   id: '/health-check/start',
   path: '/health-check/start',
@@ -118,9 +142,13 @@ const HealthCheckHistoryRoute = HealthCheckHistoryRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/company-profile': typeof CompanyProfileRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/personal-profile': typeof PersonalProfileRoute
+  '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
+  '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
@@ -137,9 +165,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/company-profile': typeof CompanyProfileRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/personal-profile': typeof PersonalProfileRoute
+  '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
+  '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
@@ -157,9 +189,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/company-profile': typeof CompanyProfileRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
   '/personal-profile': typeof PersonalProfileRoute
+  '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
+  '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
@@ -178,9 +214,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/company-profile'
+    | '/dashboard'
+    | '/login'
     | '/personal-profile'
+    | '/signup'
     | '/health-check/history'
     | '/health-check/start'
+    | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
     | '/reports/revenue-at-risk'
@@ -197,9 +237,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/company-profile'
+    | '/dashboard'
+    | '/login'
     | '/personal-profile'
+    | '/signup'
     | '/health-check/history'
     | '/health-check/start'
+    | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
     | '/reports/revenue-at-risk'
@@ -216,9 +260,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/company-profile'
+    | '/dashboard'
+    | '/login'
     | '/personal-profile'
+    | '/signup'
     | '/health-check/history'
     | '/health-check/start'
+    | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
     | '/reports/revenue-at-risk'
@@ -236,9 +284,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompanyProfileRoute: typeof CompanyProfileRoute
+  DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
   PersonalProfileRoute: typeof PersonalProfileRoute
+  SignupRoute: typeof SignupRoute
   HealthCheckHistoryRoute: typeof HealthCheckHistoryRoute
   HealthCheckStartRoute: typeof HealthCheckStartRoute
+  ProfilePersonalRoute: typeof ProfilePersonalRoute
   ReportsExecutiveSummaryRoute: typeof ReportsExecutiveSummaryRoute
   ReportsFounderDependencyRoute: typeof ReportsFounderDependencyRoute
   ReportsRevenueAtRiskRoute: typeof ReportsRevenueAtRiskRoute
@@ -255,11 +307,32 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/personal-profile': {
       id: '/personal-profile'
       path: '/personal-profile'
       fullPath: '/personal-profile'
       preLoaderRoute: typeof PersonalProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company-profile': {
@@ -360,6 +433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsExecutiveSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/personal': {
+      id: '/profile/personal'
+      path: '/profile/personal'
+      fullPath: '/profile/personal'
+      preLoaderRoute: typeof ProfilePersonalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/health-check/start': {
       id: '/health-check/start'
       path: '/health-check/start'
@@ -380,9 +460,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompanyProfileRoute: CompanyProfileRoute,
+  DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
   PersonalProfileRoute: PersonalProfileRoute,
+  SignupRoute: SignupRoute,
   HealthCheckHistoryRoute: HealthCheckHistoryRoute,
   HealthCheckStartRoute: HealthCheckStartRoute,
+  ProfilePersonalRoute: ProfilePersonalRoute,
   ReportsExecutiveSummaryRoute: ReportsExecutiveSummaryRoute,
   ReportsFounderDependencyRoute: ReportsFounderDependencyRoute,
   ReportsRevenueAtRiskRoute: ReportsRevenueAtRiskRoute,
