@@ -147,10 +147,6 @@ function HealthCheckShell({
 
   const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
 
-  const isChildSelected = useCallback(
-    (c: ChildSystem) => selectedSet.has(c.code),
-    [selectedSet],
-  );
 
 
 
