@@ -10,10 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as PersonalProfileRouteImport } from './routes/personal-profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CompanyProfileRouteImport } from './routes/company-profile'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsTeamRouteImport } from './routes/settings.team'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
@@ -37,11 +35,6 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PersonalProfileRoute = PersonalProfileRouteImport.update({
-  id: '/personal-profile',
-  path: '/personal-profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -50,11 +43,6 @@ const LoginRoute = LoginRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompanyProfileRoute = CompanyProfileRouteImport.update({
-  id: '/company-profile',
-  path: '/company-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -147,10 +135,8 @@ const HealthCheckHistoryRoute = HealthCheckHistoryRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/company-profile': typeof CompanyProfileRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/personal-profile': typeof PersonalProfileRoute
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
@@ -171,10 +157,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/company-profile': typeof CompanyProfileRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/personal-profile': typeof PersonalProfileRoute
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
@@ -196,10 +180,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/company-profile': typeof CompanyProfileRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/personal-profile': typeof PersonalProfileRoute
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
@@ -222,10 +204,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/company-profile'
     | '/dashboard'
     | '/login'
-    | '/personal-profile'
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
@@ -246,10 +226,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/company-profile'
     | '/dashboard'
     | '/login'
-    | '/personal-profile'
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
@@ -270,10 +248,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/company-profile'
     | '/dashboard'
     | '/login'
-    | '/personal-profile'
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
@@ -295,10 +271,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CompanyProfileRoute: typeof CompanyProfileRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
-  PersonalProfileRoute: typeof PersonalProfileRoute
   SignupRoute: typeof SignupRoute
   HealthCheckHistoryRoute: typeof HealthCheckHistoryRoute
   HealthCheckStartRoute: typeof HealthCheckStartRoute
@@ -327,13 +301,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/personal-profile': {
-      id: '/personal-profile'
-      path: '/personal-profile'
-      fullPath: '/personal-profile'
-      preLoaderRoute: typeof PersonalProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -346,13 +313,6 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company-profile': {
-      id: '/company-profile'
-      path: '/company-profile'
-      fullPath: '/company-profile'
-      preLoaderRoute: typeof CompanyProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -479,10 +439,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CompanyProfileRoute: CompanyProfileRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
-  PersonalProfileRoute: PersonalProfileRoute,
   SignupRoute: SignupRoute,
   HealthCheckHistoryRoute: HealthCheckHistoryRoute,
   HealthCheckStartRoute: HealthCheckStartRoute,
@@ -504,3 +462,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
