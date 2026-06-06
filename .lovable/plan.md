@@ -1,95 +1,106 @@
+# Profile Stepper: /profile/personal → /profile/company
 
-## Goal
-
-Build only the visual shell of the app. No Supabase, no data fetching, no auth, no forms, no mock data layer. Every nav item routes to a placeholder page that renders just its title.
-
-## Design tokens (added to `src/styles.css`)
-
-- `--background: #FFFEFA` (never pure white)
-- `--sidebar: #182829`
-- `--primary: #F05223` (only CTA color)
-- Top bar border: `#F5F5F0`
-- Fonts loaded via Google Fonts `<link>` in `src/routes/__root.tsx` head:
-  - Instrument Serif → display headings
-  - Inter → all UI
-- Register `--font-display` and `--font-sans` in `@theme` so `font-display` / `font-sans` utilities work.
-
-## Layout
-
-`src/routes/__root.tsx` becomes the shell:
-
-```
-┌─────────┬──────────────────────────────┐
-│ Sidebar │  TopBar (56px, sticky)       │
-│ 240px   ├──────────────────────────────┤
-│ #182829 │  <Outlet /> on #FFFEFA       │
-│ collap- │                              │
-│ sible   │                              │
-└─────────┴──────────────────────────────┘
-```
-
-- Sidebar: fixed 240px when expanded, collapses to a narrow icon rail (~64px). Collapse toggle lives in the top bar.
-- Top bar: 56px, sticky, `#FFFEFA` bg, `1px solid #F5F5F0` border-bottom, holds the collapse trigger + a static user avatar placeholder (logged-in stub, no auth).
-- Main panel scrolls under the sticky top bar on `#FFFEFA`.
-
-## Sidebar component (`src/components/app-sidebar.tsx`)
-
-Accordion-style sections (each section header is a collapsible group; sections default open). Section labels rendered in Inter, uppercase, white at 50% opacity, 11px tracking-wide.
-
-Sections + items (exact):
-
-- **HOME** — Dashboard, Personal Profile, Company Profile
-- **HEALTH CHECK** — Start / Resume, Health Check History
-- **REPORTS** — Executive Summary, Revenue System Health, Top Opportunities, Revenue at Risk, Team Alignment, Founder Dependency
-- **REVENUE INTELLIGENCE** — Matrix Map, Shadow Systems, Roadmap Builder
-- **SETTINGS** — Account, Billing & Plan, Team
-
-Nav item rules:
-- Inactive: white text at 70% opacity, transparent bg.
-- Active: 3px left border `#F05223`, background `rgba(255,255,255,0.05)`, white text at 100%.
-- Determined by current pathname via `useRouterState`.
-- Each item uses a Lucide icon (kept visible in collapsed rail).
-
-Built with the shadcn `Sidebar` primitives already in the project, themed via overrides so the sidebar bg is `#182829` regardless of light/dark token defaults.
+Builds the two-page profile stepper matching the attached prototype, wired to the existing Supabase schema. No DB changes.
 
 ## Routes
 
-One file per nav item under `src/routes/`. Each file exports a `createFileRoute` whose component renders only `<h1>` with the page title in Instrument Serif. No other content.
+- `/profile/personal` — already exists as stub; replace with real form.
+- `/profile/company` — new file `src/routes/profile.company.tsx`.
+- Both render inside the app shell (AuthGate). After signup the user already lands on `/profile/personal`.
 
-```
-src/routes/
-  index.tsx                          → /                          "Dashboard"
-  personal-profile.tsx               → /personal-profile
-  company-profile.tsx                → /company-profile
-  health-check.start.tsx             → /health-check/start        "Start / Resume"
-  health-check.history.tsx           → /health-check/history
-  reports.executive-summary.tsx
-  reports.revenue-system-health.tsx
-  reports.top-opportunities.tsx
-  reports.revenue-at-risk.tsx
-  reports.team-alignment.tsx
-  reports.founder-dependency.tsx
-  revenue.matrix-map.tsx
-  revenue.shadow-systems.tsx
-  revenue.roadmap-builder.tsx
-  settings.account.tsx
-  settings.billing.tsx
-  settings.team.tsx
-```
+## Shared UI primitives
 
-`src/routes/index.tsx` replaces the current placeholder; it becomes the Dashboard page (title only).
+New file `src/components/profile/profile-ui.tsx` ports the prototype's shared components using the project's brand CSS tokens (no inline hex — use `var(--mm-*)`):
 
-## Out of scope (explicitly NOT doing)
+- `ProgressSteps` (Personal / Company / Done)
+- `SectionCard`, `FieldGroup`, `Field`, `Label`, `Helper`
+- `TextInput`, `Select`, `TextArea` styled with `--mm-off-white` bg, `--mm-teal` focus border
+- Primary `ContinueButton` using `--mm-ember`
+- All fonts: Instrument Serif (headings already imported), Inter (UI)
 
-- No Supabase client, queries, or env wiring.
-- No auth flow — user avatar in top bar is a static circle.
-- No forms, no mock data arrays beyond the nav config.
-- No additional pages, charts, tables, or section bodies beyond the `<h1>` title.
+Layout: `max-w-[680px] mx-auto`, page-level padding handled by existing `<main>` in `__root.tsx`. Progress bar at top of each step.
 
-## Deliverables
+## Personal Profile (`src/routes/profile.personal.tsx`)
 
-1. Updated `src/styles.css` with brand tokens + font registration.
-2. Google Fonts `<link>` tags in `__root.tsx`.
-3. New `src/components/app-sidebar.tsx` and `src/components/top-bar.tsx`.
-4. `__root.tsx` updated to render `SidebarProvider` + sidebar + top bar + `<Outlet />`.
-5. All 17 route files listed above, each rendering only its title.
+State via `react-hook-form` + `zod`:
+
+- `first_name` (required, 1–80)
+- `last_name` (required, 1–80)
+- `role_title` (required, 1–120)
+- `years_in_role` (optional, enum: `<1 year | 1–2 years | 3–5 years | 5+ years`)
+- `primary_background` (optional, enum: `Sales | Marketing | Product | Operations | Finance | Founder/General`)
+- `email` (display-only, pre-filled from `useAuth().user.email`, disabled with helper "Pre-filled from your account.")
+
+Data load:
+
+- Server fn `getPersonalProfile` (createServerFn, `requireSupabaseAuth`) → `select first_name,last_name,role_title,years_in_role,primary_background,email from profiles where user_id = auth.uid()`.
+- Loaded via `useQuery` in the component (route is under public-AuthGate; uses bearer attacher already wired). Pre-fills form via `reset()` once loaded.
+
+Save:
+
+- Server fn `savePersonalProfile` (auth middleware) → `update profiles set ... where user_id = context.userId`, then `await supabase.rpc('refresh_profile_completion', { _user_id: context.userId })`.
+- Returns the updated row. On success, navigate to `/profile/company`.
+- Toast on error (sonner is already in project).
+
+## Symptom data source
+
+New server fn `getSymptomCategories` (auth middleware, but framework data is non-sensitive):
+
+- Uses `supabaseAdmin` (inside `await import(...)` per import-graph rules) to query `revhealth2.symptom_map` — that schema is not exposed via PostgREST so the user-scoped client cannot reach it.
+- Returns `[{ category, symptoms: [{ symptom_code, symptom }] }]` grouped by `category`, ordered by `symptom_code`.
+- Category presentation (icon + helper description) is mapped client-side from a small static lookup keyed by the canonical category names returned by the DB (Revenue & Growth, Sales, Marketing, Customer Success & Friction, Brand & Market, Leadership & Scaling, Team & Operations, People & Culture, Visibility & Data).
+- Cached via React Query with `staleTime: Infinity` (taxonomy is static).
+
+## Company Profile (`src/routes/profile.company.tsx`)
+
+Five `SectionCard`s exactly as in prototype:
+
+1. **Business Basics** — `company_name*`, `industry*` (B2B SaaS / B2B Services / Marketplace / E-commerce / Other), `business_model` (Subscription / Project-Retainer / Transactional / Mixed), `founded_year` (smallint), `headquarters`, `website`.
+2. **Scale & Stage** — `annual_revenue*` (<$500K / $500K–$1M / $1M–$2M / $2M–$5M / $5M–$10M / $10M+), `funding_stage*` (Bootstrapped / Pre-seed / Seed / Series A / Series B / Series C+), `total_headcount` (1–10 / 11–25 / 26–50 / 51–100 / 100+), `revenue_org_size` (int).
+3. **Revenue Environment** — `acv`, `cac`, `estimated_ltv` (numeric); `avg_sales_cycle`, `avg_close_rate`, `annual_churn` (enums per prototype).
+4. **Growth Context** — `primary_growth_constraint`, `primary_sales_motion`, `revenue_model`, `has_defined_icp` (Yes / Partially / No).
+5. **Operational Friction** — `pain_points` (required, ≥1, ≤5) via `SymptomSelector`; `open_friction_text`.
+
+`SymptomSelector` component (matches prototype):
+
+- Grid of category cards; tap to expand into the Step-2 list.
+- Tapping a symptom toggles inclusion in `pain_points`; insertion order = rank. Cap at 5; over-cap items render disabled.
+- Counter badge per category, ranked summary chip-list at bottom with × to remove.
+- Stores `symptom_code` strings (e.g. `SYM-007`) as `text[]`.
+
+Data load:
+
+- Server fn `getCompanyProfile` → `select * from company_profiles where user_id = auth.uid()` (row already exists from signup trigger).
+- Pre-fills the form via `reset()`.
+
+Save:
+
+- Server fn `saveCompanyProfile` → `update company_profiles set ... where user_id = context.userId` (use `update`, not insert — stub row exists). Validate via zod; coerce empty strings to `null` for nullable columns; coerce numerics with `z.coerce.number().nullable()`.
+- Then `await supabase.rpc('refresh_profile_completion', { _user_id: context.userId })`.
+- On success, navigate to `/dashboard`.
+
+Footer has "← Previous" (back to `/profile/personal`) + ember "Save Profile & Continue →".
+
+## Server function files
+
+All in `src/lib/profile.functions.ts` (client-safe path):
+
+- `getPersonalProfile`, `savePersonalProfile`
+- `getCompanyProfile`, `saveCompanyProfile`
+- `getSymptomCategories`
+
+Each `.middleware([requireSupabaseAuth])`, each `.inputValidator(z.parse)` where applicable. Secrets/admin client loaded inside handlers only.
+
+## Validation & Test Plan
+
+After build, manually validate against Supabase:
+
+1. Sign in as the existing test user, fill /profile/personal, save. Verify `profiles` row has `first_name/last_name/role_title/years_in_role/primary_background` set and `profile_complete = true`.
+2. Fill /profile/company including ≥1 pain point, save. Verify `company_profiles` row populated, `pain_points` is `text[]` of symptom_codes in chosen rank order, and `profiles.company_profile_complete = true`.
+3. Re-open both pages — fields must pre-fill.
+
+## Out of scope
+
+- No /dashboard build (route exists as stub; redirect target only).
+- No Done step screen (prototype `ProfileComplete`) — flow goes straight to /dashboard per spec.
+- No schema migrations, no RLS changes, no edits to `handle_new_user` or `refresh_profile_completion`.

@@ -28,6 +28,7 @@ import { Route as ReportsRevenueAtRiskRouteImport } from './routes/reports.reven
 import { Route as ReportsFounderDependencyRouteImport } from './routes/reports.founder-dependency'
 import { Route as ReportsExecutiveSummaryRouteImport } from './routes/reports.executive-summary'
 import { Route as ProfilePersonalRouteImport } from './routes/profile.personal'
+import { Route as ProfileCompanyRouteImport } from './routes/profile.company'
 import { Route as HealthCheckStartRouteImport } from './routes/health-check.start'
 import { Route as HealthCheckHistoryRouteImport } from './routes/health-check.history'
 
@@ -128,6 +129,11 @@ const ProfilePersonalRoute = ProfilePersonalRouteImport.update({
   path: '/profile/personal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileCompanyRoute = ProfileCompanyRouteImport.update({
+  id: '/profile/company',
+  path: '/profile/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealthCheckStartRoute = HealthCheckStartRouteImport.update({
   id: '/health-check/start',
   path: '/health-check/start',
@@ -148,6 +154,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
+  '/profile/company': typeof ProfileCompanyRoute
   '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
+  '/profile/company': typeof ProfileCompanyRoute
   '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
+  '/profile/company': typeof ProfileCompanyRoute
   '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
+    | '/profile/company'
     | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
@@ -243,6 +253,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
+    | '/profile/company'
     | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
+    | '/profile/company'
     | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
@@ -290,6 +302,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   HealthCheckHistoryRoute: typeof HealthCheckHistoryRoute
   HealthCheckStartRoute: typeof HealthCheckStartRoute
+  ProfileCompanyRoute: typeof ProfileCompanyRoute
   ProfilePersonalRoute: typeof ProfilePersonalRoute
   ReportsExecutiveSummaryRoute: typeof ReportsExecutiveSummaryRoute
   ReportsFounderDependencyRoute: typeof ReportsFounderDependencyRoute
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilePersonalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/company': {
+      id: '/profile/company'
+      path: '/profile/company'
+      fullPath: '/profile/company'
+      preLoaderRoute: typeof ProfileCompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/health-check/start': {
       id: '/health-check/start'
       path: '/health-check/start'
@@ -466,6 +486,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   HealthCheckHistoryRoute: HealthCheckHistoryRoute,
   HealthCheckStartRoute: HealthCheckStartRoute,
+  ProfileCompanyRoute: ProfileCompanyRoute,
   ProfilePersonalRoute: ProfilePersonalRoute,
   ReportsExecutiveSummaryRoute: ReportsExecutiveSummaryRoute,
   ReportsFounderDependencyRoute: ReportsFounderDependencyRoute,
@@ -483,13 +504,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
