@@ -43,7 +43,15 @@ export type HealthCheckData = {
     id: string;
     status: string;
     completion_pct: number;
+    selected_child_ids: string[];
   };
+  parents: ParentSystem[];
+  children: ChildSystem[];
+  areas: Area[];
+  responses: ResponseRow[];
+  totalUnlockedAreas: number;
+};
+
   parents: ParentSystem[];
   children: ChildSystem[];
   areas: Area[];
