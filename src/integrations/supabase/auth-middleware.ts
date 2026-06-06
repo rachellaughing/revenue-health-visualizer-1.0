@@ -10,17 +10,26 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
   async ({ next }) => {
     
     const SUPABASE_URL = process.env.SUPABASE_URL;
-    const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 
-    if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+    // Lovable injects SUPABASE_PUBLISHABLE_KEYS as JSON: {"default":"eyJ..."}
+    let SUPABASE_ANON_KEY: string | undefined;
+    try {
+      const keys = JSON.parse(process.env.SUPABASE_PUBLISHABLE_KEYS || '{}');
+      SUPABASE_ANON_KEY = keys.default || (Object.values(keys)[0] as string);
+    } catch {
+      SUPABASE_ANON_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
       const missing = [
         ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-        ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
+        ...(!SUPABASE_ANON_KEY ? ['SUPABASE_ANON_KEY'] : []),
       ];
       const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
       console.error(`[Supabase] ${message}`);
       throw new Error(message);
     }
+    
     
     const request = getRequest();
 
