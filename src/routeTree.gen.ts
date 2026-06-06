@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PersonalProfileRouteImport } from './routes/personal-profile'
 import { Route as CompanyProfileRouteImport } from './routes/company-profile'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SettingsTeamRouteImport } from './routes/settings.team'
+import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
 import { Route as SettingsAccountRouteImport } from './routes/settings.account'
 import { Route as RevenueShadowSystemsRouteImport } from './routes/revenue.shadow-systems'
 import { Route as RevenueRoadmapBuilderRouteImport } from './routes/revenue.roadmap-builder'
@@ -38,6 +40,16 @@ const CompanyProfileRoute = CompanyProfileRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsTeamRoute = SettingsTeamRouteImport.update({
+  id: '/settings/team',
+  path: '/settings/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsBillingRoute = SettingsBillingRouteImport.update({
+  id: '/settings/billing',
+  path: '/settings/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsAccountRoute = SettingsAccountRouteImport.update({
@@ -119,6 +131,8 @@ export interface FileRoutesByFullPath {
   '/revenue/roadmap-builder': typeof RevenueRoadmapBuilderRoute
   '/revenue/shadow-systems': typeof RevenueShadowSystemsRoute
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/billing': typeof SettingsBillingRoute
+  '/settings/team': typeof SettingsTeamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -136,6 +150,8 @@ export interface FileRoutesByTo {
   '/revenue/roadmap-builder': typeof RevenueRoadmapBuilderRoute
   '/revenue/shadow-systems': typeof RevenueShadowSystemsRoute
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/billing': typeof SettingsBillingRoute
+  '/settings/team': typeof SettingsTeamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -154,6 +170,8 @@ export interface FileRoutesById {
   '/revenue/roadmap-builder': typeof RevenueRoadmapBuilderRoute
   '/revenue/shadow-systems': typeof RevenueShadowSystemsRoute
   '/settings/account': typeof SettingsAccountRoute
+  '/settings/billing': typeof SettingsBillingRoute
+  '/settings/team': typeof SettingsTeamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -173,6 +191,8 @@ export interface FileRouteTypes {
     | '/revenue/roadmap-builder'
     | '/revenue/shadow-systems'
     | '/settings/account'
+    | '/settings/billing'
+    | '/settings/team'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -190,6 +210,8 @@ export interface FileRouteTypes {
     | '/revenue/roadmap-builder'
     | '/revenue/shadow-systems'
     | '/settings/account'
+    | '/settings/billing'
+    | '/settings/team'
   id:
     | '__root__'
     | '/'
@@ -207,6 +229,8 @@ export interface FileRouteTypes {
     | '/revenue/roadmap-builder'
     | '/revenue/shadow-systems'
     | '/settings/account'
+    | '/settings/billing'
+    | '/settings/team'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,6 +249,8 @@ export interface RootRouteChildren {
   RevenueRoadmapBuilderRoute: typeof RevenueRoadmapBuilderRoute
   RevenueShadowSystemsRoute: typeof RevenueShadowSystemsRoute
   SettingsAccountRoute: typeof SettingsAccountRoute
+  SettingsBillingRoute: typeof SettingsBillingRoute
+  SettingsTeamRoute: typeof SettingsTeamRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -248,6 +274,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/team': {
+      id: '/settings/team'
+      path: '/settings/team'
+      fullPath: '/settings/team'
+      preLoaderRoute: typeof SettingsTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/billing': {
+      id: '/settings/billing'
+      path: '/settings/billing'
+      fullPath: '/settings/billing'
+      preLoaderRoute: typeof SettingsBillingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/account': {
@@ -353,6 +393,8 @@ const rootRouteChildren: RootRouteChildren = {
   RevenueRoadmapBuilderRoute: RevenueRoadmapBuilderRoute,
   RevenueShadowSystemsRoute: RevenueShadowSystemsRoute,
   SettingsAccountRoute: SettingsAccountRoute,
+  SettingsBillingRoute: SettingsBillingRoute,
+  SettingsTeamRoute: SettingsTeamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
