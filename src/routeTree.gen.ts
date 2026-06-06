@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HealthCheckIndexRouteImport } from './routes/health-check.index'
 import { Route as SettingsTeamRouteImport } from './routes/settings.team'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
 import { Route as SettingsAccountRouteImport } from './routes/settings.account'
@@ -48,6 +49,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthCheckIndexRoute = HealthCheckIndexRouteImport.update({
+  id: '/health-check/',
+  path: '/health-check/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsTeamRoute = SettingsTeamRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/settings/account': typeof SettingsAccountRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/team': typeof SettingsTeamRoute
+  '/health-check/': typeof HealthCheckIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/settings/account': typeof SettingsAccountRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/team': typeof SettingsTeamRoute
+  '/health-check': typeof HealthCheckIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -199,6 +207,7 @@ export interface FileRoutesById {
   '/settings/account': typeof SettingsAccountRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/team': typeof SettingsTeamRoute
+  '/health-check/': typeof HealthCheckIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/billing'
     | '/settings/team'
+    | '/health-check/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/billing'
     | '/settings/team'
+    | '/health-check'
   id:
     | '__root__'
     | '/'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/settings/account'
     | '/settings/billing'
     | '/settings/team'
+    | '/health-check/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -290,6 +302,7 @@ export interface RootRouteChildren {
   SettingsAccountRoute: typeof SettingsAccountRoute
   SettingsBillingRoute: typeof SettingsBillingRoute
   SettingsTeamRoute: typeof SettingsTeamRoute
+  HealthCheckIndexRoute: typeof HealthCheckIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -320,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-check/': {
+      id: '/health-check/'
+      path: '/health-check'
+      fullPath: '/health-check/'
+      preLoaderRoute: typeof HealthCheckIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/team': {
@@ -458,6 +478,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsAccountRoute: SettingsAccountRoute,
   SettingsBillingRoute: SettingsBillingRoute,
   SettingsTeamRoute: SettingsTeamRoute,
+  HealthCheckIndexRoute: HealthCheckIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
