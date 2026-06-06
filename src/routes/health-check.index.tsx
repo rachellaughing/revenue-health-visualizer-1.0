@@ -58,6 +58,7 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
 function HealthCheckPage() {
   const fetchData = useServerFn(getHealthCheckData);
   const saveFn = useServerFn(saveResponse);
+  const updateSelFn = useServerFn(updateSelectedChildIds);
   const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
@@ -81,18 +82,21 @@ function HealthCheckPage() {
   }
   if (!data) return null;
 
-  return <HealthCheckShell data={data} saveFn={saveFn} qc={qc} />;
+  return <HealthCheckShell data={data} saveFn={saveFn} updateSelFn={updateSelFn} qc={qc} />;
 }
 
 function HealthCheckShell({
   data,
   saveFn,
+  updateSelFn,
   qc,
 }: {
   data: HealthCheckData;
   saveFn: ReturnType<typeof useServerFn<typeof saveResponse>>;
+  updateSelFn: ReturnType<typeof useServerFn<typeof updateSelectedChildIds>>;
   qc: ReturnType<typeof useQueryClient>;
 }) {
+
   const { tier, assessment, parents, children, areas } = data;
 
   // Build a response map keyed by question_id
