@@ -145,11 +145,13 @@ function HealthCheckShell({
     assessment.selected_child_ids ?? [],
   );
 
-  const codeById = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const c of children) m.set(c.id, c.code);
-    return m;
-  }, [children]);
+  const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
+
+  const isChildSelected = useCallback(
+    (c: ChildSystem) => selectedSet.has(c.code),
+    [selectedSet],
+  );
+
 
   const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
 
