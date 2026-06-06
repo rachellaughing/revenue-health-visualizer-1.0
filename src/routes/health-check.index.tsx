@@ -337,10 +337,21 @@ function HealthCheckShell({
 
   const activeParent = parents.find((p) => p.id === activeParentId) ?? parents[0];
   const activeChildren = activeParent ? childrenByParent.get(activeParent.id) ?? [] : [];
-  const activeChild =
-    activeChildren.find((c) => c.id === activeChildId) ??
-    activeChildren.find((c) => !isChildLocked(c)) ??
-    activeChildren[0];
+  // For starter in mid-selection (none picked) activeChild is null → show only chips
+  const activeParentSelectedCount = activeParent
+    ? selectedForParent(activeParent.id).length
+    : 0;
+  const inSelectionMode =
+    tier === "starter" && activeParentSelectedCount < 3;
+  const noSelectionsYet =
+    tier === "starter" && activeParentSelectedCount === 0;
+
+  const activeChild = noSelectionsYet
+    ? null
+    : activeChildren.find((c) => c.id === activeChildId) ??
+      activeChildren.find((c) => !isChildLocked(c)) ??
+      activeChildren[0] ??
+      null;
   const activeAreas = activeChild ? areasByChild.get(activeChild.id) ?? [] : [];
   const systemColor = activeParent?.color_hex ? `#${activeParent.color_hex}` : T.teal;
 
@@ -356,6 +367,11 @@ function HealthCheckShell({
   ).length;
 
   function selectChild(c: ChildSystem) {
+    // In selection mode, clicking a chip toggles selection instead of navigating
+    if (tier === "starter" && inSelectionMode) {
+      toggleChipSelection(c);
+      return;
+    }
     if (isChildLocked(c)) return;
     setShowSkipWarning(false);
     setActiveChildId(c.id);
@@ -364,10 +380,16 @@ function HealthCheckShell({
   function selectParent(pid: string) {
     setActiveParentId(pid);
     const list = childrenByParent.get(pid) ?? [];
-    const first = list.find((c) => !isChildLocked(c)) ?? list[0];
-    if (first) setActiveChildId(first.id);
+    if (tier === "starter") {
+      const selFor = list.filter((c) => selectedSet.has(c.code));
+      setActiveChildId(selFor.length > 0 ? selFor[0].id : null);
+    } else {
+      const first = list[0];
+      if (first) setActiveChildId(first.id);
+    }
     setShowSkipWarning(false);
   }
+
 
   return (
     <div
