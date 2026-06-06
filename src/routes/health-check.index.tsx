@@ -658,17 +658,43 @@ function HealthCheckShell({
               >
                 {activeParent.name}
               </div>
+
+              {/* Snapshot selection instruction */}
+              {tier === "starter" && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: T.mid,
+                    marginBottom: 10,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {activeParentSelectedCount < 3 ? (
+                    <>
+                      You're on Revenue Health Snapshot™ — select 3 subsystems
+                      to evaluate in this system. Choose the ones most relevant
+                      to your business right now.
+                    </>
+                  ) : (
+                    <>3 subsystems selected. Start answering below ↓</>
+                  )}
+                </div>
+              )}
+
               {/* Chips */}
               <div
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
                   gap: 8,
-                  marginBottom: 18,
+                  marginBottom: 6,
+                  alignItems: "center",
                 }}
               >
                 {activeChildren.map((c) => {
                   const locked = isChildLocked(c);
+                  const selected = tier === "starter" && selectedSet.has(c.code);
+                  const hasResp = childHasResponses(c);
                   const arr = areasByChild.get(c.id) ?? [];
                   const complete =
                     arr.length > 0 &&
@@ -685,6 +711,8 @@ function HealthCheckShell({
                     (a) => responses[a.question_id]?.health === -1,
                   );
                   const active = c.id === activeChild?.id;
+                  const highlight =
+                    tier === "starter" ? selected || active : active;
                   return (
                     <button
                       key={c.id}
@@ -696,26 +724,26 @@ function HealthCheckShell({
                         border: `1.5px solid ${
                           locked
                             ? "rgba(0,0,0,0.08)"
-                            : active
+                            : highlight
                             ? systemColor
                             : complete
                             ? `${T.tealBright}60`
                             : "rgba(0,0,0,0.1)"
                         }`,
-                        background: active
+                        background: highlight
                           ? `${systemColor}15`
                           : complete
                           ? `${T.tealBright}10`
                           : T.white,
                         color: locked
                           ? T.mid
-                          : active
+                          : highlight
                           ? systemColor
                           : complete
                           ? T.teal
                           : T.ink,
                         fontSize: 12,
-                        fontWeight: active ? 600 : 400,
+                        fontWeight: highlight ? 600 : 400,
                         cursor: locked ? "not-allowed" : "pointer",
                         opacity: locked ? 0.5 : 1,
                         display: "flex",
@@ -732,10 +760,55 @@ function HealthCheckShell({
                         <span style={{ fontSize: 10, color: T.mid }}>○</span>
                       )}
                       {c.name}
+                      {tier === "starter" && selected && hasResp && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: T.mid,
+                            marginLeft: 4,
+                            fontWeight: 400,
+                          }}
+                        >
+                          · In progress
+                        </span>
+                      )}
                     </button>
                   );
                 })}
+
+                {tier === "starter" && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: systemColor,
+                      marginLeft: "auto",
+                    }}
+                  >
+                    {activeParentSelectedCount} of 3 selected
+                  </span>
+                )}
               </div>
+
+              {/* Change selection link */}
+              {tier === "starter" &&
+                activeParentSelectedCount > 0 &&
+                activeParentSelectedCount < 3 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: T.mid,
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Change selection
+                    </span>
+                  </div>
+                )}
+
+              <div style={{ height: 12 }} />
+
 
               {activeChild && (
                 <div
