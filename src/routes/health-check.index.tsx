@@ -5,10 +5,12 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   getHealthCheckData,
   saveResponse,
+  updateSelectedChildIds,
   type HealthCheckData,
   type ChildSystem,
   type Area,
 } from "@/lib/healthcheck.functions";
+
 
 export const Route = createFileRoute("/health-check/")({
   head: () => ({ meta: [{ title: "Health Check — Revenue Health Visualiser" }] }),
