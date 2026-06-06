@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
 import {
@@ -10,19 +10,9 @@ import {
   type SystemScore,
 } from "@/lib/illustrative-scores";
 
-export const dashboardQuery = queryOptions({
-  queryKey: ["dashboard"],
-  queryFn: () => getDashboardData(),
-});
-
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Revenue Health Visualiser" }] }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(dashboardQuery),
   component: DashboardPage,
-  errorComponent: ({ error }) => (
-    <div className="p-8 text-sm text-destructive">Failed to load dashboard: {error.message}</div>
-  ),
-  notFoundComponent: () => <div className="p-8">Not found.</div>,
 });
 
 const TIER_LABEL: Record<string, string> = {
@@ -31,14 +21,28 @@ const TIER_LABEL: Record<string, string> = {
   diagnostic: "Revenue Health Diagnostic™",
 };
 
-const TIER_SHORT: Record<string, string> = {
-  starter: "SNAPSHOT™",
-  pro: "ASSESSMENT™",
-  diagnostic: "DIAGNOSTIC™",
-};
-
 function DashboardPage() {
-  const { data } = useSuspenseQuery(dashboardQuery);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: () => getDashboardData(),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-full items-center justify-center bg-[var(--mm-paper)] p-8">
+        <p className="text-sm text-[var(--mm-mid)]">Loading your dashboard…</p>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="p-8 text-sm text-destructive">
+        Failed to load dashboard: {(error as Error).message}
+      </div>
+    );
+  }
+  if (!data) return null;
+
   const profile = data.profile;
   const latest = data.latestAssessment;
 
@@ -64,6 +68,7 @@ function DashboardPage() {
     </div>
   );
 }
+
 
 /* ─────────────────────────  NEW USER  ───────────────────────── */
 
