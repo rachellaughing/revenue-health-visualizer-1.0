@@ -12,7 +12,11 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
     console.log('[env] SUPABASE_URL:', process.env.SUPABASE_URL);
     console.log('[env] SUPABASE_PUBLISHABLE_KEYS:', process.env.SUPABASE_PUBLISHABLE_KEYS);
     console.log('[env] SUPABASE_PUBLISHABLE_KEY:', process.env.SUPABASE_PUBLISHABLE_KEY);
+    // Unreachable — preserve context shape for typecheck
+    if (false as boolean) {
+      const supabase = createClient<Database>('', '');
+      return next({ context: { supabase, userId: '', claims: {} as any } });
+    }
     throw new Error('ENV DEBUG — check server logs');
-    return next();
   },
 );
