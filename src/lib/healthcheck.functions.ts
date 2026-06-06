@@ -52,12 +52,7 @@ export type HealthCheckData = {
   totalUnlockedAreas: number;
 };
 
-  parents: ParentSystem[];
-  children: ChildSystem[];
-  areas: Area[];
-  responses: ResponseRow[];
-  totalUnlockedAreas: number;
-};
+
 
 async function loadFrameworkAndResponses(assessmentId: string) {
   const [parentsRes, childrenRes, areasRes, questionsRes, respRes] =
