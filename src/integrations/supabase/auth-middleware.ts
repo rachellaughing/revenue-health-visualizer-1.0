@@ -21,8 +21,21 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
     const token = authHeader.replace('Bearer ', '');
 
     const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-      auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      auth: {
+        storage: undefined,
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
+
+    // Force the client to use this token for all requests including DB queries
+    await supabase.auth.setSession({
+      access_token: token,
+      refresh_token: '',
     });
 
     const { data, error } = await supabase.auth.getUser(token);
