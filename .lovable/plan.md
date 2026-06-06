@@ -1,10 +1,18 @@
-Update only `src/integrations/supabase/auth-middleware.ts`.
+Add temporary debug logs exactly where requested, with no behavioral fixes or unrelated edits.
 
-Changes:
-- Replace the invalid `supabase.auth.getClaims(token)` call with `supabase.auth.getUser(token)`.
-- Treat `error` or missing `data.user` as `Unauthorized: Invalid token`.
-- Remove the `data.claims.sub` check entirely.
-- Pass `data.user.id` as `userId` in middleware context.
-- Pass `data.user` as `claims` to preserve the existing context field name.
+Steps:
+1. In `src/lib/profile.functions.ts`, update only `getPersonalProfile`:
+   - Log `[profile] handler reached, userId:` with `context.userId` at the start of the handler.
+   - Log `[profile] data:` and `error:` immediately after the `profiles` query.
+   - Keep the same query, error handling, and return behavior.
 
-No other files or behavior will be changed.
+2. In `src/integrations/supabase/auth-middleware.ts`, update only `requireSupabaseAuth`:
+   - Add the three requested logs before `supabase.auth.getUser(token)`:
+     - `[auth] token present:`
+     - `[auth] SUPABASE_URL:`
+     - `[auth] ANON_KEY:`
+   - Do not change authentication logic.
+
+3. Verify the edit is limited to those two files and contains no functional fix.
+
+4. After approval/build, use the preview/debug logs for `/profile/personal` and report back the observed console/server logs.
