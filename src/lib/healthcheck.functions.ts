@@ -179,7 +179,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     // Find or create in_progress assessment
     let { data: assessment, error: aErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,status,completion_pct")
+      .select("id,status,completion_pct,selected_child_ids")
       .eq("user_id", userId)
       .eq("status", "in_progress")
       .order("created_at", { ascending: false })
@@ -198,7 +198,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
           status: "in_progress",
           completion_pct: 0,
         })
-        .select("id,status,completion_pct")
+        .select("id,status,completion_pct,selected_child_ids")
         .single();
       if (cErr) throw new Error(cErr.message);
       assessment = created;
@@ -209,7 +209,12 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 
     return {
       tier,
-      assessment: assessment!,
+      assessment: {
+        id: assessment!.id,
+        status: assessment!.status,
+        completion_pct: assessment!.completion_pct ?? 0,
+        selected_child_ids: (assessment!.selected_child_ids ?? []) as string[],
+      },
       parents: fw.parents,
       children: fw.children,
       areas: fw.areas,
@@ -217,6 +222,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       totalUnlockedAreas: total,
     };
   });
+
 
 const saveSchema = z.object({
   assessment_id: z.string().uuid(),
