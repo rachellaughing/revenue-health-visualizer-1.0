@@ -5,10 +5,12 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   getHealthCheckData,
   saveResponse,
+  updateSelectedChildIds,
   type HealthCheckData,
   type ChildSystem,
   type Area,
 } from "@/lib/healthcheck.functions";
+
 
 export const Route = createFileRoute("/health-check/")({
   head: () => ({ meta: [{ title: "Health Check — Revenue Health Visualiser" }] }),
@@ -56,6 +58,7 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
 function HealthCheckPage() {
   const fetchData = useServerFn(getHealthCheckData);
   const saveFn = useServerFn(saveResponse);
+  const updateSelFn = useServerFn(updateSelectedChildIds);
   const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
@@ -79,18 +82,21 @@ function HealthCheckPage() {
   }
   if (!data) return null;
 
-  return <HealthCheckShell data={data} saveFn={saveFn} qc={qc} />;
+  return <HealthCheckShell data={data} saveFn={saveFn} updateSelFn={updateSelFn} qc={qc} />;
 }
 
 function HealthCheckShell({
   data,
   saveFn,
+  updateSelFn,
   qc,
 }: {
   data: HealthCheckData;
   saveFn: ReturnType<typeof useServerFn<typeof saveResponse>>;
+  updateSelFn: ReturnType<typeof useServerFn<typeof updateSelectedChildIds>>;
   qc: ReturnType<typeof useQueryClient>;
 }) {
+
   const { tier, assessment, parents, children, areas } = data;
 
   // Build a response map keyed by question_id
@@ -134,12 +140,61 @@ function HealthCheckShell({
     return m;
   }, [areas]);
 
-  // pre-select first parent, first unlocked child
+  // Selection state (starter tier only — pro/diagnostic ignore this)
+  const [selectedCodes, setSelectedCodes] = useState<string[]>(
+    assessment.selected_child_ids ?? [],
+  );
+
+  const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
+
+
+
+
+
+  const selectedForParent = useCallback(
+    (parentId: string) => {
+      const list = childrenByParent.get(parentId) ?? [];
+      return list.filter((c) => selectedSet.has(c.code));
+    },
+    [childrenByParent, selectedSet],
+  );
+
+  const childHasResponses = useCallback(
+    (c: ChildSystem) => {
+      const arr = areasByChild.get(c.id) ?? [];
+      return arr.some((a) => {
+        const r = responses[a.question_id];
+        return r && r.health !== null;
+      });
+    },
+    [areasByChild, responses],
+  );
+
+  // Tier-aware lock predicate
+  const isChildLocked = useCallback(
+    (c: ChildSystem) => {
+      if (tier !== "starter") return false;
+      const parentSelected = selectedForParent(c.parent_system_id);
+      // selection complete: only the 3 selected are unlocked
+      if (parentSelected.length >= 3) return !selectedSet.has(c.code);
+      // mid-selection: nothing is "locked" — chip is selectable
+      return false;
+    },
+    [tier, selectedForParent, selectedSet],
+  );
+
+  // pre-select first parent, first available child for that parent
   const firstParent = parents[0];
   const initialChild = useMemo(() => {
     if (!firstParent) return null;
     const list = childrenByParent.get(firstParent.id) ?? [];
-    return list.find((c) => c.access_tier === "free" || tier !== "starter") ?? list[0];
+    if (tier === "starter") {
+      const selFor = list.filter((c) => selectedSet.has(c.code));
+      if (selFor.length === 0) return null; // selection mode, no card shown
+      return selFor[0];
+    }
+    return list[0];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstParent, childrenByParent, tier]);
 
   const [activeParentId, setActiveParentId] = useState<string | null>(
@@ -152,10 +207,50 @@ function HealthCheckShell({
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  const isChildLocked = useCallback(
-    (c: ChildSystem) => c.access_tier === "paid" && tier === "starter",
-    [tier],
+  // Persist selection helper (debounced lightly)
+  const selTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const persistSelection = useCallback(
+    (codes: string[]) => {
+      if (selTimer.current) clearTimeout(selTimer.current);
+      selTimer.current = setTimeout(() => {
+        updateSelFn({
+          data: { assessment_id: assessment.id, selected_child_ids: codes },
+        }).catch((e) => console.error(e));
+      }, 300);
+    },
+    [assessment.id, updateSelFn],
   );
+
+  function toggleChipSelection(c: ChildSystem) {
+    if (tier !== "starter") return;
+    const parentSel = selectedForParent(c.parent_system_id);
+    const isSelected = selectedSet.has(c.code);
+    let next: string[];
+    if (isSelected) {
+      if (childHasResponses(c)) return; // in progress, cannot deselect
+      next = selectedCodes.filter((code) => code !== c.code);
+    } else {
+      if (parentSel.length >= 3) return; // cap reached
+      next = [...selectedCodes, c.code];
+    }
+    setSelectedCodes(next);
+    persistSelection(next);
+    // when this completes the parent selection, focus first selected child
+    if (!isSelected) {
+      const newParentSel = [...parentSel.map((x) => x.code), c.code];
+      if (newParentSel.length === 3) {
+        const list = childrenByParent.get(c.parent_system_id) ?? [];
+        const firstSel = list.find((x) => newParentSel.includes(x.code));
+        if (firstSel) setActiveChildId(firstSel.id);
+      } else if (parentSel.length === 0) {
+        // first pick — surface its card
+        setActiveChildId(c.id);
+      }
+    } else if (activeChildId === c.id) {
+      setActiveChildId(null);
+    }
+  }
+
 
   // Overall completion
   const totalUnlocked = data.totalUnlockedAreas;
@@ -242,10 +337,21 @@ function HealthCheckShell({
 
   const activeParent = parents.find((p) => p.id === activeParentId) ?? parents[0];
   const activeChildren = activeParent ? childrenByParent.get(activeParent.id) ?? [] : [];
-  const activeChild =
-    activeChildren.find((c) => c.id === activeChildId) ??
-    activeChildren.find((c) => !isChildLocked(c)) ??
-    activeChildren[0];
+  // For starter in mid-selection (none picked) activeChild is null → show only chips
+  const activeParentSelectedCount = activeParent
+    ? selectedForParent(activeParent.id).length
+    : 0;
+  const inSelectionMode =
+    tier === "starter" && activeParentSelectedCount < 3;
+  const noSelectionsYet =
+    tier === "starter" && activeParentSelectedCount === 0;
+
+  const activeChild = noSelectionsYet
+    ? null
+    : activeChildren.find((c) => c.id === activeChildId) ??
+      activeChildren.find((c) => !isChildLocked(c)) ??
+      activeChildren[0] ??
+      null;
   const activeAreas = activeChild ? areasByChild.get(activeChild.id) ?? [] : [];
   const systemColor = activeParent?.color_hex ? `#${activeParent.color_hex}` : T.teal;
 
@@ -261,6 +367,11 @@ function HealthCheckShell({
   ).length;
 
   function selectChild(c: ChildSystem) {
+    // In selection mode, clicking a chip toggles selection instead of navigating
+    if (tier === "starter" && inSelectionMode) {
+      toggleChipSelection(c);
+      return;
+    }
     if (isChildLocked(c)) return;
     setShowSkipWarning(false);
     setActiveChildId(c.id);
@@ -269,10 +380,16 @@ function HealthCheckShell({
   function selectParent(pid: string) {
     setActiveParentId(pid);
     const list = childrenByParent.get(pid) ?? [];
-    const first = list.find((c) => !isChildLocked(c)) ?? list[0];
-    if (first) setActiveChildId(first.id);
+    if (tier === "starter") {
+      const selFor = list.filter((c) => selectedSet.has(c.code));
+      setActiveChildId(selFor.length > 0 ? selFor[0].id : null);
+    } else {
+      const first = list[0];
+      if (first) setActiveChildId(first.id);
+    }
     setShowSkipWarning(false);
   }
+
 
   return (
     <div
@@ -322,8 +439,41 @@ function HealthCheckShell({
         </div>
       </div>
 
+      {/* Tier indicator bar */}
+      <div
+        style={{
+          height: 32,
+          background: T.offWhite,
+          display: "flex",
+          alignItems: "center",
+          padding: "0 24px",
+          fontSize: 11,
+          color: T.mid,
+          flexShrink: 0,
+        }}
+      >
+        {tier === "starter" && (
+          <span>
+            Revenue Health Snapshot™ · 15 subsystems ·{" "}
+            <a
+              href="/upgrade"
+              style={{ color: T.teal, textDecoration: "none", fontWeight: 500 }}
+            >
+              Upgrade for full access ↗
+            </a>
+          </span>
+        )}
+        {tier === "pro" && (
+          <span>Revenue Health Assessment™ · All 50 subsystems unlocked</span>
+        )}
+        {tier === "diagnostic" && (
+          <span>Revenue Health Diagnostic™ · All 50 subsystems unlocked</span>
+        )}
+      </div>
+
       {/* Body */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+
         {/* Left nav */}
         <div
           style={{
@@ -508,17 +658,43 @@ function HealthCheckShell({
               >
                 {activeParent.name}
               </div>
+
+              {/* Snapshot selection instruction */}
+              {tier === "starter" && (
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: T.mid,
+                    marginBottom: 10,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {activeParentSelectedCount < 3 ? (
+                    <>
+                      You're on Revenue Health Snapshot™ — select 3 subsystems
+                      to evaluate in this system. Choose the ones most relevant
+                      to your business right now.
+                    </>
+                  ) : (
+                    <>3 subsystems selected. Start answering below ↓</>
+                  )}
+                </div>
+              )}
+
               {/* Chips */}
               <div
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
                   gap: 8,
-                  marginBottom: 18,
+                  marginBottom: 6,
+                  alignItems: "center",
                 }}
               >
                 {activeChildren.map((c) => {
                   const locked = isChildLocked(c);
+                  const selected = tier === "starter" && selectedSet.has(c.code);
+                  const hasResp = childHasResponses(c);
                   const arr = areasByChild.get(c.id) ?? [];
                   const complete =
                     arr.length > 0 &&
@@ -535,6 +711,8 @@ function HealthCheckShell({
                     (a) => responses[a.question_id]?.health === -1,
                   );
                   const active = c.id === activeChild?.id;
+                  const highlight =
+                    tier === "starter" ? selected || active : active;
                   return (
                     <button
                       key={c.id}
@@ -546,26 +724,26 @@ function HealthCheckShell({
                         border: `1.5px solid ${
                           locked
                             ? "rgba(0,0,0,0.08)"
-                            : active
+                            : highlight
                             ? systemColor
                             : complete
                             ? `${T.tealBright}60`
                             : "rgba(0,0,0,0.1)"
                         }`,
-                        background: active
+                        background: highlight
                           ? `${systemColor}15`
                           : complete
                           ? `${T.tealBright}10`
                           : T.white,
                         color: locked
                           ? T.mid
-                          : active
+                          : highlight
                           ? systemColor
                           : complete
                           ? T.teal
                           : T.ink,
                         fontSize: 12,
-                        fontWeight: active ? 600 : 400,
+                        fontWeight: highlight ? 600 : 400,
                         cursor: locked ? "not-allowed" : "pointer",
                         opacity: locked ? 0.5 : 1,
                         display: "flex",
@@ -582,10 +760,55 @@ function HealthCheckShell({
                         <span style={{ fontSize: 10, color: T.mid }}>○</span>
                       )}
                       {c.name}
+                      {tier === "starter" && selected && hasResp && (
+                        <span
+                          style={{
+                            fontSize: 10,
+                            color: T.mid,
+                            marginLeft: 4,
+                            fontWeight: 400,
+                          }}
+                        >
+                          · In progress
+                        </span>
+                      )}
                     </button>
                   );
                 })}
+
+                {tier === "starter" && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: systemColor,
+                      marginLeft: "auto",
+                    }}
+                  >
+                    {activeParentSelectedCount} of 3 selected
+                  </span>
+                )}
               </div>
+
+              {/* Change selection link */}
+              {tier === "starter" &&
+                activeParentSelectedCount > 0 &&
+                activeParentSelectedCount < 3 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: T.mid,
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Change selection
+                    </span>
+                  </div>
+                )}
+
+              <div style={{ height: 12 }} />
+
 
               {activeChild && (
                 <div
