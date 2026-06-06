@@ -55,7 +55,7 @@ export const getPersonalProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     console.log("[profile] handler reached, userId:", context.userId);
-    const { data, error } = await context.supabase
+    const { data, error } = await supabaseAdmin
       .from("profiles")
       .select("first_name,last_name,role_title,years_in_role,primary_background,email")
       .eq("user_id", context.userId)
@@ -69,7 +69,7 @@ export const savePersonalProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => personalSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { error } = await supabaseAdmin
       .from("profiles")
       .update({
         first_name: data.first_name,
@@ -81,7 +81,7 @@ export const savePersonalProfile = createServerFn({ method: "POST" })
       })
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
-    const { error: rpcErr } = await context.supabase.rpc(
+    const { error: rpcErr } = await supabaseAdmin.rpc(
       "refresh_profile_completion",
       { _user_id: context.userId },
     );
@@ -92,7 +92,7 @@ export const savePersonalProfile = createServerFn({ method: "POST" })
 export const getCompanyProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
+    const { data, error } = await supabaseAdmin
       .from("company_profiles")
       .select("*")
       .eq("user_id", context.userId)
@@ -105,7 +105,7 @@ export const saveCompanyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => companySchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { error } = await supabaseAdmin
       .from("company_profiles")
       .update({
         company_name: data.company_name,
@@ -133,7 +133,7 @@ export const saveCompanyProfile = createServerFn({ method: "POST" })
       })
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
-    const { error: rpcErr } = await context.supabase.rpc(
+    const { error: rpcErr } = await supabaseAdmin.rpc(
       "refresh_profile_completion",
       { _user_id: context.userId },
     );
@@ -149,7 +149,7 @@ export type SymptomCategory = {
 export const getSymptomCategories = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<SymptomCategory[]> => {
-    const { data, error } = await (context.supabase as any)
+    const { data, error } = await (supabaseAdmin as any)
       .schema("revhealth2")
       .from("symptom_map")
       .select("symptom_code,category,symptom")
