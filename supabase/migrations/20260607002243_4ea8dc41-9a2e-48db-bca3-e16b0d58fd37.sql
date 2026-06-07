@@ -1,0 +1,1 @@
+ALTER TABLE public.report_narratives ADD COLUMN IF NOT EXISTS top_risks jsonb;

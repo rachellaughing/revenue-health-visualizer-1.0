@@ -436,6 +436,7 @@ export type Database = {
           narrative_lfc: string | null
           narrative_pos: string | null
           narrative_vis: string | null
+          top_risks: Json | null
           user_id: string
         }
         Insert: {
@@ -451,6 +452,7 @@ export type Database = {
           narrative_lfc?: string | null
           narrative_pos?: string | null
           narrative_vis?: string | null
+          top_risks?: Json | null
           user_id: string
         }
         Update: {
@@ -466,6 +468,7 @@ export type Database = {
           narrative_lfc?: string | null
           narrative_pos?: string | null
           narrative_vis?: string | null
+          top_risks?: Json | null
           user_id?: string
         }
         Relationships: [
