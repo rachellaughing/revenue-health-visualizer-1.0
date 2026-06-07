@@ -137,22 +137,26 @@ function computeCompletionPct(
   children: ChildSystem[],
   areas: Area[],
   responses: ResponseRow[],
+  selectedChildUuids: string[] = [],
 ): { pct: number; total: number; done: number } {
-  const total = countUnlockedAreas(tier, children, areas);
-  const unlockedChildIds = new Set(
-    children.filter((c) => c.access_tier === "free" || tier !== "starter").map(
-      (c) => c.id,
-    ),
-  );
-  const unlockedQids = new Set(
-    areas.filter((a) => unlockedChildIds.has(a.child_system_id)).map(
+  let relevantChildIds: Set<string>;
+  if (tier === "starter") {
+    // Starter: only count questions for the user's selected child systems
+    relevantChildIds = new Set(selectedChildUuids);
+  } else {
+    relevantChildIds = new Set(children.map((c) => c.id));
+  }
+  const relevantQids = new Set(
+    areas.filter((a) => relevantChildIds.has(a.child_system_id)).map(
       (a) => a.question_id,
     ),
   );
+  const total = relevantQids.size;
   const done = responses.filter(
     (r) =>
-      unlockedQids.has(r.question_id) &&
+      relevantQids.has(r.question_id) &&
       r.health_response !== null &&
+      r.health_response !== -1 &&
       r.tracking_response !== null,
   ).length;
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -205,7 +209,21 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     }
 
     const fw = await loadFrameworkAndResponses(assessment!.id);
-    const total = countUnlockedAreas(tier, fw.children, fw.areas);
+
+    // Convert stored UUIDs back to child system codes for the UI
+    const storedIds = (assessment!.selected_child_ids ?? []) as string[];
+    const selectedCodes = storedIds
+      .map((id) => fw.children.find((c) => c.id === id)?.code)
+      .filter((code): code is string => Boolean(code));
+
+    // Total unlocked areas: for starter, count only selected child areas
+    const selectedChildIdSet = new Set(
+      fw.children.filter((c) => selectedCodes.includes(c.code)).map((c) => c.id),
+    );
+    const total =
+      tier === "starter"
+        ? fw.areas.filter((a) => selectedChildIdSet.has(a.child_system_id)).length
+        : countUnlockedAreas(tier, fw.children, fw.areas);
 
     return {
       tier,
@@ -213,7 +231,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
         id: assessment!.id,
         status: assessment!.status,
         completion_pct: assessment!.completion_pct ?? 0,
-        selected_child_ids: (assessment!.selected_child_ids ?? []) as string[],
+        selected_child_ids: selectedCodes,
       },
       parents: fw.parents,
       children: fw.children,
@@ -240,7 +258,7 @@ export const saveResponse = createServerFn({ method: "POST" })
     // verify ownership
     const { data: asmt, error: oErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,user_id,status")
+      .select("id,user_id,status,selected_child_ids")
       .eq("id", data.assessment_id)
       .maybeSingle();
     if (oErr) throw new Error(oErr.message);
@@ -292,11 +310,13 @@ export const saveResponse = createServerFn({ method: "POST" })
     const tier = (profile?.tier ?? "starter") as string;
 
     const fw = await loadFrameworkAndResponses(data.assessment_id);
+    const selectedChildUuids = ((asmt as any).selected_child_ids ?? []) as string[];
     const { pct } = computeCompletionPct(
       tier,
       fw.children,
       fw.areas,
       fw.responses,
+      selectedChildUuids,
     );
 
     const isComplete = pct >= 100;
