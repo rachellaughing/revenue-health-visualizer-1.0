@@ -1563,3 +1563,329 @@ export const getMatrixMap = createServerFn({ method: "POST" })
       };
     },
   );
+
+// ============================================================================
+// Team Alignment Report
+// ============================================================================
+
+export type AlignmentSystem = {
+  code: string;
+  name: string;
+  color: string;
+  founderScore: number;
+  teamAvg: number;
+  gap: number;
+  direction: "founder_high" | "team_high" | "aligned";
+  status: "critical_gap" | "significant_gap" | "moderate_gap" | "strong_alignment";
+  clusters: { label: string; score: number }[];
+  narrative: string | null;
+};
+
+export type AlignmentRecommendation = {
+  rank: number;
+  title: string;
+  rationale: string;
+  effortLevel: string | null;
+  timeframe: string | null;
+  systemColor: string;
+  systemName: string;
+};
+
+export type TeamAlignmentData = {
+  tier: Tier;
+  state: "preview" | "waiting" | "ready";
+  profile: { first_name: string | null };
+  company: { company_name: string | null };
+  assessment: { id: string; submitted_at: string | null } | null;
+  systems: AlignmentSystem[];
+  summary: {
+    overallAlignment: number;
+    criticalGaps: number;
+    leaderHigher: number;
+    teamHigher: number;
+  };
+  recommendations: AlignmentRecommendation[];
+  teamInviteUrl: string | null;
+  invitedCount: number;
+  completedCount: number;
+};
+
+function aShortName(full: string): string {
+  // "Positioning System" -> "Positioning"
+  return full.replace(/\s+System$/i, "").trim();
+}
+
+function statusFor(absGap: number): AlignmentSystem["status"] {
+  if (absGap > 25) return "critical_gap";
+  if (absGap > 15) return "significant_gap";
+  if (absGap > 5) return "moderate_gap";
+  return "strong_alignment";
+}
+
+function directionFor(gap: number): AlignmentSystem["direction"] {
+  if (Math.abs(gap) < 5) return "aligned";
+  return gap > 0 ? "founder_high" : "team_high";
+}
+
+function illustrativeAlignment(seed: string, code: string): {
+  founderScore: number;
+  teamAvg: number;
+  clusters: { label: string; score: number }[];
+} {
+  const h1 = hashStr(`${seed}:align:${code}:founder`);
+  const h2 = hashStr(`${seed}:align:${code}:team`);
+  const founderScore = 55 + (h1 % 30); // 55-84
+  const teamAvg = 45 + (h2 % 40); // 45-84
+  const clusters = ["Leadership", "Sales", "Marketing"].map((label, i) => {
+    const h = hashStr(`${seed}:align:${code}:c${i}`);
+    return { label, score: Math.max(35, teamAvg - 8 + (h % 18)) };
+  });
+  return { founderScore, teamAvg, clusters };
+}
+
+export const getTeamAlignment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(async ({ data, context }): Promise<TeamAlignmentData | { error: "no_completed_assessment" }> => {
+    const userId = context.userId;
+
+    let assessmentId = data?.assessmentId;
+    if (!assessmentId) {
+      const { data: latest } = await supabaseAdmin
+        .from("assessments")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!latest) return { error: "no_completed_assessment" as const };
+      assessmentId = latest.id;
+    }
+
+    const [profileRes, companyRes, asmtRes, parentsRes, childrenRes, alignRes, teamsRes] =
+      await Promise.all([
+        supabaseAdmin
+          .from("profiles")
+          .select("first_name,tier")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("company_profiles")
+          .select("company_name")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("assessments")
+          .select("id,user_id,submitted_at")
+          .eq("id", assessmentId)
+          .maybeSingle(),
+        (supabaseAdmin as any)
+          .schema("revhealth2")
+          .from("parent_systems")
+          .select("id,code,name,color_hex,sort_order"),
+        (supabaseAdmin as any)
+          .schema("revhealth2")
+          .from("child_systems")
+          .select("id,parent_system_id"),
+        supabaseAdmin
+          .from("alignment_scores")
+          .select("child_system_id,founder_score,team_avg_score,alignment_gap,gap_direction,alignment_status,cluster_scores")
+          .eq("assessment_id", assessmentId)
+          .eq("owner_id", userId),
+        supabaseAdmin
+          .from("teams")
+          .select("id")
+          .eq("owner_id", userId)
+          .maybeSingle(),
+      ]);
+
+    if (!asmtRes.data) throw new Error("Assessment not found");
+    if (asmtRes.data.user_id !== userId) throw new Error("Forbidden");
+
+    const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+    const parents = (parentsRes.data ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+    const children = (childrenRes.data ?? []) as any[];
+    const align = (alignRes.data ?? []) as any[];
+
+    const childToParent = new Map<string, string>();
+    for (const c of children) childToParent.set(c.id, c.parent_system_id);
+
+    // Team members count for waiting state
+    let invitedCount = 0;
+    let completedCount = 0;
+    let teamInviteUrl: string | null = null;
+    if (teamsRes.data?.id) {
+      const { data: members } = await supabaseAdmin
+        .from("team_members")
+        .select("id,status,invite_token")
+        .eq("team_id", teamsRes.data.id);
+      invitedCount = members?.length ?? 0;
+      completedCount = members?.filter((m: any) => m.status === "completed").length ?? 0;
+      const firstToken = members?.find((m: any) => m.invite_token)?.invite_token;
+      if (firstToken) teamInviteUrl = `${process.env.APP_URL ?? ""}/team/invite/${firstToken}`;
+    }
+
+    // Diagnostic-only auxiliary data
+    let observations: any[] = [];
+    let recs: any[] = [];
+    if (tier === "diagnostic") {
+      const [obsRes, recsRes] = await Promise.all([
+        supabaseAdmin
+          .from("consultant_observations")
+          .select("parent_system_id,generated_narrative")
+          .eq("assessment_id", assessmentId)
+          .eq("owner_id", userId),
+        supabaseAdmin
+          .from("diagnostic_recommendations")
+          .select("rank,recommendation_text,rationale,timeframe,effort_level,child_system_id")
+          .eq("assessment_id", assessmentId)
+          .eq("owner_id", userId)
+          .order("rank")
+          .limit(3),
+      ]);
+      observations = obsRes.data ?? [];
+      recs = recsRes.data ?? [];
+    }
+    const narrativeByParent = new Map<string, string>();
+    for (const o of observations) {
+      if (o.parent_system_id && o.generated_narrative) {
+        narrativeByParent.set(o.parent_system_id, o.generated_narrative);
+      }
+    }
+
+    // Aggregate alignment_scores per parent (avg founder/team across child rows)
+    type Agg = {
+      founderSum: number;
+      teamSum: number;
+      count: number;
+      clusterAgg: Map<string, { sum: number; n: number }>;
+    };
+    const aggByParent = new Map<string, Agg>();
+    for (const row of align) {
+      const parentId = childToParent.get(row.child_system_id);
+      if (!parentId) continue;
+      let a = aggByParent.get(parentId);
+      if (!a) {
+        a = { founderSum: 0, teamSum: 0, count: 0, clusterAgg: new Map() };
+        aggByParent.set(parentId, a);
+      }
+      a.founderSum += Number(row.founder_score ?? 0);
+      a.teamSum += Number(row.team_avg_score ?? 0);
+      a.count += 1;
+      const cs = Array.isArray(row.cluster_scores) ? row.cluster_scores : [];
+      for (const c of cs) {
+        const label = String(c?.cluster_label ?? c?.label ?? "");
+        const score = Number(c?.score ?? 0);
+        if (!label) continue;
+        let cur = a.clusterAgg.get(label);
+        if (!cur) { cur = { sum: 0, n: 0 }; a.clusterAgg.set(label, cur); }
+        cur.sum += score; cur.n += 1;
+      }
+    }
+
+    const seed = assessmentId!;
+    const hasRealData = aggByParent.size > 0;
+
+    // State determination
+    let state: TeamAlignmentData["state"];
+    if (tier === "starter") {
+      state = "preview";
+    } else if (!hasRealData && invitedCount > 0 && completedCount < invitedCount) {
+      state = "waiting";
+    } else if (!hasRealData) {
+      state = "preview"; // no team yet — show preview-style illustrative
+    } else {
+      state = "ready";
+    }
+
+    const systems: AlignmentSystem[] = parents.map((p: any) => {
+      const color = `#${p.color_hex}`;
+      const name = aShortName(p.name);
+      const useReal = state === "ready" && aggByParent.has(p.id);
+
+      let founderScore: number;
+      let teamAvg: number;
+      let clusters: { label: string; score: number }[];
+
+      if (useReal) {
+        const a = aggByParent.get(p.id)!;
+        founderScore = Math.round(a.founderSum / a.count);
+        teamAvg = Math.round(a.teamSum / a.count);
+        clusters = Array.from(a.clusterAgg.entries()).map(([label, v]) => ({
+          label,
+          score: Math.round(v.sum / v.n),
+        }));
+        if (clusters.length === 0) {
+          clusters = [
+            { label: "Leadership", score: teamAvg },
+            { label: "Sales", score: teamAvg },
+            { label: "Marketing", score: teamAvg },
+          ];
+        }
+      } else {
+        const illus = illustrativeAlignment(seed, p.code);
+        founderScore = illus.founderScore;
+        teamAvg = illus.teamAvg;
+        clusters = illus.clusters;
+      }
+
+      const gap = founderScore - teamAvg;
+      const direction = directionFor(gap);
+      const status = statusFor(Math.abs(gap));
+
+      return {
+        code: p.code,
+        name,
+        color,
+        founderScore,
+        teamAvg,
+        gap,
+        direction,
+        status,
+        clusters,
+        narrative: tier === "diagnostic" ? narrativeByParent.get(p.id) ?? null : null,
+      };
+    });
+
+    const overallAlignment = systems.length
+      ? Math.round(systems.reduce((s, d) => s + (100 - Math.abs(d.gap)), 0) / systems.length)
+      : 0;
+    const criticalGaps = systems.filter((d) => d.status === "critical_gap").length;
+    const leaderHigher = systems.filter((d) => d.direction === "founder_high" && d.status !== "strong_alignment").length;
+    const teamHigher = systems.filter((d) => d.direction === "team_high" && d.status !== "strong_alignment").length;
+
+    // Recommendations: map child_system_id to parent for color/name
+    const parentByChild = new Map<string, any>();
+    for (const c of children) {
+      const p = parents.find((pp: any) => pp.id === c.parent_system_id);
+      if (p) parentByChild.set(c.id, p);
+    }
+    const recommendations: AlignmentRecommendation[] = recs.map((r: any) => {
+      const p = parentByChild.get(r.child_system_id);
+      return {
+        rank: r.rank,
+        title: r.recommendation_text ?? "",
+        rationale: r.rationale ?? "",
+        effortLevel: r.effort_level ?? null,
+        timeframe: r.timeframe ?? null,
+        systemColor: p ? `#${p.color_hex}` : "#888880",
+        systemName: p ? aShortName(p.name) : "",
+      };
+    });
+
+    return {
+      tier,
+      state,
+      profile: { first_name: profileRes.data?.first_name ?? null },
+      company: { company_name: companyRes.data?.company_name ?? null },
+      assessment: { id: asmtRes.data.id, submitted_at: asmtRes.data.submitted_at },
+      systems,
+      summary: { overallAlignment, criticalGaps, leaderHigher, teamHigher },
+      recommendations,
+      teamInviteUrl,
+      invitedCount,
+      completedCount,
+    };
+  });
+
