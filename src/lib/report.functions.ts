@@ -305,7 +305,7 @@ function stripCodeFences(s: string): string {
 async function _generateReportNarrativeImpl(
   assessmentId: string,
   userId: string,
-): Promise<{ headline: string; body: string; risks: RiskItem[] }> {
+): Promise<{ headline: string; body: string; risks: RiskItem[]; systems: SystemNarratives }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
 
