@@ -469,6 +469,7 @@ export type Database = {
           delegation_difficulty: string | null
           dependency_type: string
           id: string
+          is_shadow_system: boolean
           owner_id: string
           parent_system_id: string
           process_name: string
@@ -484,6 +485,7 @@ export type Database = {
           delegation_difficulty?: string | null
           dependency_type?: string
           id?: string
+          is_shadow_system?: boolean
           owner_id: string
           parent_system_id: string
           process_name: string
@@ -499,6 +501,7 @@ export type Database = {
           delegation_difficulty?: string | null
           dependency_type?: string
           id?: string
+          is_shadow_system?: boolean
           owner_id?: string
           parent_system_id?: string
           process_name?: string
@@ -791,6 +794,44 @@ export type Database = {
             foreignKeyName: "report_narratives_assessment_id_fkey"
             columns: ["assessment_id"]
             isOneToOne: true
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roadmap_selections: {
+        Row: {
+          assessment_id: string
+          child_system_id: string
+          horizon: string
+          id: string
+          selected_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          child_system_id: string
+          horizon: string
+          id?: string
+          selected_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          child_system_id?: string
+          horizon?: string
+          id?: string
+          selected_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_selections_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
             referencedRelation: "assessments"
             referencedColumns: ["id"]
           },
