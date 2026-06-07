@@ -461,6 +461,156 @@ export type Database = {
           },
         ]
       }
+      founder_dependency_processes: {
+        Row: {
+          assessment_id: string
+          blast_radius_window: string | null
+          created_at: string | null
+          delegation_difficulty: string | null
+          dependency_type: string
+          id: string
+          owner_id: string
+          parent_system_id: string
+          process_name: string
+          recommended_first_step: string | null
+          risk_level: number | null
+          sort_order: number | null
+          why_founder_dependent: string | null
+        }
+        Insert: {
+          assessment_id: string
+          blast_radius_window?: string | null
+          created_at?: string | null
+          delegation_difficulty?: string | null
+          dependency_type?: string
+          id?: string
+          owner_id: string
+          parent_system_id: string
+          process_name: string
+          recommended_first_step?: string | null
+          risk_level?: number | null
+          sort_order?: number | null
+          why_founder_dependent?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          blast_radius_window?: string | null
+          created_at?: string | null
+          delegation_difficulty?: string | null
+          dependency_type?: string
+          id?: string
+          owner_id?: string
+          parent_system_id?: string
+          process_name?: string
+          recommended_first_step?: string | null
+          risk_level?: number | null
+          sort_order?: number | null
+          why_founder_dependent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_dependency_processes_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_dependency_scores: {
+        Row: {
+          assessment_id: string
+          blast_radius_narrative: string | null
+          consultant_id: string | null
+          created_at: string | null
+          dependency_label: string | null
+          executive_summary: string | null
+          id: string
+          overall_dependency_index: number | null
+          owner_id: string
+          summary_generated_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessment_id: string
+          blast_radius_narrative?: string | null
+          consultant_id?: string | null
+          created_at?: string | null
+          dependency_label?: string | null
+          executive_summary?: string | null
+          id?: string
+          overall_dependency_index?: number | null
+          owner_id: string
+          summary_generated_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          blast_radius_narrative?: string | null
+          consultant_id?: string | null
+          created_at?: string | null
+          dependency_label?: string | null
+          executive_summary?: string | null
+          id?: string
+          overall_dependency_index?: number | null
+          owner_id?: string
+          summary_generated_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_dependency_scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: true
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      founder_dependency_systems: {
+        Row: {
+          assessment_id: string
+          created_at: string | null
+          dependency_level: number | null
+          dependency_type: string
+          handoff_readiness: string | null
+          id: string
+          narrative: string | null
+          owner_id: string
+          parent_system_id: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string | null
+          dependency_level?: number | null
+          dependency_type: string
+          handoff_readiness?: string | null
+          id?: string
+          narrative?: string | null
+          owner_id: string
+          parent_system_id: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string | null
+          dependency_level?: number | null
+          dependency_type?: string
+          handoff_readiness?: string | null
+          id?: string
+          narrative?: string | null
+          owner_id?: string
+          parent_system_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "founder_dependency_systems_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ghl_sync_log: {
         Row: {
           error_message: string | null

@@ -43,6 +43,7 @@ type NavItem = {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   lock?: LockKind;
+  previewWhenLocked?: boolean;
 };
 type NavSection = { label: string; items: NavItem[] };
 
@@ -69,7 +70,7 @@ const sections: NavSection[] = [
       { title: "Revenue System Health", url: "/reports/revenue-system-health", icon: Activity, lock: "assessment_complete" },
       { title: "Top Opportunities", url: "/reports/top-opportunities", icon: Target, lock: "assessment_complete" },
       { title: "Revenue at Risk", url: "/reports/revenue-at-risk", icon: AlertTriangle, lock: "assessment_complete" },
-      { title: "Team Alignment", url: "/reports/team-alignment", icon: Users, lock: "diagnostic" },
+      { title: "Team Alignment", url: "/reports/team-alignment", icon: Users, lock: "diagnostic", previewWhenLocked: true },
       { title: "Founder Dependency", url: "/reports/founder-dependency", icon: Crown, lock: "diagnostic" },
     ],
   },
@@ -212,7 +213,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                                 ? "3px solid var(--mm-ember)"
                                 : "3px solid transparent",
                             paddingLeft: active && !locked ? "calc(1rem - 3px)" : "1rem",
-                            cursor: locked ? "not-allowed" : "pointer",
+                            cursor: locked && !item.previewWhenLocked ? "not-allowed" : "pointer",
                           }}
                         >
                           <Icon className="h-4 w-4 shrink-0" />
@@ -227,13 +228,22 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
 
                       return (
                         <li key={item.url}>
-                          {locked ? (
+                          {locked && !item.previewWhenLocked ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="block select-none">{baseRow}</span>
                               </TooltipTrigger>
                               <TooltipContent side="right">
                                 {LOCK_REASON[item.lock as Exclude<LockKind, null>]}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : locked && item.previewWhenLocked ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Link to={item.url}>{baseRow}</Link>
+                              </TooltipTrigger>
+                              <TooltipContent side="right">
+                                {LOCK_REASON[item.lock as Exclude<LockKind, null>]} — preview available
                               </TooltipContent>
                             </Tooltip>
                           ) : (
