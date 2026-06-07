@@ -310,11 +310,13 @@ export const saveResponse = createServerFn({ method: "POST" })
     const tier = (profile?.tier ?? "starter") as string;
 
     const fw = await loadFrameworkAndResponses(data.assessment_id);
+    const selectedChildUuids = ((asmt as any).selected_child_ids ?? []) as string[];
     const { pct } = computeCompletionPct(
       tier,
       fw.children,
       fw.areas,
       fw.responses,
+      selectedChildUuids,
     );
 
     const isComplete = pct >= 100;
