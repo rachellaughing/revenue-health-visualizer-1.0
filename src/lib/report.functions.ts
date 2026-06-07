@@ -866,3 +866,245 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
       };
     },
   );
+
+// ---------------------------------------------------------------------------
+// Revenue at Risk
+// ---------------------------------------------------------------------------
+
+export type RiskCategory = "churn" | "expansion" | "visibility" | "conversion" | "acquisition";
+
+export type RiskItemFull = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  healthScore: number;
+  trackingScore: number;
+  visibilityGap: number;
+  isSoftShadow: boolean;
+  severity: "critical" | "fragile" | "stable" | "strong";
+  riskCategory: RiskCategory;
+  riskLabel: string;
+  financialDriverLabel: string;
+  symptom: string;
+  assessed: boolean;
+};
+
+export type RevenueAtRisk = {
+  tier: Tier;
+  firstName: string | null;
+  assessment: { id: string; submitted_at: string | null };
+  selectedChildIds: string[];
+  company: {
+    annual_revenue: string | null;
+    acv: number | null;
+    cac: number | null;
+    estimated_ltv: number | null;
+    avg_close_rate: string | null;
+    annual_churn: string | null;
+  };
+  items: RiskItemFull[];
+};
+
+const RISK_CATEGORY_BY_CODE: Record<string, { cat: RiskCategory; label: string; driver: string }> = {
+  // churn
+  RET: { cat: "churn", label: "Churn Exposure", driver: "Annual churn exposure" },
+  CSX: { cat: "churn", label: "Churn Exposure", driver: "Annual churn exposure" },
+  COB: { cat: "churn", label: "Onboarding Loss", driver: "Annual churn exposure" },
+  CC:  { cat: "churn", label: "Churn Exposure", driver: "Annual churn exposure" },
+  // expansion
+  UE:  { cat: "expansion", label: "Expansion Revenue Loss", driver: "Missed expansion revenue (est.)" },
+  // visibility (entire VIS parent)
+  // conversion (LFC + CONV core deal mechanics)
+  SP:  { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  LC:  { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  SI:  { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  LQ:  { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  OM:  { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  CRM: { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  OPS: { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" },
+  // CONV parent: conversion
+  // POS parent: acquisition
+  // AUTH parent: acquisition
+};
+
+function riskCategoryFor(code: string, parentCode: string): { cat: RiskCategory; label: string; driver: string } {
+  const direct = RISK_CATEGORY_BY_CODE[code];
+  if (direct) return direct;
+  if (parentCode === "VIS") return { cat: "visibility", label: "Planning Exposure", driver: "Forecast/planning error exposure" };
+  if (parentCode === "CONV") return { cat: "conversion", label: "Conversion Leakage", driver: "Close rate gap cost (quarterly)" };
+  if (parentCode === "POS" || parentCode === "AUTH") return { cat: "acquisition", label: "Poor-Fit Customer Cost", driver: "Poor-fit customer cost (annual est.)" };
+  return { cat: "conversion", label: "Revenue Leakage", driver: "Revenue exposure" };
+}
+
+export const getRevenueAtRisk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(
+    async ({ data, context }): Promise<RevenueAtRisk | { error: "no_completed_assessment" }> => {
+      const userId = context.userId;
+
+      let assessmentId = data?.assessmentId;
+      if (!assessmentId) {
+        const { data: latest, error } = await supabaseAdmin
+          .from("assessments")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        if (!latest) return { error: "no_completed_assessment" as const };
+        assessmentId = latest.id;
+      }
+
+      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, profileRes, companyRes] =
+        await Promise.all([
+          supabaseAdmin
+            .from("assessments")
+            .select("id,user_id,submitted_at,selected_child_ids")
+            .eq("id", assessmentId)
+            .maybeSingle(),
+          supabaseAdmin
+            .from("assessment_scores")
+            .select("child_system_id,health_score,tracking_score,visibility_gap,is_soft_shadow,severity")
+            .eq("assessment_id", assessmentId)
+            .eq("user_id", userId),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("parent_systems")
+            .select("id,code,name,color_hex,sort_order"),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("child_systems")
+            .select("id,parent_system_id,code,name,sort_order"),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("failure_map")
+            .select("child_system_id,core_symptoms"),
+          supabaseAdmin
+            .from("profiles")
+            .select("first_name,tier")
+            .eq("user_id", userId)
+            .maybeSingle(),
+          supabaseAdmin
+            .from("company_profiles")
+            .select("annual_revenue,acv,cac,estimated_ltv,avg_close_rate,annual_churn")
+            .eq("user_id", userId)
+            .maybeSingle(),
+        ]);
+
+      for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, profileRes, companyRes]) {
+        if ((r as any).error) throw new Error((r as any).error.message);
+      }
+      if (!asmtRes.data) throw new Error("Assessment not found");
+      if (asmtRes.data.user_id !== userId) throw new Error("Forbidden");
+
+      const parents = (parentsRes.data ?? []) as any[];
+      const children = (childrenRes.data ?? []) as any[];
+      const scores = (scoresRes.data ?? []) as any[];
+      const failures = (failureRes.data ?? []) as any[];
+
+      const parentById = new Map<string, any>();
+      for (const p of parents) parentById.set(p.id, p);
+      const scoreByChild = new Map<string, any>();
+      for (const s of scores) scoreByChild.set(s.child_system_id, s);
+      const failureByChild = new Map<string, any>();
+      for (const f of failures) failureByChild.set(f.child_system_id, f);
+
+      const seed = assessmentId!;
+      const items: RiskItemFull[] = [];
+      for (const c of children) {
+        const parent = parentById.get(c.parent_system_id);
+        const s = scoreByChild.get(c.id);
+        const assessed = !!s;
+        let healthScore: number;
+        let trackingScore: number;
+        let visibilityGap: number;
+        let isSoftShadow: boolean;
+        if (assessed) {
+          healthScore = Math.round(Number(s.health_score ?? 0));
+          trackingScore = Math.round(Number(s.tracking_score ?? 0));
+          visibilityGap = s.visibility_gap !== null ? Math.round(Number(s.visibility_gap)) : healthScore - trackingScore;
+          isSoftShadow = !!s.is_soft_shadow;
+        } else {
+          const illus = illustrativeScore(seed, c.code);
+          healthScore = illus.healthScore;
+          trackingScore = illus.trackingScore;
+          visibilityGap = healthScore - trackingScore;
+          isSoftShadow = false;
+        }
+
+        // Risk filter: health<50 OR visibilityGap>25 OR isSoftShadow
+        const flagged = healthScore < 50 || visibilityGap > 25 || isSoftShadow;
+        if (!flagged) continue;
+
+        const cat = riskCategoryFor(c.code, parent?.code ?? "");
+        const f = failureByChild.get(c.id);
+        items.push({
+          childSystemId: c.id,
+          code: c.code,
+          name: c.name,
+          parentCode: parent?.code ?? "",
+          parentName: parent?.name ?? "",
+          parentColorHex: parent?.color_hex ?? "#888880",
+          healthScore,
+          trackingScore,
+          visibilityGap,
+          isSoftShadow,
+          severity:
+            healthScore < 40 ? "critical" : healthScore < 60 ? "fragile" : healthScore < 75 ? "stable" : "strong",
+          riskCategory: cat.cat,
+          riskLabel: cat.label,
+          financialDriverLabel: cat.driver,
+          symptom: f?.core_symptoms ?? "",
+          assessed,
+        });
+      }
+
+      const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+
+      return {
+        tier,
+        firstName: profileRes.data?.first_name ?? null,
+        assessment: { id: asmtRes.data.id, submitted_at: asmtRes.data.submitted_at },
+        selectedChildIds: ((asmtRes.data as any).selected_child_ids ?? []) as string[],
+        company: {
+          annual_revenue: companyRes.data?.annual_revenue ?? null,
+          acv: companyRes.data?.acv !== null && companyRes.data?.acv !== undefined ? Number(companyRes.data.acv) : null,
+          cac: companyRes.data?.cac !== null && companyRes.data?.cac !== undefined ? Number(companyRes.data.cac) : null,
+          estimated_ltv: companyRes.data?.estimated_ltv !== null && companyRes.data?.estimated_ltv !== undefined ? Number(companyRes.data.estimated_ltv) : null,
+          avg_close_rate: companyRes.data?.avg_close_rate ?? null,
+          annual_churn: companyRes.data?.annual_churn ?? null,
+        },
+        items,
+      };
+    },
+  );
+
+const metricsSchema = z.object({
+  annual_revenue: z.string().min(1).max(40).optional(),
+  acv: z.number().min(0).max(1e9).optional(),
+  cac: z.number().min(0).max(1e9).optional(),
+  avg_close_rate: z.string().min(1).max(40).optional(),
+  annual_churn: z.string().min(1).max(40).optional(),
+});
+
+export const updateCompanyMetrics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => metricsSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+    const payload: Record<string, any> = { user_id: userId };
+    for (const [k, v] of Object.entries(data)) {
+      if (v !== undefined && v !== "" && v !== null) payload[k] = v;
+    }
+    const { error } = await supabaseAdmin
+      .from("company_profiles")
+      .upsert(payload, { onConflict: "user_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
