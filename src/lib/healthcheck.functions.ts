@@ -180,7 +180,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       | "pro"
       | "diagnostic";
 
-    // Find or create in_progress assessment
+    // 1. Look for an existing in_progress assessment → use it
     let { data: assessment, error: aErr } = await supabaseAdmin
       .from("assessments")
       .select("id,status,completion_pct,selected_child_ids")
@@ -191,6 +191,22 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       .maybeSingle();
     if (aErr) throw new Error(aErr.message);
 
+    // 2. If none, look for the most recent completed assessment → return it
+    if (!assessment) {
+      const { data: lastCompleted, error: lcErr } = await supabaseAdmin
+        .from("assessments")
+        .select("id,status,completion_pct,selected_child_ids")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (lcErr) throw new Error(lcErr.message);
+      assessment = lastCompleted;
+    }
+
+    // 3. Only auto-create for first-time users (no in_progress AND no completed).
+    //    Reassessment is an explicit action — see startNewAssessment.
     if (!assessment) {
       const { data: created, error: cErr } = await supabaseAdmin
         .from("assessments")
@@ -578,4 +594,51 @@ export const calculateAssessmentScores = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     if (data.userId !== context.userId) throw new Error("Forbidden");
     return _calculateAssessmentScoresImpl(data.assessmentId, context.userId);
+  });
+
+// ---------------------------------------------------------------------------
+// startNewAssessment — explicit reassessment trigger
+// ---------------------------------------------------------------------------
+
+export const startNewAssessment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const userId = context.userId;
+
+    const { data: profile, error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .select("id,tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+
+    const tier = (profile?.tier ?? "starter") as "starter" | "pro" | "diagnostic";
+
+    // If there's already an in_progress one, reuse it instead of stacking duplicates.
+    const { data: existing, error: eErr } = await supabaseAdmin
+      .from("assessments")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "in_progress")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (eErr) throw new Error(eErr.message);
+    if (existing) return { ok: true as const, assessment_id: existing.id };
+
+    const { data: created, error: cErr } = await supabaseAdmin
+      .from("assessments")
+      .insert({
+        user_id: userId,
+        profile_id: profile?.id ?? null,
+        assessment_type: tier,
+        tier_at_start: tier,
+        status: "in_progress",
+        completion_pct: 0,
+      })
+      .select("id")
+      .single();
+    if (cErr) throw new Error(cErr.message);
+
+    return { ok: true as const, assessment_id: created.id };
   });
