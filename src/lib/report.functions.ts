@@ -288,9 +288,10 @@ Write:
 1. HEADLINE: One sentence, max 8 words, specific to this data. Not generic.
 2. BODY: 2-3 sentences describing the key pattern. Reference specific systems by name. Be direct.
 3. RISKS: The top 3 risks for this business, chosen as the 3 lowest-scoring systems by health score. For each risk, give the system name and a 2-3 sentence specific insight grounded in the scores and pain points above. Number them rank 1 (highest risk) to 3.
+4. SYSTEMS: For each of the 5 systems (Positioning, Authority, Conversion, Lifecycle, Visibility), write ONE paragraph (3-5 sentences) of specific analysis grounded in that system's health score, tracking score, gap, and any shadow flags. Reference subsystem-level patterns when meaningful. No generic filler.
 
 Respond in this exact JSON format, with no surrounding prose or code fences:
-{"headline":"...","body":"...","risks":[{"rank":1,"system":"...","text":"..."},{"rank":2,"system":"...","text":"..."},{"rank":3,"system":"...","text":"..."}]}`;
+{"headline":"...","body":"...","risks":[{"rank":1,"system":"...","text":"..."},{"rank":2,"system":"...","text":"..."},{"rank":3,"system":"...","text":"..."}],"systems":{"POS":"...","AUTH":"...","CONV":"...","LFC":"...","VIS":"..."}}`;
 }
 
 function stripCodeFences(s: string): string {
