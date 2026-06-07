@@ -305,17 +305,10 @@ function buildOperatingConditions(
 
 function ExecSummaryPage() {
   const fetchSummary = useServerFn(getExecutiveSummary);
-  const regenerate = useServerFn(generateReportNarrative);
-  const queryClient = useQueryClient();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["report", "executive-summary"],
     queryFn: () => fetchSummary({ data: {} }),
-  });
-
-  const regenMutation = useMutation({
-    mutationFn: (assessmentId: string) => regenerate({ data: { assessmentId } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["report", "executive-summary"] }),
   });
 
   const shellStyles: React.CSSProperties = {
@@ -329,14 +322,7 @@ function ExecSummaryPage() {
       <div style={shellStyles}>
         <GlobalStyles />
         <TopBar />
-        <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }}>
-          <Skeleton height={14} width="40%" style={{ marginBottom: 28 }} />
-          <Card style={{ marginBottom: 28 }}>
-            <Skeleton height={20} width="60%" style={{ marginBottom: 12 }} />
-            <Skeleton height={12} width="90%" style={{ marginBottom: 8 }} />
-            <Skeleton height={12} width="75%" />
-          </Card>
-        </main>
+        <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }} />
       </div>
     );
   }
@@ -412,8 +398,9 @@ function ExecSummaryPage() {
     );
   }
 
-  return <ReportBody summary={data as ExecutiveSummary} regenMutation={regenMutation} />;
+  return <ReportBody summary={data as ExecutiveSummary} onNarrativeReady={() => refetch()} />;
 }
+
 
 function TopBar() {
   return (
