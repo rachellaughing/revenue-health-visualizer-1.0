@@ -2133,3 +2133,97 @@ export const getFounderDependency = createServerFn({ method: "POST" })
       processes,
     };
   });
+
+// ---------------------------------------------------------------------------
+// Shadow Systems
+// ---------------------------------------------------------------------------
+
+export type ShadowSystemItem = {
+  id: string;
+  name: string;
+  parentSystem: string;
+  parentColor: string;
+  type: "spreadsheet" | "document" | "messaging" | "tribal" | "workaround" | "informal_process";
+  keyPerson: string;
+  compensatesFor: string;
+  riskLevel: number;
+  actionType: "document" | "formalise" | "rebuild" | "eliminate";
+  finding: string;
+  recommended: string;
+};
+
+export type ShadowSystemsData = {
+  tier: Tier;
+  state: "preview" | "ready" | "pending"; // pending = diagnostic but no shadow data
+  shadows: ShadowSystemItem[];        // real shadow systems (diagnostic + ready)
+  systemsCount: number;               // distinct parent systems for banner
+};
+
+export const getShadowSystems = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(async ({ context }): Promise<ShadowSystemsData> => {
+    const userId = context.userId;
+
+    const profileRes = await supabaseAdmin
+      .from("profiles").select("tier").eq("user_id", userId).maybeSingle();
+    const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+
+    if (tier !== "diagnostic") {
+      return { tier, state: "preview", shadows: [], systemsCount: 0 };
+    }
+
+    const { data: latest } = await supabaseAdmin
+      .from("assessments")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "completed")
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!latest) return { tier, state: "pending", shadows: [], systemsCount: 0 };
+
+    const [parentsRes, procRes] = await Promise.all([
+      (supabaseAdmin as any).schema("revhealth2").from("parent_systems").select("id,name,color_hex"),
+      (supabaseAdmin as any)
+        .from("founder_dependency_processes")
+        .select("id,parent_system_id,process_name,why_founder_dependent,risk_level,delegation_difficulty,recommended_first_step,is_shadow_system")
+        .eq("assessment_id", latest.id)
+        .eq("owner_id", userId)
+        .eq("is_shadow_system", true)
+        .order("sort_order"),
+    ]);
+
+    const parentById = new Map<string, any>();
+    for (const p of (parentsRes.data ?? [])) parentById.set(p.id, p);
+
+    const diffToAction: Record<string, ShadowSystemItem["actionType"]> = {
+      easy: "document", medium: "formalise", hard: "rebuild",
+    };
+
+    const shadows: ShadowSystemItem[] = ((procRes.data ?? []) as any[]).map((r) => {
+      const p = parentById.get(r.parent_system_id);
+      return {
+        id: r.id,
+        name: r.process_name ?? "",
+        parentSystem: p?.name ?? "",
+        parentColor: p ? `#${p.color_hex}` : "#888880",
+        type: "informal_process",
+        keyPerson: "Team member on file",
+        compensatesFor: p?.name ?? "",
+        riskLevel: Math.max(1, Math.min(5, Number(r.risk_level ?? 3))),
+        actionType: diffToAction[r.delegation_difficulty ?? "medium"] ?? "formalise",
+        finding: r.why_founder_dependent ?? "",
+        recommended: r.recommended_first_step ?? "",
+      };
+    });
+
+    if (shadows.length === 0) {
+      return { tier, state: "pending", shadows: [], systemsCount: 0 };
+    }
+
+    const systemsCount = new Set(shadows.map((s) => s.parentSystem)).size;
+    return { tier, state: "ready", shadows, systemsCount };
+  });
+
