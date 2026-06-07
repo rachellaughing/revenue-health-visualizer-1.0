@@ -330,6 +330,11 @@ export const saveResponse = createServerFn({ method: "POST" })
       await supabaseAdmin.rpc("refresh_profile_completion", {
         _user_id: userId,
       });
+      try {
+        await _calculateAssessmentScoresImpl(data.assessment_id, userId);
+      } catch (err) {
+        console.error("[scores] calculation failed:", err);
+      }
     }
 
     return { ok: true, completion_pct: pct, completed: isComplete };
