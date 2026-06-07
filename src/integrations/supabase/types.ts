@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      alignment_scores: {
+        Row: {
+          alignment_gap: number | null
+          alignment_status: string | null
+          assessment_id: string
+          calculated_at: string | null
+          child_system_id: string
+          cluster_scores: Json | null
+          founder_score: number | null
+          gap_direction: string | null
+          id: string
+          owner_id: string
+          team_avg_score: number | null
+        }
+        Insert: {
+          alignment_gap?: number | null
+          alignment_status?: string | null
+          assessment_id: string
+          calculated_at?: string | null
+          child_system_id: string
+          cluster_scores?: Json | null
+          founder_score?: number | null
+          gap_direction?: string | null
+          id?: string
+          owner_id: string
+          team_avg_score?: number | null
+        }
+        Update: {
+          alignment_gap?: number | null
+          alignment_status?: string | null
+          assessment_id?: string
+          calculated_at?: string | null
+          child_system_id?: string
+          cluster_scores?: Json | null
+          founder_score?: number | null
+          gap_direction?: string | null
+          id?: string
+          owner_id?: string
+          team_avg_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alignment_scores_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assessment_responses: {
         Row: {
           answered_at: string | null
@@ -260,6 +310,68 @@ export type Database = {
         }
         Relationships: []
       }
+      consultant_observations: {
+        Row: {
+          assessment_id: string
+          attendees_count: number | null
+          child_system_id: string | null
+          consultant_id: string
+          created_at: string | null
+          generated_narrative: string | null
+          id: string
+          narrative_generated_at: string | null
+          owner_id: string
+          parent_system_id: string | null
+          raw_notes: string | null
+          session_date: string | null
+          session_type: string
+          severity_flag: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessment_id: string
+          attendees_count?: number | null
+          child_system_id?: string | null
+          consultant_id: string
+          created_at?: string | null
+          generated_narrative?: string | null
+          id?: string
+          narrative_generated_at?: string | null
+          owner_id: string
+          parent_system_id?: string | null
+          raw_notes?: string | null
+          session_date?: string | null
+          session_type?: string
+          severity_flag?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          attendees_count?: number | null
+          child_system_id?: string | null
+          consultant_id?: string
+          created_at?: string | null
+          generated_narrative?: string | null
+          id?: string
+          narrative_generated_at?: string | null
+          owner_id?: string
+          parent_system_id?: string | null
+          raw_notes?: string | null
+          session_date?: string | null
+          session_type?: string
+          severity_flag?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_observations_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           active: boolean
@@ -298,6 +410,56 @@ export type Database = {
           valid_until?: string | null
         }
         Relationships: []
+      }
+      diagnostic_recommendations: {
+        Row: {
+          assessment_id: string
+          child_system_id: string | null
+          consultant_id: string
+          created_at: string | null
+          effort_level: string | null
+          id: string
+          owner_id: string
+          rank: number
+          rationale: string | null
+          recommendation_text: string
+          timeframe: string | null
+        }
+        Insert: {
+          assessment_id: string
+          child_system_id?: string | null
+          consultant_id: string
+          created_at?: string | null
+          effort_level?: string | null
+          id?: string
+          owner_id: string
+          rank: number
+          rationale?: string | null
+          recommendation_text: string
+          timeframe?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          child_system_id?: string | null
+          consultant_id?: string
+          created_at?: string | null
+          effort_level?: string | null
+          id?: string
+          owner_id?: string
+          rank?: number
+          rationale?: string | null
+          recommendation_text?: string
+          timeframe?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_recommendations_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ghl_sync_log: {
         Row: {
@@ -486,7 +648,9 @@ export type Database = {
       }
       team_members: {
         Row: {
+          cluster_label: string | null
           created_at: string
+          display_name: string | null
           email: string
           id: string
           invite_accepted_at: string | null
@@ -497,7 +661,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cluster_label?: string | null
           created_at?: string
+          display_name?: string | null
           email: string
           id?: string
           invite_accepted_at?: string | null
@@ -508,7 +674,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cluster_label?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string
           id?: string
           invite_accepted_at?: string | null
