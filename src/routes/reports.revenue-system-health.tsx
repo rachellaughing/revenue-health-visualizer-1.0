@@ -449,7 +449,7 @@ function SystemSection({
                 fontWeight: 400,
               }}
             >
-              {system.name} System
+              {system.name}
             </span>
             <div
               style={{
