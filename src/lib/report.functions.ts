@@ -1108,3 +1108,458 @@ export const updateCompanyMetrics = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---------------------------------------------------------------------------
+// Matrix Map
+// ---------------------------------------------------------------------------
+
+export type MatrixParentNode = {
+  id: string;
+  code: string;
+  name: string;
+  colorHex: string;
+  healthScore: number;
+  trackingScore: number;
+  severity: "critical" | "fragile" | "stable" | "strong";
+  x: number;
+  y: number;
+};
+
+export type MatrixConnection = {
+  from: string;
+  to: string;
+  strength: number;
+  label: string;
+};
+
+export type MatrixSysConnItem = {
+  name: string;
+  score: number | null;
+  note: string;
+  type: "strong" | "moderate" | "info";
+};
+
+export type MatrixChildNode = {
+  id: string;
+  code: string;
+  name: string;
+  healthScore: number;
+  severity: "critical" | "fragile" | "stable" | "strong";
+  assessed: boolean;
+  coreSymptom: string;
+  likelyRootCause: string;
+};
+
+export type MatrixChain = {
+  label: string;
+  parentCode: string;
+  nodes: string[];
+  note: string;
+};
+
+export type MatrixScenario = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  parentCode: string;
+  parentName: string;
+  title: string;
+  description: string;
+  assessed: boolean;
+  confidenceScore: number;
+  leverage: "critical" | "high" | "moderate";
+  improvements: { name: string; impact: "High" | "Medium"; reason: string }[];
+  effortLevel: "Low" | "Medium" | "High";
+  timeframe: string;
+  stabilisationNote: string;
+};
+
+export type MatrixMapData = {
+  tier: Tier;
+  firstName: string | null;
+  assessment: { id: string; submitted_at: string | null };
+  selectedChildIds: string[];
+  parents: MatrixParentNode[];
+  summaryCounts: { critical: number; strained: number; needsAttention: number; healthy: number };
+  connections: MatrixConnection[];
+  systemConnections: Record<string, { upstream: MatrixSysConnItem[]; downstream: MatrixSysConnItem[] }>;
+  childrenByParent: Record<string, MatrixChildNode[]>;
+  criticalChains: MatrixChain[];
+  scenarios: MatrixScenario[];
+};
+
+const PARENT_POSITIONS: Record<string, { x: number; y: number }> = {
+  POS: { x: 200, y: 180 },
+  AUTH: { x: 200, y: 360 },
+  CONV: { x: 420, y: 270 },
+  LFC: { x: 640, y: 180 },
+  VIS: { x: 640, y: 360 },
+};
+
+export const getMatrixMap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(
+    async ({ data, context }): Promise<MatrixMapData | { error: "no_completed_assessment" }> => {
+      const userId = context.userId;
+
+      let assessmentId = data?.assessmentId;
+      if (!assessmentId) {
+        const { data: latest, error } = await supabaseAdmin
+          .from("assessments")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        if (!latest) return { error: "no_completed_assessment" as const };
+        assessmentId = latest.id;
+      }
+
+      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, profileRes] =
+        await Promise.all([
+          supabaseAdmin
+            .from("assessments")
+            .select("id,user_id,submitted_at,selected_child_ids")
+            .eq("id", assessmentId)
+            .maybeSingle(),
+          supabaseAdmin
+            .from("assessment_scores")
+            .select("child_system_id,health_score,tracking_score")
+            .eq("assessment_id", assessmentId)
+            .eq("user_id", userId),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("parent_systems")
+            .select("id,code,name,color_hex,sort_order"),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("child_systems")
+            .select("id,parent_system_id,code,name,sort_order"),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("failure_map")
+            .select(
+              "child_system_id,core_symptoms,likely_root_causes,impacted_system_1,impact_reason_1,impacted_system_2,impact_reason_2,impacted_system_3,impact_reason_3",
+            ),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("critical_paths")
+            .select("name,tagline,definition,bottleneck_logic,sort_order")
+            .order("sort_order")
+            .limit(3),
+          supabaseAdmin
+            .from("profiles")
+            .select("first_name,tier")
+            .eq("user_id", userId)
+            .maybeSingle(),
+        ]);
+
+      for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, profileRes]) {
+        if ((r as any).error) throw new Error((r as any).error.message);
+      }
+      if (!asmtRes.data) throw new Error("Assessment not found");
+      if (asmtRes.data.user_id !== userId) throw new Error("Forbidden");
+
+      const parentsRaw = (parentsRes.data ?? []) as any[];
+      const childrenRaw = (childrenRes.data ?? []) as any[];
+      const scores = (scoresRes.data ?? []) as any[];
+      const failures = (failureRes.data ?? []) as any[];
+      const paths = (pathsRes.data ?? []) as any[];
+
+      const parentById = new Map<string, any>();
+      for (const p of parentsRaw) parentById.set(p.id, p);
+      const scoreByChild = new Map<string, any>();
+      for (const s of scores) scoreByChild.set(s.child_system_id, s);
+      const failureByChild = new Map<string, any>();
+      for (const f of failures) failureByChild.set(f.child_system_id, f);
+
+      const seed = assessmentId!;
+      type ChildInfo = {
+        id: string;
+        code: string;
+        name: string;
+        parent: any;
+        healthScore: number;
+        trackingScore: number;
+        assessed: boolean;
+      };
+      const childInfoById = new Map<string, ChildInfo>();
+      const childInfoByName = new Map<string, ChildInfo>();
+      for (const c of childrenRaw) {
+        const s = scoreByChild.get(c.id);
+        const assessed = !!s;
+        const illus = illustrativeScore(seed, c.code);
+        const healthScore = assessed ? Math.round(Number(s.health_score ?? 0)) : illus.healthScore;
+        const trackingScore = assessed
+          ? Math.round(Number(s.tracking_score ?? 0))
+          : illus.trackingScore;
+        const info: ChildInfo = {
+          id: c.id,
+          code: c.code,
+          name: c.name,
+          parent: parentById.get(c.parent_system_id),
+          healthScore,
+          trackingScore,
+          assessed,
+        };
+        childInfoById.set(c.id, info);
+        childInfoByName.set(c.name.trim().toLowerCase(), info);
+      }
+
+      const parentBuckets = new Map<string, { h: number[]; t: number[] }>();
+      for (const info of childInfoById.values()) {
+        if (!info.parent) continue;
+        const b = parentBuckets.get(info.parent.code) ?? { h: [], t: [] };
+        b.h.push(info.healthScore);
+        b.t.push(info.trackingScore);
+        parentBuckets.set(info.parent.code, b);
+      }
+      const avg = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0);
+
+      const parents: MatrixParentNode[] = parentsRaw
+        .filter((p) => PARENT_POSITIONS[p.code])
+        .map((p) => {
+          const b = parentBuckets.get(p.code) ?? { h: [], t: [] };
+          const healthScore = avg(b.h);
+          const trackingScore = avg(b.t);
+          return {
+            id: p.id,
+            code: p.code,
+            name: p.name,
+            colorHex: p.color_hex,
+            healthScore,
+            trackingScore,
+            severity: severityFor(healthScore),
+            x: PARENT_POSITIONS[p.code].x,
+            y: PARENT_POSITIONS[p.code].y,
+          };
+        });
+
+      const parentByCode = new Map<string, MatrixParentNode>();
+      for (const p of parents) parentByCode.set(p.code, p);
+
+      let critical = 0, strained = 0, needsAttention = 0, healthy = 0;
+      for (const info of childInfoById.values()) {
+        if (info.healthScore < 40) critical++;
+        else if (info.healthScore < 60) strained++;
+        else if (info.healthScore < 70) needsAttention++;
+        else healthy++;
+      }
+
+      // Parent-to-parent connections
+      const pairMap = new Map<string, { from: string; to: string; strength: number; label: string }>();
+      for (const f of failures) {
+        const sourceChild = childInfoById.get(f.child_system_id);
+        if (!sourceChild?.parent) continue;
+        const fromCode = sourceChild.parent.code;
+        const impacts: { sys: string | null; reason: string | null }[] = [
+          { sys: f.impacted_system_1, reason: f.impact_reason_1 },
+          { sys: f.impacted_system_2, reason: f.impact_reason_2 },
+          { sys: f.impacted_system_3, reason: f.impact_reason_3 },
+        ];
+        for (const im of impacts) {
+          if (!im.sys) continue;
+          const targetInfo = childInfoByName.get(String(im.sys).trim().toLowerCase());
+          if (!targetInfo?.parent) continue;
+          const toCode = targetInfo.parent.code;
+          if (toCode === fromCode) continue;
+          const key = `${fromCode}->${toCode}`;
+          const ex = pairMap.get(key);
+          if (ex) {
+            ex.strength++;
+          } else {
+            pairMap.set(key, {
+              from: fromCode,
+              to: toCode,
+              strength: 1,
+              label: im.reason ?? `${fromCode} influences ${toCode}`,
+            });
+          }
+        }
+      }
+      const connections: MatrixConnection[] = Array.from(pairMap.values()).sort(
+        (a, b) => b.strength - a.strength,
+      );
+
+      const PARENT_CODES = ["POS", "AUTH", "CONV", "LFC", "VIS"];
+      const systemConnections: Record<
+        string,
+        { upstream: MatrixSysConnItem[]; downstream: MatrixSysConnItem[] }
+      > = {};
+      for (const code of PARENT_CODES) {
+        const downstream: MatrixSysConnItem[] = connections
+          .filter((c) => c.from === code)
+          .slice(0, 3)
+          .map((c) => {
+            const target = parentByCode.get(c.to);
+            const score = target?.healthScore ?? null;
+            const type: MatrixSysConnItem["type"] =
+              c.strength >= 4 || (score !== null && score < 60) ? "strong" : "moderate";
+            return { name: target?.name ?? c.to, score, note: c.label, type };
+          });
+        const upstream: MatrixSysConnItem[] = connections
+          .filter((c) => c.to === code)
+          .slice(0, 3)
+          .map((c) => {
+            const source = parentByCode.get(c.from);
+            const score = source?.healthScore ?? null;
+            const type: MatrixSysConnItem["type"] =
+              c.strength >= 4 || (score !== null && score < 60) ? "strong" : "moderate";
+            return { name: source?.name ?? c.from, score, note: c.label, type };
+          });
+        if (upstream.length === 0) {
+          upstream.push({
+            name: "No direct upstream dependencies",
+            score: null,
+            note: `${parentByCode.get(code)?.name ?? code} is a foundational system — it influences others but has no upstream revenue system feeding it.`,
+            type: "info",
+          });
+        }
+        systemConnections[code] = { upstream, downstream };
+      }
+
+      const childrenByParent: Record<string, MatrixChildNode[]> = {};
+      for (const code of PARENT_CODES) {
+        const arr: MatrixChildNode[] = [];
+        for (const info of childInfoById.values()) {
+          if (info.parent?.code !== code) continue;
+          const f = failureByChild.get(info.id);
+          arr.push({
+            id: info.id,
+            code: info.code,
+            name: info.name,
+            healthScore: info.healthScore,
+            severity: severityFor(info.healthScore),
+            assessed: info.assessed,
+            coreSymptom: f?.core_symptoms ?? "",
+            likelyRootCause: f?.likely_root_causes ?? "",
+          });
+        }
+        arr.sort((a, b) => {
+          if (a.assessed !== b.assessed) return a.assessed ? -1 : 1;
+          return a.healthScore - b.healthScore;
+        });
+        childrenByParent[code] = arr;
+      }
+
+      const sortedByWeakness = Array.from(childInfoById.values())
+        .filter((c) => c.assessed)
+        .sort((a, b) => a.healthScore - b.healthScore);
+      const seedsForChains =
+        sortedByWeakness.length >= 3
+          ? sortedByWeakness.slice(0, 3)
+          : Array.from(childInfoById.values())
+              .sort((a, b) => a.healthScore - b.healthScore)
+              .slice(0, 3);
+
+      function walkChain(startId: string, length = 4): string[] {
+        const out: string[] = [];
+        const seenSet = new Set<string>();
+        let cursorId: string | null = startId;
+        for (let i = 0; i < length && cursorId; i++) {
+          const info = childInfoById.get(cursorId);
+          if (!info || seenSet.has(cursorId)) break;
+          seenSet.add(cursorId);
+          out.push(info.name);
+          const f = failureByChild.get(cursorId);
+          if (!f) break;
+          const nextName: string | null =
+            f.impacted_system_1 ?? f.impacted_system_2 ?? f.impacted_system_3 ?? null;
+          if (!nextName) break;
+          const next = childInfoByName.get(String(nextName).trim().toLowerCase());
+          cursorId = next?.id ?? null;
+        }
+        return out;
+      }
+
+      const fallbackLabels = ["Primary breakdown chain", "Compounding pressure", "Visibility gap chain"];
+      const fallbackNotes = [
+        "The primary breakdown begins here. Every downstream system is degraded as a direct consequence.",
+        "Weakness in this subsystem compounds across the funnel — each downstream stage absorbs the problem.",
+        "Fragility here cascades into all downstream visibility and planning capabilities.",
+      ];
+      const criticalChains: MatrixChain[] = seedsForChains.map((s, i) => {
+        const nodes = walkChain(s.id, 4);
+        const pathRow = paths[i];
+        return {
+          label: pathRow?.name ?? fallbackLabels[i] ?? `Chain ${i + 1}`,
+          parentCode: s.parent?.code ?? "POS",
+          nodes: nodes.length ? nodes : [s.name],
+          note: pathRow?.bottleneck_logic ?? fallbackNotes[i] ?? "",
+        };
+      });
+
+      const scenarios: MatrixScenario[] = [];
+      for (const info of childInfoById.values()) {
+        const f = failureByChild.get(info.id);
+        if (!f) continue;
+        const impacts = [
+          { sys: f.impacted_system_1, reason: f.impact_reason_1 },
+          { sys: f.impacted_system_2, reason: f.impact_reason_2 },
+          { sys: f.impacted_system_3, reason: f.impact_reason_3 },
+        ].filter((x) => x.sys && x.reason);
+        const improvements = impacts.map((x, idx) => {
+          const target = childInfoByName.get(String(x.sys).trim().toLowerCase());
+          const targetWeak = target ? target.healthScore < 60 : false;
+          return {
+            name: String(x.sys),
+            impact: (idx === 0 || targetWeak ? "High" : "Medium") as "High" | "Medium",
+            reason: String(x.reason),
+          };
+        });
+        const weakCascadeCount = improvements.filter((i) => {
+          const t = childInfoByName.get(i.name.trim().toLowerCase());
+          return t !== undefined && t.healthScore < 60;
+        }).length;
+        const base = 100 - info.healthScore;
+        const confidenceScore = Math.round(Math.min(95, base * (1 + 0.15 * weakCascadeCount)));
+        const leverage: MatrixScenario["leverage"] =
+          confidenceScore >= 80 ? "critical" : confidenceScore >= 60 ? "high" : "moderate";
+        const effortLevel: MatrixScenario["effortLevel"] =
+          info.healthScore < 40 ? "High" : info.healthScore < 60 ? "Medium" : "Low";
+        const timeframe =
+          effortLevel === "High" ? "90–180 days" : effortLevel === "Medium" ? "60–120 days" : "30–60 days";
+        const stabilisationNote = `Allow ${timeframe} before expecting improvements to show in metrics.`;
+        const sym = f.core_symptoms ? String(f.core_symptoms) : "";
+        const description = sym
+          ? `Address the underlying pattern: ${sym.charAt(0).toLowerCase()}${sym.slice(1)}`
+          : `Strengthen ${info.name} to compound gains across dependent systems.`;
+        scenarios.push({
+          childSystemId: info.id,
+          code: info.code,
+          name: info.name,
+          parentCode: info.parent?.code ?? "",
+          parentName: info.parent?.name ?? "",
+          title: `Improve ${info.name}`,
+          description,
+          assessed: info.assessed,
+          confidenceScore,
+          leverage,
+          improvements,
+          effortLevel,
+          timeframe,
+          stabilisationNote,
+        });
+      }
+      scenarios.sort((a, b) => b.confidenceScore - a.confidenceScore);
+
+      const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+
+      return {
+        tier,
+        firstName: profileRes.data?.first_name ?? null,
+        assessment: { id: asmtRes.data.id, submitted_at: asmtRes.data.submitted_at },
+        selectedChildIds: ((asmtRes.data as any).selected_child_ids ?? []) as string[],
+        parents,
+        summaryCounts: { critical, strained, needsAttention, healthy },
+        connections,
+        systemConnections,
+        childrenByParent,
+        criticalChains,
+        scenarios,
+      };
+    },
+  );

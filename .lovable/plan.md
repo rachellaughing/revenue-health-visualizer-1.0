@@ -1,71 +1,99 @@
-## Plan: Top Opportunities Report
+## Matrix Map — /revenue/matrix-map
 
-### 1. Server function — `getTopOpportunities` in `src/lib/report.functions.ts`
+Note: brief says `/revenue-intelligence/matrix-map`, but the sidebar already links `/revenue/matrix-map` (existing stub `src/routes/revenue.matrix-map.tsx`). I'll keep `/revenue/matrix-map` to avoid a broken nav link. Flag if you want me to rename the route + sidebar entry instead.
 
-Auth-protected serverFn returning data for the current user's latest completed assessment. Uses `supabaseAdmin` per project rule.
+### 1. Server function — `getMatrixMap` in `src/lib/report.functions.ts`
 
-**Queries (parallel):**
+Auth-protected serverFn, `supabaseAdmin` for all queries (per project rule).
+
+Parallel queries:
 - `profiles` → tier, first_name
-- latest `assessments` (completed) → id, selected_child_ids, submitted_at
-- `assessment_scores` for that assessment → health_score, tracking_score, severity, child_system_id
-- `revhealth2.child_systems` (all 50) → id, code, name, parent_system_id, access_tier, sort_order
-- `revhealth2.parent_systems` → id, code, name, color_hex
-- `revhealth2.failure_map` (all 50) → child_system_id, core_symptoms, likely_root_causes, impacted_system_1/2/3, impact_reason_1/2/3
+- latest completed `assessments` → id, selected_child_ids, submitted_at
+- `assessment_scores` for that assessment
+- `revhealth2.parent_systems` (id, code, name, sort_order)
+- `revhealth2.child_systems` (id, code, name, parent_system_id, access_tier, sort_order)
+- `revhealth2.failure_map` (all rows)
+- `revhealth2.critical_paths` (top 3 by sort_order)
 
-**Per-child computation:**
-- Build `childByName` map (name → {id, healthScore, parentCode}).
-- For each child system: derive `healthScore`/`trackingScore`/`severity`:
-  - assessed → from `assessment_scores`
-  - not assessed → deterministic illustrative score via hash(assessmentId + code) returning 40–85 (same helper pattern as Revenue System Health page).
-- Effort: `<40 High`, `40–59 Medium`, `≥60 Low`.
-- Timeframe: High→`90–180 days`, Medium→`60–120 days`, Low→`14–60 days`.
-- Cascade impacts: for each of impacted_system_{1,2,3}, look up the named child system's healthScore from the map. Emit `{ system, reason, score (number|null) }`. Score < 60 marks as "weak".
-- `weakCascadeCount` = number of cascade impacts whose score is non-null AND < 60.
-- `opportunityScore = round((100 - healthScore) * (1 + 0.15 * weakCascadeCount))`.
+Per-child derivation (same illustrative-score helper used by Top Opportunities / Revenue at Risk — deterministic hash(assessmentId+code) → 40–85 for unassessed; real `assessment_scores` for assessed). Severity bands: <40 critical, 40–59 strained, 60–74 needs attention, ≥75 healthy.
 
-Return shape:
+Per-parent aggregation:
+- `healthScore` = avg of child healthScores in that parent (rounded)
+- `trackingScore` = avg tracking
+- `severity` = derived from parent healthScore
+- `summaryCounts` = totals across all 50 children for the 4 summary cards
+
+Parent-to-parent connections (CONNECTIONS):
+- For each child failure_map row, match `impacted_system_{1,2,3}` text against `child_systems.name` (case-insensitive trim).
+- Group source parent → target parent, count occurrences = `strength`. Drop self-loops. Keep top label = the first impact_reason found for that pair.
+
+Per-parent upstream/downstream lists (for the zoom view):
+- Downstream: for each child in the parent, walk its failure_map impacts, group by target parent. For each target parent emit `{ name, score: parentHealth, note: impact_reason_1, type }` where `type` is "strong" if reason exists and target parent health<60, else "moderate". Cap at 3.
+- Upstream: invert — find children in OTHER parents whose impacts land in this parent. Group by source parent; same shape.
+- If a parent has no upstream rows, emit the standard "No direct upstream dependencies" info row (only for POS).
+
+Children-for-zoom payload per parent: all 10 child systems with `{ id, code, name, healthScore, severity, assessed, coreSymptom, likelyRootCause }`.
+
+Critical-path chains:
+- Use top 3 `critical_paths` by sort_order. Translate `bottleneck_logic`/`tagline` into the chain pills. If chain segment data isn't structured, fall back to surfacing `name` + `tagline` + `definition` per row and render as 3 pill chains using the parent codes referenced. (If critical_paths doesn't include explicit ordered system arrays, derive a 3-node chain per row from the 3 highest-strength CONNECTIONS that share a starting parent — keeps UI consistent without inventing copy.)
+
+Scenarios payload (Scenario Simulator tab):
+- One scenario per child system that has a failure_map row.
+- `confidenceScore = round(min(95, (100 - healthScore) * (1 + 0.15 * weakCascadeCount)))` where weakCascadeCount = impacts whose mapped child healthScore < 60.
+- Include `assessed`, `effortLevel`, `timeframe`, cascade impacts (with reason + score), `coreSymptom`, `likelyRootCause`.
+- Sort desc by confidenceScore.
+
+Return:
 ```ts
 {
-  tier, profile: { first_name },
-  assessment: { id, submitted_at },
+  tier, profile, assessment,
   selectedChildIds: string[],
-  opportunities: Array<{
-    childSystemId, code, name, parentCode, parentName, parentColorHex,
-    healthScore, trackingScore, severity,
-    opportunityScore, coreSymptom, likelyRootCause,
-    cascadeImpacts: [{ system, reason, score|null }],
-    effortLevel, timeframe,
-    assessed: boolean,
-  }>
+  parents: ParentNode[],              // 5 nodes incl. x/y from fixed layout map
+  summaryCounts: { critical, strained, needsAttention, healthy },
+  connections: Connection[],
+  systemConnections: Record<ParentCode, { upstream:[], downstream:[] }>,
+  childrenByParent: Record<ParentCode, ChildNode[]>,
+  criticalChains: Chain[],            // 3 chains
+  scenarios: Scenario[],
 }
 ```
 
-Sort opportunities desc by `opportunityScore`. (Starter assessed-first sort applied client-side so locked items still render.)
+Fixed pentagon positions hard-coded by parent code: POS(200,180), AUTH(200,360), CONV(420,270), LFC(640,180), VIS(640,360).
 
-### 2. Route — `src/routes/reports.top-opportunities.tsx` (replace stub)
+### 2. Route — replace `src/routes/revenue.matrix-map.tsx`
 
-- `createFileRoute("/reports/top-opportunities")` with `head()` meta.
-- `useServerFn(getTopOpportunities)` + `useQuery`. While loading: render empty paper background (no skeleton — matches Executive Summary pattern). On data: render page.
-- Port prototype verbatim using inline styles + the `T` token object already used in sibling report page. Sections:
-  1. Breadcrumb `REVENUE HEALTH MATRIX™ › TOP OPPORTUNITIES`
-  2. H1 "Top Opportunities" + subline
-  3. "How opportunity score is calculated" card (📐)
-  4. Self-assessment reminder card (🔍) with link to `https://marketplacemaven.com/founder-blindspots`
-  5. Filter bar pills (All / POS / AUTH / CONV / LFC / VIS) — local `useState` for `filterSystem`
-  6. Ranked `OpportunityCard` list with collapse/expand (`expandedId` state; first card open by default)
-  7. Starter upgrade gradient overlay
-  8. Copyright footer
-- Tier gating:
-  - **starter** → `isLocked = !assessed`. Sort assessed first (preserving opp score order within each group). Locked rows blurred (`filter: blur(3px); opacity: 0.7`) with illustrative data already supplied by server. Bottom gradient overlay with ember CTA: "Showing opportunities for {N} of 10 subsystems per system" / "Upgrade to see all opportunities →".
-  - **pro / diagnostic** → all rows visible, pure opportunity-score order.
-- Rank number = filtered index + 1.
-- `OpportunityCard`: matches prototype exactly — header grid (rank pill / name+parent+dot / health / severity badge / opp score / chevron), expanded body (3 cols: What's Happening / Likely Root Cause / Effort & Timeframe), cascade impacts in offWhite block with numbered circles + red "Also weak (score)" badge when impact.score < 60, "View in Revenue System Health →" outlined button (anchor to `/reports/revenue-system-health`).
-- No narrative generation, no AI calls.
+`createFileRoute("/revenue/matrix-map")` + `head()` meta. Uses `useServerFn(getMatrixMap)` + `useQuery`. Empty paper background while loading (matches other report pages). Inline-styles + `T` token object identical to attached prototype.
+
+Layout:
+- Tab strip at top: **Matrix Map** | **Scenario Simulator** (lock icon for starter). Local `useState` `activeTab`.
+- Breadcrumb `REVENUE INTELLIGENCE › MATRIX MAP`.
+- H1 + subline.
+
+#### Tab 1 — Matrix Map
+1. **Summary cards row** — 4 cards (Critical / Strained / Needs Attention / Healthy) with counts from `summaryCounts`.
+2. **Map card** — two-column when `activeParent == null`:
+   - Left rail: legend (severity colors, connection strength scale).
+   - Center: SVG (viewBox 0 0 860 500) — draws curved connection paths (thickness `1 + strength/3`, color = source parent health color, dash when source health < 60, arrow marker), then 5 parent nodes (outer health ring, inner fill, score, name, severity). Click selects → glow + "CLICK TO ZOOM IN" hint. Second click (or click on glowing node) sets `zoomedParent`.
+3. **Zoom view** (replaces map card body when `zoomedParent` set, no navigation):
+   - Back button → clears zoom.
+   - Three columns: Upstream Influences (left) | Children grid (center 5-col, all 10 nodes visible: assessed = full color score + "assessed" label, unassessed = greyed + 🔒 for starter / "EST" badge for pro+) | Downstream Effects (right, HIGH IMPACT badge when target parent health < 60).
+   - Click a child node → child detail panel slides into the right column (replaces downstream temporarily) with name, severity badge, assessed/illustrative note, "View in Top Opportunities →" link to `/reports/top-opportunities`.
+   - Starter only: ember CTA strip below grid "X subsystems locked — upgrade to assess all 10".
+4. **Key Cause & Effect Chains card** — below map, always visible. Renders 3 chains as pill rows with `→` arrows + label + explanatory sentence.
+
+#### Tab 2 — Scenario Simulator
+- Starter: tab is disabled (lock icon, cursor-not-allowed). Clicking shows tooltip "Available in Revenue Health Assessment™ and above". Tab body never rendered for starter.
+- Pro/Diagnostic:
+  - Sorted scenario cards (collapsed: rank, system+parent dot, "Improve [name]", *ILLUSTRATIVE if unassessed, leverage badge (Critical ≥80 / High ≥60 / Moderate <60), confidence ring %, chevron).
+  - Expanded: description (reframed core_symptoms), "What likely improves downstream" 3-col grid from cascade impacts, effort + timeframe + confidence + stabilisation note. Amber disclaimer card on illustrative scenarios.
+  - Bottom disclaimer paragraph (verbatim from brief).
+
+5. Copyright footer `© 2025 Marketplace Maven. All rights reserved.`
 
 ### 3. Technical notes
-
-- `impacted_system_N` is free text — match against `child_systems.name` (case-insensitive trim). If no match found → `score: null` and no "Also weak" badge shown.
-- Illustrative scores must be deterministic per (assessmentId, childCode) so blurred values stay stable across renders.
-- All DB ops via `supabaseAdmin` (per project rule). Use `(supabaseAdmin as any).schema("revhealth2")` for framework tables (pattern matches `healthcheck.functions.ts`).
-- No DB migrations needed.
-- No changes to existing files other than adding `getTopOpportunities` export to `report.functions.ts` and replacing the stub route file.
+- All DB ops via `supabaseAdmin`; `(supabaseAdmin as any).schema('revhealth2')` for framework tables (existing project pattern).
+- Inline styles + `T` token object to mirror the attached JSX prototype precisely — no Tailwind class refactor.
+- No DB migrations. No new packages.
+- No changes to other files beyond:
+  - add `getMatrixMap` export in `src/lib/report.functions.ts`
+  - replace `src/routes/revenue.matrix-map.tsx` stub
