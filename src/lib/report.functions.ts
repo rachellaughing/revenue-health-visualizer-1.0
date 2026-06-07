@@ -289,8 +289,6 @@ async function _generateReportNarrativeImpl(
   assessmentId: string,
   userId: string,
 ): Promise<{ headline: string; body: string; risks: RiskItem[] }> {
-  console.log("[narrative] starting generation for assessment:", assessmentId);
-  console.log("[narrative] ANTHROPIC_API_KEY present:", !!process.env.ANTHROPIC_API_KEY);
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
 
@@ -322,13 +320,11 @@ async function _generateReportNarrativeImpl(
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5-20250929",
       max_tokens: 800,
       messages: [{ role: "user", content: prompt }],
     }),
   });
-
-  console.log("[narrative] API response status:", response.status);
 
   if (!response.ok) {
     const errText = await response.text();
@@ -337,7 +333,6 @@ async function _generateReportNarrativeImpl(
   }
 
   const json = (await response.json()) as any;
-  console.log("[narrative] API response:", JSON.stringify(json).substring(0, 500));
 
   const text: string = json?.content?.[0]?.text ?? "";
   if (!text) throw new Error("Empty response from Anthropic");
@@ -361,7 +356,7 @@ async function _generateReportNarrativeImpl(
         exec_headline: validated.headline,
         exec_body: validated.body,
         top_risks: validated.risks,
-        model_used: "claude-sonnet-4-20250514",
+        model_used: "claude-sonnet-4-5-20250929",
         generated_at: new Date().toISOString(),
       },
       { onConflict: "assessment_id" },
