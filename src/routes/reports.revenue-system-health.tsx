@@ -378,8 +378,9 @@ function SystemSection({
 
   // Build child rows; for starter, non-selected children show illustrative blurred data.
   const childRows = system.children.map((c) => {
-    const isSelected = selectedIds.has(c.id);
-    if (isStarter && !isSelected) {
+    const isAssessed = selectedIds.has(c.id) || c.assessed;
+    const shouldBlur = isStarter && !isAssessed;
+    if (shouldBlur) {
       const i = illustrativeForChild(assessmentId, c.code);
       const gap = i.healthScore - i.trackingScore;
       return {
