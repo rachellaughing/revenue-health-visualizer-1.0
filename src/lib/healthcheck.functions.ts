@@ -37,6 +37,12 @@ export type ResponseRow = {
   tracking_response: number | null;
 };
 
+export type ScoreRow = {
+  child_system_id: string;
+  health_score: number;
+  tracking_score: number;
+};
+
 export type HealthCheckData = {
   tier: "starter" | "pro" | "diagnostic";
   assessment: {
@@ -44,11 +50,14 @@ export type HealthCheckData = {
     status: string;
     completion_pct: number;
     selected_child_ids: string[];
+    submitted_at: string | null;
+    completed_at: string | null;
   };
   parents: ParentSystem[];
   children: ChildSystem[];
   areas: Area[];
   responses: ResponseRow[];
+  scores: ScoreRow[];
   totalUnlockedAreas: number;
 };
 
