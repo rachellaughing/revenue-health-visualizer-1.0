@@ -378,8 +378,9 @@ function SystemSection({
 
   // Build child rows; for starter, non-selected children show illustrative blurred data.
   const childRows = system.children.map((c) => {
-    const isSelected = selectedIds.has(c.id);
-    if (isStarter && !isSelected) {
+    const isAssessed = selectedIds.has(c.id) || c.assessed;
+    const shouldBlur = isStarter && !isAssessed;
+    if (shouldBlur) {
       const i = illustrativeForChild(assessmentId, c.code);
       const gap = i.healthScore - i.trackingScore;
       return {
@@ -448,7 +449,7 @@ function SystemSection({
                 fontWeight: 400,
               }}
             >
-              {system.name} System
+              {system.name}
             </span>
             <div
               style={{
@@ -562,36 +563,7 @@ function SystemSection({
               >
                 {system.narrative}
               </p>
-            ) : (
-              <div>
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    marginBottom: 8,
-                    width: "94%",
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    marginBottom: 8,
-                    width: "88%",
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    width: "72%",
-                  }}
-                />
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Inline note about shadow systems for non-diagnostic with high gaps */}
