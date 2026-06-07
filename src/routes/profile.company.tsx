@@ -165,7 +165,7 @@ function CompanyProfilePage() {
       primary_sales_motion: existing.primary_sales_motion ?? "",
       revenue_model: existing.revenue_model ?? "",
       has_defined_icp: existing.has_defined_icp ?? "",
-      pain_points: existing.pain_points ?? [],
+      pain_points: (existing.pain_points ?? []).filter((p: string) => /^SYM-\d{3}$/.test(p)),
       open_friction_text: existing.open_friction_text ?? "",
     });
   }, [existing]);
