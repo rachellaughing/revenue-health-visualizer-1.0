@@ -947,6 +947,114 @@ function HealthCheckShell({
                 const isSkipped = r.health === -1;
                 const isComplete =
                   r.health !== null && r.health > 0 && r.tracking !== null;
+                const collapsed =
+                  (isComplete || isSkipped) &&
+                  autoCollapsed[area.question_id] &&
+                  !manuallyExpanded[area.question_id];
+
+                if (collapsed) {
+                  const healthLabel =
+                    isSkipped || r.health === null || r.health <= 0
+                      ? "Skipped"
+                      : HEALTH_LABELS[r.health - 1];
+                  const trackingLabel =
+                    !isSkipped && r.tracking !== null
+                      ? TRACKING_LABELS[r.tracking - 1]
+                      : null;
+                  return (
+                    <div
+                      key={area.id}
+                      ref={(el) => {
+                        cardRefs.current[area.question_id] = el;
+                      }}
+                      className="hc-card-compact"
+                      onClick={() =>
+                        setManuallyExpanded((s) => ({
+                          ...s,
+                          [area.question_id]: true,
+                        }))
+                      }
+                      style={{
+                        background: T.paper,
+                        border: `1px solid ${
+                          isSkipped ? "rgba(136,136,128,0.3)" : `${systemColor}4D`
+                        }`,
+                        borderRadius: 12,
+                        marginBottom: 14,
+                        height: 44,
+                        padding: "10px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        cursor: "pointer",
+                        fontFamily: "Inter, sans-serif",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: isSkipped ? T.mid : T.tealBright,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          width: 14,
+                          display: "inline-block",
+                          textAlign: "center",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {isSkipped ? "○" : "✓"}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: isSkipped ? T.mid : systemColor,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        {area.name}
+                      </span>
+                      <span style={{ color: T.mid, fontSize: 12 }}>·</span>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: T.mid,
+                          fontStyle: isSkipped ? "italic" : "normal",
+                        }}
+                      >
+                        {healthLabel}
+                      </span>
+                      {trackingLabel && (
+                        <>
+                          <span style={{ color: T.mid, fontSize: 12 }}>·</span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: T.mid,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {trackingLabel}
+                          </span>
+                        </>
+                      )}
+                      <span
+                        className="hc-card-edit"
+                        style={{
+                          marginLeft: "auto",
+                          fontSize: 11,
+                          color: T.teal,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {isSkipped ? "Answer this →" : "Edit →"}
+                      </span>
+                    </div>
+                  );
+                }
+
                 return (
                   <div
                     key={area.id}
