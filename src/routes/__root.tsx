@@ -160,6 +160,7 @@ function AuthGate() {
           <Outlet />
         </main>
       </div>
+      <Toaster />
     </div>
   );
 }
