@@ -23,10 +23,19 @@ export type ParentScore = {
 
 export type RiskItem = { rank: number; system: string; text: string };
 
+export type SystemNarratives = {
+  POS: string | null;
+  AUTH: string | null;
+  CONV: string | null;
+  LFC: string | null;
+  VIS: string | null;
+};
+
 export type Narrative = {
   headline: string;
   body: string;
   risks: RiskItem[];
+  systems?: SystemNarratives;
 } | null;
 
 export type ExecutiveSummary = {
@@ -112,7 +121,7 @@ async function loadCoreData(assessmentId: string, userId: string) {
         .maybeSingle(),
       supabaseAdmin
         .from("report_narratives")
-        .select("exec_headline,exec_body,top_risks")
+        .select("exec_headline,exec_body,top_risks,narrative_pos,narrative_auth,narrative_conv,narrative_lfc,narrative_vis")
         .eq("assessment_id", assessmentId)
         .maybeSingle(),
     ]);
@@ -225,6 +234,13 @@ const narrativeJsonSchema = z.object({
       }),
     )
     .length(3),
+  systems: z.object({
+    POS: z.string().min(1).max(2000),
+    AUTH: z.string().min(1).max(2000),
+    CONV: z.string().min(1).max(2000),
+    LFC: z.string().min(1).max(2000),
+    VIS: z.string().min(1).max(2000),
+  }),
 });
 
 function buildNarrativePrompt(args: {
@@ -272,9 +288,10 @@ Write:
 1. HEADLINE: One sentence, max 8 words, specific to this data. Not generic.
 2. BODY: 2-3 sentences describing the key pattern. Reference specific systems by name. Be direct.
 3. RISKS: The top 3 risks for this business, chosen as the 3 lowest-scoring systems by health score. For each risk, give the system name and a 2-3 sentence specific insight grounded in the scores and pain points above. Number them rank 1 (highest risk) to 3.
+4. SYSTEMS: For each of the 5 systems (Positioning, Authority, Conversion, Lifecycle, Visibility), write ONE paragraph (3-5 sentences) of specific analysis grounded in that system's health score, tracking score, gap, and any shadow flags. Reference subsystem-level patterns when meaningful. No generic filler.
 
 Respond in this exact JSON format, with no surrounding prose or code fences:
-{"headline":"...","body":"...","risks":[{"rank":1,"system":"...","text":"..."},{"rank":2,"system":"...","text":"..."},{"rank":3,"system":"...","text":"..."}]}`;
+{"headline":"...","body":"...","risks":[{"rank":1,"system":"...","text":"..."},{"rank":2,"system":"...","text":"..."},{"rank":3,"system":"...","text":"..."}],"systems":{"POS":"...","AUTH":"...","CONV":"...","LFC":"...","VIS":"..."}}`;
 }
 
 function stripCodeFences(s: string): string {
@@ -288,7 +305,7 @@ function stripCodeFences(s: string): string {
 async function _generateReportNarrativeImpl(
   assessmentId: string,
   userId: string,
-): Promise<{ headline: string; body: string; risks: RiskItem[] }> {
+): Promise<{ headline: string; body: string; risks: RiskItem[]; systems: SystemNarratives }> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
 
@@ -356,6 +373,11 @@ async function _generateReportNarrativeImpl(
         exec_headline: validated.headline,
         exec_body: validated.body,
         top_risks: validated.risks,
+        narrative_pos: validated.systems.POS,
+        narrative_auth: validated.systems.AUTH,
+        narrative_conv: validated.systems.CONV,
+        narrative_lfc: validated.systems.LFC,
+        narrative_vis: validated.systems.VIS,
         model_used: "claude-sonnet-4-5-20250929",
         generated_at: new Date().toISOString(),
       },
@@ -431,6 +453,13 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
         headline: core.narrative.exec_headline,
         body: core.narrative.exec_body,
         risks: core.narrative.top_risks as RiskItem[],
+        systems: {
+          POS: (core.narrative as any).narrative_pos ?? null,
+          AUTH: (core.narrative as any).narrative_auth ?? null,
+          CONV: (core.narrative as any).narrative_conv ?? null,
+          LFC: (core.narrative as any).narrative_lfc ?? null,
+          VIS: (core.narrative as any).narrative_vis ?? null,
+        },
       };
     } else {
       try {
@@ -468,3 +497,123 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
       quarter: quarterLabel(submittedAt),
     };
   });
+
+// ---------------------------------------------------------------------------
+// Revenue System Health
+// ---------------------------------------------------------------------------
+
+export type ChildSystemScore = {
+  id: string;
+  parentCode: string;
+  code: string;
+  name: string;
+  healthScore: number;
+  trackingScore: number;
+  visibilityGap: number;
+  severity: "critical" | "fragile" | "stable" | "strong";
+  isShadow: boolean;
+  assessed: boolean;
+};
+
+export type SystemHealthSystem = ParentScore & {
+  children: ChildSystemScore[];
+  narrative: string | null;
+};
+
+export type RevenueSystemHealth = {
+  tier: Tier;
+  firstName: string | null;
+  assessment: {
+    id: string;
+    submitted_at: string | null;
+    selected_child_ids: string[] | null;
+  };
+  systems: SystemHealthSystem[];
+};
+
+export const getRevenueSystemHealth = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<RevenueSystemHealth | { error: "no_completed_assessment" }> => {
+      const userId = context.userId;
+
+      let assessmentId = data?.assessmentId;
+      if (!assessmentId) {
+        const { data: latest, error } = await supabaseAdmin
+          .from("assessments")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        if (!latest) return { error: "no_completed_assessment" as const };
+        assessmentId = latest.id;
+      }
+
+      const core = await loadCoreData(assessmentId!, userId);
+      const parentAgg = aggregateByParent(core.scores, core.parents, core.children);
+
+      // Map child_system_id -> score row
+      const scoreByChild = new Map<string, any>();
+      for (const s of core.scores) scoreByChild.set(s.child_system_id, s);
+
+      const parentById = new Map<string, any>();
+      for (const p of core.parents) parentById.set(p.id, p);
+
+      // Group children by parent
+      const childrenByParent = new Map<string, any[]>();
+      for (const c of core.children) {
+        const arr = childrenByParent.get(c.parent_system_id) ?? [];
+        arr.push(c);
+        childrenByParent.set(c.parent_system_id, arr);
+      }
+
+      const narr = core.narrative as any;
+
+      const systems: SystemHealthSystem[] = parentAgg.map((p) => {
+        const kids = (childrenByParent.get(p.id) ?? []).map((c: any): ChildSystemScore => {
+          const s = scoreByChild.get(c.id);
+          const health = s ? Number(s.health_score ?? 0) : 0;
+          const tracking = s ? Number(s.tracking_score ?? 0) : 0;
+          const visibilityGap =
+            s && s.visibility_gap !== null ? Number(s.visibility_gap) : health - tracking;
+          return {
+            id: c.id,
+            parentCode: p.code,
+            code: c.code,
+            name: c.name,
+            healthScore: Math.round(health),
+            trackingScore: Math.round(tracking),
+            visibilityGap: Math.round(visibilityGap),
+            severity: severityFor(health),
+            isShadow: health >= 60 && tracking < 40,
+            assessed: !!s,
+          };
+        });
+
+        const key = `narrative_${p.code.toLowerCase()}`;
+        const narrative: string | null = narr ? (narr[key] ?? null) : null;
+
+        return { ...p, children: kids, narrative };
+      });
+
+      const tier = (core.profile?.tier ?? "starter") as Tier;
+
+      return {
+        tier,
+        firstName: core.profile?.first_name ?? null,
+        assessment: {
+          id: core.assessment.id,
+          submitted_at: core.assessment.submitted_at,
+          selected_child_ids: (core.assessment as any).selected_child_ids ?? null,
+        },
+        systems,
+      };
+    },
+  );
