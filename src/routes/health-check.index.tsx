@@ -82,7 +82,173 @@ function HealthCheckPage() {
   }
   if (!data) return null;
 
+  if (data.assessment.status === "completed") {
+    return <CompletedLanding data={data} qc={qc} />;
+  }
+
   return <HealthCheckShell data={data} saveFn={saveFn} updateSelFn={updateSelFn} qc={qc} />;
+}
+
+function quarterFromDate(d: Date) {
+  return Math.floor(d.getMonth() / 3) + 1;
+}
+
+function CompletedLanding({
+  data,
+  qc,
+}: {
+  data: HealthCheckData;
+  qc: ReturnType<typeof useQueryClient>;
+}) {
+  const startFn = useServerFn(startNewAssessment);
+  const [starting, setStarting] = useState(false);
+  const now = new Date();
+  const currentQ = quarterFromDate(now);
+  const completedQ = currentQ; // best-effort label without a stored completed_at
+  const nextQ = currentQ === 4 ? 1 : currentQ + 1;
+
+  const selectedCodes = new Set(data.assessment.selected_child_ids ?? []);
+  const selectedChildren =
+    data.tier === "starter"
+      ? data.children.filter((c) => selectedCodes.has(c.code))
+      : data.children;
+
+  async function handleStart() {
+    setStarting(true);
+    try {
+      await startFn();
+      await qc.invalidateQueries({ queryKey: ["health-check"] });
+    } finally {
+      setStarting(false);
+    }
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: "100%",
+        background: T.paper,
+        padding: "48px 24px",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ maxWidth: 720, width: "100%" }}>
+        <div
+          style={{
+            display: "inline-block",
+            background: `${T.tealBright}20`,
+            color: T.teal,
+            border: `1px solid ${T.tealBright}55`,
+            borderRadius: 999,
+            padding: "4px 12px",
+            fontSize: 12,
+            fontWeight: 600,
+            marginBottom: 16,
+          }}
+        >
+          100% complete
+        </div>
+        <h1
+          style={{
+            fontFamily: "'Instrument Serif', serif",
+            fontSize: 44,
+            lineHeight: 1.1,
+            color: T.ink,
+            margin: "0 0 12px",
+          }}
+        >
+          Your Q{completedQ} Health Check is complete.
+        </h1>
+        <p style={{ fontSize: 15, color: T.mid, margin: "0 0 28px", lineHeight: 1.5 }}>
+          Review your results in the Executive Summary, or start your next quarterly
+          Health Check when your business has shifted enough to warrant a fresh diagnostic.
+        </p>
+
+        <div
+          style={{
+            background: T.white,
+            border: "1px solid rgba(0,0,0,0.08)",
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 28,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              color: T.mid,
+              marginBottom: 12,
+            }}
+          >
+            Subsystems assessed
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {selectedChildren.map((c) => {
+              const parent = data.parents.find((p) => p.id === c.parent_system_id);
+              const color = parent?.color_hex ? `#${parent.color_hex}` : T.teal;
+              return (
+                <span
+                  key={c.id}
+                  style={{
+                    fontSize: 12,
+                    color,
+                    background: `${color}10`,
+                    border: `1px solid ${color}40`,
+                    borderRadius: 999,
+                    padding: "4px 10px",
+                  }}
+                >
+                  {c.name}
+                </span>
+              );
+            })}
+            {selectedChildren.length === 0 && (
+              <span style={{ fontSize: 12, color: T.mid }}>
+                No subsystems recorded.
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <Link
+            to="/reports/executive-summary"
+            style={{
+              background: T.ember,
+              color: T.white,
+              fontSize: 14,
+              fontWeight: 600,
+              padding: "12px 20px",
+              borderRadius: 8,
+              textDecoration: "none",
+            }}
+          >
+            View Your Report →
+          </Link>
+          <button
+            onClick={handleStart}
+            disabled={starting}
+            style={{
+              background: "transparent",
+              color: T.teal,
+              fontSize: 14,
+              fontWeight: 600,
+              padding: "12px 20px",
+              borderRadius: 8,
+              border: `1px solid ${T.teal}55`,
+              cursor: starting ? "wait" : "pointer",
+            }}
+          >
+            {starting ? "Starting…" : `Start Q${nextQ} Health Check`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function HealthCheckShell({
