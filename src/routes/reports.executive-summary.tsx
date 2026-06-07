@@ -556,48 +556,26 @@ function ReportBody({
               </>
             ) : (
               <div style={{ marginBottom: 20 }}>
-                <Skeleton height={22} width="80%" style={{ marginBottom: 14 }} />
-                <Skeleton height={12} width="95%" style={{ marginBottom: 8 }} />
-                <Skeleton height={12} width="90%" style={{ marginBottom: 8 }} />
-                <Skeleton height={12} width="75%" style={{ marginBottom: 14 }} />
-                {regenMutation.isError && (
-                  <button
-                    onClick={() => regenMutation.mutate(assessment.id)}
-                    style={{
-                      background: T.ember,
-                      color: T.white,
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "8px 14px",
-                      fontFamily: "Inter",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Retry narrative
-                  </button>
-                )}
-                {!regenMutation.isError && !regenMutation.isPending && (
-                  <button
-                    onClick={() => regenMutation.mutate(assessment.id)}
-                    style={{
-                      background: "transparent",
-                      color: T.teal,
-                      border: `1px solid ${T.teal}40`,
-                      borderRadius: 8,
-                      padding: "6px 12px",
-                      fontFamily: "Inter",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Generate narrative
-                  </button>
-                )}
+                <div
+                  style={{
+                    height: 12,
+                    background: "#EDEDE8",
+                    borderRadius: 4,
+                    marginBottom: 10,
+                    width: "92%",
+                  }}
+                />
+                <div
+                  style={{
+                    height: 12,
+                    background: "#EDEDE8",
+                    borderRadius: 4,
+                    width: "78%",
+                  }}
+                />
               </div>
             )}
+
             <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
               <span style={{ fontWeight: 600, color: T.ink }}>{companyMeta}</span>
             </div>
