@@ -617,3 +617,252 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
       };
     },
   );
+
+// ---------------------------------------------------------------------------
+// Top Opportunities
+// ---------------------------------------------------------------------------
+
+export type CascadeImpact = {
+  system: string;
+  reason: string;
+  score: number | null;
+};
+
+export type OpportunityItem = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  healthScore: number;
+  trackingScore: number;
+  severity: "critical" | "fragile" | "stable" | "strong";
+  opportunityScore: number;
+  coreSymptom: string;
+  likelyRootCause: string;
+  cascadeImpacts: CascadeImpact[];
+  effortLevel: "Low" | "Medium" | "High";
+  timeframe: string;
+  assessed: boolean;
+};
+
+export type TopOpportunities = {
+  tier: Tier;
+  firstName: string | null;
+  assessment: { id: string; submitted_at: string | null };
+  selectedChildIds: string[];
+  opportunities: OpportunityItem[];
+};
+
+function hashStr(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function illustrativeScore(seed: string, code: string) {
+  const h = hashStr(`${seed}:${code}`);
+  const healthScore = 40 + (h % 45);
+  const trackingScore = Math.max(15, healthScore - 10 - ((h >> 8) % 25));
+  return { healthScore, trackingScore };
+}
+
+export const getTopOpportunities = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<TopOpportunities | { error: "no_completed_assessment" }> => {
+      const userId = context.userId;
+
+      let assessmentId = data?.assessmentId;
+      if (!assessmentId) {
+        const { data: latest, error } = await supabaseAdmin
+          .from("assessments")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        if (!latest) return { error: "no_completed_assessment" as const };
+        assessmentId = latest.id;
+      }
+
+      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, profileRes] =
+        await Promise.all([
+          supabaseAdmin
+            .from("assessments")
+            .select("id,user_id,submitted_at,selected_child_ids")
+            .eq("id", assessmentId)
+            .maybeSingle(),
+          supabaseAdmin
+            .from("assessment_scores")
+            .select("child_system_id,health_score,tracking_score,severity")
+            .eq("assessment_id", assessmentId)
+            .eq("user_id", userId),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("parent_systems")
+            .select("id,code,name,color_hex,sort_order"),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("child_systems")
+            .select("id,parent_system_id,code,name,sort_order"),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("failure_map")
+            .select(
+              "child_system_id,core_symptoms,likely_root_causes,impacted_system_1,impact_reason_1,impacted_system_2,impact_reason_2,impacted_system_3,impact_reason_3",
+            ),
+          supabaseAdmin
+            .from("profiles")
+            .select("first_name,tier")
+            .eq("user_id", userId)
+            .maybeSingle(),
+        ]);
+
+      for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, profileRes]) {
+        if ((r as any).error) throw new Error((r as any).error.message);
+      }
+      if (!asmtRes.data) throw new Error("Assessment not found");
+      if (asmtRes.data.user_id !== userId) throw new Error("Forbidden");
+
+      const parents = (parentsRes.data ?? []) as any[];
+      const children = (childrenRes.data ?? []) as any[];
+      const scores = (scoresRes.data ?? []) as any[];
+      const failures = (failureRes.data ?? []) as any[];
+
+      const parentById = new Map<string, any>();
+      for (const p of parents) parentById.set(p.id, p);
+
+      const scoreByChild = new Map<string, any>();
+      for (const s of scores) scoreByChild.set(s.child_system_id, s);
+
+      const failureByChild = new Map<string, any>();
+      for (const f of failures) failureByChild.set(f.child_system_id, f);
+
+      // First pass: compute health for every child (real or illustrative)
+      const seed = assessmentId!;
+      type ChildInfo = {
+        id: string;
+        code: string;
+        name: string;
+        parent: any;
+        healthScore: number;
+        trackingScore: number;
+        assessed: boolean;
+      };
+      const childInfoById = new Map<string, ChildInfo>();
+      const childInfoByName = new Map<string, ChildInfo>();
+      for (const c of children) {
+        const s = scoreByChild.get(c.id);
+        const assessed = !!s;
+        const healthScore = assessed
+          ? Math.round(Number(s.health_score ?? 0))
+          : illustrativeScore(seed, c.code).healthScore;
+        const trackingScore = assessed
+          ? Math.round(Number(s.tracking_score ?? 0))
+          : illustrativeScore(seed, c.code).trackingScore;
+        const info: ChildInfo = {
+          id: c.id,
+          code: c.code,
+          name: c.name,
+          parent: parentById.get(c.parent_system_id),
+          healthScore,
+          trackingScore,
+          assessed,
+        };
+        childInfoById.set(c.id, info);
+        childInfoByName.set(c.name.trim().toLowerCase(), info);
+      }
+
+      const opportunities: OpportunityItem[] = [];
+      for (const c of children) {
+        const info = childInfoById.get(c.id)!;
+        const f = failureByChild.get(c.id);
+
+        const rawImpacts = [
+          { sys: f?.impacted_system_1, reason: f?.impact_reason_1 },
+          { sys: f?.impacted_system_2, reason: f?.impact_reason_2 },
+          { sys: f?.impacted_system_3, reason: f?.impact_reason_3 },
+        ];
+        const cascadeImpacts: CascadeImpact[] = rawImpacts
+          .filter((x) => x.sys && x.reason)
+          .map((x) => {
+            const match = childInfoByName.get(String(x.sys).trim().toLowerCase());
+            return {
+              system: String(x.sys),
+              reason: String(x.reason),
+              score: match ? match.healthScore : null,
+            };
+          });
+
+        const weakCascadeCount = cascadeImpacts.filter(
+          (i) => i.score !== null && i.score < 60,
+        ).length;
+        const baseScore = 100 - info.healthScore;
+        const multiplier = 1 + 0.15 * weakCascadeCount;
+        const opportunityScore = Math.round(baseScore * multiplier);
+
+        const severity: OpportunityItem["severity"] =
+          info.healthScore < 40
+            ? "critical"
+            : info.healthScore < 60
+              ? "fragile"
+              : info.healthScore < 75
+                ? "stable"
+                : "strong";
+
+        const effortLevel: OpportunityItem["effortLevel"] =
+          info.healthScore < 40 ? "High" : info.healthScore < 60 ? "Medium" : "Low";
+        const timeframe =
+          effortLevel === "High"
+            ? "90–180 days"
+            : effortLevel === "Medium"
+              ? "60–120 days"
+              : "14–60 days";
+
+        opportunities.push({
+          childSystemId: info.id,
+          code: info.code,
+          name: info.name,
+          parentCode: info.parent?.code ?? "",
+          parentName: info.parent?.name ?? "",
+          parentColorHex: info.parent?.color_hex ?? "#888880",
+          healthScore: info.healthScore,
+          trackingScore: info.trackingScore,
+          severity,
+          opportunityScore,
+          coreSymptom: f?.core_symptoms ?? "",
+          likelyRootCause: f?.likely_root_causes ?? "",
+          cascadeImpacts,
+          effortLevel,
+          timeframe,
+          assessed: info.assessed,
+        });
+      }
+
+      opportunities.sort((a, b) => b.opportunityScore - a.opportunityScore);
+
+      const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+
+      return {
+        tier,
+        firstName: profileRes.data?.first_name ?? null,
+        assessment: {
+          id: asmtRes.data.id,
+          submitted_at: asmtRes.data.submitted_at,
+        },
+        selectedChildIds: ((asmtRes.data as any).selected_child_ids ?? []) as string[],
+        opportunities,
+      };
+    },
+  );
