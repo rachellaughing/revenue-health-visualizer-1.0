@@ -611,8 +611,18 @@ function SystemSection({
             )}
           </div>
 
+          const sortedChildRows = isStarter
+            ? [...childRows].sort((a, b) => {
+                const aAssessed = selectedIds.has(a.id);
+                const bAssessed = selectedIds.has(b.id);
+                if (aAssessed && !bAssessed) return -1;
+                if (!aAssessed && bAssessed) return 1;
+                return 0;
+              })
+            : childRows;
+
           <div style={{ position: "relative" }}>
-            {childRows.map((c) => (
+            {sortedChildRows.map((c) => (
               <ChildRow
                 key={c.id}
                 child={c}
