@@ -1,0 +1,1 @@
+ALTER TABLE public.founder_dependency_processes ADD COLUMN IF NOT EXISTS is_shadow_system boolean NOT NULL DEFAULT false;
