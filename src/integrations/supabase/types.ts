@@ -436,6 +436,7 @@ export type Database = {
           narrative_lfc: string | null
           narrative_pos: string | null
           narrative_vis: string | null
+          operating_conditions: Json | null
           top_risks: Json | null
           user_id: string
         }
@@ -452,6 +453,7 @@ export type Database = {
           narrative_lfc?: string | null
           narrative_pos?: string | null
           narrative_vis?: string | null
+          operating_conditions?: Json | null
           top_risks?: Json | null
           user_id: string
         }
@@ -468,6 +470,7 @@ export type Database = {
           narrative_lfc?: string | null
           narrative_pos?: string | null
           narrative_vis?: string | null
+          operating_conditions?: Json | null
           top_risks?: Json | null
           user_id?: string
         }

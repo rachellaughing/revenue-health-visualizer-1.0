@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import {
   getExecutiveSummary,
   generateReportNarrative,
   type ExecutiveSummary,
   type ParentScore,
-  type RiskItem,
 } from "@/lib/report.functions";
+
 
 export const Route = createFileRoute("/reports/executive-summary")({
   head: () => ({ meta: [{ title: "Executive Summary — Revenue Health Visualiser" }] }),
@@ -305,17 +305,10 @@ function buildOperatingConditions(
 
 function ExecSummaryPage() {
   const fetchSummary = useServerFn(getExecutiveSummary);
-  const regenerate = useServerFn(generateReportNarrative);
-  const queryClient = useQueryClient();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["report", "executive-summary"],
     queryFn: () => fetchSummary({ data: {} }),
-  });
-
-  const regenMutation = useMutation({
-    mutationFn: (assessmentId: string) => regenerate({ data: { assessmentId } }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["report", "executive-summary"] }),
   });
 
   const shellStyles: React.CSSProperties = {
@@ -329,14 +322,7 @@ function ExecSummaryPage() {
       <div style={shellStyles}>
         <GlobalStyles />
         <TopBar />
-        <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }}>
-          <Skeleton height={14} width="40%" style={{ marginBottom: 28 }} />
-          <Card style={{ marginBottom: 28 }}>
-            <Skeleton height={20} width="60%" style={{ marginBottom: 12 }} />
-            <Skeleton height={12} width="90%" style={{ marginBottom: 8 }} />
-            <Skeleton height={12} width="75%" />
-          </Card>
-        </main>
+        <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }} />
       </div>
     );
   }
@@ -412,8 +398,9 @@ function ExecSummaryPage() {
     );
   }
 
-  return <ReportBody summary={data as ExecutiveSummary} regenMutation={regenMutation} />;
+  return <ReportBody summary={data as ExecutiveSummary} onNarrativeReady={() => refetch()} />;
 }
+
 
 function TopBar() {
   return (
@@ -460,13 +447,26 @@ function GlobalStyles() {
 
 function ReportBody({
   summary,
-  regenMutation,
+  onNarrativeReady,
 }: {
   summary: ExecutiveSummary;
-  regenMutation: ReturnType<typeof useMutation<RiskItem[] | any, Error, string>>;
+  onNarrativeReady: () => void;
 }) {
   const { tier, profile, company, assessment, systems, overallScore, narrative, quarter } = summary;
   const isStarter = tier === "starter";
+
+  const generate = useServerFn(generateReportNarrative);
+  const triggered = useRef(false);
+  useEffect(() => {
+    if (!narrative && !triggered.current) {
+      triggered.current = true;
+      generate({ data: { assessmentId: assessment.id } })
+        .then(() => onNarrativeReady())
+        .catch((e) => console.error("[narrative] generation failed", e));
+    }
+  }, [narrative, assessment.id, generate, onNarrativeReady]);
+
+
 
   // Determine which systems get blurred for starter
   // Pick first N systems user has actual data for; others get illustrative
@@ -556,48 +556,26 @@ function ReportBody({
               </>
             ) : (
               <div style={{ marginBottom: 20 }}>
-                <Skeleton height={22} width="80%" style={{ marginBottom: 14 }} />
-                <Skeleton height={12} width="95%" style={{ marginBottom: 8 }} />
-                <Skeleton height={12} width="90%" style={{ marginBottom: 8 }} />
-                <Skeleton height={12} width="75%" style={{ marginBottom: 14 }} />
-                {regenMutation.isError && (
-                  <button
-                    onClick={() => regenMutation.mutate(assessment.id)}
-                    style={{
-                      background: T.ember,
-                      color: T.white,
-                      border: "none",
-                      borderRadius: 8,
-                      padding: "8px 14px",
-                      fontFamily: "Inter",
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Retry narrative
-                  </button>
-                )}
-                {!regenMutation.isError && !regenMutation.isPending && (
-                  <button
-                    onClick={() => regenMutation.mutate(assessment.id)}
-                    style={{
-                      background: "transparent",
-                      color: T.teal,
-                      border: `1px solid ${T.teal}40`,
-                      borderRadius: 8,
-                      padding: "6px 12px",
-                      fontFamily: "Inter",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Generate narrative
-                  </button>
-                )}
+                <div
+                  style={{
+                    height: 12,
+                    background: "#EDEDE8",
+                    borderRadius: 4,
+                    marginBottom: 10,
+                    width: "92%",
+                  }}
+                />
+                <div
+                  style={{
+                    height: 12,
+                    background: "#EDEDE8",
+                    borderRadius: 4,
+                    width: "78%",
+                  }}
+                />
               </div>
             )}
+
             <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
               <span style={{ fontWeight: 600, color: T.ink }}>{companyMeta}</span>
             </div>
@@ -1035,11 +1013,11 @@ function ReportBody({
                       borderLeft: `3px solid ${T.ember}`,
                     }}
                   >
-                    <Skeleton height={10} width="20%" style={{ marginBottom: 8 }} />
-                    <Skeleton height={12} width="95%" style={{ marginBottom: 6 }} />
-                    <Skeleton height={12} width="80%" />
+                    <div style={{ height: 10, width: "92%", background: "#EDEDE8", borderRadius: 4, marginBottom: 8 }} />
+                    <div style={{ height: 10, width: "75%", background: "#EDEDE8", borderRadius: 4 }} />
                   </Card>
                 ))}
+
           </div>
         </div>
 
@@ -1387,5 +1365,3 @@ function ReportBody({
   );
 }
 
-// Suppress unused-import warning while keeping useState available for future toggles
-void useState;
