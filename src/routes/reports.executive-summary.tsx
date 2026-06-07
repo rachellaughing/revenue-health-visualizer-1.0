@@ -10,7 +10,7 @@ import {
   type RiskItem,
 } from "@/lib/report.functions";
 
-export const Route = createFileRoute("/report/executive-summary")({
+export const Route = createFileRoute("/reports/executive-summary")({
   head: () => ({ meta: [{ title: "Executive Summary — Revenue Health Visualiser" }] }),
   component: ExecSummaryPage,
 });
