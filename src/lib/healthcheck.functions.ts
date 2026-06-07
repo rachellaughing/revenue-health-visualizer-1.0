@@ -205,7 +205,21 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     }
 
     const fw = await loadFrameworkAndResponses(assessment!.id);
-    const total = countUnlockedAreas(tier, fw.children, fw.areas);
+
+    // Convert stored UUIDs back to child system codes for the UI
+    const storedIds = (assessment!.selected_child_ids ?? []) as string[];
+    const selectedCodes = storedIds
+      .map((id) => fw.children.find((c) => c.id === id)?.code)
+      .filter((code): code is string => Boolean(code));
+
+    // Total unlocked areas: for starter, count only selected child areas
+    const selectedChildIdSet = new Set(
+      fw.children.filter((c) => selectedCodes.includes(c.code)).map((c) => c.id),
+    );
+    const total =
+      tier === "starter"
+        ? fw.areas.filter((a) => selectedChildIdSet.has(a.child_system_id)).length
+        : countUnlockedAreas(tier, fw.children, fw.areas);
 
     return {
       tier,
@@ -213,7 +227,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
         id: assessment!.id,
         status: assessment!.status,
         completion_pct: assessment!.completion_pct ?? 0,
-        selected_child_ids: (assessment!.selected_child_ids ?? []) as string[],
+        selected_child_ids: selectedCodes,
       },
       parents: fw.parents,
       children: fw.children,
