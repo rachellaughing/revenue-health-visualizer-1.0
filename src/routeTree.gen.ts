@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DiagnosticRouteImport } from './routes/diagnostic'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HealthCheckIndexRouteImport } from './routes/health-check.index'
@@ -39,6 +40,11 @@ const SignupRoute = SignupRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticRoute = DiagnosticRouteImport.update({
+  id: '/diagnostic',
+  path: '/diagnostic',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -142,6 +148,7 @@ const HealthCheckHistoryRoute = HealthCheckHistoryRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/diagnostic': typeof DiagnosticRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/diagnostic': typeof DiagnosticRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/diagnostic': typeof DiagnosticRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/diagnostic'
     | '/login'
     | '/signup'
     | '/health-check/history'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/diagnostic'
     | '/login'
     | '/signup'
     | '/health-check/history'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/diagnostic'
     | '/login'
     | '/signup'
     | '/health-check/history'
@@ -284,6 +296,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  DiagnosticRoute: typeof DiagnosticRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   HealthCheckHistoryRoute: typeof HealthCheckHistoryRoute
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostic': {
+      id: '/diagnostic'
+      path: '/diagnostic'
+      fullPath: '/diagnostic'
+      preLoaderRoute: typeof DiagnosticRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -460,6 +480,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  DiagnosticRoute: DiagnosticRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   HealthCheckHistoryRoute: HealthCheckHistoryRoute,
@@ -483,3 +504,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
