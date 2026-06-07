@@ -141,9 +141,13 @@ function HealthCheckShell({
   }, [areas]);
 
   // Selection state (starter tier only — pro/diagnostic ignore this)
+  // DB is the source of truth: re-sync whenever the server payload changes.
   const [selectedCodes, setSelectedCodes] = useState<string[]>(
     assessment.selected_child_ids ?? [],
   );
+  useEffect(() => {
+    setSelectedCodes(assessment.selected_child_ids ?? []);
+  }, [assessment.selected_child_ids]);
 
   const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
 
@@ -252,20 +256,38 @@ function HealthCheckShell({
   }
 
 
-  // Overall completion
+  // Overall completion — mirror server's computeCompletionPct exactly:
+  // - starter: only areas under children whose code ∈ selectedSet
+  // - pro/diagnostic: all areas
+  // - exclude skipped (health === -1) and require tracking
+  // - dedupe by question_id (areas already 1:1 with question_id)
   const totalUnlocked = data.totalUnlockedAreas;
   const completedCount = useMemo(() => {
-    const unlockedChildIds = new Set(
-      children.filter((c) => !isChildLocked(c)).map((c) => c.id),
+    const relevantChildIds = new Set(
+      tier === "starter"
+        ? children.filter((c) => selectedSet.has(c.code)).map((c) => c.id)
+        : children.map((c) => c.id),
     );
-    return areas.filter((a) => {
-      if (!unlockedChildIds.has(a.child_system_id)) return false;
+    const seen = new Set<string>();
+    let done = 0;
+    for (const a of areas) {
+      if (!relevantChildIds.has(a.child_system_id)) continue;
+      if (seen.has(a.question_id)) continue;
+      seen.add(a.question_id);
       const r = responses[a.question_id];
-      return r && r.health !== null && r.tracking !== null;
-    }).length;
-  }, [areas, children, responses, isChildLocked]);
+      if (
+        r &&
+        r.health !== null &&
+        r.health !== -1 &&
+        r.tracking !== null
+      ) {
+        done++;
+      }
+    }
+    return done;
+  }, [tier, areas, children, responses, selectedSet]);
   const completionPct = totalUnlocked
-    ? Math.round((completedCount / totalUnlocked) * 100)
+    ? Math.min(100, Math.round((completedCount / totalUnlocked) * 100))
     : 0;
 
   // Save helper (debounced per question)
