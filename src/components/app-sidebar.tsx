@@ -69,7 +69,7 @@ const sections: NavSection[] = [
       { title: "Revenue System Health", url: "/reports/revenue-system-health", icon: Activity, lock: "assessment_complete" },
       { title: "Top Opportunities", url: "/reports/top-opportunities", icon: Target, lock: "assessment_complete" },
       { title: "Revenue at Risk", url: "/reports/revenue-at-risk", icon: AlertTriangle, lock: "assessment_complete" },
-      { title: "Team Alignment", url: "/reports/team-alignment", icon: Users, lock: "diagnostic" },
+      { title: "Team Alignment", url: "/reports/team-alignment", icon: Users, lock: "diagnostic", previewWhenLocked: true },
       { title: "Founder Dependency", url: "/reports/founder-dependency", icon: Crown, lock: "diagnostic" },
     ],
   },
