@@ -43,6 +43,7 @@ type NavItem = {
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   lock?: LockKind;
+  previewWhenLocked?: boolean;
 };
 type NavSection = { label: string; items: NavItem[] };
 
