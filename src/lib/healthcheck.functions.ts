@@ -180,7 +180,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       | "pro"
       | "diagnostic";
 
-    // Find or create in_progress assessment
+    // 1. Look for an existing in_progress assessment → use it
     let { data: assessment, error: aErr } = await supabaseAdmin
       .from("assessments")
       .select("id,status,completion_pct,selected_child_ids")
@@ -191,6 +191,22 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       .maybeSingle();
     if (aErr) throw new Error(aErr.message);
 
+    // 2. If none, look for the most recent completed assessment → return it
+    if (!assessment) {
+      const { data: lastCompleted, error: lcErr } = await supabaseAdmin
+        .from("assessments")
+        .select("id,status,completion_pct,selected_child_ids")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("completed_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (lcErr) throw new Error(lcErr.message);
+      assessment = lastCompleted;
+    }
+
+    // 3. Only auto-create for first-time users (no in_progress AND no completed).
+    //    Reassessment is an explicit action — see startNewAssessment.
     if (!assessment) {
       const { data: created, error: cErr } = await supabaseAdmin
         .from("assessments")
