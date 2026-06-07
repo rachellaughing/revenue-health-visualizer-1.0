@@ -1,63 +1,64 @@
-# Stripe Payments — Mixed Tier Model
+# Stripe Payments — Final Plan
 
-## Approach
-Connect your own Stripe account (BYOK). Lovable Cloud isn't an option because your project uses an external Supabase. All Stripe logic lives in TanStack server functions/routes and writes to your existing `profiles` table.
+External Supabase rules out Lovable's built-in payments, so we use Stripe BYOK. All Stripe logic lives in TanStack server functions/routes.
 
-## Tier model (placeholder pricing — you'll set real prices in Stripe later)
-- **Snapshot™ (`starter`)** — free, default on signup. No Stripe object.
-- **Assessment™ (`pro`)** — recurring subscription (monthly + annual prices in Stripe).
-- **Diagnostic™ (`diagnostic`)** — one-time purchase (or sales-led "Contact us" — toggle).
+## Tiers
+- **Snapshot™ (`starter`)** — free, default on signup.
+- **Assessment™ (`pro`)** — recurring subscription (monthly + annual).
+- **Diagnostic™ (`diagnostic`)** — **sales-led "Contact us"** (no Stripe checkout). Tier is set manually by you via the existing `profiles.tier` column or admin portal.
 
-## Database changes (one small migration)
-Add Stripe linkage columns to `public.profiles`:
+## Database migration (one)
+Add to `public.profiles`:
 - `stripe_customer_id text`
 - `stripe_subscription_id text`
-- `stripe_subscription_status text` (active, trialing, past_due, canceled, etc.)
+- `stripe_subscription_status text`
 - `subscription_current_period_end timestamptz`
-- `diagnostic_purchased_at timestamptz`
+- Index on `stripe_customer_id`
 
-Tier values stay `starter` / `pro` / `diagnostic` — no schema rename. RLS unchanged (existing self-read policy on profiles already covers these new columns).
+(No `diagnostic_purchased_at` since Diagnostic is sales-led.)
 
-## Server-side (TanStack)
-1. `src/lib/billing.functions.ts`
-   - `createCheckoutSession({ priceKey: 'pro_monthly' | 'pro_annual' | 'diagnostic_onetime' })` — auth-protected, creates/reuses Stripe Customer (tied to `user.id`), returns checkout URL.
-   - `createPortalSession()` — auth-protected, returns Stripe Billing Portal URL for users to manage/cancel.
-   - `getBillingStatus()` — returns current tier, subscription status, period end, portal availability.
+## Secrets to add (you'll be prompted)
+- `STRIPE_SECRET_KEY` — your `sk_test_...`
+- `STRIPE_WEBHOOK_SECRET` — your `whsec_...` (you have this)
+- `STRIPE_PRICE_PRO_MONTHLY` — placeholder until you create the Stripe product
+- `STRIPE_PRICE_PRO_ANNUAL` — placeholder until you create the Stripe product
 
-2. `src/routes/api/public/stripe-webhook.ts` (server route, raw body, signature-verified with `STRIPE_WEBHOOK_SECRET`)
-   - `checkout.session.completed` → upgrade tier (`pro` or `diagnostic`), store `stripe_customer_id`, `stripe_subscription_id`.
-   - `customer.subscription.updated` / `.deleted` → sync status + period end; downgrade to `starter` on cancel/unpaid past grace.
+You can paste `price_placeholder` for the two Price IDs now and update them in Project Settings later; checkout will error until they're real, but everything else builds.
+
+## Server code
+1. `src/lib/billing.functions.ts` (auth-protected via `requireSupabaseAuth`, uses `supabaseAdmin` per project rule):
+   - `createCheckoutSession({ priceKey: 'pro_monthly' | 'pro_annual' })` → returns Stripe Checkout URL. Creates/reuses Stripe Customer keyed to `user.id`.
+   - `createPortalSession()` → returns Stripe Billing Portal URL.
+   - `getBillingStatus()` → tier, status, renewal date, portal availability.
+
+2. `src/routes/api/public/stripe-webhook.ts` (raw body, signature-verified):
+   - `checkout.session.completed` → set `tier='pro'`, store customer + subscription IDs.
+   - `customer.subscription.updated` / `.deleted` → sync status + period end; downgrade to `starter` on cancel/unpaid.
    - `invoice.payment_failed` → mark `past_due` (no immediate downgrade).
 
-Webhook uses `supabaseAdmin` (service role) since Stripe is unauthenticated.
+Webhook URL (already configured in your Stripe dashboard):
+`https://app.revenuevisualizer.com/api/public/stripe-webhook`
 
 ## Frontend
-1. **New `/settings/billing` page** (replaces the existing placeholder) — shows current tier, status, renewal date, and:
-   - "Upgrade to Assessment™" → monthly/annual toggle → checkout
-   - "Purchase Diagnostic™" → one-time checkout (or contact CTA)
-   - "Manage subscription" → opens Stripe Billing Portal (existing subscribers only)
-2. **Success/Cancel landing**: `/settings/billing?status=success|cancel` — toast + refetch billing.
-3. **Upgrade CTAs** on existing locked pages (Shadow Systems, Roadmap blurred cards, etc.) link to `/settings/billing`.
+Replace placeholder `/settings/billing` page:
+- Current tier + status + renewal date
+- "Upgrade to Assessment™" with Monthly/Annual toggle → checkout
+- **Diagnostic™ card**: "Talk to us" CTA (mailto or contact link — confirm below if you want a specific destination)
+- "Manage subscription" → Stripe Billing Portal (existing subscribers)
+- Success/cancel handling via `?status=success|cancel` query param + toast
 
-## Secrets needed (you'll be prompted for these)
-- `STRIPE_SECRET_KEY` — from Stripe Dashboard → Developers → API keys (use **test mode** key first).
-- `STRIPE_WEBHOOK_SECRET` — generated after creating the webhook endpoint in Stripe Dashboard pointing at `https://<your-app>/api/public/stripe-webhook`.
-- `STRIPE_PRICE_PRO_MONTHLY`, `STRIPE_PRICE_PRO_ANNUAL`, `STRIPE_PRICE_DIAGNOSTIC` — Stripe Price IDs you'll create in the Stripe Dashboard once you decide on pricing. You can paste placeholders to start; checkout will simply error until real prices exist.
-
-## What you'll do in Stripe
-1. Create your Stripe account (or use existing).
-2. Create 3 Products: Assessment Monthly, Assessment Annual, Diagnostic.
-3. Copy the Price IDs into the secrets above.
-4. Add a Webhook endpoint → URL `https://<your-app>/api/public/stripe-webhook`, copy signing secret.
-
-## What this plan does NOT include
-- Coupons/discount codes (your `coupons` table is separate — can wire later).
-- Team seat billing for Diagnostic tier (per-seat add-ons) — defer until pricing is decided.
-- Tax handling — Stripe Tax can be enabled later in the dashboard with one toggle; no code change.
-- Invoice PDFs / customer email customization — Stripe handles by default.
+## Install
+- `bun add stripe`
 
 ## Order of operations
-1. Migration (add columns to `profiles`).
-2. Add `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` secrets (placeholders for Price IDs).
-3. Build server functions + webhook + `/settings/billing` page.
-4. You create products in Stripe → paste Price IDs → test checkout in Stripe test mode.
+1. Migration (profiles columns).
+2. Request 4 secrets.
+3. Install `stripe` + build server functions, webhook route, billing page.
+4. You create the 2 Stripe Products → update the 2 Price ID secrets → test in Stripe test mode.
+
+## What's NOT included
+- Coupon redemption (your `coupons` table is separate — wire later).
+- Diagnostic checkout (sales-led per your choice).
+- Tax / invoice customization (Stripe defaults).
+
+One open question: for the Diagnostic "Contact us" CTA, do you want it to go to a `mailto:` (which email?), an external Calendly/form URL, or just an in-app contact route? Default if unspecified: `mailto:` to your account email.
