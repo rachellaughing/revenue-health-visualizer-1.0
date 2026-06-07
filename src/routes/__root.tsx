@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { TopBar } from "../components/top-bar";
 import { AuthProvider, useAuth } from "../lib/auth-context";
+import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -159,6 +160,7 @@ function AuthGate() {
           <Outlet />
         </main>
       </div>
+      <Toaster />
     </div>
   );
 }

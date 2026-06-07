@@ -2,11 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { toast } from "sonner";
 import {
   getHealthCheckData,
   saveResponse,
   updateSelectedChildIds,
   startNewAssessment,
+  editCompletedResponse,
   type HealthCheckData,
   type ChildSystem,
   type Area,
@@ -94,6 +96,348 @@ function quarterFromDate(d: Date) {
   return Math.floor(d.getMonth() / 3) + 1;
 }
 
+const HEALTH_SHORT = ["", "Strongly Disagree", "Disagree", "Agree", "Strongly Agree"];
+const TRACKING_SHORT = [
+  "",
+  "Not documented",
+  "Someone knows",
+  "Occasional review",
+  "Tracked regularly",
+  "Documented & measured",
+];
+
+type LocalResponse = { health: number | null; tracking: number | null };
+
+function ScoreRing({ score, color, size = 32 }: { score: number; color: string; size?: number }) {
+  const r = size / 2 - 4;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, score));
+  return (
+    <div style={{ width: size, height: size, position: "relative", flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={T.offWhite} strokeWidth="3" />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="3"
+          strokeDasharray={`${(pct / 100) * c} ${c}`}
+          strokeLinecap="round"
+        />
+      </svg>
+      <span
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: size <= 36 ? 9 : 11,
+          fontWeight: 700,
+          color: T.ink,
+        }}
+      >
+        {Math.round(pct)}
+      </span>
+    </div>
+  );
+}
+
+function AnswerCard({
+  area,
+  response,
+  systemColor,
+  isLocked,
+  onSave,
+}: {
+  area: Area;
+  response: LocalResponse;
+  systemColor: string;
+  isLocked: boolean;
+  onSave: (h: number, t: number) => Promise<void>;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [health, setHealth] = useState<number>(response.health ?? 0);
+  const [tracking, setTracking] = useState<number>(response.tracking ?? 0);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setHealth(response.health ?? 0);
+    setTracking(response.tracking ?? 0);
+  }, [response.health, response.tracking]);
+
+  function handleEditClick() {
+    if (isLocked) {
+      toast("This Health Check is locked. Start a new Health Check to update your answers.");
+      return;
+    }
+    setEditing(true);
+  }
+
+  async function handleSave() {
+    if (!health || !tracking) return;
+    setSaving(true);
+    try {
+      await onSave(health, tracking);
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (editing && !isLocked) {
+    return (
+      <div
+        style={{
+          background: T.white,
+          border: `1.5px solid ${systemColor}50`,
+          borderRadius: 10,
+          padding: "16px 18px",
+          marginBottom: 8,
+          boxShadow: `0 2px 12px ${systemColor}15`,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: systemColor,
+            letterSpacing: "0.1em",
+            marginBottom: 6,
+            textTransform: "uppercase",
+          }}
+        >
+          {area.name}
+        </div>
+        <div style={{ fontSize: 13, color: T.ink, marginBottom: 12 }}>{area.question_text}</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, marginBottom: 6, letterSpacing: "0.08em" }}>
+          HEALTH
+        </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+          {[1, 2, 3, 4].map((v) => (
+            <button
+              key={v}
+              onClick={() => setHealth(v)}
+              style={{
+                flex: "1 1 0",
+                padding: "8px 4px",
+                borderRadius: 8,
+                border: `1.5px solid ${health === v ? systemColor : "rgba(0,0,0,0.1)"}`,
+                background: health === v ? systemColor : T.offWhite,
+                color: health === v ? T.white : T.mid,
+                fontSize: 11,
+                cursor: "pointer",
+              }}
+            >
+              {HEALTH_SHORT[v]}
+            </button>
+          ))}
+        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, marginBottom: 6, letterSpacing: "0.08em" }}>
+          TRACKING
+        </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
+          {[1, 2, 3, 4, 5].map((v) => (
+            <button
+              key={v}
+              onClick={() => setTracking(v)}
+              style={{
+                flex: "1 1 0",
+                padding: "8px 4px",
+                borderRadius: 8,
+                border: `1.5px solid ${tracking === v ? systemColor : "rgba(0,0,0,0.1)"}`,
+                background: tracking === v ? systemColor : T.offWhite,
+                color: tracking === v ? T.white : T.mid,
+                fontSize: 10,
+                cursor: "pointer",
+              }}
+            >
+              {TRACKING_SHORT[v]}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button
+            onClick={() => setEditing(false)}
+            style={{
+              background: "none",
+              border: "none",
+              color: T.mid,
+              fontSize: 12,
+              cursor: "pointer",
+              padding: 0,
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !health || !tracking}
+            style={{
+              background: systemColor,
+              color: T.white,
+              border: "none",
+              borderRadius: 8,
+              padding: "8px 16px",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: saving ? "wait" : "pointer",
+              opacity: !health || !tracking ? 0.5 : 1,
+            }}
+          >
+            {saving ? "Saving…" : "Save →"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const healthLabel = response.health && response.health > 0 ? HEALTH_SHORT[response.health] : "Skipped";
+  const trackingLabel = response.tracking ? TRACKING_SHORT[response.tracking] : "—";
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "9px 14px",
+        marginBottom: 6,
+        background: hovered ? systemColor + "06" : T.paper,
+        border: `1px solid ${hovered ? systemColor + "30" : T.offWhite}`,
+        borderRadius: 8,
+        transition: "all 0.15s",
+      }}
+    >
+      <span style={{ fontSize: 13, color: T.tealBright, flexShrink: 0 }}>✓</span>
+      <span
+        style={{
+          fontSize: 10,
+          fontWeight: 700,
+          color: systemColor,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          flexShrink: 0,
+        }}
+      >
+        {area.name}
+      </span>
+      <span style={{ color: T.offWhite, fontSize: 11 }}>·</span>
+      <span style={{ fontSize: 12, color: T.mid }}>{healthLabel}</span>
+      <span style={{ color: T.offWhite, fontSize: 11 }}>·</span>
+      <span style={{ fontSize: 12, color: T.mid }}>{trackingLabel}</span>
+      {!isLocked && hovered && (
+        <button
+          onClick={handleEditClick}
+          style={{
+            marginLeft: "auto",
+            background: "none",
+            border: "none",
+            color: T.teal,
+            fontSize: 11,
+            cursor: "pointer",
+            padding: 0,
+            flexShrink: 0,
+          }}
+        >
+          Edit →
+        </button>
+      )}
+      {isLocked && hovered && (
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: 10,
+            color: T.mid,
+            fontStyle: "italic",
+            flexShrink: 0,
+          }}
+        >
+          Locked
+        </span>
+      )}
+    </div>
+  );
+}
+
+function ChildBlock({
+  child,
+  areas,
+  responses,
+  childScore,
+  systemColor,
+  isLocked,
+  onSave,
+}: {
+  child: ChildSystem;
+  areas: Area[];
+  responses: Record<string, LocalResponse>;
+  childScore: number;
+  systemColor: string;
+  isLocked: boolean;
+  onSave: (questionId: string, h: number, t: number) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "10px 14px",
+          borderRadius: 8,
+          background: open ? systemColor + "08" : T.offWhite,
+          border: `1px solid ${open ? systemColor + "30" : "transparent"}`,
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <span style={{ fontSize: 12, fontWeight: 600, color: open ? systemColor : T.ink, flex: 1 }}>
+          {child.name}
+        </span>
+        <span style={{ fontSize: 11, color: T.mid }}>{areas.length} areas</span>
+        <ScoreRing score={childScore} color={systemColor} />
+        <span
+          style={{
+            fontSize: 11,
+            color: T.mid,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.15s",
+            display: "inline-block",
+          }}
+        >
+          ▾
+        </span>
+      </button>
+      {open && (
+        <div style={{ paddingLeft: 14, paddingTop: 6 }}>
+          {areas.map((area) => {
+            const r = responses[area.question_id] ?? { health: null, tracking: null };
+            return (
+              <AnswerCard
+                key={area.id}
+                area={area}
+                response={r}
+                systemColor={systemColor}
+                isLocked={isLocked}
+                onSave={(h, t) => onSave(area.question_id, h, t)}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CompletedLanding({
   data,
   qc,
@@ -102,17 +446,73 @@ function CompletedLanding({
   qc: ReturnType<typeof useQueryClient>;
 }) {
   const startFn = useServerFn(startNewAssessment);
+  const editFn = useServerFn(editCompletedResponse);
   const [starting, setStarting] = useState(false);
-  const now = new Date();
-  const currentQ = quarterFromDate(now);
-  const completedQ = currentQ; // best-effort label without a stored completed_at
-  const nextQ = currentQ === 4 ? 1 : currentQ + 1;
 
-  const selectedCodes = new Set(data.assessment.selected_child_ids ?? []);
-  const selectedChildren =
-    data.tier === "starter"
-      ? data.children.filter((c) => selectedCodes.has(c.code))
-      : data.children;
+  const submittedAt = data.assessment.submitted_at ?? data.assessment.completed_at;
+  const submittedDate = submittedAt ? new Date(submittedAt) : new Date();
+  const lockDate = new Date(submittedDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const isLocked = new Date() > lockDate;
+  const lockDateStr = lockDate.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const completedQ = quarterFromDate(submittedDate);
+  const nowQ = quarterFromDate(new Date());
+  const nextQ = nowQ === 4 ? 1 : nowQ + 1;
+
+  const selectedSet = new Set(data.assessment.selected_child_ids ?? []);
+
+  const childrenByParent = useMemo(() => {
+    const m = new Map<string, ChildSystem[]>();
+    for (const c of data.children) {
+      const arr = m.get(c.parent_system_id) ?? [];
+      arr.push(c);
+      m.set(c.parent_system_id, arr);
+    }
+    for (const v of m.values()) v.sort((a, b) => a.sort_order - b.sort_order);
+    return m;
+  }, [data.children]);
+
+  const areasByChild = useMemo(() => {
+    const m = new Map<string, Area[]>();
+    for (const a of data.areas) {
+      const arr = m.get(a.child_system_id) ?? [];
+      arr.push(a);
+      m.set(a.child_system_id, arr);
+    }
+    for (const v of m.values()) v.sort((a, b) => a.sort_order - b.sort_order);
+    return m;
+  }, [data.areas]);
+
+  const scoreByChild = useMemo(() => {
+    const m = new Map<string, { health: number; tracking: number }>();
+    for (const s of data.scores) {
+      m.set(s.child_system_id, { health: s.health_score, tracking: s.tracking_score });
+    }
+    return m;
+  }, [data.scores]);
+
+  const [responses, setResponses] = useState<Record<string, LocalResponse>>(() => {
+    const m: Record<string, LocalResponse> = {};
+    for (const r of data.responses) {
+      m[r.question_id] = { health: r.health_response, tracking: r.tracking_response };
+    }
+    return m;
+  });
+
+  useEffect(() => {
+    const m: Record<string, LocalResponse> = {};
+    for (const r of data.responses) {
+      m[r.question_id] = { health: r.health_response, tracking: r.tracking_response };
+    }
+    setResponses(m);
+  }, [data.responses]);
+
+  const [activeParentId, setActiveParentId] = useState<string>(data.parents[0]?.id ?? "");
+  const activeParent = data.parents.find((p) => p.id === activeParentId) ?? data.parents[0];
+  const systemColor = activeParent?.color_hex ? `#${activeParent.color_hex}` : T.teal;
 
   async function handleStart() {
     setStarting(true);
@@ -124,129 +524,295 @@ function CompletedLanding({
     }
   }
 
-  return (
-    <div
-      style={{
-        minHeight: "100%",
-        background: T.paper,
-        padding: "48px 24px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ maxWidth: 720, width: "100%" }}>
-        <div
-          style={{
-            display: "inline-block",
-            background: `${T.tealBright}20`,
-            color: T.teal,
-            border: `1px solid ${T.tealBright}55`,
-            borderRadius: 999,
-            padding: "4px 12px",
-            fontSize: 12,
-            fontWeight: 600,
-            marginBottom: 16,
-          }}
-        >
-          100% complete
-        </div>
-        <h1
-          style={{
-            fontFamily: "'Instrument Serif', serif",
-            fontSize: 44,
-            lineHeight: 1.1,
-            color: T.ink,
-            margin: "0 0 12px",
-          }}
-        >
-          Your Q{completedQ} Health Check is complete.
-        </h1>
-        <p style={{ fontSize: 15, color: T.mid, margin: "0 0 28px", lineHeight: 1.5 }}>
-          Review your results in the Executive Summary, or start your next quarterly
-          Health Check when your business has shifted enough to warrant a fresh diagnostic.
-        </p>
+  async function handleSaveEdit(questionId: string, health: number, tracking: number) {
+    try {
+      await editFn({
+        data: {
+          assessment_id: data.assessment.id,
+          question_id: questionId,
+          health_response: health,
+          tracking_response: tracking,
+        },
+      });
+      setResponses((prev) => ({ ...prev, [questionId]: { health, tracking } }));
+      await qc.invalidateQueries({ queryKey: ["health-check"] });
+      toast.success("Answer updated");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not save edit");
+    }
+  }
 
+  const activeChildren = activeParent ? childrenByParent.get(activeParent.id) ?? [] : [];
+  const assessedChildren = activeChildren.filter(
+    (c) => data.tier !== "starter" || selectedSet.has(c.code),
+  );
+  const unassessedChildren =
+    data.tier === "starter" ? activeChildren.filter((c) => !selectedSet.has(c.code)) : [];
+
+  return (
+    <div style={{ minHeight: "100%", background: T.paper, display: "flex" }}>
+      {/* Left nav — parent systems */}
+      <div
+        style={{
+          width: 220,
+          flexShrink: 0,
+          borderRight: `1px solid ${T.offWhite}`,
+          padding: "16px 0",
+        }}
+      >
+        {data.parents.map((p) => {
+          const color = `#${p.color_hex}`;
+          const active = activeParentId === p.id;
+          return (
+            <button
+              key={p.id}
+              onClick={() => setActiveParentId(p.id)}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 16px",
+                background: active ? color + "10" : "none",
+                border: "none",
+                borderLeft: `3px solid ${active ? color : "transparent"}`,
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: color,
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: active ? color : T.ink,
+                  }}
+                >
+                  {p.name}
+                </div>
+                <div
+                  style={{
+                    marginTop: 4,
+                    height: 3,
+                    background: T.offWhite,
+                    borderRadius: 2,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ height: "100%", width: "100%", background: color, borderRadius: 2 }} />
+                </div>
+              </div>
+              <span style={{ fontSize: 10, color: T.tealBright, fontWeight: 600 }}>100%</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
+        {/* Completion banner */}
         <div
           style={{
-            background: T.white,
-            border: "1px solid rgba(0,0,0,0.08)",
-            borderRadius: 12,
-            padding: 20,
-            marginBottom: 28,
+            background: T.abyss,
+            borderRadius: 14,
+            padding: "28px 32px",
+            marginBottom: 24,
+            position: "relative",
+            overflow: "hidden",
           }}
         >
           <div
             style={{
-              fontSize: 11,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: 0.5,
-              color: T.mid,
-              marginBottom: 12,
+              position: "absolute",
+              right: -20,
+              top: -20,
+              bottom: -20,
+              width: 240,
+              background: `radial-gradient(circle at 80% 50%, ${T.tealBright}12, transparent 70%)`,
             }}
-          >
-            Subsystems assessed
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {selectedChildren.map((c) => {
-              const parent = data.parents.find((p) => p.id === c.parent_system_id);
-              const color = parent?.color_hex ? `#${parent.color_hex}` : T.teal;
-              return (
-                <span
-                  key={c.id}
-                  style={{
-                    fontSize: 12,
-                    color,
-                    background: `${color}10`,
-                    border: `1px solid ${color}40`,
-                    borderRadius: 999,
-                    padding: "4px 10px",
-                  }}
-                >
-                  {c.name}
-                </span>
-              );
-            })}
-            {selectedChildren.length === 0 && (
-              <span style={{ fontSize: 12, color: T.mid }}>
-                No subsystems recorded.
-              </span>
+          />
+          <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "inline-flex" }}>
+              <div
+                style={{
+                  background: T.tealBright + "22",
+                  border: `1px solid ${T.tealBright}40`,
+                  borderRadius: 20,
+                  padding: "4px 14px",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: T.tealBright,
+                  letterSpacing: "0.06em",
+                }}
+              >
+                ✓ 100% COMPLETE
+              </div>
+            </div>
+            <h2
+              style={{
+                fontFamily: "'Instrument Serif', Georgia, serif",
+                fontSize: 32,
+                fontWeight: 400,
+                color: T.white,
+                margin: 0,
+                lineHeight: 1.2,
+              }}
+            >
+              Your Q{completedQ} Health Check is complete.
+            </h2>
+            {!isLocked ? (
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "rgba(255,255,255,0.55)",
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}
+              >
+                You can edit your answers until{" "}
+                <span style={{ color: T.tealBright, fontWeight: 600 }}>{lockDateStr}</span>. After
+                that your Health Check will be locked.
+              </p>
+            ) : (
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "rgba(255,255,255,0.55)",
+                  margin: 0,
+                  lineHeight: 1.6,
+                }}
+              >
+                This Health Check was locked on {lockDateStr}. Start your Q{nextQ} Health Check when
+                your business has shifted enough to warrant a fresh diagnostic.
+              </p>
             )}
+            <div style={{ display: "flex", gap: 10, marginTop: 4, flexWrap: "wrap" }}>
+              <Link
+                to="/reports/executive-summary"
+                style={{
+                  background: T.ember,
+                  color: T.white,
+                  borderRadius: 8,
+                  padding: "11px 22px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                View Your Report →
+              </Link>
+              <button
+                onClick={handleStart}
+                disabled={starting}
+                style={{
+                  background: "transparent",
+                  color: "rgba(255,255,255,0.65)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: 8,
+                  padding: "11px 22px",
+                  fontSize: 13,
+                  cursor: starting ? "wait" : "pointer",
+                }}
+              >
+                {starting ? "Starting…" : `Start Q${nextQ} Health Check`}
+              </button>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-          <Link
-            to="/reports/executive-summary"
+        {/* System header */}
+        <div style={{ marginBottom: 16 }}>
+          <h3
             style={{
-              background: T.ember,
-              color: T.white,
-              fontSize: 14,
-              fontWeight: 600,
-              padding: "12px 20px",
-              borderRadius: 8,
-              textDecoration: "none",
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontSize: 22,
+              fontWeight: 400,
+              color: systemColor,
+              margin: "0 0 4px",
             }}
           >
-            View Your Report →
-          </Link>
-          <button
-            onClick={handleStart}
-            disabled={starting}
-            style={{
-              background: "transparent",
-              color: T.teal,
-              fontSize: 14,
-              fontWeight: 600,
-              padding: "12px 20px",
-              borderRadius: 8,
-              border: `1px solid ${T.teal}55`,
-              cursor: starting ? "wait" : "pointer",
-            }}
-          >
-            {starting ? "Starting…" : `Start Q${nextQ} Health Check`}
-          </button>
+            {activeParent?.name}
+          </h3>
+          <p style={{ fontSize: 12, color: T.mid, margin: 0 }}>
+            {assessedChildren.length} subsystems assessed · click any subsystem to review your answers
+            {!isLocked && <span style={{ color: T.teal }}> · hover any answer to edit</span>}
+          </p>
         </div>
+
+        {/* Assessed children */}
+        {assessedChildren.map((c) => {
+          const areas = areasByChild.get(c.id) ?? [];
+          const score = scoreByChild.get(c.id)?.health ?? 0;
+          return (
+            <ChildBlock
+              key={c.id}
+              child={c}
+              areas={areas}
+              responses={responses}
+              childScore={score}
+              systemColor={systemColor}
+              isLocked={isLocked}
+              onSave={handleSaveEdit}
+            />
+          );
+        })}
+
+        {/* Unassessed (starter only) */}
+        {unassessedChildren.length > 0 && (
+          <div style={{ marginTop: 20 }}>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: T.mid,
+                letterSpacing: "0.1em",
+                marginBottom: 10,
+              }}
+            >
+              NOT ASSESSED IN THIS HEALTH CHECK
+            </div>
+            {unassessedChildren.map((c) => (
+              <div
+                key={c.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "10px 14px",
+                  marginBottom: 6,
+                  background: T.offWhite,
+                  borderRadius: 8,
+                  opacity: 0.7,
+                }}
+              >
+                <span style={{ fontSize: 12 }}>🔒</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: T.mid }}>{c.name}</span>
+                <span style={{ fontSize: 11, color: T.mid, marginLeft: 4 }}>
+                  · Not selected for this Health Check
+                </span>
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    fontSize: 11,
+                    color: T.teal,
+                    cursor: "pointer",
+                  }}
+                >
+                  Include in Q{nextQ} →
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
