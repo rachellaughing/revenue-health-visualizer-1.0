@@ -359,16 +359,29 @@ export const updateSelectedChildIds = createServerFn({ method: "POST" })
     if (!asmt || asmt.user_id !== userId) throw new Error("Forbidden");
     if (asmt.status === "completed") throw new Error("Assessment already completed");
 
+    // Convert codes to UUIDs before saving
+    const { data: childSystems, error: csError } = await (supabaseAdmin as any)
+      .schema('revhealth2')
+      .from('child_systems')
+      .select('id, code')
+      .in('code', data.selected_child_ids);
+
+    if (csError) throw new Error(csError.message);
+
+    const uuids = data.selected_child_ids.map(code =>
+      (childSystems ?? []).find((cs: any) => cs.code === code)?.id
+    ).filter(Boolean);
+
     const { error: uErr } = await supabaseAdmin
       .from("assessments")
       .update({
-        selected_child_ids: data.selected_child_ids,
+        selected_child_ids: uuids,
         updated_at: new Date().toISOString(),
       })
       .eq("id", data.assessment_id);
     if (uErr) throw new Error(uErr.message);
 
-    return { ok: true, selected_child_ids: data.selected_child_ids };
+    return { ok: true, selected_child_ids: uuids };
   });
 
 
