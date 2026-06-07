@@ -1025,8 +1025,8 @@ function Page() {
             >
               Go to your Health Check →
             </Link>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     );
   }
