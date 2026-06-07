@@ -563,36 +563,7 @@ function SystemSection({
               >
                 {system.narrative}
               </p>
-            ) : (
-              <div>
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    marginBottom: 8,
-                    width: "94%",
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    marginBottom: 8,
-                    width: "88%",
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    width: "72%",
-                  }}
-                />
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Inline note about shadow systems for non-diagnostic with high gaps */}
