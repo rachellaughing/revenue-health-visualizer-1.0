@@ -447,13 +447,26 @@ function GlobalStyles() {
 
 function ReportBody({
   summary,
-  regenMutation,
+  onNarrativeReady,
 }: {
   summary: ExecutiveSummary;
-  regenMutation: ReturnType<typeof useMutation<RiskItem[] | any, Error, string>>;
+  onNarrativeReady: () => void;
 }) {
   const { tier, profile, company, assessment, systems, overallScore, narrative, quarter } = summary;
   const isStarter = tier === "starter";
+
+  const generate = useServerFn(generateReportNarrative);
+  const triggered = useRef(false);
+  useEffect(() => {
+    if (!narrative && !triggered.current) {
+      triggered.current = true;
+      generate({ data: { assessmentId: assessment.id } })
+        .then(() => onNarrativeReady())
+        .catch((e) => console.error("[narrative] generation failed", e));
+    }
+  }, [narrative, assessment.id, generate, onNarrativeReady]);
+
+
 
   // Determine which systems get blurred for starter
   // Pick first N systems user has actual data for; others get illustrative
