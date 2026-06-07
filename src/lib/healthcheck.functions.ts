@@ -192,7 +192,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     // 1. Look for an existing in_progress assessment → use it
     let { data: assessment, error: aErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,status,completion_pct,selected_child_ids")
+      .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
       .eq("user_id", userId)
       .eq("status", "in_progress")
       .order("created_at", { ascending: false })
@@ -204,7 +204,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     if (!assessment) {
       const { data: lastCompleted, error: lcErr } = await supabaseAdmin
         .from("assessments")
-        .select("id,status,completion_pct,selected_child_ids")
+        .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
         .eq("user_id", userId)
         .eq("status", "completed")
         .order("completed_at", { ascending: false })
@@ -227,7 +227,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
           status: "in_progress",
           completion_pct: 0,
         })
-        .select("id,status,completion_pct,selected_child_ids")
+        .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
         .single();
       if (cErr) throw new Error(cErr.message);
       assessment = created;
