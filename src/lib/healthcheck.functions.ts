@@ -37,7 +37,7 @@ export type ResponseRow = {
   tracking_response: number | null;
 };
 
-export type ScoreRow = {
+export type AssessmentScoreRow = {
   child_system_id: string;
   health_score: number;
   tracking_score: number;
@@ -57,7 +57,7 @@ export type HealthCheckData = {
   children: ChildSystem[];
   areas: Area[];
   responses: ResponseRow[];
-  scores: ScoreRow[];
+  scores: AssessmentScoreRow[];
   totalUnlockedAreas: number;
 };
 
