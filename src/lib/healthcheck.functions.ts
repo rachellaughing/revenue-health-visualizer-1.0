@@ -137,22 +137,26 @@ function computeCompletionPct(
   children: ChildSystem[],
   areas: Area[],
   responses: ResponseRow[],
+  selectedChildUuids: string[] = [],
 ): { pct: number; total: number; done: number } {
-  const total = countUnlockedAreas(tier, children, areas);
-  const unlockedChildIds = new Set(
-    children.filter((c) => c.access_tier === "free" || tier !== "starter").map(
-      (c) => c.id,
-    ),
-  );
-  const unlockedQids = new Set(
-    areas.filter((a) => unlockedChildIds.has(a.child_system_id)).map(
+  let relevantChildIds: Set<string>;
+  if (tier === "starter") {
+    // Starter: only count questions for the user's selected child systems
+    relevantChildIds = new Set(selectedChildUuids);
+  } else {
+    relevantChildIds = new Set(children.map((c) => c.id));
+  }
+  const relevantQids = new Set(
+    areas.filter((a) => relevantChildIds.has(a.child_system_id)).map(
       (a) => a.question_id,
     ),
   );
+  const total = relevantQids.size;
   const done = responses.filter(
     (r) =>
-      unlockedQids.has(r.question_id) &&
+      relevantQids.has(r.question_id) &&
       r.health_response !== null &&
+      r.health_response !== -1 &&
       r.tracking_response !== null,
   ).length;
   const pct = total ? Math.round((done / total) * 100) : 0;
