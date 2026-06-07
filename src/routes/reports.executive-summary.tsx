@@ -1387,5 +1387,3 @@ function ReportBody({
   );
 }
 
-// Suppress unused-import warning while keeping useState available for future toggles
-void useState;
