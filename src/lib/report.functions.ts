@@ -234,6 +234,13 @@ const narrativeJsonSchema = z.object({
       }),
     )
     .length(3),
+  systems: z.object({
+    POS: z.string().min(1).max(2000),
+    AUTH: z.string().min(1).max(2000),
+    CONV: z.string().min(1).max(2000),
+    LFC: z.string().min(1).max(2000),
+    VIS: z.string().min(1).max(2000),
+  }),
 });
 
 function buildNarrativePrompt(args: {
