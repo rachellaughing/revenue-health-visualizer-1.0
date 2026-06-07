@@ -114,6 +114,8 @@ function HealthCheckShell({
   const [responses, setResponses] = useState<ResponseMap>(initialResponses);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>({});
+  const [manuallyExpanded, setManuallyExpanded] = useState<Record<string, boolean>>({});
   const [completedBanner, setCompletedBanner] = useState(
     assessment.status === "completed",
   );
