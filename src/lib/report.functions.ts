@@ -497,3 +497,123 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
       quarter: quarterLabel(submittedAt),
     };
   });
+
+// ---------------------------------------------------------------------------
+// Revenue System Health
+// ---------------------------------------------------------------------------
+
+export type ChildSystemScore = {
+  id: string;
+  parentCode: string;
+  code: string;
+  name: string;
+  healthScore: number;
+  trackingScore: number;
+  visibilityGap: number;
+  severity: "critical" | "fragile" | "stable" | "strong";
+  isShadow: boolean;
+  assessed: boolean;
+};
+
+export type SystemHealthSystem = ParentScore & {
+  children: ChildSystemScore[];
+  narrative: string | null;
+};
+
+export type RevenueSystemHealth = {
+  tier: Tier;
+  firstName: string | null;
+  assessment: {
+    id: string;
+    submitted_at: string | null;
+    selected_child_ids: string[] | null;
+  };
+  systems: SystemHealthSystem[];
+};
+
+export const getRevenueSystemHealth = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<RevenueSystemHealth | { error: "no_completed_assessment" }> => {
+      const userId = context.userId;
+
+      let assessmentId = data?.assessmentId;
+      if (!assessmentId) {
+        const { data: latest, error } = await supabaseAdmin
+          .from("assessments")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (error) throw new Error(error.message);
+        if (!latest) return { error: "no_completed_assessment" as const };
+        assessmentId = latest.id;
+      }
+
+      const core = await loadCoreData(assessmentId!, userId);
+      const parentAgg = aggregateByParent(core.scores, core.parents, core.children);
+
+      // Map child_system_id -> score row
+      const scoreByChild = new Map<string, any>();
+      for (const s of core.scores) scoreByChild.set(s.child_system_id, s);
+
+      const parentById = new Map<string, any>();
+      for (const p of core.parents) parentById.set(p.id, p);
+
+      // Group children by parent
+      const childrenByParent = new Map<string, any[]>();
+      for (const c of core.children) {
+        const arr = childrenByParent.get(c.parent_system_id) ?? [];
+        arr.push(c);
+        childrenByParent.set(c.parent_system_id, arr);
+      }
+
+      const narr = core.narrative as any;
+
+      const systems: SystemHealthSystem[] = parentAgg.map((p) => {
+        const kids = (childrenByParent.get(p.id) ?? []).map((c: any): ChildSystemScore => {
+          const s = scoreByChild.get(c.id);
+          const health = s ? Number(s.health_score ?? 0) : 0;
+          const tracking = s ? Number(s.tracking_score ?? 0) : 0;
+          const visibilityGap =
+            s && s.visibility_gap !== null ? Number(s.visibility_gap) : health - tracking;
+          return {
+            id: c.id,
+            parentCode: p.code,
+            code: c.code,
+            name: c.name,
+            healthScore: Math.round(health),
+            trackingScore: Math.round(tracking),
+            visibilityGap: Math.round(visibilityGap),
+            severity: severityFor(health),
+            isShadow: health >= 60 && tracking < 40,
+            assessed: !!s,
+          };
+        });
+
+        const key = `narrative_${p.code.toLowerCase()}`;
+        const narrative: string | null = narr ? (narr[key] ?? null) : null;
+
+        return { ...p, children: kids, narrative };
+      });
+
+      const tier = (core.profile?.tier ?? "starter") as Tier;
+
+      return {
+        tier,
+        firstName: core.profile?.first_name ?? null,
+        assessment: {
+          id: core.assessment.id,
+          submitted_at: core.assessment.submitted_at,
+          selected_child_ids: (core.assessment as any).selected_child_ids ?? null,
+        },
+        systems,
+      };
+    },
+  );
