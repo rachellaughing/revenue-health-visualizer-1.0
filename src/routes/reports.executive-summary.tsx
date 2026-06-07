@@ -1013,11 +1013,11 @@ function ReportBody({
                       borderLeft: `3px solid ${T.ember}`,
                     }}
                   >
-                    <Skeleton height={10} width="20%" style={{ marginBottom: 8 }} />
-                    <Skeleton height={12} width="95%" style={{ marginBottom: 6 }} />
-                    <Skeleton height={12} width="80%" />
+                    <div style={{ height: 10, width: "92%", background: "#EDEDE8", borderRadius: 4, marginBottom: 8 }} />
+                    <div style={{ height: 10, width: "75%", background: "#EDEDE8", borderRadius: 4 }} />
                   </Card>
                 ))}
+
           </div>
         </div>
 
