@@ -37,6 +37,12 @@ export type ResponseRow = {
   tracking_response: number | null;
 };
 
+export type AssessmentScoreRow = {
+  child_system_id: string;
+  health_score: number;
+  tracking_score: number;
+};
+
 export type HealthCheckData = {
   tier: "starter" | "pro" | "diagnostic";
   assessment: {
@@ -44,11 +50,14 @@ export type HealthCheckData = {
     status: string;
     completion_pct: number;
     selected_child_ids: string[];
+    submitted_at: string | null;
+    completed_at: string | null;
   };
   parents: ParentSystem[];
   children: ChildSystem[];
   areas: Area[];
   responses: ResponseRow[];
+  scores: AssessmentScoreRow[];
   totalUnlockedAreas: number;
 };
 
@@ -183,7 +192,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     // 1. Look for an existing in_progress assessment → use it
     let { data: assessment, error: aErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,status,completion_pct,selected_child_ids")
+      .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
       .eq("user_id", userId)
       .eq("status", "in_progress")
       .order("created_at", { ascending: false })
@@ -195,7 +204,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
     if (!assessment) {
       const { data: lastCompleted, error: lcErr } = await supabaseAdmin
         .from("assessments")
-        .select("id,status,completion_pct,selected_child_ids")
+        .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
         .eq("user_id", userId)
         .eq("status", "completed")
         .order("completed_at", { ascending: false })
@@ -218,13 +227,20 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
           status: "in_progress",
           completion_pct: 0,
         })
-        .select("id,status,completion_pct,selected_child_ids")
+        .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
         .single();
       if (cErr) throw new Error(cErr.message);
       assessment = created;
     }
 
     const fw = await loadFrameworkAndResponses(assessment!.id);
+
+    // Per-child scores (if calculated)
+    const { data: scoresData, error: scErr } = await supabaseAdmin
+      .from("assessment_scores")
+      .select("child_system_id,health_score,tracking_score")
+      .eq("assessment_id", assessment!.id);
+    if (scErr) console.error("[health-check] scores fetch failed:", scErr.message);
 
     // Convert stored UUIDs back to child system codes for the UI
     const storedIds = (assessment!.selected_child_ids ?? []) as string[];
@@ -248,11 +264,14 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
         status: assessment!.status,
         completion_pct: assessment!.completion_pct ?? 0,
         selected_child_ids: selectedCodes,
+        submitted_at: (assessment as any).submitted_at ?? null,
+        completed_at: (assessment as any).completed_at ?? null,
       },
       parents: fw.parents,
       children: fw.children,
       areas: fw.areas,
       responses: fw.responses,
+      scores: (scoresData ?? []) as AssessmentScoreRow[],
       totalUnlockedAreas: total,
     };
   });
@@ -641,4 +660,78 @@ export const startNewAssessment = createServerFn({ method: "POST" })
     if (cErr) throw new Error(cErr.message);
 
     return { ok: true as const, assessment_id: created.id };
+  });
+
+// ---------------------------------------------------------------------------
+// editCompletedResponse — edit answers on a completed assessment within
+// the 7-day edit window, then recompute scores.
+// ---------------------------------------------------------------------------
+
+const editSchema = z.object({
+  assessment_id: z.string().uuid(),
+  question_id: z.string().uuid(),
+  health_response: z.number().int().min(-1).max(4).nullable(),
+  tracking_response: z.number().int().min(1).max(5).nullable(),
+});
+
+const LOCK_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+export const editCompletedResponse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => editSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+
+    const { data: asmt, error: oErr } = await supabaseAdmin
+      .from("assessments")
+      .select("id,user_id,status,submitted_at,completed_at")
+      .eq("id", data.assessment_id)
+      .maybeSingle();
+    if (oErr) throw new Error(oErr.message);
+    if (!asmt || asmt.user_id !== userId) throw new Error("Forbidden");
+    if (asmt.status !== "completed") throw new Error("Assessment is not completed");
+
+    const anchor = (asmt as any).submitted_at ?? (asmt as any).completed_at;
+    if (!anchor) throw new Error("Missing submission date");
+    const lockAt = new Date(anchor).getTime() + LOCK_WINDOW_MS;
+    if (Date.now() > lockAt) throw new Error("Edit window closed");
+
+    const { data: existing, error: eErr } = await supabaseAdmin
+      .from("assessment_responses")
+      .select("id")
+      .eq("assessment_id", data.assessment_id)
+      .eq("question_id", data.question_id)
+      .maybeSingle();
+    if (eErr) throw new Error(eErr.message);
+
+    if (existing) {
+      const { error: uErr } = await supabaseAdmin
+        .from("assessment_responses")
+        .update({
+          health_response: data.health_response,
+          tracking_response: data.tracking_response,
+          answered_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+      if (uErr) throw new Error(uErr.message);
+    } else {
+      const { error: iErr } = await supabaseAdmin
+        .from("assessment_responses")
+        .insert({
+          assessment_id: data.assessment_id,
+          user_id: userId,
+          question_id: data.question_id,
+          health_response: data.health_response,
+          tracking_response: data.tracking_response,
+        });
+      if (iErr) throw new Error(iErr.message);
+    }
+
+    try {
+      await _calculateAssessmentScoresImpl(data.assessment_id, userId);
+    } catch (err) {
+      console.error("[edit] score recalc failed:", err);
+    }
+
+    return { ok: true as const };
   });
