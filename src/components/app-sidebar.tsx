@@ -213,7 +213,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                                 ? "3px solid var(--mm-ember)"
                                 : "3px solid transparent",
                             paddingLeft: active && !locked ? "calc(1rem - 3px)" : "1rem",
-                            cursor: locked ? "not-allowed" : "pointer",
+                            cursor: locked && !item.previewWhenLocked ? "not-allowed" : "pointer",
                           }}
                         >
                           <Icon className="h-4 w-4 shrink-0" />
