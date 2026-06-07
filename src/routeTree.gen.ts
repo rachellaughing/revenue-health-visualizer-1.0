@@ -25,7 +25,7 @@ import { Route as ReportsTeamAlignmentRouteImport } from './routes/reports.team-
 import { Route as ReportsRevenueSystemHealthRouteImport } from './routes/reports.revenue-system-health'
 import { Route as ReportsRevenueAtRiskRouteImport } from './routes/reports.revenue-at-risk'
 import { Route as ReportsFounderDependencyRouteImport } from './routes/reports.founder-dependency'
-import { Route as ReportExecutiveSummaryRouteImport } from './routes/report.executive-summary'
+import { Route as ReportsExecutiveSummaryRouteImport } from './routes/reports.executive-summary'
 import { Route as ProfilePersonalRouteImport } from './routes/profile.personal'
 import { Route as ProfileCompanyRouteImport } from './routes/profile.company'
 import { Route as HealthCheckStartRouteImport } from './routes/health-check.start'
@@ -113,9 +113,9 @@ const ReportsFounderDependencyRoute =
     path: '/reports/founder-dependency',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ReportExecutiveSummaryRoute = ReportExecutiveSummaryRouteImport.update({
-  id: '/report/executive-summary',
-  path: '/report/executive-summary',
+const ReportsExecutiveSummaryRoute = ReportsExecutiveSummaryRouteImport.update({
+  id: '/reports/executive-summary',
+  path: '/reports/executive-summary',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilePersonalRoute = ProfilePersonalRouteImport.update({
@@ -148,7 +148,7 @@ export interface FileRoutesByFullPath {
   '/health-check/start': typeof HealthCheckStartRoute
   '/profile/company': typeof ProfileCompanyRoute
   '/profile/personal': typeof ProfilePersonalRoute
-  '/report/executive-summary': typeof ReportExecutiveSummaryRoute
+  '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
   '/reports/revenue-system-health': typeof ReportsRevenueSystemHealthRoute
@@ -171,7 +171,7 @@ export interface FileRoutesByTo {
   '/health-check/start': typeof HealthCheckStartRoute
   '/profile/company': typeof ProfileCompanyRoute
   '/profile/personal': typeof ProfilePersonalRoute
-  '/report/executive-summary': typeof ReportExecutiveSummaryRoute
+  '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
   '/reports/revenue-system-health': typeof ReportsRevenueSystemHealthRoute
@@ -195,7 +195,7 @@ export interface FileRoutesById {
   '/health-check/start': typeof HealthCheckStartRoute
   '/profile/company': typeof ProfileCompanyRoute
   '/profile/personal': typeof ProfilePersonalRoute
-  '/report/executive-summary': typeof ReportExecutiveSummaryRoute
+  '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
   '/reports/revenue-system-health': typeof ReportsRevenueSystemHealthRoute
@@ -220,7 +220,7 @@ export interface FileRouteTypes {
     | '/health-check/start'
     | '/profile/company'
     | '/profile/personal'
-    | '/report/executive-summary'
+    | '/reports/executive-summary'
     | '/reports/founder-dependency'
     | '/reports/revenue-at-risk'
     | '/reports/revenue-system-health'
@@ -243,7 +243,7 @@ export interface FileRouteTypes {
     | '/health-check/start'
     | '/profile/company'
     | '/profile/personal'
-    | '/report/executive-summary'
+    | '/reports/executive-summary'
     | '/reports/founder-dependency'
     | '/reports/revenue-at-risk'
     | '/reports/revenue-system-health'
@@ -266,7 +266,7 @@ export interface FileRouteTypes {
     | '/health-check/start'
     | '/profile/company'
     | '/profile/personal'
-    | '/report/executive-summary'
+    | '/reports/executive-summary'
     | '/reports/founder-dependency'
     | '/reports/revenue-at-risk'
     | '/reports/revenue-system-health'
@@ -290,7 +290,7 @@ export interface RootRouteChildren {
   HealthCheckStartRoute: typeof HealthCheckStartRoute
   ProfileCompanyRoute: typeof ProfileCompanyRoute
   ProfilePersonalRoute: typeof ProfilePersonalRoute
-  ReportExecutiveSummaryRoute: typeof ReportExecutiveSummaryRoute
+  ReportsExecutiveSummaryRoute: typeof ReportsExecutiveSummaryRoute
   ReportsFounderDependencyRoute: typeof ReportsFounderDependencyRoute
   ReportsRevenueAtRiskRoute: typeof ReportsRevenueAtRiskRoute
   ReportsRevenueSystemHealthRoute: typeof ReportsRevenueSystemHealthRoute
@@ -419,11 +419,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsFounderDependencyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/report/executive-summary': {
-      id: '/report/executive-summary'
-      path: '/report/executive-summary'
-      fullPath: '/report/executive-summary'
-      preLoaderRoute: typeof ReportExecutiveSummaryRouteImport
+    '/reports/executive-summary': {
+      id: '/reports/executive-summary'
+      path: '/reports/executive-summary'
+      fullPath: '/reports/executive-summary'
+      preLoaderRoute: typeof ReportsExecutiveSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/personal': {
@@ -466,7 +466,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthCheckStartRoute: HealthCheckStartRoute,
   ProfileCompanyRoute: ProfileCompanyRoute,
   ProfilePersonalRoute: ProfilePersonalRoute,
-  ReportExecutiveSummaryRoute: ReportExecutiveSummaryRoute,
+  ReportsExecutiveSummaryRoute: ReportsExecutiveSummaryRoute,
   ReportsFounderDependencyRoute: ReportsFounderDependencyRoute,
   ReportsRevenueAtRiskRoute: ReportsRevenueAtRiskRoute,
   ReportsRevenueSystemHealthRoute: ReportsRevenueSystemHealthRoute,
@@ -483,3 +483,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
