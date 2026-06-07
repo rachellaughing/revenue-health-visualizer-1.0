@@ -407,6 +407,16 @@ function SystemSection({
   const lockedCount = childRows.filter((c) => c.illustrative).length;
   const visibleCount = childRows.length - lockedCount;
 
+  const sortedChildRows = isStarter
+    ? [...childRows].sort((a, b) => {
+        const aAssessed = selectedIds.has(a.id);
+        const bAssessed = selectedIds.has(b.id);
+        if (aAssessed && !bAssessed) return -1;
+        if (!aAssessed && bAssessed) return 1;
+        return 0;
+      })
+    : childRows;
+
   return (
     <div
       style={{
