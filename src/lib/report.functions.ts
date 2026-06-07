@@ -2227,3 +2227,354 @@ export const getShadowSystems = createServerFn({ method: "POST" })
     return { tier, state: "ready", shadows, systemsCount };
   });
 
+
+// ---------------------------------------------------------------------------
+// Roadmap Builder
+// ---------------------------------------------------------------------------
+
+export type RoadmapHorizon = "quick_win" | "30_days" | "90_days" | "120_days";
+
+export type RoadmapItem = {
+  code: string;            // child system code
+  childSystemId: string;   // uuid, used to persist
+  name: string;
+  parent: string;
+  parentCode: string;
+  color: string;
+  healthScore: number;
+  effort: "low" | "medium" | "high";
+  horizon: RoadmapHorizon;
+  title: string;
+  why: string;
+  tasks: string[];
+  outcomes: string[];
+  kpis: string[];
+};
+
+export type RoadmapSelection = { code: string; horizon: RoadmapHorizon };
+
+export type RoadmapData = {
+  tier: Tier;
+  assessmentId: string | null;     // null => no persistence (illustrative)
+  items: RoadmapItem[];
+  selections: RoadmapSelection[];
+};
+
+const PARENT_COLOR_BY_CODE: Record<string, string> = {
+  POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B",
+};
+
+// Authoritative pre-written content (from prototype) keyed by child system code.
+const ROADMAP_CONTENT: Record<string, Pick<RoadmapItem, "title" | "why" | "tasks" | "outcomes" | "kpis">> = {
+  ICP: {
+    title: "Write a one-page ICP definition",
+    why: "Your ICP score is fragile and your tracking score shows it is not operationalised. A written ICP document stops the drift.",
+    tasks: [
+      "List the 10 best customers you have ever had and identify 3 things they have in common",
+      "Define 3 firmographic must-haves and 2 hard disqualifiers",
+      "Write a one-page ICP brief — company, role, trigger, and outcome they need",
+      "Share with the sales team and test: can they use it to qualify the next 5 inbound leads?",
+    ],
+    outcomes: ["Consistent qualification across the team", "Fewer poor-fit customers entering the funnel", "Shorter sales cycles on average"],
+    kpis: ["% of new deals matching ICP criteria", "Close rate on ICP-matched vs non-matched leads", "Time to qualify inbound leads"],
+  },
+  TST: {
+    title: "Collect 3 outcome-specific testimonials",
+    why: "You have happy customers but limited documented proof. Three specific outcome testimonials would materially improve conversion.",
+    tasks: [
+      "Identify 3 customers with measurable outcomes (revenue impact, time saved, retention improvement)",
+      "Send a structured request: ask for the specific before/after result, not general satisfaction",
+      "Format each as a one-paragraph case study with the outcome in the first sentence",
+      "Add to website, sales deck, and email sequences",
+    ],
+    outcomes: ["Stronger social proof in sales conversations", "Reduced buyer uncertainty at evaluation stage", "More referrals from case study customers"],
+    kpis: ["Number of case studies on website", "Sales deck usage rate", "Referral rate from featured customers"],
+  },
+  FC: {
+    title: "Build a basic revenue forecast model",
+    why: "You cannot make confident growth decisions without a forecast. Even a simple model beats running on instinct.",
+    tasks: [
+      "Define your 3 leading indicators (pipeline stage, ACV, close rate by stage)",
+      "Build a simple weighted pipeline model in a spreadsheet or your CRM",
+      "Run a monthly forecast meeting — 30 mins, same format each time",
+      "Track forecast accuracy vs actuals for 2 months before declaring it reliable",
+    ],
+    outcomes: ["Confident revenue projections for board and planning", "Early warning when pipeline is thin", "Reduced end-of-quarter scramble"],
+    kpis: ["Forecast vs actual variance (target: within 15%)", "Pipeline coverage ratio", "Time spent on manual reporting"],
+  },
+  SP: {
+    title: "Document the sales process in one page",
+    why: "Your sales process works when the right person runs it. It needs to work when any qualified person runs it.",
+    tasks: [
+      "Map the 5-7 stages of your current sales process as it actually happens (not how it should)",
+      "Define the entry criteria for each stage — what has to be true to advance?",
+      "Identify the 2-3 actions the founder takes that no one else does — these are handoff risks",
+      "Write it up. One page. Test it: have an AE walk a new deal through it without asking you",
+    ],
+    outcomes: ["Consistent close rates across reps", "Deals advance without founder involvement", "Reliable stage-based forecasting"],
+    kpis: ["Close rate by rep (should converge)", "Average days per stage", "Deals closed without founder involvement"],
+  },
+  RET: {
+    title: "Define 3 early warning signals for churn",
+    why: "Retention is your most critical gap. You cannot fix churn you cannot see coming.",
+    tasks: [
+      "Look at your last 5 churned customers — what did they have in common 60 days before they left?",
+      "Define 3 measurable signals (login frequency drop, support tickets, NPS decline, etc.)",
+      "Assign a CS owner to monitor these weekly per account",
+      "Create a simple escalation protocol: what happens when a signal fires?",
+    ],
+    outcomes: ["Earlier intervention before customers decide to leave", "Reduced reactive firefighting", "Improved retention rate over 2 quarters"],
+    kpis: ["Early warning signal hit rate", "Save rate on at-risk accounts", "Net revenue retention"],
+  },
+  COB: {
+    title: "Build a documented onboarding playbook",
+    why: "Inconsistent onboarding creates inconsistent outcomes which creates unpredictable retention.",
+    tasks: [
+      "Map your current onboarding steps for your top 3 customer types",
+      "Identify the moments where onboarding currently varies by rep or by customer",
+      "Define a standard 30-day success milestone for each customer type",
+      "Document the playbook and pilot with the next 3 new customers",
+      "Measure: time to first value, completion rate, 90-day retention of pilot cohort",
+    ],
+    outcomes: ["Consistent time-to-value across customers", "Reduced CS time per onboarding", "Higher 90-day retention"],
+    kpis: ["Average time to first value", "Onboarding completion rate", "90-day retention by cohort"],
+  },
+  KPI: {
+    title: "Define and distribute a revenue KPI framework",
+    why: "Your tracking score shows KPIs exist but are not embedded operationally. The team needs to own specific numbers.",
+    tasks: [
+      "Define 8-12 revenue KPIs across the 5 systems — no more",
+      "Assign an owner to each KPI (not the founder)",
+      "Build or identify the data source for each KPI",
+      "Run a weekly 30-min revenue review — each owner reports their number",
+      "After 60 days: which KPIs are being ignored? Fix or remove them",
+    ],
+    outcomes: ["Revenue visibility distributed across the team", "Earlier detection of performance gaps", "Reduced founder reporting burden"],
+    kpis: ["Number of KPIs with assigned non-founder owners", "Review meeting attendance", "Time founder spends on reporting"],
+  },
+  DG: {
+    title: "Build a demand generation engine that runs without the founder",
+    why: "Current demand generation relies too heavily on founder relationships and network. You need a repeatable system.",
+    tasks: [
+      "Audit current pipeline sources — what % comes from founder relationships vs scalable channels?",
+      "Pick 2 channels to invest in that do not require founder involvement",
+      "Define 90-day targets for each channel",
+      "Assign a non-founder owner to each channel with a budget and measurement framework",
+      "After 90 days: cut what is not working, double down on what is",
+    ],
+    outcomes: ["Pipeline that grows without founder activity", "Diversified lead sources", "Predictable inbound volume"],
+    kpis: ["% of pipeline from non-founder sources", "Cost per qualified lead by channel", "Channel conversion rates"],
+  },
+};
+
+// Illustrative items shown when no real assessment data exists
+const ILLUSTRATIVE_CODES: { code: string; name: string; parent: string; parentCode: string; healthScore: number }[] = [
+  { code: "ICP", name: "Ideal Customer Profile", parent: "Positioning", parentCode: "POS", healthScore: 48 },
+  { code: "TST", name: "Testimonials", parent: "Authority", parentCode: "AUTH", healthScore: 65 },
+  { code: "FC", name: "Forecasting", parent: "Visibility", parentCode: "VIS", healthScore: 52 },
+  { code: "SP", name: "Sales Process", parent: "Lifecycle", parentCode: "LFC", healthScore: 52 },
+  { code: "RET", name: "Retention", parent: "Lifecycle", parentCode: "LFC", healthScore: 38 },
+  { code: "COB", name: "Customer Onboarding", parent: "Lifecycle", parentCode: "LFC", healthScore: 44 },
+  { code: "KPI", name: "KPI Frameworks", parent: "Visibility", parentCode: "VIS", healthScore: 75 },
+  { code: "DG", name: "Demand Generation", parent: "Conversion", parentCode: "CONV", healthScore: 69 },
+];
+
+function horizonFor(health: number, tracking: number): RoadmapHorizon {
+  if (health < 50 && tracking < 40) return "quick_win";
+  if (health < 60) return "30_days";
+  if (health < 70) return "90_days";
+  return "120_days";
+}
+
+function effortFor(health: number): "low" | "medium" | "high" {
+  if (health < 50) return "low";
+  if (health < 65) return "medium";
+  return "high";
+}
+
+function defaultContent(name: string, parent: string, failure?: { core_symptoms?: string | null; likely_root_causes?: string | null }) {
+  const symptoms = failure?.core_symptoms ?? `${name} is not yet operating at full strength.`;
+  const causes = failure?.likely_root_causes ?? `Your ${name} score indicates structural gaps that need attention.`;
+  return {
+    title: `Improve ${name}`,
+    why: causes,
+    tasks: [
+      `Audit your current ${name.toLowerCase()} approach end to end`,
+      `Identify the 2–3 highest-impact gaps and assign owners`,
+      `Define what good looks like — written, one page, sharable`,
+      `Set a 30-day checkpoint to measure progress`,
+    ],
+    outcomes: [
+      `A clear, documented ${name.toLowerCase()} approach`,
+      `Reduced founder involvement in day-to-day execution`,
+      `Measurable progress against ${parent} system goals`,
+    ],
+    kpis: [
+      `${name} health score (target: +15 points in 90 days)`,
+      `Owner accountability rate`,
+      `Cycle time for ${name.toLowerCase()} decisions`,
+    ],
+  };
+}
+
+const roadmapSchema = z.object({}).optional();
+
+export const getRoadmap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => roadmapSchema.parse(d) ?? {})
+  .handler(async ({ context }): Promise<RoadmapData> => {
+    const userId = context.userId;
+
+    const profileRes = await supabaseAdmin
+      .from("profiles").select("tier").eq("user_id", userId).maybeSingle();
+    const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+
+    // Latest completed assessment (any tier may have one)
+    const { data: latest } = await supabaseAdmin
+      .from("assessments")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "completed")
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // Always load child_systems so we can map illustrative codes -> uuids
+    const [childRes, parentRes] = await Promise.all([
+      (supabaseAdmin as any).schema("revhealth2").from("child_systems").select("id,code,name,parent_system_id"),
+      (supabaseAdmin as any).schema("revhealth2").from("parent_systems").select("id,code,name,color_hex"),
+    ]);
+    const parents: any[] = parentRes.data ?? [];
+    const parentById = new Map<string, any>(parents.map((p: any) => [p.id, p]));
+    const children: any[] = childRes.data ?? [];
+    const childByCode = new Map<string, any>(children.map((c: any) => [c.code, c]));
+
+    let items: RoadmapItem[] = [];
+    let assessmentId: string | null = null;
+
+    if (latest) {
+      assessmentId = latest.id;
+      const [scoresRes, failureRes] = await Promise.all([
+        supabaseAdmin
+          .from("assessment_scores")
+          .select("child_system_id,health_score,tracking_score,severity")
+          .eq("assessment_id", latest.id),
+        (supabaseAdmin as any).schema("revhealth2").from("failure_map").select("child_system_id,core_symptoms,likely_root_causes"),
+      ]);
+      const failureByChild = new Map<string, any>();
+      for (const f of (failureRes.data ?? [])) failureByChild.set(f.child_system_id, f);
+
+      for (const s of (scoresRes.data ?? [])) {
+        const child = children.find((c: any) => c.id === s.child_system_id);
+        if (!child) continue;
+        const parent = parentById.get(child.parent_system_id);
+        if (!parent) continue;
+        const health = Number(s.health_score ?? 0);
+        const tracking = Number(s.tracking_score ?? 0);
+        const content = ROADMAP_CONTENT[child.code] ?? defaultContent(child.name, parent.name, failureByChild.get(child.id));
+        items.push({
+          code: child.code,
+          childSystemId: child.id,
+          name: child.name,
+          parent: parent.name,
+          parentCode: parent.code,
+          color: PARENT_COLOR_BY_CODE[parent.code] ?? `#${parent.color_hex}`,
+          healthScore: Math.round(health),
+          effort: effortFor(health),
+          horizon: horizonFor(health, tracking),
+          ...content,
+        });
+      }
+    }
+
+    if (items.length === 0) {
+      // Illustrative items (no scores yet) — still resolve childSystemId via code map
+      const fallbackHorizon: Record<string, RoadmapHorizon> = {
+        ICP: "quick_win", TST: "quick_win",
+        FC: "30_days", SP: "30_days", RET: "30_days",
+        COB: "90_days", KPI: "90_days",
+        DG: "120_days",
+      };
+      for (const ill of ILLUSTRATIVE_CODES) {
+        const child = childByCode.get(ill.code);
+        const content = ROADMAP_CONTENT[ill.code];
+        if (!content) continue;
+        items.push({
+          code: ill.code,
+          childSystemId: child?.id ?? "",
+          name: ill.name,
+          parent: ill.parent,
+          parentCode: ill.parentCode,
+          color: PARENT_COLOR_BY_CODE[ill.parentCode],
+          healthScore: ill.healthScore,
+          effort: effortFor(ill.healthScore),
+          horizon: fallbackHorizon[ill.code] ?? "30_days",
+          ...content,
+        });
+      }
+    }
+
+    // Saved selections (only if we have an assessment)
+    let selections: RoadmapSelection[] = [];
+    if (assessmentId) {
+      const { data: saved } = await supabaseAdmin
+        .from("roadmap_selections")
+        .select("child_system_id,horizon")
+        .eq("assessment_id", assessmentId);
+      const codeByChildId = new Map<string, string>(children.map((c: any) => [c.id, c.code]));
+      selections = (saved ?? [])
+        .map((r: any) => {
+          const code = codeByChildId.get(r.child_system_id);
+          if (!code) return null;
+          return { code, horizon: r.horizon as RoadmapHorizon };
+        })
+        .filter(Boolean) as RoadmapSelection[];
+    }
+
+    return { tier, assessmentId, items, selections };
+  });
+
+const saveSchema = z.object({
+  assessmentId: z.string().uuid(),
+  childSystemId: z.string().uuid(),
+  horizon: z.enum(["quick_win", "30_days", "90_days", "120_days"]),
+});
+
+export const saveRoadmapSelection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => saveSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const now = new Date().toISOString();
+    const { error } = await supabaseAdmin
+      .from("roadmap_selections")
+      .upsert(
+        {
+          assessment_id: data.assessmentId,
+          user_id: context.userId,
+          child_system_id: data.childSystemId,
+          horizon: data.horizon,
+          selected_at: now,
+          updated_at: now,
+        },
+        { onConflict: "assessment_id,child_system_id,horizon" },
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteRoadmapSelection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => saveSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await supabaseAdmin
+      .from("roadmap_selections")
+      .delete()
+      .match({
+        assessment_id: data.assessmentId,
+        user_id: context.userId,
+        child_system_id: data.childSystemId,
+        horizon: data.horizon,
+      });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
