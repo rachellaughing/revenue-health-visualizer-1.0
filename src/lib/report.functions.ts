@@ -112,7 +112,7 @@ async function loadCoreData(assessmentId: string, userId: string) {
         .maybeSingle(),
       supabaseAdmin
         .from("report_narratives")
-        .select("exec_headline,exec_body,top_risks")
+        .select("exec_headline,exec_body,top_risks,narrative_pos,narrative_auth,narrative_conv,narrative_lfc,narrative_vis")
         .eq("assessment_id", assessmentId)
         .maybeSingle(),
     ]);
