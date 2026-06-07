@@ -595,3 +595,50 @@ export const calculateAssessmentScores = createServerFn({ method: "POST" })
     if (data.userId !== context.userId) throw new Error("Forbidden");
     return _calculateAssessmentScoresImpl(data.assessmentId, context.userId);
   });
+
+// ---------------------------------------------------------------------------
+// startNewAssessment — explicit reassessment trigger
+// ---------------------------------------------------------------------------
+
+export const startNewAssessment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const userId = context.userId;
+
+    const { data: profile, error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .select("id,tier")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+
+    const tier = (profile?.tier ?? "starter") as "starter" | "pro" | "diagnostic";
+
+    // If there's already an in_progress one, reuse it instead of stacking duplicates.
+    const { data: existing, error: eErr } = await supabaseAdmin
+      .from("assessments")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "in_progress")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (eErr) throw new Error(eErr.message);
+    if (existing) return { ok: true as const, assessment_id: existing.id };
+
+    const { data: created, error: cErr } = await supabaseAdmin
+      .from("assessments")
+      .insert({
+        user_id: userId,
+        profile_id: profile?.id ?? null,
+        assessment_type: tier,
+        tier_at_start: tier,
+        status: "in_progress",
+        completion_pct: 0,
+      })
+      .select("id")
+      .single();
+    if (cErr) throw new Error(cErr.message);
+
+    return { ok: true as const, assessment_id: created.id };
+  });
