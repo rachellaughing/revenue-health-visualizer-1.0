@@ -1,0 +1,1 @@
+UPDATE auth.users SET email_confirmed_at = now() WHERE email = 'e2e-jane-1780795923@marketplacemaven.com';
