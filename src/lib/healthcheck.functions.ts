@@ -661,3 +661,77 @@ export const startNewAssessment = createServerFn({ method: "POST" })
 
     return { ok: true as const, assessment_id: created.id };
   });
+
+// ---------------------------------------------------------------------------
+// editCompletedResponse — edit answers on a completed assessment within
+// the 7-day edit window, then recompute scores.
+// ---------------------------------------------------------------------------
+
+const editSchema = z.object({
+  assessment_id: z.string().uuid(),
+  question_id: z.string().uuid(),
+  health_response: z.number().int().min(-1).max(4).nullable(),
+  tracking_response: z.number().int().min(1).max(5).nullable(),
+});
+
+const LOCK_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+export const editCompletedResponse = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => editSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+
+    const { data: asmt, error: oErr } = await supabaseAdmin
+      .from("assessments")
+      .select("id,user_id,status,submitted_at,completed_at")
+      .eq("id", data.assessment_id)
+      .maybeSingle();
+    if (oErr) throw new Error(oErr.message);
+    if (!asmt || asmt.user_id !== userId) throw new Error("Forbidden");
+    if (asmt.status !== "completed") throw new Error("Assessment is not completed");
+
+    const anchor = (asmt as any).submitted_at ?? (asmt as any).completed_at;
+    if (!anchor) throw new Error("Missing submission date");
+    const lockAt = new Date(anchor).getTime() + LOCK_WINDOW_MS;
+    if (Date.now() > lockAt) throw new Error("Edit window closed");
+
+    const { data: existing, error: eErr } = await supabaseAdmin
+      .from("assessment_responses")
+      .select("id")
+      .eq("assessment_id", data.assessment_id)
+      .eq("question_id", data.question_id)
+      .maybeSingle();
+    if (eErr) throw new Error(eErr.message);
+
+    if (existing) {
+      const { error: uErr } = await supabaseAdmin
+        .from("assessment_responses")
+        .update({
+          health_response: data.health_response,
+          tracking_response: data.tracking_response,
+          answered_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id);
+      if (uErr) throw new Error(uErr.message);
+    } else {
+      const { error: iErr } = await supabaseAdmin
+        .from("assessment_responses")
+        .insert({
+          assessment_id: data.assessment_id,
+          user_id: userId,
+          question_id: data.question_id,
+          health_response: data.health_response,
+          tracking_response: data.tracking_response,
+        });
+      if (iErr) throw new Error(iErr.message);
+    }
+
+    try {
+      await _calculateAssessmentScoresImpl(data.assessment_id, userId);
+    } catch (err) {
+      console.error("[edit] score recalc failed:", err);
+    }
+
+    return { ok: true as const };
+  });
