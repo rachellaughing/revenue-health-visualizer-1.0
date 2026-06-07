@@ -656,6 +656,7 @@ export type Database = {
           company_profile_complete: boolean
           coupon_code_used: string | null
           created_at: string | null
+          diagnostic_purchased_at: string | null
           email: string | null
           first_name: string | null
           full_name: string | null
@@ -671,6 +672,9 @@ export type Database = {
           profile_photo_url: string | null
           role_title: string | null
           stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          stripe_subscription_status: string | null
+          subscription_current_period_end: string | null
           team_owner_id: string | null
           tier: Database["public"]["Enums"]["user_tier"]
           updated_at: string | null
@@ -685,6 +689,7 @@ export type Database = {
           company_profile_complete?: boolean
           coupon_code_used?: string | null
           created_at?: string | null
+          diagnostic_purchased_at?: string | null
           email?: string | null
           first_name?: string | null
           full_name?: string | null
@@ -700,6 +705,9 @@ export type Database = {
           profile_photo_url?: string | null
           role_title?: string | null
           stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_status?: string | null
+          subscription_current_period_end?: string | null
           team_owner_id?: string | null
           tier?: Database["public"]["Enums"]["user_tier"]
           updated_at?: string | null
@@ -714,6 +722,7 @@ export type Database = {
           company_profile_complete?: boolean
           coupon_code_used?: string | null
           created_at?: string | null
+          diagnostic_purchased_at?: string | null
           email?: string | null
           first_name?: string | null
           full_name?: string | null
@@ -729,6 +738,9 @@ export type Database = {
           profile_photo_url?: string | null
           role_title?: string | null
           stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          stripe_subscription_status?: string | null
+          subscription_current_period_end?: string | null
           team_owner_id?: string | null
           tier?: Database["public"]["Enums"]["user_tier"]
           updated_at?: string | null
