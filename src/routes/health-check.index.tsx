@@ -114,6 +114,8 @@ function HealthCheckShell({
   const [responses, setResponses] = useState<ResponseMap>(initialResponses);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>({});
+  const [manuallyExpanded, setManuallyExpanded] = useState<Record<string, boolean>>({});
   const [completedBanner, setCompletedBanner] = useState(
     assessment.status === "completed",
   );
@@ -320,25 +322,37 @@ function HealthCheckShell({
   );
 
   function setHealth(area: Area, value: number) {
+    const qid = area.question_id;
     setResponses((prev) => {
-      const cur = prev[area.question_id] ?? { health: null, tracking: null };
+      const cur = prev[qid] ?? { health: null, tracking: null };
       const next = { ...cur, health: value };
-      persist(area.question_id, next.health, next.tracking);
-      return { ...prev, [area.question_id]: next };
+      persist(qid, next.health, next.tracking);
+      return { ...prev, [qid]: next };
     });
+    // Changing health re-opens the card so the user can pick tracking again
+    setAutoCollapsed((s) => ({ ...s, [qid]: false }));
+    setManuallyExpanded((s) => ({ ...s, [qid]: false }));
     if (value === -1) {
-      setTimeout(() => advanceToNext(area), 300);
+      setTimeout(() => {
+        setAutoCollapsed((s) => ({ ...s, [qid]: true }));
+      }, 600);
+      setTimeout(() => advanceToNext(area), 700);
     }
   }
 
   function setTracking(area: Area, value: number) {
+    const qid = area.question_id;
     setResponses((prev) => {
-      const cur = prev[area.question_id] ?? { health: null, tracking: null };
+      const cur = prev[qid] ?? { health: null, tracking: null };
       const next = { ...cur, tracking: value };
-      persist(area.question_id, next.health, next.tracking);
-      return { ...prev, [area.question_id]: next };
+      persist(qid, next.health, next.tracking);
+      return { ...prev, [qid]: next };
     });
-    setTimeout(() => advanceToNext(area), 400);
+    setManuallyExpanded((s) => ({ ...s, [qid]: false }));
+    setTimeout(() => {
+      setAutoCollapsed((s) => ({ ...s, [qid]: true }));
+    }, 600);
+    setTimeout(() => advanceToNext(area), 700);
   }
 
   function advanceToNext(area: Area) {
@@ -933,6 +947,114 @@ function HealthCheckShell({
                 const isSkipped = r.health === -1;
                 const isComplete =
                   r.health !== null && r.health > 0 && r.tracking !== null;
+                const collapsed =
+                  (isComplete || isSkipped) &&
+                  autoCollapsed[area.question_id] &&
+                  !manuallyExpanded[area.question_id];
+
+                if (collapsed) {
+                  const healthLabel =
+                    isSkipped || r.health === null || r.health <= 0
+                      ? "Skipped"
+                      : HEALTH_LABELS[r.health - 1];
+                  const trackingLabel =
+                    !isSkipped && r.tracking !== null
+                      ? TRACKING_LABELS[r.tracking - 1]
+                      : null;
+                  return (
+                    <div
+                      key={area.id}
+                      ref={(el) => {
+                        cardRefs.current[area.question_id] = el;
+                      }}
+                      className="hc-card-compact"
+                      onClick={() =>
+                        setManuallyExpanded((s) => ({
+                          ...s,
+                          [area.question_id]: true,
+                        }))
+                      }
+                      style={{
+                        background: T.paper,
+                        border: `1px solid ${
+                          isSkipped ? "rgba(136,136,128,0.3)" : `${systemColor}4D`
+                        }`,
+                        borderRadius: 12,
+                        marginBottom: 14,
+                        height: 44,
+                        padding: "10px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        cursor: "pointer",
+                        fontFamily: "Inter, sans-serif",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: isSkipped ? T.mid : T.tealBright,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          width: 14,
+                          display: "inline-block",
+                          textAlign: "center",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {isSkipped ? "○" : "✓"}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: isSkipped ? T.mid : systemColor,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        {area.name}
+                      </span>
+                      <span style={{ color: T.mid, fontSize: 12 }}>·</span>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: T.mid,
+                          fontStyle: isSkipped ? "italic" : "normal",
+                        }}
+                      >
+                        {healthLabel}
+                      </span>
+                      {trackingLabel && (
+                        <>
+                          <span style={{ color: T.mid, fontSize: 12 }}>·</span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: T.mid,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {trackingLabel}
+                          </span>
+                        </>
+                      )}
+                      <span
+                        className="hc-card-edit"
+                        style={{
+                          marginLeft: "auto",
+                          fontSize: 11,
+                          color: T.teal,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {isSkipped ? "Answer this →" : "Edit →"}
+                      </span>
+                    </div>
+                  );
+                }
+
                 return (
                   <div
                     key={area.id}
