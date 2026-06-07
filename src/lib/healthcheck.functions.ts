@@ -235,6 +235,13 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 
     const fw = await loadFrameworkAndResponses(assessment!.id);
 
+    // Per-child scores (if calculated)
+    const { data: scoresData, error: scErr } = await supabaseAdmin
+      .from("assessment_scores")
+      .select("child_system_id,health_score,tracking_score")
+      .eq("assessment_id", assessment!.id);
+    if (scErr) console.error("[health-check] scores fetch failed:", scErr.message);
+
     // Convert stored UUIDs back to child system codes for the UI
     const storedIds = (assessment!.selected_child_ids ?? []) as string[];
     const selectedCodes = storedIds
@@ -257,11 +264,14 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
         status: assessment!.status,
         completion_pct: assessment!.completion_pct ?? 0,
         selected_child_ids: selectedCodes,
+        submitted_at: (assessment as any).submitted_at ?? null,
+        completed_at: (assessment as any).completed_at ?? null,
       },
       parents: fw.parents,
       children: fw.children,
       areas: fw.areas,
       responses: fw.responses,
+      scores: (scoresData ?? []) as AssessmentScoreRow[],
       totalUnlockedAreas: total,
     };
   });
