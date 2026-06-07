@@ -322,25 +322,37 @@ function HealthCheckShell({
   );
 
   function setHealth(area: Area, value: number) {
+    const qid = area.question_id;
     setResponses((prev) => {
-      const cur = prev[area.question_id] ?? { health: null, tracking: null };
+      const cur = prev[qid] ?? { health: null, tracking: null };
       const next = { ...cur, health: value };
-      persist(area.question_id, next.health, next.tracking);
-      return { ...prev, [area.question_id]: next };
+      persist(qid, next.health, next.tracking);
+      return { ...prev, [qid]: next };
     });
+    // Changing health re-opens the card so the user can pick tracking again
+    setAutoCollapsed((s) => ({ ...s, [qid]: false }));
+    setManuallyExpanded((s) => ({ ...s, [qid]: false }));
     if (value === -1) {
-      setTimeout(() => advanceToNext(area), 300);
+      setTimeout(() => {
+        setAutoCollapsed((s) => ({ ...s, [qid]: true }));
+      }, 600);
+      setTimeout(() => advanceToNext(area), 700);
     }
   }
 
   function setTracking(area: Area, value: number) {
+    const qid = area.question_id;
     setResponses((prev) => {
-      const cur = prev[area.question_id] ?? { health: null, tracking: null };
+      const cur = prev[qid] ?? { health: null, tracking: null };
       const next = { ...cur, tracking: value };
-      persist(area.question_id, next.health, next.tracking);
-      return { ...prev, [area.question_id]: next };
+      persist(qid, next.health, next.tracking);
+      return { ...prev, [qid]: next };
     });
-    setTimeout(() => advanceToNext(area), 400);
+    setManuallyExpanded((s) => ({ ...s, [qid]: false }));
+    setTimeout(() => {
+      setAutoCollapsed((s) => ({ ...s, [qid]: true }));
+    }, 600);
+    setTimeout(() => advanceToNext(area), 700);
   }
 
   function advanceToNext(area: Area) {
