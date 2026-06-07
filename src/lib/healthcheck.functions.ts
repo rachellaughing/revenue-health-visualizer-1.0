@@ -258,7 +258,7 @@ export const saveResponse = createServerFn({ method: "POST" })
     // verify ownership
     const { data: asmt, error: oErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,user_id,status")
+      .select("id,user_id,status,selected_child_ids")
       .eq("id", data.assessment_id)
       .maybeSingle();
     if (oErr) throw new Error(oErr.message);
