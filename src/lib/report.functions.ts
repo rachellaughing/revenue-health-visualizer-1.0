@@ -1889,3 +1889,247 @@ export const getTeamAlignment = createServerFn({ method: "POST" })
     };
   });
 
+// ============================================================================
+// Founder Dependency
+// ============================================================================
+
+export type FDProcess = {
+  code: string;
+  systemName: string;
+  name: string;
+  type: "healthy" | "dangerous";
+  risk: number; // 1-5
+  difficulty: "easy" | "medium" | "hard";
+  window: "immediate" | "1-7 days" | "7-30 days" | "30-90 days";
+  whyDependent: string;
+  firstStep: string;
+};
+
+export type FDSystem = {
+  code: string;
+  name: string;
+  color: string;
+  type: "healthy" | "dangerous" | "mixed";
+  level: number;
+  handoffReadiness: string;
+  narrative: string | null;
+};
+
+export type FounderDependencyData = {
+  tier: Tier;
+  state: "ready" | "pending" | "preview";
+  preliminary: boolean;
+  profile: { first_name: string | null; company_name: string | null };
+  assessment: { id: string; submitted_at: string | null };
+  overall: {
+    index: number;
+    label: string; // "critical" | "high" | "moderate" | "low"
+    executiveSummary: string | null;
+    blastRadiusNarrative: string | null;
+  };
+  systems: FDSystem[];
+  processes: FDProcess[];
+};
+
+const ILLUSTRATIVE_FD_SYSTEMS: Record<string, { type: "healthy" | "dangerous" | "mixed"; level: number; handoffReadiness: string; narrative: string }> = {
+  POS: {
+    type: "mixed", level: 65,
+    handoffReadiness: "A documented positioning brief and ICP criteria need to exist before this can be delegated. Currently the positioning lives in the founder's head and surfaces differently in every sales conversation.",
+    narrative: "Positioning is mixed — the founder has a sophisticated understanding of the market position that is not yet operationalised. The strategic positioning is healthy founder ownership. The day-to-day execution inconsistency is dangerous dependency.",
+  },
+  AUTH: {
+    type: "healthy", level: 25,
+    handoffReadiness: "Content strategy is partially documented. Thought leadership can be delegated with a clear editorial calendar and POV document.",
+    narrative: "Authority is the healthiest system from a dependency perspective. The team produces content independently. The founder's role here is appropriate — setting strategic direction, not executing.",
+  },
+  CONV: {
+    type: "dangerous", level: 88,
+    handoffReadiness: "A documented sales playbook with stage criteria and a defined qualification process is the prerequisite. Until deals can progress without the founder, this system cannot scale.",
+    narrative: "Conversion is the highest-risk dependency in the business. The founder closes the majority of significant deals personally. The team lacks a documented process that works without them.",
+  },
+  LFC: {
+    type: "dangerous", level: 71,
+    handoffReadiness: "Onboarding documentation and a defined CS handoff process are the immediate prerequisites. Retention monitoring needs a system, not a person.",
+    narrative: "Lifecycle has dangerous dependency concentrated in onboarding and retention. New customers are onboarded differently depending on who handles them. Retention decisions run through the founder because there is no early warning system.",
+  },
+  VIS: {
+    type: "dangerous", level: 82,
+    handoffReadiness: "A shared dashboard with defined KPIs and a weekly revenue review cadence would reduce this dependency significantly. The team needs to be able to see the same data the founder sees.",
+    narrative: "Visibility is acutely founder-dependent. The founder is the only person with a reliable picture of revenue performance. The team makes decisions based on incomplete information.",
+  },
+};
+
+const ILLUSTRATIVE_FD_PROCESSES: Array<Omit<FDProcess, "systemName">> = [
+  { code: "CONV", name: "Closes all enterprise deals personally", type: "dangerous", risk: 5, difficulty: "hard", window: "immediate", whyDependent: "No documented close methodology. Team lacks confidence in late-stage negotiation without founder involvement.", firstStep: "Shadow 3 deals, document the close framework, trial-close 1 deal independently with founder available." },
+  { code: "VIS",  name: "Only person who interprets revenue data", type: "dangerous", risk: 5, difficulty: "medium", window: "immediate", whyDependent: "No shared dashboard. Revenue data lives across 3 tools only the founder knows how to reconcile.", firstStep: "Build a single revenue dashboard with definitions agreed by the team. Weekly 30-min revenue review with team." },
+  { code: "LFC",  name: "Personally manages at-risk customer relationships", type: "dangerous", risk: 4, difficulty: "medium", window: "1-7 days", whyDependent: "No early warning system. CS escalates to the founder reactively when a customer goes quiet.", firstStep: "Define 3 early warning signals. Assign CS owner per account with escalation criteria." },
+  { code: "CONV", name: "Approves all discounts and pricing exceptions", type: "dangerous", risk: 4, difficulty: "easy", window: "1-7 days", whyDependent: "No pricing authority matrix. Every non-standard deal requires founder sign-off.", firstStep: "Document a tiered pricing authority matrix — define what CS/AE can approve without escalation." },
+  { code: "POS",  name: "Sole articulator of market positioning to new hires", type: "dangerous", risk: 3, difficulty: "easy", window: "7-30 days", whyDependent: "Positioning brief does not exist in written form. New hires learn it through osmosis.", firstStep: "Write a 1-page positioning brief. Add to onboarding. Test: ask 3 team members to pitch the company." },
+  { code: "VIS",  name: "Board reporting relies entirely on founder preparation", type: "dangerous", risk: 4, difficulty: "medium", window: "7-30 days", whyDependent: "No automated reporting. Every board pack is built manually by the founder.", firstStep: "Build a board report template. Assign data ownership to each section. Automate data pulls." },
+  { code: "LFC",  name: "Personally onboards all new customers", type: "dangerous", risk: 3, difficulty: "medium", window: "30-90 days", whyDependent: "Onboarding is undocumented and varies by customer. The founder handles the complex ones directly.", firstStep: "Document the onboarding process for the top 3 customer types. Pilot with CS team on next 2 customers." },
+  { code: "POS",  name: "Sets overall market strategy and direction", type: "healthy", risk: 1, difficulty: "hard", window: "30-90 days", whyDependent: "Appropriate founder ownership at Seed stage. Strategy should be founder-led.", firstStep: "Begin involving a senior hire in strategic planning sessions to build context for future transition." },
+  { code: "AUTH", name: "Defines thought leadership point of view", type: "healthy", risk: 1, difficulty: "medium", window: "30-90 days", whyDependent: "Thought leadership authentically requires founder voice at this stage. Not a risk.", firstStep: "Document the core POV so it can be expressed by others in writing and sales conversations." },
+  { code: "AUTH", name: "Reviews and approves content before publication", type: "healthy", risk: 2, difficulty: "easy", window: "30-90 days", whyDependent: "Quality control appropriate now. Should transition to editorial standards document.", firstStep: "Create a content standards document. Pilot self-approval for lower-stakes content." },
+];
+
+const ILLUSTRATIVE_EXEC_SUMMARY = "The company has built a functional and growing business, but it runs significantly through the founder. Sales, strategic positioning, and most revenue-critical decisions require founder involvement. This is common at Seed stage and not inherently problematic — but the current dependency profile will create a structural ceiling before Series A close rates and team scalability can support the next phase of growth. The three highest-risk dependency areas are Sales Process, Revenue Visibility, and Positioning — all of which require founder presence to function reliably.";
+
+function depLabel(index: number): string {
+  if (index > 70) return "high";
+  if (index > 50) return "moderate";
+  if (index > 30) return "low-moderate";
+  return "low";
+}
+
+export const getFounderDependency = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .handler(async ({ data, context }): Promise<FounderDependencyData | { error: "no_completed_assessment" }> => {
+    const userId = context.userId;
+
+    let assessmentId = data?.assessmentId;
+    if (!assessmentId) {
+      const { data: latest } = await supabaseAdmin
+        .from("assessments")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!latest) return { error: "no_completed_assessment" as const };
+      assessmentId = latest.id;
+    }
+
+    const [profileRes, companyRes, asmtRes, parentsRes, scoresRes, fdScoreRes, fdSystemsRes, fdProcRes] =
+      await Promise.all([
+        supabaseAdmin.from("profiles").select("first_name,tier").eq("user_id", userId).maybeSingle(),
+        supabaseAdmin.from("company_profiles").select("company_name").eq("user_id", userId).maybeSingle(),
+        supabaseAdmin.from("assessments").select("id,user_id,submitted_at").eq("id", assessmentId).maybeSingle(),
+        (supabaseAdmin as any).schema("revhealth2").from("parent_systems").select("id,code,name,color_hex,sort_order"),
+        supabaseAdmin.from("assessment_scores").select("tracking_score,health_score,is_soft_shadow,is_hard_shadow").eq("assessment_id", assessmentId).eq("user_id", userId),
+        supabaseAdmin.from("founder_dependency_scores").select("overall_dependency_index,dependency_label,executive_summary,blast_radius_narrative").eq("assessment_id", assessmentId).eq("owner_id", userId).maybeSingle(),
+        supabaseAdmin.from("founder_dependency_systems").select("parent_system_id,dependency_type,dependency_level,handoff_readiness,narrative").eq("assessment_id", assessmentId).eq("owner_id", userId),
+        supabaseAdmin.from("founder_dependency_processes").select("parent_system_id,process_name,why_founder_dependent,risk_level,delegation_difficulty,recommended_first_step,blast_radius_window,dependency_type,sort_order").eq("assessment_id", assessmentId).eq("owner_id", userId).order("sort_order"),
+      ]);
+
+    if (!asmtRes.data) throw new Error("Assessment not found");
+    if (asmtRes.data.user_id !== userId) throw new Error("Forbidden");
+
+    const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+    const parents = (parentsRes.data ?? []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+    const parentByCode = new Map<string, any>();
+    const parentById = new Map<string, any>();
+    for (const p of parents) { parentByCode.set(p.code, p); parentById.set(p.id, p); }
+
+    const fdScore = fdScoreRes.data;
+    const fdSystems = (fdSystemsRes.data ?? []) as any[];
+    const fdProc = (fdProcRes.data ?? []) as any[];
+    const scores = (scoresRes.data ?? []) as any[];
+
+    const hasRealFD = tier === "diagnostic" && !!fdScore && fdSystems.length > 0;
+
+    let state: FounderDependencyData["state"];
+    let preliminary = false;
+    if (tier === "starter") state = "preview";
+    else if (tier === "diagnostic" && hasRealFD) state = "ready";
+    else if (tier === "diagnostic") { state = "pending"; preliminary = true; }
+    else { state = "preview"; preliminary = true; } // pro: illustrative w/ derived index
+
+    // Derive preliminary index from assessment_scores
+    let derivedIndex = 0;
+    if (scores.length > 0) {
+      const sum = scores.reduce((s, r) => s + (100 - Number(r.tracking_score ?? 0)), 0);
+      derivedIndex = Math.round(sum / scores.length);
+    }
+
+    let overallIndex: number;
+    let overallLabel: string;
+    let executiveSummary: string | null = null;
+    let blastRadiusNarrative: string | null = null;
+
+    if (state === "ready") {
+      overallIndex = Math.round(Number(fdScore!.overall_dependency_index ?? 0));
+      overallLabel = fdScore!.dependency_label ?? depLabel(overallIndex);
+      executiveSummary = fdScore!.executive_summary ?? null;
+      blastRadiusNarrative = fdScore!.blast_radius_narrative ?? null;
+    } else if (state === "pending") {
+      overallIndex = derivedIndex;
+      overallLabel = depLabel(overallIndex);
+    } else {
+      // preview (starter or pro illustrative)
+      overallIndex = tier === "pro" && derivedIndex > 0 ? derivedIndex : 74;
+      overallLabel = depLabel(overallIndex);
+      executiveSummary = ILLUSTRATIVE_EXEC_SUMMARY;
+    }
+
+    // Systems
+    let systems: FDSystem[];
+    if (state === "ready") {
+      systems = parents.map((p: any) => {
+        const row = fdSystems.find((r) => r.parent_system_id === p.id);
+        return {
+          code: p.code,
+          name: p.name,
+          color: `#${p.color_hex}`,
+          type: (row?.dependency_type ?? "healthy") as FDSystem["type"],
+          level: Math.round(Number(row?.dependency_level ?? 0)),
+          handoffReadiness: row?.handoff_readiness ?? "",
+          narrative: row?.narrative ?? null,
+        };
+      });
+    } else {
+      systems = parents.map((p: any) => {
+        const ill = ILLUSTRATIVE_FD_SYSTEMS[p.code] ?? { type: "healthy" as const, level: 30, handoffReadiness: "", narrative: "" };
+        return {
+          code: p.code,
+          name: p.name,
+          color: `#${p.color_hex}`,
+          type: ill.type,
+          level: ill.level,
+          handoffReadiness: ill.handoffReadiness,
+          narrative: tier === "diagnostic" ? ill.narrative : null,
+        };
+      });
+    }
+
+    // Processes
+    let processes: FDProcess[];
+    if (state === "ready") {
+      processes = fdProc.map((r) => {
+        const p = parentById.get(r.parent_system_id);
+        return {
+          code: p?.code ?? "",
+          systemName: p?.name ?? "",
+          name: r.process_name ?? "",
+          type: (r.dependency_type ?? "dangerous") as "healthy" | "dangerous",
+          risk: Math.max(1, Math.min(5, Number(r.risk_level ?? 1))),
+          difficulty: (r.delegation_difficulty ?? "medium") as "easy" | "medium" | "hard",
+          window: (r.blast_radius_window ?? "30-90 days") as FDProcess["window"],
+          whyDependent: r.why_founder_dependent ?? "",
+          firstStep: r.recommended_first_step ?? "",
+        };
+      });
+    } else if (state === "pending") {
+      processes = [];
+    } else {
+      processes = ILLUSTRATIVE_FD_PROCESSES.map((p) => ({
+        ...p,
+        systemName: parentByCode.get(p.code)?.name ?? p.code,
+      }));
+    }
+
+    return {
+      tier,
+      state,
+      preliminary,
+      profile: {
+        first_name: profileRes.data?.first_name ?? null,
+        company_name: companyRes.data?.company_name ?? null,
+      },
+      assessment: { id: asmtRes.data.id, submitted_at: asmtRes.data.submitted_at },
+      overall: { index: overallIndex, label: overallLabel, executiveSummary, blastRadiusNarrative },
+      systems,
+      processes,
+    };
+  });
