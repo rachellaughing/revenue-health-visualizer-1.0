@@ -453,6 +453,13 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
         headline: core.narrative.exec_headline,
         body: core.narrative.exec_body,
         risks: core.narrative.top_risks as RiskItem[],
+        systems: {
+          POS: (core.narrative as any).narrative_pos ?? null,
+          AUTH: (core.narrative as any).narrative_auth ?? null,
+          CONV: (core.narrative as any).narrative_conv ?? null,
+          LFC: (core.narrative as any).narrative_lfc ?? null,
+          VIS: (core.narrative as any).narrative_vis ?? null,
+        },
       };
     } else {
       try {
