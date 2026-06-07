@@ -23,10 +23,19 @@ export type ParentScore = {
 
 export type RiskItem = { rank: number; system: string; text: string };
 
+export type SystemNarratives = {
+  POS: string | null;
+  AUTH: string | null;
+  CONV: string | null;
+  LFC: string | null;
+  VIS: string | null;
+};
+
 export type Narrative = {
   headline: string;
   body: string;
   risks: RiskItem[];
+  systems?: SystemNarratives;
 } | null;
 
 export type ExecutiveSummary = {
