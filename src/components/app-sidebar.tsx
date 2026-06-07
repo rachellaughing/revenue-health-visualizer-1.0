@@ -58,7 +58,7 @@ const sections: NavSection[] = [
   {
     label: "HEALTH CHECK",
     items: [
-      { title: "Start / Resume", url: "/health-check", icon: PlayCircle, lock: "profile" },
+      { title: "Health Check", url: "/health-check", icon: PlayCircle, lock: "profile" },
       { title: "Health Check History", url: "/health-check/history", icon: History, lock: "two_assessments" },
     ],
   },
