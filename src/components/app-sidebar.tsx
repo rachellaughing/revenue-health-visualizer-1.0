@@ -228,13 +228,22 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
 
                       return (
                         <li key={item.url}>
-                          {locked ? (
+                          {locked && !item.previewWhenLocked ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="block select-none">{baseRow}</span>
                               </TooltipTrigger>
                               <TooltipContent side="right">
                                 {LOCK_REASON[item.lock as Exclude<LockKind, null>]}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : locked && item.previewWhenLocked ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Link to={item.url}>{baseRow}</Link>
+                              </TooltipTrigger>
+                              <TooltipContent side="right">
+                                {LOCK_REASON[item.lock as Exclude<LockKind, null>]} — preview available
                               </TooltipContent>
                             </Tooltip>
                           ) : (
