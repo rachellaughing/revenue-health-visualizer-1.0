@@ -141,9 +141,13 @@ function HealthCheckShell({
   }, [areas]);
 
   // Selection state (starter tier only — pro/diagnostic ignore this)
+  // DB is the source of truth: re-sync whenever the server payload changes.
   const [selectedCodes, setSelectedCodes] = useState<string[]>(
     assessment.selected_child_ids ?? [],
   );
+  useEffect(() => {
+    setSelectedCodes(assessment.selected_child_ids ?? []);
+  }, [assessment.selected_child_ids]);
 
   const selectedSet = useMemo(() => new Set(selectedCodes), [selectedCodes]);
 
