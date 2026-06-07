@@ -106,10 +106,13 @@ export type Database = {
         Row: {
           assessment_type: string
           assessment_version: number
+          calculated_at: string | null
           completed_at: string | null
           completion_pct: number
           created_at: string | null
           id: string
+          overall_health_score: number | null
+          overall_tracking_score: number | null
           profile_id: string | null
           selected_child_ids: string[]
           started_at: string | null
@@ -122,10 +125,13 @@ export type Database = {
         Insert: {
           assessment_type?: string
           assessment_version?: number
+          calculated_at?: string | null
           completed_at?: string | null
           completion_pct?: number
           created_at?: string | null
           id?: string
+          overall_health_score?: number | null
+          overall_tracking_score?: number | null
           profile_id?: string | null
           selected_child_ids?: string[]
           started_at?: string | null
@@ -138,10 +144,13 @@ export type Database = {
         Update: {
           assessment_type?: string
           assessment_version?: number
+          calculated_at?: string | null
           completed_at?: string | null
           completion_pct?: number
           created_at?: string | null
           id?: string
+          overall_health_score?: number | null
+          overall_tracking_score?: number | null
           profile_id?: string | null
           selected_child_ids?: string[]
           started_at?: string | null
