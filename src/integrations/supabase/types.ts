@@ -422,6 +422,62 @@ export type Database = {
         }
         Relationships: []
       }
+      report_narratives: {
+        Row: {
+          assessment_id: string
+          created_at: string | null
+          exec_body: string | null
+          exec_headline: string | null
+          generated_at: string | null
+          id: string
+          model_used: string | null
+          narrative_auth: string | null
+          narrative_conv: string | null
+          narrative_lfc: string | null
+          narrative_pos: string | null
+          narrative_vis: string | null
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          created_at?: string | null
+          exec_body?: string | null
+          exec_headline?: string | null
+          generated_at?: string | null
+          id?: string
+          model_used?: string | null
+          narrative_auth?: string | null
+          narrative_conv?: string | null
+          narrative_lfc?: string | null
+          narrative_pos?: string | null
+          narrative_vis?: string | null
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          created_at?: string | null
+          exec_body?: string | null
+          exec_headline?: string | null
+          generated_at?: string | null
+          id?: string
+          model_used?: string | null
+          narrative_auth?: string | null
+          narrative_conv?: string | null
+          narrative_lfc?: string | null
+          narrative_pos?: string | null
+          narrative_vis?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_narratives_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: true
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
