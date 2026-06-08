@@ -233,7 +233,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                       );
 
                       return (
-                        <li key={item.url}>
+                        <li key={item.title}>
                           {locked && !item.previewWhenLocked ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
