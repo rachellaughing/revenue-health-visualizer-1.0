@@ -1392,13 +1392,18 @@ function HealthCheckShell({
             return (
               <div key={p.id}>
                 <button
-                  onClick={() => selectParent(p.id)}
+                  onClick={() => {
+                    if (leftRailCollapsed) setLeftRailCollapsed(false);
+                    selectParent(p.id);
+                  }}
+                  title={leftRailCollapsed ? `${p.name}${pct > 0 ? ` — ${pct}%` : ""}` : undefined}
                   style={{
                     width: "100%",
                     display: "flex",
                     alignItems: "center",
                     gap: 10,
-                    padding: "10px 16px",
+                    padding: leftRailCollapsed ? "10px 0" : "10px 16px",
+                    justifyContent: leftRailCollapsed ? "center" : "flex-start",
                     background: isActiveParent ? `${color}10` : "none",
                     border: "none",
                     borderLeft: `3px solid ${isActiveParent ? color : "transparent"}`,
@@ -1408,35 +1413,39 @@ function HealthCheckShell({
                 >
                   <div
                     style={{
-                      width: 8,
-                      height: 8,
+                      width: leftRailCollapsed ? 10 : 8,
+                      height: leftRailCollapsed ? 10 : 8,
                       borderRadius: "50%",
                       background: color,
                       flexShrink: 0,
                     }}
                   />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: isActiveParent ? color : T.ink,
-                      }}
-                    >
-                      {p.name}
-                    </div>
-                    {pct > 0 && (
-                      <div style={{ marginTop: 4 }}>
-                        <ProgressBar pct={pct} color={color} />
+                  {!leftRailCollapsed && (
+                    <>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: isActiveParent ? color : T.ink,
+                          }}
+                        >
+                          {p.name}
+                        </div>
+                        {pct > 0 && (
+                          <div style={{ marginTop: 4 }}>
+                            <ProgressBar pct={pct} color={color} />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {pct > 0 && (
-                    <span style={{ fontSize: 10, color: T.mid }}>{pct}%</span>
+                      {pct > 0 && (
+                        <span style={{ fontSize: 10, color: T.mid }}>{pct}%</span>
+                      )}
+                    </>
                   )}
                 </button>
 
-                {isActiveParent &&
+                {!leftRailCollapsed && isActiveParent &&
                   list.map((c) => {
                     const locked = isChildLocked(c);
                     const arr = areasByChild.get(c.id) ?? [];
@@ -1492,6 +1501,7 @@ function HealthCheckShell({
                   })}
               </div>
             );
+
           })}
         </div>
 
