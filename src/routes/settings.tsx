@@ -74,7 +74,7 @@ function SettingsPage() {
                 role="tab"
                 aria-selected={active}
                 onClick={() =>
-                  navigate({ search: (prev) => ({ ...prev, tab: t.key }) })
+                  navigate({ search: { tab: t.key } })
                 }
                 style={{
                   background: "transparent",
