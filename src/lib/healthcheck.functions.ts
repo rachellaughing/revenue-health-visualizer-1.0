@@ -468,6 +468,23 @@ export const saveResponse = createServerFn({ method: "POST" })
       } catch (err) {
         console.error("[scores] calculation failed:", err);
       }
+      // If this is a team member completing their Health Check, mark
+      // their team_members row active so the founder sees them as "Active".
+      try {
+        const { data: roleRow } = await supabaseAdmin
+          .from("profiles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if ((roleRow?.role ?? "owner") === "team_member") {
+          await supabaseAdmin
+            .from("team_members")
+            .update({ status: "active" })
+            .eq("user_id", userId);
+        }
+      } catch (err) {
+        console.error("[team_members] status update failed:", err);
+      }
     }
 
     return { ok: true, completion_pct: pct, completed: isComplete };
