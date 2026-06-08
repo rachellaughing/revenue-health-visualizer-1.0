@@ -688,6 +688,62 @@ function CompletedLanding({
         })}
       </div>
 
+      {/* Mobile system tabs */}
+      {isMobile && (
+        <div
+          style={{
+            display: "flex",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
+            borderBottom: `1px solid ${T.offWhite}`,
+            flexShrink: 0,
+            background: T.paper,
+          }}
+        >
+          {data.parents.map((p) => {
+            const color = `#${p.color_hex}`;
+            const active = activeParentId === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setActiveParentId(p.id)}
+                style={{
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                  padding: "10px 16px",
+                  background: "none",
+                  border: "none",
+                  borderBottom: `2px solid ${active ? color : "transparent"}`,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: color,
+                    flexShrink: 0,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: active ? 600 : 500,
+                    color: active ? T.ink : T.mid,
+                  }}
+                >
+                  {p.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Main content */}
       <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? "16px" : "24px 32px", minWidth: 0 }}>
         {/* Completion banner */}
