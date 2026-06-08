@@ -1215,6 +1215,20 @@ function HealthCheckShell({
     setShowSkipWarning(false);
   }
 
+  // Left rail collapse — persisted; default collapsed on small screens
+  const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const stored = window.localStorage.getItem("hc-leftrail-collapsed");
+    if (stored !== null) return stored === "1";
+    return window.innerWidth < 768;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("hc-leftrail-collapsed", leftRailCollapsed ? "1" : "0");
+  }, [leftRailCollapsed]);
+
+
+
 
   return (
     <div
