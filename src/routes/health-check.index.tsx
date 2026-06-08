@@ -13,6 +13,9 @@ import {
   type ChildSystem,
   type Area,
 } from "@/lib/healthcheck.functions";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+
 
 
 export const Route = createFileRoute("/health-check/")({
