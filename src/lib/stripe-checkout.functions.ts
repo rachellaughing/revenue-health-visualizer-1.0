@@ -25,6 +25,7 @@ export const createProCheckoutSession = createServerFn({ method: "POST" })
     params.set("line_items[0][price]", priceId);
     params.set("line_items[0][quantity]", "1");
     params.set("success_url", `${origin}/settings/billing?success=true`);
+    params.set("allow_promotion_codes", "true");
     params.set("cancel_url", `${origin}/settings/billing`);
     params.set("client_reference_id", userId);
     if (email) params.set("customer_email", email);
