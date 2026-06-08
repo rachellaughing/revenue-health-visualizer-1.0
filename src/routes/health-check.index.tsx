@@ -1215,6 +1215,20 @@ function HealthCheckShell({
     setShowSkipWarning(false);
   }
 
+  // Left rail collapse — persisted; default collapsed on small screens
+  const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const stored = window.localStorage.getItem("hc-leftrail-collapsed");
+    if (stored !== null) return stored === "1";
+    return window.innerWidth < 768;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("hc-leftrail-collapsed", leftRailCollapsed ? "1" : "0");
+  }, [leftRailCollapsed]);
+
+
+
 
   return (
     <div
@@ -1315,13 +1329,46 @@ function HealthCheckShell({
         {/* Left nav */}
         <div
           style={{
-            width: 220,
+            width: leftRailCollapsed ? 48 : 220,
             flexShrink: 0,
             borderRight: `1px solid ${T.offWhite}`,
             overflowY: "auto",
+            overflowX: "hidden",
             paddingTop: 8,
+            transition: "width 200ms ease",
           }}
         >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: leftRailCollapsed ? "center" : "flex-end",
+              padding: "0 8px 8px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setLeftRailCollapsed((v) => !v)}
+              title={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
+              aria-label={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
+              style={{
+                background: "transparent",
+                border: `1px solid ${T.offWhite}`,
+                borderRadius: 6,
+                width: 24,
+                height: 24,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: T.mid,
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+            >
+              {leftRailCollapsed ? "»" : "«"}
+            </button>
+          </div>
+
           {parents.map((p) => {
             const list = childrenByParent.get(p.id) ?? [];
             const totalAreas = list.reduce(
@@ -1345,13 +1392,18 @@ function HealthCheckShell({
             return (
               <div key={p.id}>
                 <button
-                  onClick={() => selectParent(p.id)}
+                  onClick={() => {
+                    if (leftRailCollapsed) setLeftRailCollapsed(false);
+                    selectParent(p.id);
+                  }}
+                  title={leftRailCollapsed ? `${p.name}${pct > 0 ? ` — ${pct}%` : ""}` : undefined}
                   style={{
                     width: "100%",
                     display: "flex",
                     alignItems: "center",
                     gap: 10,
-                    padding: "10px 16px",
+                    padding: leftRailCollapsed ? "10px 0" : "10px 16px",
+                    justifyContent: leftRailCollapsed ? "center" : "flex-start",
                     background: isActiveParent ? `${color}10` : "none",
                     border: "none",
                     borderLeft: `3px solid ${isActiveParent ? color : "transparent"}`,
@@ -1361,35 +1413,39 @@ function HealthCheckShell({
                 >
                   <div
                     style={{
-                      width: 8,
-                      height: 8,
+                      width: leftRailCollapsed ? 10 : 8,
+                      height: leftRailCollapsed ? 10 : 8,
                       borderRadius: "50%",
                       background: color,
                       flexShrink: 0,
                     }}
                   />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: isActiveParent ? color : T.ink,
-                      }}
-                    >
-                      {p.name}
-                    </div>
-                    {pct > 0 && (
-                      <div style={{ marginTop: 4 }}>
-                        <ProgressBar pct={pct} color={color} />
+                  {!leftRailCollapsed && (
+                    <>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: isActiveParent ? color : T.ink,
+                          }}
+                        >
+                          {p.name}
+                        </div>
+                        {pct > 0 && (
+                          <div style={{ marginTop: 4 }}>
+                            <ProgressBar pct={pct} color={color} />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {pct > 0 && (
-                    <span style={{ fontSize: 10, color: T.mid }}>{pct}%</span>
+                      {pct > 0 && (
+                        <span style={{ fontSize: 10, color: T.mid }}>{pct}%</span>
+                      )}
+                    </>
                   )}
                 </button>
 
-                {isActiveParent &&
+                {!leftRailCollapsed && isActiveParent &&
                   list.map((c) => {
                     const locked = isChildLocked(c);
                     const arr = areasByChild.get(c.id) ?? [];
@@ -1445,6 +1501,7 @@ function HealthCheckShell({
                   })}
               </div>
             );
+
           })}
         </div>
 
