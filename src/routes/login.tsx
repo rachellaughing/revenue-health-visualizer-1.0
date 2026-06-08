@@ -6,11 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    verified: search.verified === "1" || search.verified === 1 ? true : undefined,
+  }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { verified } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +40,15 @@ function LoginPage() {
         <p className="text-sm mb-8" style={{ color: "var(--mm-mid)" }}>
           Welcome back to your Revenue Health Visualiser™.
         </p>
+        {verified && (
+          <div
+            className="mb-6 rounded-md px-4 py-3 text-sm"
+            style={{ backgroundColor: "#E8F5E9", color: "#1B5E20", border: "1px solid #C8E6C9" }}
+            role="status"
+          >
+            Email verified — sign in to continue.
+          </div>
+        )}
         <form onSubmit={onSubmit} className="space-y-4">
           <Field label="Email" type="email" value={email} onChange={setEmail} required />
           <Field label="Password" type="password" value={password} onChange={setPassword} required />

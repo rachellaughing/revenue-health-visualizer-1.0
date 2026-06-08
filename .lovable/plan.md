@@ -1,42 +1,30 @@
-# Team Members — Detailed Status
+# Email-verification UX on signup
 
-Add a richer status badge to each row in Settings → Team so the owner can see, at a glance, where each invited teammate is in the Health Check.
+Two small changes, both in `src/routes/signup.tsx`. No DB, no auth-template scaffolding needed.
 
-## Status model
+## 1. Show a "check your email" confirmation after signup
 
-For each `team_members` row, derive one of four statuses:
+Currently the signup handler calls `supabase.auth.signUp(...)` then immediately `navigate({ to: "/profile/personal" })`. Because Supabase requires email confirmation, the user lands on a logged-out profile page and is confused.
 
-| Status | Condition | Badge color |
-|---|---|---|
-| **Invited** | No `user_id` (invite not yet accepted) | Amber |
-| **Joined** | `user_id` set, but no assessment row exists for that user | Blue |
-| **In progress** | Assessment exists with `status != 'completed'` | Teal |
-| **Completed** | Assessment exists with `status = 'completed'` | Green |
+Change: on successful `signUp`, do **not** navigate. Instead, swap the form for a confirmation card in the same page:
 
-"Joined" replaces today's coarse "Active". The team member's assessment is the one whose `user_id = team_members.user_id` (created automatically the first time they open the Health Check, per existing `getHealthCheckData` logic).
+> **Check your email**
+> We've sent a verification link to **{email}**. Click the link to activate your account, then sign in to continue.
+> [Resend email] (calls `supabase.auth.resend({ type: 'signup', email })`)
+> [Back to sign in] → `/login`
 
-## Changes
+Implemented via a local `submitted` state flag — no new routes, no new files.
 
-### 1. `src/lib/team.functions.ts` — `listTeamMembers`
-- After loading `team_members`, collect the non-null `user_id`s.
-- One extra query: `assessments.select('user_id,status,completed_at,submitted_at').in('user_id', userIds)` via `supabaseAdmin` (per project rule: server fns use `supabaseAdmin`).
-- For each member, compute status using the table above. If multiple assessments exist for a user, prefer `completed` > otherwise the most recent.
-- Return shape gains a `status` value from the set `"Invited" | "Joined" | "In progress" | "Completed"` (replacing the current "Active"/"Invited" strings). Keep `initials`, `email`, `display_name`, `id` unchanged.
-- Optionally include `completed_at` so the UI can show "Completed · 12 May" later (not required for v1).
+## 2. Redirect the verification link to `/login` with a success banner
 
-### 2. `src/components/settings/TeamTab.tsx`
-- Update the badge styling map to cover all four statuses:
-  - Invited → existing amber (`#FFF4E5` / `#8A5A00`)
-  - Joined → blue (`#E3F2FD` / `#0D47A1`)
-  - In progress → teal tint (`#E0F2F1` / `#00695C`)
-  - Completed → existing green (`#E8F5E9` / `#1B5E20`)
-- Update the demo/preview data (locked panel) to showcase all four states so the blurred upsell preview looks richer.
-- No layout changes; same row component.
+Change `emailRedirectTo` from `${window.location.origin}/dashboard` to `${window.location.origin}/login?verified=1`.
 
-### 3. No schema changes
-`team_members.status` already supports `"invited" | "active"`; we don't need to write new values — the UI status is derived live from `assessments`. This keeps the source of truth in the assessment row and avoids drift.
+In `src/routes/login.tsx`:
+- Add `validateSearch` to accept an optional `verified` flag.
+- When `verified=1` is present, render a green confirmation strip above the form: *"Email verified — sign in to continue."*
+
+This avoids the Supabase-hosted error page entirely. Supabase exchanges the token, sets the session, then bounces the user to `/login?verified=1`. If their session is already active, the login form's existing "already signed in" path (if any) handles it; otherwise they sign in once and proceed.
 
 ## Out of scope
-- Email notifications when status changes
-- Per-member drill-in / answers (intentionally — `/team/responses` privacy rule)
-- Sorting/filtering by status
+- Custom-branded auth email templates (would require `scaffold_auth_email_templates` + a verified email domain). Default Supabase email is fine for now; we're just fixing the redirect target and post-signup UX.
+- Changing the Supabase Auth "Site URL" or redirect allow-list — `${window.location.origin}/login` is already same-origin, so it's covered by the existing Site URL.

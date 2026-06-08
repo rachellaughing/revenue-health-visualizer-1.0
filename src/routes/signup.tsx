@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +13,6 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupPage() {
-  const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -23,6 +22,8 @@ function SignupPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
 
   const rulesMet = allRulesMet(password);
   const canSubmit =
@@ -41,7 +42,7 @@ function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/login?verified=1`,
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -52,7 +53,58 @@ function SignupPage() {
     });
     setLoading(false);
     if (error) return setError(error.message);
-    navigate({ to: "/profile/personal" });
+    setSubmitted(true);
+  }
+
+  async function onResend() {
+    if (resendState === "sending") return;
+    setResendState("sending");
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/login?verified=1` },
+    });
+    if (error) {
+      setError(error.message);
+      setResendState("idle");
+      return;
+    }
+    setResendState("sent");
+  }
+
+  if (submitted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 py-12" style={{ backgroundColor: "var(--mm-paper)" }}>
+        <div className="w-full max-w-md">
+          <h1 className="text-5xl mb-2" style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}>
+            Check your email
+          </h1>
+          <p className="text-sm mb-6" style={{ color: "var(--mm-mid)" }}>
+            We sent a verification link to <strong style={{ color: "var(--mm-ink)" }}>{email}</strong>. Click the link to activate your account, then sign in to continue.
+          </p>
+          <p className="text-xs mb-8" style={{ color: "var(--mm-mid)" }}>
+            Didn't get it? Check your spam folder, or resend below.
+          </p>
+          <button
+            type="button"
+            onClick={onResend}
+            disabled={resendState !== "idle"}
+            className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60 mb-3"
+            style={{ backgroundColor: "var(--mm-ember)" }}
+          >
+            {resendState === "sending" ? "Sending…" : resendState === "sent" ? "Verification email resent" : "Resend verification email"}
+          </button>
+          {error && <p className="text-sm mb-3" style={{ color: "var(--mm-ember)" }}>{error}</p>}
+          <Link
+            to="/login"
+            className="block w-full rounded-md px-4 py-3 font-semibold text-center"
+            style={{ border: "1px solid #E5E5DF", color: "var(--mm-ink)" }}
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
