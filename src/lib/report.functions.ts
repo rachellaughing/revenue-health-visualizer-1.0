@@ -2520,7 +2520,8 @@ export const getRoadmap = createServerFn({ method: "POST" })
       const { data: saved } = await supabaseAdmin
         .from("roadmap_selections")
         .select("child_system_id,horizon")
-        .eq("assessment_id", assessmentId);
+        .eq("assessment_id", assessmentId)
+        .eq("user_id", userId);
       const codeByChildId = new Map<string, string>(children.map((c: any) => [c.id, c.code]));
       selections = (saved ?? [])
         .map((r: any) => {
