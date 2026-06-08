@@ -1614,7 +1614,7 @@ function HealthCheckShell({
                   );
                 })}
 
-                {tier === "starter" && (
+                {tier === "starter" && !data.isTeamMember && (
                   <span
                     style={{
                       fontSize: 11,
@@ -1629,7 +1629,7 @@ function HealthCheckShell({
               </div>
 
               {/* Change selection link */}
-              {tier === "starter" &&
+              {tier === "starter" && !data.isTeamMember &&
                 activeParentSelectedCount > 0 &&
                 activeParentSelectedCount < 3 && (
                   <div style={{ marginBottom: 14 }}>
