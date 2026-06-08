@@ -129,7 +129,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
   const [email, setEmail] = useState("");
 
   const invite = useMutation({
-    mutationFn: (e: string) => inviteFn({ data: { email: e } }),
+    mutationFn: (e: string) => inviteFn({ data: { email: e, origin: window.location.origin } }),
     onSuccess: (r) => {
       toast.success(`Invite sent to ${r.email}`);
       setEmail("");
