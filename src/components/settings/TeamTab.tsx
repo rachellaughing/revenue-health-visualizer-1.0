@@ -119,6 +119,7 @@ function LockedTeamPanel() {
 
 function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: boolean }) {
   const qc = useQueryClient();
+  const isMobile = useIsMobile();
   const listFn = useServerFn(listTeamMembers);
   const inviteFn = useServerFn(inviteTeamMember);
   const removeFn = useServerFn(removeTeamMember);
