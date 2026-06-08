@@ -151,3 +151,41 @@
   }
   .hc-completion-cta { text-align: center !important; }
 }
+
+/* Reports — mobile readability overrides.
+   Inline styles are targeted by attribute substring; React serializes
+   camelCase to kebab-case in the rendered style attribute. */
+@media (max-width: 767px) {
+  /* Main content padding */
+  main[style*="padding: 36px 40px 80px"] {
+    padding: 20px 16px 64px !important;
+  }
+  /* Top bar padding */
+  header[style*="padding: 0 40px"],
+  div[style*="padding: 0 40px"] {
+    padding: 0 16px !important;
+  }
+  /* Collapse multi-column grids to a single column */
+  div[style*="grid-template-columns: 1fr 280px"],
+  div[style*="grid-template-columns: repeat(4, 1fr)"],
+  div[style*="grid-template-columns: repeat(3, 1fr)"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Wide table-like rows: stack vertically */
+  div[style*="grid-template-columns: 1fr 80px 100px 160px 100px"],
+  div[style*="grid-template-columns: 1fr 52px 90px 180px 90px 80px"],
+  div[style*="grid-template-columns: 44px 1fr auto auto auto auto"],
+  div[style*="grid-template-columns: 52px 1fr auto auto auto auto"],
+  div[style*="grid-template-columns: auto 1fr auto auto auto"],
+  div[style*="grid-template-columns: 32px 1fr auto"] {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  /* Split-radar layout */
+  div[style*="grid-template-columns: auto 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
