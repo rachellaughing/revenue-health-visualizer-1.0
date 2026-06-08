@@ -1,43 +1,55 @@
-## Health Check — mobile layout fix
+## Problem
 
-Scope: `src/routes/health-check.index.tsx` only. Desktop (≥768px) layout unchanged.
+The screenshot shows the desktop left rail AND the right panel side-by-side on a 390px viewport — the mobile horizontal tabs are not visible. The previous edit gated layout on `useIsMobile()`, which:
 
-### 1. Hide left rail on mobile, show horizontal parent tabs
+1. Returns `false` during SSR and on first paint (it's a `useEffect`-driven hook).
+2. In the SSR'd Health Check shell, that first-paint desktop layout sticks because the iframe preview isn't always triggering a re-render at mobile width, leaving the user looking at the desktop layout.
 
-In `HealthCheckShell`:
+The fix: drive the layout switch with **CSS media queries** instead of a JS hook. CSS is correct on first paint, has no hydration gap, and works regardless of SSR.
 
-- Read `useIsMobile()` from `@/hooks/use-mobile`.
-- When `isMobile`, do NOT render the existing `<div>` left rail (lines ~1337–1514). Instead, render a new horizontal tab row at the top of the right panel (before the completion banner).
-- Tab row container: `display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 0; border-bottom: 1px solid var(--mm-off-white); margin: -16px -16px 16px;` (bleed to panel edges, scroll horizontally, no wrap).
-- One tab per parent (5 total):
-  - `flex-shrink: 0; white-space: nowrap; padding: 10px 16px; cursor: pointer; background: none; border: none; border-bottom: 2px solid <color | transparent>;`
-  - Contents: colored dot (8px circle, `background: #<parent.color_hex>`) + parent name (12px, `fontWeight: isActive ? 600 : 500`, color: active → `T.ink`, inactive → `T.mid`) + percentage (11px, `T.mid`, shown only when `pct > 0`).
-  - Active tab: `border-bottom: 2px solid #<parent.color_hex>` and darker text; inactive: transparent border.
-  - `onClick` → `selectParent(p.id)` (existing function).
+## Changes (single file: `src/routes/health-check.index.tsx`)
 
-- Below the tab row, the existing parent-name heading + child chips + question cards render full width.
+### 1. Remove `isMobile` gating, render both layouts unconditionally
 
-### 2. Mobile right-panel padding and body layout
+- Always render the desktop left rail `<div>` (drop the `!isMobile && …` wrapper at line 1342).
+- Always render the mobile horizontal tabs block (drop the `isMobile && …` wrapper at line 1525).
+- Replace `padding: isMobile ? 16 : "24px 32px"` with a static value of `"24px 32px"`, then override via CSS class on mobile.
+- Drop `flexDirection: isMobile ? "column" : "row"` and `alignItems: isMobile ? "stretch" : "center"` on the completion banner — drive those with CSS too.
 
-- The body wrapper (line 1334 `<div style={{ display: "flex", flex: 1, overflow: "hidden" }}>`) stays flex; on mobile the left rail is simply not rendered so the right panel takes full width naturally.
-- Right panel padding: `padding: isMobile ? "16px" : "24px 32px"` (line 1517).
+### 2. Add `className` markers to the elements that swap
 
-### 3. Completion banner stacks on mobile
+- Desktop left rail `<div>`: `className="hc-desktop-rail"`
+- Mobile tab row `<div>`: `className="hc-mobile-tabs"`
+- Right panel `<div>`: `className="hc-right-panel"`
+- Completion banner outer `<div>`: `className="hc-completion-banner"`
+- Completion banner CTA `<a>`: `className="hc-completion-cta"`
 
-Existing banner (lines 1518–1550) uses `display: flex; justifyContent: space-between`. Change to:
-- `flexDirection: isMobile ? "column" : "row"`
-- `alignItems: isMobile ? "stretch" : "center"`
-- CTA `<a>` gets `textAlign: "center"` on mobile so it spans full width of the column.
+(Inline styles remain for everything else; classes only carry the responsive overrides.)
 
-### 4. Out of scope / unchanged
+### 3. Add a small CSS block to `src/styles.css`
 
-- Desktop sidebar, collapse button, child sub-list under active parent: untouched.
-- Top bar, tier indicator bar: untouched (already fit mobile width; the top bar is 52px with horizontal padding 24px — leave as-is per "no other changes").
-- Question cards (`AnswerCard`, collapsed cards, edit forms): untouched. They already use percentage widths and will fill the now-wider right panel.
-- `CompletedLanding` (the post-completion screen) and `TeamMemberCompletionInline`: untouched.
+```css
+/* Health Check — responsive nav swap */
+.hc-mobile-tabs { display: none; }
 
-### Technical notes
+@media (max-width: 767px) {
+  .hc-desktop-rail { display: none !important; }
+  .hc-mobile-tabs  { display: flex !important; }
+  .hc-right-panel  { padding: 16px !important; }
+  .hc-completion-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .hc-completion-cta { text-align: center !important; }
+}
+```
 
-- `useIsMobile()` returns `false` during SSR, so on first paint mobile users briefly see the desktop layout for one frame before hydration — acceptable, consistent with the rest of the app.
-- No new CSS files; all styling stays inline to match the file's existing convention.
-- No new dependencies. No route, server function, or data-shape changes.
+### 4. Drop the now-unused `useIsMobile` import/usage in this file
+
+Remove `const isMobile = useIsMobile();` and the `useIsMobile` import if no longer used elsewhere in the file.
+
+## Out of scope
+
+- No changes to the desktop layout at ≥768px.
+- No changes to question cards, top bar, tier bar, completed landing, team inline component.
+- No changes to other routes or shared components — only this file and a small block in `styles.css`.

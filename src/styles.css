@@ -137,3 +137,17 @@
     font-size: 16px;
   }
 }
+
+/* Health Check — responsive nav swap */
+.hc-mobile-tabs { display: none; }
+
+@media (max-width: 767px) {
+  .hc-desktop-rail { display: none !important; }
+  .hc-mobile-tabs  { display: flex !important; }
+  .hc-right-panel  { padding: 16px !important; }
+  .hc-completion-banner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .hc-completion-cta { text-align: center !important; }
+}
