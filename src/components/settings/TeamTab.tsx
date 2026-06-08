@@ -149,8 +149,10 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
 
   const demoMembers = preview
     ? [
-        { id: "1", email: "alex@example.com", display_name: "Alex Carter", initials: "AC", status: "Active" },
-        { id: "2", email: "sam@example.com", display_name: "Sam Patel", initials: "SP", status: "Invited" },
+        { id: "1", email: "alex@example.com", display_name: "Alex Carter", initials: "AC", status: "Completed", completed_at: null },
+        { id: "2", email: "sam@example.com", display_name: "Sam Patel", initials: "SP", status: "In progress", completed_at: null },
+        { id: "3", email: "jordan@example.com", display_name: "Jordan Lee", initials: "JL", status: "Joined", completed_at: null },
+        { id: "4", email: "riley@example.com", display_name: "Riley Kim", initials: "RK", status: "Invited", completed_at: null },
       ]
     : members;
 
