@@ -1614,6 +1614,7 @@ function HealthCheckShell({
               </span>
               <a
                 href="/report"
+                className="hc-completion-cta"
                 style={{
                   background: T.ember,
                   color: T.white,
