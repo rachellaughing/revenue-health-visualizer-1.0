@@ -182,7 +182,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
             if (!email.trim()) return;
             invite.mutate(email.trim());
           }}
-          style={{ display: "flex", gap: 10 }}
+          style={{ display: "flex", gap: 10, flexDirection: isMobile ? "column" : "row" }}
         >
           <input
             type="email"
@@ -193,6 +193,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
             disabled={preview}
             style={{
               flex: 1,
+              width: isMobile ? "100%" : undefined,
               borderRadius: 8,
               border: "1px solid #E5E5DF",
               padding: "10px 12px",
@@ -209,12 +210,13 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
               background: "var(--mm-ember)",
               color: "#FFFFFF",
               border: "none",
-              padding: "10px 20px",
+              padding: isMobile ? "12px 20px" : "10px 20px",
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 700,
               cursor: invite.isPending ? "wait" : "pointer",
               opacity: !email.trim() || invite.isPending ? 0.6 : 1,
+              width: isMobile ? "100%" : undefined,
             }}
           >
             {invite.isPending ? "Sending…" : "Send Invite"}
