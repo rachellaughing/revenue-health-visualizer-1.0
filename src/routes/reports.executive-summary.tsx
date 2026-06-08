@@ -312,7 +312,7 @@ function ExecSummaryPage() {
   });
 
   const shellStyles: React.CSSProperties = {
-    minHeight: "100vh",
+    minHeight: "100dvh",
     background: T.paper,
     fontFamily: "Inter, sans-serif",
   };
@@ -504,7 +504,7 @@ function ReportBody({
     .join(" · ");
 
   return (
-    <div style={{ minHeight: "100vh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <GlobalStyles />
       <TopBar />
 

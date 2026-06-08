@@ -287,7 +287,7 @@ function Page() {
   // Waiting state — only render this
   if (d.state === "waiting") {
     return (
-      <div style={{ background: T.paper, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
+      <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif" }}>
         <main style={{ maxWidth: 720, margin: "0 auto", padding: "80px 40px" }}>
           <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
             REVENUE HEALTH MATRIX™ › TEAM ALIGNMENT
@@ -324,7 +324,7 @@ function Page() {
     : {};
 
   return (
-    <div style={{ background: T.paper, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
+    <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif" }}>
       <main style={{ maxWidth: 960, margin: "0 auto", padding: "36px 40px 80px" }}>
         {/* Breadcrumb */}
         <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>

@@ -13,7 +13,7 @@ const T = {
 
 function Page() {
   return (
-    <div style={{ minHeight: "100vh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <main style={{ maxWidth: 760, margin: "0 auto", padding: "60px 40px 80px" }}>
         <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
           REVENUE HEALTH DIAGNOSTIC™

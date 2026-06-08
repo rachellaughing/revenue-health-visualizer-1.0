@@ -34,7 +34,7 @@ function SettingsPage() {
     <div
       style={{
         background: "var(--mm-paper)",
-        minHeight: "100vh",
+        minHeight: "100dvh",
         fontFamily: "Inter, sans-serif",
         display: "flex",
         flexDirection: "column",
