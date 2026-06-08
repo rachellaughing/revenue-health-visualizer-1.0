@@ -2276,6 +2276,8 @@ function HealthCheckShell({
           )}
         </div>
       </div>
+      </div>
     </div>
+
   );
 }
