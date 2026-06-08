@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createProCheckoutSession,
   getCurrentTier,
 } from "@/lib/stripe-checkout.functions";
+import { validateCoupon, redeemCoupon } from "@/lib/coupon.functions";
 
 const T = {
   abyss: "#182829",
@@ -20,6 +22,9 @@ const T = {
 export function BillingTab({ success }: { success?: boolean }) {
   const tierFn = useServerFn(getCurrentTier);
   const checkoutFn = useServerFn(createProCheckoutSession);
+  const validateFn = useServerFn(validateCoupon);
+  const redeemFn = useServerFn(redeemCoupon);
+  const queryClient = useQueryClient();
 
   const tierQ = useQuery({
     queryKey: ["current-tier"],
@@ -32,6 +37,51 @@ export function BillingTab({ success }: { success?: boolean }) {
       if (url) window.location.href = url;
     },
   });
+
+  const [codeInput, setCodeInput] = useState("");
+  const [applied, setApplied] = useState<null | {
+    code: string;
+    free: boolean;
+  }>(null);
+  const [couponMsg, setCouponMsg] = useState<{
+    kind: "ok" | "err";
+    text: string;
+  } | null>(null);
+
+  const apply = useMutation({
+    mutationFn: (code: string) => validateFn({ data: { code } }),
+    onSuccess: (res) => {
+      if (res.valid) {
+        setApplied({ code: res.code, free: res.free });
+        setCouponMsg({
+          kind: "ok",
+          text: res.free
+            ? `${res.code} applied — free upgrade unlocked.`
+            : `${res.code} applied — discount will show at checkout.`,
+        });
+      } else {
+        setApplied(null);
+        setCouponMsg({ kind: "err", text: res.reason });
+      }
+    },
+    onError: (e) => {
+      setApplied(null);
+      setCouponMsg({ kind: "err", text: (e as Error).message });
+    },
+  });
+
+  const redeem = useMutation({
+    mutationFn: (code: string) => redeemFn({ data: { code } }),
+    onSuccess: () => {
+      setApplied(null);
+      setCodeInput("");
+      setCouponMsg({ kind: "ok", text: "Upgrade complete — welcome to Assessment™." });
+      queryClient.invalidateQueries({ queryKey: ["current-tier"] });
+    },
+    onError: (e) =>
+      setCouponMsg({ kind: "err", text: (e as Error).message }),
+  });
+
 
   const tier = tierQ.data?.tier ?? "starter";
   const isPro = tier === "pro";
