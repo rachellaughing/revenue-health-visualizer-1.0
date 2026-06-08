@@ -43,21 +43,66 @@ export const listTeamMembers = createServerFn({ method: "GET" })
       .eq("team_id", teamId)
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []).map((m: any) => {
+
+    const members = data ?? [];
+    const userIds = members
+      .map((m: any) => m.user_id)
+      .filter((u: any): u is string => !!u);
+
+    const assessmentsByUser: Record<
+      string,
+      { status: string; completed_at: string | null; submitted_at: string | null; created_at: string | null }
+    > = {};
+    if (userIds.length > 0) {
+      const { data: aData, error: aErr } = await supabaseAdmin
+        .from("assessments")
+        .select("user_id,status,completed_at,submitted_at,created_at")
+        .in("user_id", userIds);
+      if (aErr) throw new Error(aErr.message);
+      for (const a of aData ?? []) {
+        const uid = a.user_id as string;
+        const existing = assessmentsByUser[uid];
+        const isCompleted = a.status === "completed";
+        if (!existing) {
+          assessmentsByUser[uid] = a as any;
+        } else if (isCompleted && existing.status !== "completed") {
+          assessmentsByUser[uid] = a as any;
+        } else if (existing.status !== "completed" && !isCompleted) {
+          if ((a.created_at ?? "") > (existing.created_at ?? "")) {
+            assessmentsByUser[uid] = a as any;
+          }
+        }
+      }
+    }
+
+    return members.map((m: any) => {
       const name: string = m.display_name || m.email || "";
-      const initials = name
-        .split(/[\s@.]+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((p: string) => p[0]?.toUpperCase() ?? "")
-        .join("") || "?";
-      const status = m.status === "active" || m.user_id ? "Active" : "Invited";
+      const initials =
+        name
+          .split(/[\s@.]+/)
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((p: string) => p[0]?.toUpperCase() ?? "")
+          .join("") || "?";
+
+      let status: "Invited" | "Joined" | "In progress" | "Completed" = "Invited";
+      let completedAt: string | null = null;
+      if (m.user_id) {
+        const a = assessmentsByUser[m.user_id as string];
+        if (!a) status = "Joined";
+        else if (a.status === "completed") {
+          status = "Completed";
+          completedAt = a.completed_at ?? a.submitted_at ?? null;
+        } else status = "In progress";
+      }
+
       return {
         id: m.id as string,
         email: m.email as string,
         display_name: (m.display_name as string | null) ?? null,
         initials,
         status,
+        completed_at: completedAt,
       };
     });
   });
