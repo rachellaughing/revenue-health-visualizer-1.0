@@ -505,6 +505,7 @@ function CompletedLanding({
   data: HealthCheckData;
   qc: ReturnType<typeof useQueryClient>;
 }) {
+  const isMobile = useIsMobile();
   const startFn = useServerFn(startNewAssessment);
   const editFn = useServerFn(editCompletedResponse);
   const [starting, setStarting] = useState(false);
@@ -610,10 +611,20 @@ function CompletedLanding({
     data.tier === "starter" ? activeChildren.filter((c) => !selectedSet.has(c.code)) : [];
 
   return (
-    <div style={{ minHeight: "100%", background: T.paper, display: "flex" }}>
+    <div
+      style={{
+        minHeight: "100%",
+        background: T.paper,
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        flex: 1,
+        overflow: "hidden",
+      }}
+    >
       {/* Left nav — parent systems */}
       <div
         style={{
+          display: isMobile ? "none" : "block",
           width: 220,
           flexShrink: 0,
           borderRight: `1px solid ${T.offWhite}`,
@@ -678,7 +689,7 @@ function CompletedLanding({
       </div>
 
       {/* Main content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? "16px" : "24px 32px", minWidth: 0 }}>
         {/* Completion banner */}
         <div
           style={{
