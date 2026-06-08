@@ -1601,78 +1601,7 @@ function HealthCheckShell({
 
         {/* Right panel */}
         <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : "24px 32px" }}>
-          {isMobile && (
-          <div
-            style={{
-                display: "flex",
-                overflowX: "auto",
-                WebkitOverflowScrolling: "touch",
-                borderBottom: `1px solid ${T.offWhite}`,
-                margin: "-16px -16px 16px",
-              }}
-            >
-              {parents.map((p) => {
-                const list = childrenByParent.get(p.id) ?? [];
-                const totalAreas = list.reduce(
-                  (s, c) => s + (areasByChild.get(c.id)?.length ?? 0),
-                  0,
-                );
-                const doneAreas = list.reduce((s, c) => {
-                  const arr = areasByChild.get(c.id) ?? [];
-                  return (
-                    s +
-                    arr.filter((a) => {
-                      const r = responses[a.question_id];
-                      return r && r.health !== null && r.health > 0 && r.tracking !== null;
-                    }).length
-                  );
-                }, 0);
-                const pct = totalAreas ? Math.round((doneAreas / totalAreas) * 100) : 0;
-                const isActiveParent = p.id === activeParent?.id;
-                const color = `#${p.color_hex}`;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => selectParent(p.id)}
-                    style={{
-                      flexShrink: 0,
-                      whiteSpace: "nowrap",
-                      padding: "10px 16px",
-                      background: "none",
-                      border: "none",
-                      borderBottom: `2px solid ${isActiveParent ? color : "transparent"}`,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: 12,
-                        fontWeight: isActiveParent ? 600 : 500,
-                        color: isActiveParent ? T.ink : T.mid,
-                      }}
-                    >
-                      {p.name}
-                    </span>
-                    {pct > 0 && (
-                      <span style={{ fontSize: 11, color: T.mid }}>{pct}%</span>
-                    )}
-                  </button>
-                );
-              })}
-          </div>
-          )}
+
           {completedBanner && (
             <div
               style={{
