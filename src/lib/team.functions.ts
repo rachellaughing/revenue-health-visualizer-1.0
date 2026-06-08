@@ -256,6 +256,47 @@ export const activateTeamMembership = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const resendTeamInvite = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        origin: z.string().url().max(255),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertPaidTier(context.userId);
+    const teamId = await getOrCreateTeamId(context.userId);
+
+    const { data: member, error: memErr } = await supabaseAdmin
+      .from("team_members")
+      .select("id, email, status, team_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (memErr) throw new Error(memErr.message);
+    if (!member || member.team_id !== teamId) {
+      throw new Error("Team member not found");
+    }
+    if (member.status !== "pending") {
+      throw new Error("This member has already accepted their invite");
+    }
+
+    const { error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+      member.email as string,
+      { redirectTo: `${data.origin}/join-team` },
+    );
+    if (inviteErr) throw new Error(inviteErr.message);
+
+    await supabaseAdmin
+      .from("team_members")
+      .update({ invite_sent_at: new Date().toISOString() })
+      .eq("id", data.id);
+
+    return { ok: true, email: member.email as string };
+  });
+
 export const removeTeamMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -271,3 +312,4 @@ export const removeTeamMember = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
