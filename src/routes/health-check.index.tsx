@@ -1329,13 +1329,46 @@ function HealthCheckShell({
         {/* Left nav */}
         <div
           style={{
-            width: 220,
+            width: leftRailCollapsed ? 48 : 220,
             flexShrink: 0,
             borderRight: `1px solid ${T.offWhite}`,
             overflowY: "auto",
+            overflowX: "hidden",
             paddingTop: 8,
+            transition: "width 200ms ease",
           }}
         >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: leftRailCollapsed ? "center" : "flex-end",
+              padding: "0 8px 8px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setLeftRailCollapsed((v) => !v)}
+              title={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
+              aria-label={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
+              style={{
+                background: "transparent",
+                border: `1px solid ${T.offWhite}`,
+                borderRadius: 6,
+                width: 24,
+                height: 24,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: T.mid,
+                fontSize: 12,
+                lineHeight: 1,
+              }}
+            >
+              {leftRailCollapsed ? "»" : "«"}
+            </button>
+          </div>
+
           {parents.map((p) => {
             const list = childrenByParent.get(p.id) ?? [];
             const totalAreas = list.reduce(
