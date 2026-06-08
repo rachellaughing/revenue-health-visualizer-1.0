@@ -1216,14 +1216,21 @@ function HealthCheckShell({
   }
 
   // Left rail collapse — persisted; default collapsed on small screens
-  const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const stored = window.localStorage.getItem("hc-leftrail-collapsed");
-    if (stored !== null) return stored === "1";
-    return window.innerWidth < 768;
-  });
+  const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(false);
+  const leftRailHydrated = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Apply initial default once on mount (post-SSR)
+    if (!leftRailHydrated.current) {
+      leftRailHydrated.current = true;
+      const stored = window.localStorage.getItem("hc-leftrail-collapsed");
+      if (stored !== null) {
+        setLeftRailCollapsed(stored === "1");
+      } else if (window.innerWidth < 768) {
+        setLeftRailCollapsed(true);
+      }
+      return;
+    }
     window.localStorage.setItem("hc-leftrail-collapsed", leftRailCollapsed ? "1" : "0");
   }, [leftRailCollapsed]);
 
@@ -1351,17 +1358,18 @@ function HealthCheckShell({
               title={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
               aria-label={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
               style={{
-                background: "transparent",
-                border: `1px solid ${T.offWhite}`,
+                background: T.offWhite,
+                border: `1px solid ${T.mid}`,
                 borderRadius: 6,
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: T.mid,
-                fontSize: 12,
+                color: T.ink,
+                fontSize: 14,
+                fontWeight: 600,
                 lineHeight: 1,
               }}
             >
