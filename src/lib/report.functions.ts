@@ -2545,6 +2545,15 @@ export const saveRoadmapSelection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => saveSchema.parse(d))
   .handler(async ({ data, context }) => {
+    // Ownership check: the assessment must belong to the caller.
+    const { data: asmt, error: asmtErr } = await supabaseAdmin
+      .from("assessments")
+      .select("user_id")
+      .eq("id", data.assessmentId)
+      .maybeSingle();
+    if (asmtErr) throw new Error(asmtErr.message);
+    if (!asmt || asmt.user_id !== context.userId) throw new Error("Forbidden");
+
     const now = new Date().toISOString();
     const { error } = await supabaseAdmin
       .from("roadmap_selections")
