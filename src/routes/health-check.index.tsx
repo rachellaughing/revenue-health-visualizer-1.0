@@ -1592,10 +1592,10 @@ function HealthCheckShell({
                   </button>
                 );
               })}
-            </div>
-          )}
+          </div>
           {completedBanner && (
             <div
+              className="hc-completion-banner"
               style={{
                 background: `${T.tealBright}15`,
                 border: `1px solid ${T.tealBright}40`,
@@ -1603,8 +1603,8 @@ function HealthCheckShell({
                 padding: "14px 18px",
                 marginBottom: 18,
                 display: "flex",
-                flexDirection: isMobile ? "column" : "row",
-                alignItems: isMobile ? "stretch" : "center",
+                flexDirection: "row",
+                alignItems: "center",
                 justifyContent: "space-between",
                 gap: 12,
               }}
