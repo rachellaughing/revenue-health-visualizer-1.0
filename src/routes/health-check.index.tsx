@@ -13,6 +13,7 @@ import {
   type ChildSystem,
   type Area,
 } from "@/lib/healthcheck.functions";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 
@@ -888,7 +889,7 @@ function HealthCheckShell({
   updateSelFn: ReturnType<typeof useServerFn<typeof updateSelectedChildIds>>;
   qc: ReturnType<typeof useQueryClient>;
 }) {
-  
+  const isMobile = useIsMobile();
 
   const { tier, assessment, parents, children, areas } = data;
 
@@ -1339,8 +1340,8 @@ function HealthCheckShell({
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 
         {/* Left nav (desktop only) */}
+        {!isMobile && (
         <div
-          className="hc-desktop-rail"
           style={{
             width: leftRailCollapsed ? 48 : 220,
             flexShrink: 0,
@@ -1518,13 +1519,16 @@ function HealthCheckShell({
 
           })}
         </div>
+        )}
+
 
 
         {/* Right panel */}
-        <div className="hc-right-panel" style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : "24px 32px" }}>
+          {isMobile && (
           <div
-            className="hc-mobile-tabs"
             style={{
+                display: "flex",
                 overflowX: "auto",
                 WebkitOverflowScrolling: "touch",
                 borderBottom: `1px solid ${T.offWhite}`,
@@ -1592,9 +1596,9 @@ function HealthCheckShell({
                 );
               })}
           </div>
+          )}
           {completedBanner && (
             <div
-              className="hc-completion-banner"
               style={{
                 background: `${T.tealBright}15`,
                 border: `1px solid ${T.tealBright}40`,
@@ -1602,8 +1606,8 @@ function HealthCheckShell({
                 padding: "14px 18px",
                 marginBottom: 18,
                 display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: isMobile ? "column" : "row",
+                alignItems: isMobile ? "stretch" : "center",
                 justifyContent: "space-between",
                 gap: 12,
               }}
@@ -1613,7 +1617,6 @@ function HealthCheckShell({
               </span>
               <a
                 href="/report"
-                className="hc-completion-cta"
                 style={{
                   background: T.ember,
                   color: T.white,
