@@ -59,6 +59,12 @@ export type HealthCheckData = {
   responses: ResponseRow[];
   scores: AssessmentScoreRow[];
   totalUnlockedAreas: number;
+  isTeamMember: boolean;
+  teamContext?: {
+    companyName: string | null;
+    ownerFirstName: string | null;
+    ownerEmail: string | null;
+  };
 };
 
 
