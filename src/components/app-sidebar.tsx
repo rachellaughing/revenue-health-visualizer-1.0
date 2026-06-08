@@ -41,6 +41,7 @@ type LockKind =
 type NavItem = {
   title: string;
   url: string;
+  search?: Record<string, string>;
   icon: React.ComponentType<{ className?: string }>;
   lock?: LockKind;
   previewWhenLocked?: boolean;
@@ -85,9 +86,9 @@ const sections: NavSection[] = [
   {
     label: "SETTINGS",
     items: [
-      { title: "Account", url: "/settings?tab=account", icon: Settings },
-      { title: "Billing & Plan", url: "/settings?tab=billing", icon: CreditCard },
-      { title: "Team", url: "/settings?tab=team", icon: UserCog, lock: "pro_or_diagnostic" },
+      { title: "Account", url: "/settings", search: { tab: "account" }, icon: Settings },
+      { title: "Billing & Plan", url: "/settings", search: { tab: "billing" }, icon: CreditCard },
+      { title: "Team", url: "/settings", search: { tab: "team" }, icon: UserCog, lock: "pro_or_diagnostic" },
     ],
   },
 ];
@@ -194,7 +195,11 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                 {(isOpen || collapsed) && (
                   <ul className="mt-1">
                     {section.items.map((item) => {
-                      const active = pathname === item.url;
+                      const activeTab = item.search?.tab;
+                      const currentSearch = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+                      const active =
+                        pathname === item.url &&
+                        (activeTab ? currentSearch?.get("tab") === activeTab || (!currentSearch?.get("tab") && activeTab === "account") : true);
                       const locked = evalLock(item.lock ?? null, gating);
                       const Icon = item.icon;
 
@@ -240,14 +245,14 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                           ) : locked && item.previewWhenLocked ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Link to={item.url}>{baseRow}</Link>
+                                <Link to={item.url} search={item.search as any}>{baseRow}</Link>
                               </TooltipTrigger>
                               <TooltipContent side="right">
                                 {LOCK_REASON[item.lock as Exclude<LockKind, null>]} — preview available
                               </TooltipContent>
                             </Tooltip>
                           ) : (
-                            <Link to={item.url}>{baseRow}</Link>
+                            <Link to={item.url} search={item.search as any}>{baseRow}</Link>
                           )}
                         </li>
                       );
