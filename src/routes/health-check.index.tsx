@@ -1517,7 +1517,8 @@ function HealthCheckShell({
             );
 
           })}
-        </div>
+        </div>}
+
 
         {/* Right panel */}
         <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
