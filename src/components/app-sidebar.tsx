@@ -129,6 +129,7 @@ function evalLock(
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.fromEntries(sections.map((s) => [s.label, true])),
   );
@@ -196,10 +197,10 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                   <ul className="mt-1">
                     {section.items.map((item) => {
                       const activeTab = item.search?.tab;
-                      const currentSearch = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+                      const currentTab = new URLSearchParams(searchStr || "").get("tab") ?? "account";
                       const active =
                         pathname === item.url &&
-                        (activeTab ? currentSearch?.get("tab") === activeTab || (!currentSearch?.get("tab") && activeTab === "account") : true);
+                        (activeTab ? currentTab === activeTab : true);
                       const locked = evalLock(item.lock ?? null, gating);
                       const Icon = item.icon;
 
