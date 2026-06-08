@@ -15,9 +15,11 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { TopBar } from "../components/top-bar";
+import { BottomTabBar } from "../components/bottom-tab-bar";
 import { TeamMemberShell } from "../components/team-member-shell";
 import { AuthProvider, useAuth } from "../lib/auth-context";
 import { Toaster } from "../components/ui/sonner";
+import { useIsMobile } from "../hooks/use-mobile";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { getViewerContext } from "../lib/viewer.functions";
@@ -143,6 +145,8 @@ const PUBLIC_ROUTES = ["/login", "/signup"];
 
 function AuthGate() {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { session, loading } = useAuth();
@@ -158,6 +162,22 @@ function AuthGate() {
     if (loading) return;
     if (!session && !isPublic) navigate({ to: "/login", replace: true });
   }, [loading, session, isPublic, navigate]);
+
+  // Auto-close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Body scroll lock while drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [mobileOpen]);
 
   if (isPublic) return <Outlet />;
 
@@ -178,15 +198,64 @@ function AuthGate() {
     );
   }
 
+  const handleToggle = () => {
+    if (isMobile) setMobileOpen((o) => !o);
+    else setCollapsed((c) => !c);
+  };
+
   return (
     <div className="flex h-screen w-full" style={{ backgroundColor: "var(--mm-paper)" }}>
-      <AppSidebar collapsed={collapsed} />
+      {/* Desktop: inline sidebar */}
+      {!isMobile && <AppSidebar collapsed={collapsed} />}
+
+      {/* Mobile: drawer overlay */}
+      {isMobile && (
+        <>
+          {mobileOpen && (
+            <div
+              onClick={() => setMobileOpen(false)}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.5)",
+                zIndex: 50,
+              }}
+              aria-hidden
+            />
+          )}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              bottom: 0,
+              width: 280,
+              zIndex: 60,
+              transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
+              transition: "transform 220ms ease",
+              boxShadow: mobileOpen ? "0 0 30px rgba(0,0,0,0.3)" : "none",
+            }}
+          >
+            <AppSidebar collapsed={false} />
+          </div>
+        </>
+      )}
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar onToggleSidebar={() => setCollapsed((c) => !c)} />
-        <main className="flex-1 overflow-y-auto p-8">
+        <TopBar onToggleSidebar={handleToggle} />
+        <main
+          className="flex-1 overflow-y-auto p-4 md:p-8"
+          style={
+            isMobile
+              ? { paddingBottom: "calc(56px + env(safe-area-inset-bottom) + 16px)" }
+              : undefined
+          }
+        >
           <Outlet />
         </main>
       </div>
+
+      {isMobile && <BottomTabBar />}
       <Toaster />
     </div>
   );
