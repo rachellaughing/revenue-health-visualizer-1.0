@@ -139,6 +139,12 @@ function AuthGate() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
   const isPublic = PUBLIC_ROUTES.includes(pathname);
+  const fetchViewer = useServerFn(getViewerContext);
+  const viewerQ = useQuery({
+    queryKey: ["viewer-context"],
+    queryFn: () => fetchViewer(),
+    enabled: !!session && !isPublic,
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -147,11 +153,20 @@ function AuthGate() {
 
   if (isPublic) return <Outlet />;
 
-  if (loading || !session) {
+  if (loading || !session || viewerQ.isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center" style={{ backgroundColor: "var(--mm-paper)" }}>
         <p className="text-sm" style={{ color: "var(--mm-mid)" }}>Loading…</p>
       </div>
+    );
+  }
+
+  if (viewerQ.data?.role === "team_member") {
+    return (
+      <>
+        <TeamMemberShell firstName={viewerQ.data.firstName} />
+        <Toaster />
+      </>
     );
   }
 
