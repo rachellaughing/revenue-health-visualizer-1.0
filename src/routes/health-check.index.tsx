@@ -1517,14 +1517,14 @@ function HealthCheckShell({
             );
 
           })}
-        </div>}
+        </div>
 
 
         {/* Right panel */}
-        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : "24px 32px" }}>
-          {isMobile && (
-            <div
-              style={{
+        <div className="hc-right-panel" style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
+          <div
+            className="hc-mobile-tabs"
+            style={{
                 display: "flex",
                 overflowX: "auto",
                 WebkitOverflowScrolling: "touch",
