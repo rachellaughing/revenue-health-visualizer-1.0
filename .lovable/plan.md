@@ -1,55 +1,44 @@
-## Problem
+## Finding
 
-The screenshot shows the desktop left rail AND the right panel side-by-side on a 390px viewport — the mobile horizontal tabs are not visible. The previous edit gated layout on `useIsMobile()`, which:
+All five classes you asked for are already attached in `src/routes/health-check.index.tsx`:
 
-1. Returns `false` during SSR and on first paint (it's a `useEffect`-driven hook).
-2. In the SSR'd Health Check shell, that first-paint desktop layout sticks because the iframe preview isn't always triggering a re-render at mobile width, leaving the user looking at the desktop layout.
+| Class | Line | Element |
+|---|---|---|
+| `hc-desktop-rail` | 1343 | Left sidebar `<div>` containing the 5 system nav items |
+| `hc-right-panel` | 1524 | Main right content `<div>` |
+| `hc-mobile-tabs` | 1526 | Horizontal scrollable row of 5 parent-system tab buttons (name + %) with `selectParent(p.id)` on click |
+| `hc-completion-banner` | 1598 | Dark "Health Check is complete" card |
+| `hc-completion-cta` | 1617 | "View your Report →" anchor inside the banner |
 
-The fix: drive the layout switch with **CSS media queries** instead of a JS hook. CSS is correct on first paint, has no hydration gap, and works regardless of SSR.
+No new elements need to be created. The mobile tab row already exists with the exact behavior you described (dot + name + percentage, click switches active system).
 
-## Changes (single file: `src/routes/health-check.index.tsx`)
+## The one real bug
 
-### 1. Remove `isMobile` gating, render both layouts unconditionally
+The `hc-mobile-tabs` div has an inline `display: "flex"` (line 1528). Inline styles beat the stylesheet's default `.hc-mobile-tabs { display: none }`, so on desktop (≥768px) the mobile tab row renders *in addition to* the desktop rail. On mobile the CSS `!important` rule wins, so mobile is fine — but desktop ends up with both navs stacked.
 
-- Always render the desktop left rail `<div>` (drop the `!isMobile && …` wrapper at line 1342).
-- Always render the mobile horizontal tabs block (drop the `isMobile && …` wrapper at line 1525).
-- Replace `padding: isMobile ? 16 : "24px 32px"` with a static value of `"24px 32px"`, then override via CSS class on mobile.
-- Drop `flexDirection: isMobile ? "column" : "row"` and `alignItems: isMobile ? "stretch" : "center"` on the completion banner — drive those with CSS too.
+## Change (one file, one edit)
 
-### 2. Add `className` markers to the elements that swap
+`src/routes/health-check.index.tsx` lines 1525–1534 — remove the inline `display: "flex"` line from the `hc-mobile-tabs` style object so the CSS controls visibility:
 
-- Desktop left rail `<div>`: `className="hc-desktop-rail"`
-- Mobile tab row `<div>`: `className="hc-mobile-tabs"`
-- Right panel `<div>`: `className="hc-right-panel"`
-- Completion banner outer `<div>`: `className="hc-completion-banner"`
-- Completion banner CTA `<a>`: `className="hc-completion-cta"`
-
-(Inline styles remain for everything else; classes only carry the responsive overrides.)
-
-### 3. Add a small CSS block to `src/styles.css`
-
-```css
-/* Health Check — responsive nav swap */
-.hc-mobile-tabs { display: none; }
-
-@media (max-width: 767px) {
-  .hc-desktop-rail { display: none !important; }
-  .hc-mobile-tabs  { display: flex !important; }
-  .hc-right-panel  { padding: 16px !important; }
-  .hc-completion-banner {
-    flex-direction: column !important;
-    align-items: stretch !important;
-  }
-  .hc-completion-cta { text-align: center !important; }
-}
+```diff
+   <div
+     className="hc-mobile-tabs"
+     style={{
+-      display: "flex",
+       overflowX: "auto",
+       WebkitOverflowScrolling: "touch",
+       borderBottom: `1px solid ${T.offWhite}`,
+       margin: "-16px -16px 16px",
+     }}
+   >
 ```
 
-### 4. Drop the now-unused `useIsMobile` import/usage in this file
+That's the only JSX change. The CSS in `src/styles.css` is untouched.
 
-Remove `const isMobile = useIsMobile();` and the `useIsMobile` import if no longer used elsewhere in the file.
+## If mobile still looks broken after this
+
+Then the issue isn't the JSX — it's that the latest `src/styles.css` isn't being served (stale dev-server cache, or you're viewing a previously published URL instead of the preview). Hard-reload the preview and confirm. I won't change CSS per your instruction.
 
 ## Out of scope
 
-- No changes to the desktop layout at ≥768px.
-- No changes to question cards, top bar, tier bar, completed landing, team inline component.
-- No changes to other routes or shared components — only this file and a small block in `styles.css`.
+Desktop layout at ≥768px, question cards, top bar, tier bar, completed landing, team component, other routes.
