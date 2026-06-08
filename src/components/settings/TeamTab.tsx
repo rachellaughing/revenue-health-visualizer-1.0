@@ -7,7 +7,9 @@ import {
   listTeamMembers,
   inviteTeamMember,
   removeTeamMember,
+  resendTeamInvite,
 } from "@/lib/team.functions";
+
 import {
   createProCheckoutSession,
   getCurrentTier,
@@ -119,6 +121,8 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
   const listFn = useServerFn(listTeamMembers);
   const inviteFn = useServerFn(inviteTeamMember);
   const removeFn = useServerFn(removeTeamMember);
+  const resendFn = useServerFn(resendTeamInvite);
+
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["team-members"],
@@ -146,6 +150,14 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const resend = useMutation({
+    mutationFn: (id: string) =>
+      resendFn({ data: { id, origin: window.location.origin } }),
+    onSuccess: (r) => toast.success(`Invite resent to ${r.email}`),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const demoMembers = preview
     ? [
@@ -279,6 +291,24 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                     </span>
                   );
                 })()}
+                {m.status === "Invited" && (
+                  <button
+                    type="button"
+                    onClick={() => resend.mutate(m.id)}
+                    disabled={preview || resend.isPending}
+                    style={{
+                      background: "transparent",
+                      border: "1px solid #E5E5DF",
+                      color: "var(--mm-teal)",
+                      padding: "6px 12px",
+                      borderRadius: 8,
+                      fontSize: 12,
+                      cursor: resend.isPending ? "wait" : "pointer",
+                    }}
+                  >
+                    {resend.isPending ? "Sending…" : "Resend"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => remove.mutate(m.id)}
@@ -295,6 +325,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                 >
                   Remove
                 </button>
+
               </li>
             ))}
           </ul>
