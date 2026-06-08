@@ -133,7 +133,7 @@ export const inviteTeamMember = createServerFn({ method: "POST" })
       team_id: teamId,
       email: data.email,
       invite_token: token,
-      status: "invited",
+      status: "pending",
     });
     if (insErr) throw new Error(insErr.message);
 
