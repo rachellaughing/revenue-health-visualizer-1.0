@@ -888,7 +888,7 @@ function HealthCheckShell({
   updateSelFn: ReturnType<typeof useServerFn<typeof updateSelectedChildIds>>;
   qc: ReturnType<typeof useQueryClient>;
 }) {
-  const isMobile = useIsMobile();
+  
 
   const { tier, assessment, parents, children, areas } = data;
 
