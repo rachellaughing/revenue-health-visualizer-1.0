@@ -6,11 +6,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    verified: search.verified === "1" || search.verified === 1 ? true : undefined,
+  }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { verified } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
