@@ -187,5 +187,16 @@
   div[style*="grid-template-columns: auto 1fr"] {
     grid-template-columns: 1fr !important;
   }
+  /* 1fr auto grids collapse to single column */
+  div[style*="grid-template-columns: 1fr auto"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Horizontal flex rows with space-between → stack on mobile.
+     React serializes inline style as "display: flex; justify-content: space-between". */
+  main div[style*="display: flex"][style*="justify-content: space-between"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
 }
 
