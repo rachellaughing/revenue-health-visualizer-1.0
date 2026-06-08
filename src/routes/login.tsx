@@ -40,9 +40,6 @@ function LoginPage() {
         <p className="text-sm mb-8" style={{ color: "var(--mm-mid)" }}>
           Welcome back to your Revenue Health Visualiser™.
         </p>
-        <p className="text-sm mb-8" style={{ color: "var(--mm-mid)" }}>
-          Welcome back to your Revenue Health Visualiser™.
-        </p>
         {verified && (
           <div
             className="mb-6 rounded-md px-4 py-3 text-sm"
