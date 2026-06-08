@@ -1520,6 +1520,8 @@ function HealthCheckShell({
 
           })}
         </div>
+        )}
+
 
 
         {/* Right panel */}
