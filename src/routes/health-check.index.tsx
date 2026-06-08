@@ -1525,7 +1525,6 @@ function HealthCheckShell({
           <div
             className="hc-mobile-tabs"
             style={{
-                display: "flex",
                 overflowX: "auto",
                 WebkitOverflowScrolling: "touch",
                 borderBottom: `1px solid ${T.offWhite}`,
