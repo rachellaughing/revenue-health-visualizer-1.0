@@ -1341,8 +1341,8 @@ function HealthCheckShell({
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
 
         {/* Left nav (desktop only) */}
+        {!isMobile && (
         <div
-          className="hc-desktop-rail"
           style={{
             width: leftRailCollapsed ? 48 : 220,
             flexShrink: 0,
