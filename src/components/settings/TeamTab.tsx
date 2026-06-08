@@ -239,38 +239,68 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                 key={m.id}
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: 14,
-                  padding: "12px 14px",
+                  flexDirection: isMobile ? "column" : "row",
+                  alignItems: isMobile ? "stretch" : "center",
+                  gap: isMobile ? 10 : 14,
+                  padding: isMobile ? "14px 14px" : "12px 14px",
                   border: "1px solid #F0EFEA",
                   borderRadius: 10,
                 }}
               >
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: "50%",
-                    background: "var(--mm-teal)",
-                    color: "#FFFFFF",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 13,
-                    fontWeight: 700,
-                  }}
-                >
-                  {m.initials}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, color: "var(--mm-ink)", fontWeight: 500 }}>
-                    {m.display_name || m.email}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      background: "var(--mm-teal)",
+                      color: "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {m.initials}
                   </div>
-                  {m.display_name && (
-                    <div style={{ fontSize: 12, color: "var(--mm-mid)" }}>{m.email}</div>
-                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, color: "var(--mm-ink)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {m.display_name || m.email}
+                    </div>
+                    {m.display_name && (
+                      <div style={{ fontSize: 12, color: "var(--mm-mid)", overflow: "hidden", textOverflow: "ellipsis" }}>{m.email}</div>
+                    )}
+                  </div>
+                  {!isMobile && (() => {
+                    const palette: Record<string, { bg: string; fg: string }> = {
+                      Completed: { bg: "#E8F5E9", fg: "#1B5E20" },
+                      "In progress": { bg: "#E0F2F1", fg: "#00695C" },
+                      Joined: { bg: "#E3F2FD", fg: "#0D47A1" },
+                      Invited: { bg: "#FFF4E5", fg: "#8A5A00" },
+                    };
+                    const c = palette[m.status as string] ?? palette.Invited;
+                    return (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          letterSpacing: "0.08em",
+                          padding: "4px 10px",
+                          borderRadius: 6,
+                          background: c.bg,
+                          color: c.fg,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {String(m.status).toUpperCase()}
+                      </span>
+                    );
+                  })()}
                 </div>
-                {(() => {
+
+                {isMobile && (() => {
                   const palette: Record<string, { bg: string; fg: string }> = {
                     Completed: { bg: "#E8F5E9", fg: "#1B5E20" },
                     "In progress": { bg: "#E0F2F1", fg: "#00695C" },
@@ -281,6 +311,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                   return (
                     <span
                       style={{
+                        alignSelf: "flex-start",
                         fontSize: 11,
                         fontWeight: 700,
                         letterSpacing: "0.08em",
@@ -295,41 +326,45 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                     </span>
                   );
                 })()}
-                {m.status === "Invited" && (
+
+                <div style={{ display: "flex", gap: 8, width: isMobile ? "100%" : "auto" }}>
+                  {m.status === "Invited" && (
+                    <button
+                      type="button"
+                      onClick={() => resend.mutate(m.id)}
+                      disabled={preview || resend.isPending}
+                      style={{
+                        background: "transparent",
+                        border: "1px solid #E5E5DF",
+                        color: "var(--mm-teal)",
+                        padding: isMobile ? "10px 12px" : "6px 12px",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        cursor: resend.isPending ? "wait" : "pointer",
+                        flex: isMobile ? 1 : undefined,
+                      }}
+                    >
+                      {resend.isPending ? "Sending…" : "Resend"}
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => resend.mutate(m.id)}
-                    disabled={preview || resend.isPending}
+                    onClick={() => remove.mutate(m.id)}
+                    disabled={preview || remove.isPending}
                     style={{
                       background: "transparent",
                       border: "1px solid #E5E5DF",
-                      color: "var(--mm-teal)",
-                      padding: "6px 12px",
+                      color: "var(--mm-mid)",
+                      padding: isMobile ? "10px 12px" : "6px 12px",
                       borderRadius: 8,
                       fontSize: 12,
-                      cursor: resend.isPending ? "wait" : "pointer",
+                      cursor: "pointer",
+                      flex: isMobile ? 1 : undefined,
                     }}
                   >
-                    {resend.isPending ? "Sending…" : "Resend"}
+                    Remove
                   </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => remove.mutate(m.id)}
-                  disabled={preview || remove.isPending}
-                  style={{
-                    background: "transparent",
-                    border: "1px solid #E5E5DF",
-                    color: "var(--mm-mid)",
-                    padding: "6px 12px",
-                    borderRadius: 8,
-                    fontSize: 12,
-                    cursor: "pointer",
-                  }}
-                >
-                  Remove
-                </button>
-
+                </div>
               </li>
             ))}
           </ul>
