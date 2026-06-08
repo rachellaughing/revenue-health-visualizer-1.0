@@ -1,44 +1,30 @@
-## Finding
+## Switch Health Check responsive nav back to JS-controlled rendering
 
-All five classes you asked for are already attached in `src/routes/health-check.index.tsx`:
+CSS class approach is unreliable — switch to `useIsMobile()` (existing hook at `src/hooks/use-mobile.tsx`, breakpoint 768).
 
-| Class | Line | Element |
-|---|---|---|
-| `hc-desktop-rail` | 1343 | Left sidebar `<div>` containing the 5 system nav items |
-| `hc-right-panel` | 1524 | Main right content `<div>` |
-| `hc-mobile-tabs` | 1526 | Horizontal scrollable row of 5 parent-system tab buttons (name + %) with `selectParent(p.id)` on click |
-| `hc-completion-banner` | 1598 | Dark "Health Check is complete" card |
-| `hc-completion-cta` | 1617 | "View your Report →" anchor inside the banner |
+### Edits in `src/routes/health-check.index.tsx`
 
-No new elements need to be created. The mobile tab row already exists with the exact behavior you described (dot + name + percentage, click switches active system).
+1. **Add import** alongside existing imports:
+   ```ts
+   import { useIsMobile } from "@/hooks/use-mobile";
+   ```
 
-## The one real bug
+2. **Inside `HealthCheckPage`**, near the other hooks, add:
+   ```ts
+   const isMobile = useIsMobile();
+   ```
 
-The `hc-mobile-tabs` div has an inline `display: "flex"` (line 1528). Inline styles beat the stylesheet's default `.hc-mobile-tabs { display: none }`, so on desktop (≥768px) the mobile tab row renders *in addition to* the desktop rail. On mobile the CSS `!important` rule wins, so mobile is fine — but desktop ends up with both navs stacked.
+3. **Desktop rail (line 1342)** — wrap with `{!isMobile && (...)}` and remove `className="hc-desktop-rail"`.
 
-## Change (one file, one edit)
+4. **Right panel (line 1524)** — remove `className="hc-right-panel"`; change inline padding to `isMobile ? 16 : "24px 32px"`.
 
-`src/routes/health-check.index.tsx` lines 1525–1534 — remove the inline `display: "flex"` line from the `hc-mobile-tabs` style object so the CSS controls visibility:
+5. **Mobile tabs block (lines 1525–1594)** — wrap with `{isMobile && (...)}`; remove `className="hc-mobile-tabs"`; add inline `display: "flex"` back to the style object so it renders as a flex row.
 
-```diff
-   <div
-     className="hc-mobile-tabs"
-     style={{
--      display: "flex",
-       overflowX: "auto",
-       WebkitOverflowScrolling: "touch",
-       borderBottom: `1px solid ${T.offWhite}`,
-       margin: "-16px -16px 16px",
-     }}
-   >
-```
+6. **Completion banner (line 1596)** — remove `className="hc-completion-banner"`; switch inline `flexDirection` to `isMobile ? "column" : "row"` and `alignItems` to `isMobile ? "stretch" : "center"`.
 
-That's the only JSX change. The CSS in `src/styles.css` is untouched.
+7. **Completion CTA (line 1614)** — remove `className="hc-completion-cta"` (the existing inline `textAlign: "center"` already covers mobile).
 
-## If mobile still looks broken after this
+### Out of scope
 
-Then the issue isn't the JSX — it's that the latest `src/styles.css` isn't being served (stale dev-server cache, or you're viewing a previously published URL instead of the preview). Hard-reload the preview and confirm. I won't change CSS per your instruction.
-
-## Out of scope
-
-Desktop layout at ≥768px, question cards, top bar, tier bar, completed landing, team component, other routes.
+- CSS file untouched (the now-unused `.hc-*` rules in `src/styles.css` stay — user said don't touch CSS).
+- No changes to desktop layout, question cards, top bar, tier bar, other routes.
