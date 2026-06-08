@@ -67,7 +67,6 @@ function HealthCheckPage() {
   const saveFn = useServerFn(saveResponse);
   const updateSelFn = useServerFn(updateSelectedChildIds);
   const qc = useQueryClient();
-  const isMobile = useIsMobile();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["health-check"],
