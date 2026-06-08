@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DiagnosticRouteImport } from './routes/diagnostic'
@@ -37,6 +38,11 @@ import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -70,19 +76,19 @@ const HealthCheckIndexRoute = HealthCheckIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsTeamRoute = SettingsTeamRouteImport.update({
-  id: '/settings/team',
-  path: '/settings/team',
-  getParentRoute: () => rootRouteImport,
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsBillingRoute = SettingsBillingRouteImport.update({
-  id: '/settings/billing',
-  path: '/settings/billing',
-  getParentRoute: () => rootRouteImport,
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const SettingsAccountRoute = SettingsAccountRouteImport.update({
-  id: '/settings/account',
-  path: '/settings/account',
-  getParentRoute: () => rootRouteImport,
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const RevenueShadowSystemsRoute = RevenueShadowSystemsRouteImport.update({
   id: '/revenue/shadow-systems',
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/diagnostic': typeof DiagnosticRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/diagnostic': typeof DiagnosticRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/diagnostic': typeof DiagnosticRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/signup': typeof SignupRoute
   '/health-check/history': typeof HealthCheckHistoryRoute
   '/health-check/start': typeof HealthCheckStartRoute
@@ -244,6 +253,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/login'
     | '/reset-password'
+    | '/settings'
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/login'
     | '/reset-password'
+    | '/settings'
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/diagnostic'
     | '/login'
     | '/reset-password'
+    | '/settings'
     | '/signup'
     | '/health-check/history'
     | '/health-check/start'
@@ -323,6 +335,7 @@ export interface RootRouteChildren {
   DiagnosticRoute: typeof DiagnosticRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   SignupRoute: typeof SignupRoute
   HealthCheckHistoryRoute: typeof HealthCheckHistoryRoute
   HealthCheckStartRoute: typeof HealthCheckStartRoute
@@ -337,9 +350,6 @@ export interface RootRouteChildren {
   RevenueMatrixMapRoute: typeof RevenueMatrixMapRoute
   RevenueRoadmapBuilderRoute: typeof RevenueRoadmapBuilderRoute
   RevenueShadowSystemsRoute: typeof RevenueShadowSystemsRoute
-  SettingsAccountRoute: typeof SettingsAccountRoute
-  SettingsBillingRoute: typeof SettingsBillingRoute
-  SettingsTeamRoute: typeof SettingsTeamRoute
   HealthCheckIndexRoute: typeof HealthCheckIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -351,6 +361,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -397,24 +414,24 @@ declare module '@tanstack/react-router' {
     }
     '/settings/team': {
       id: '/settings/team'
-      path: '/settings/team'
+      path: '/team'
       fullPath: '/settings/team'
       preLoaderRoute: typeof SettingsTeamRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/settings/billing': {
       id: '/settings/billing'
-      path: '/settings/billing'
+      path: '/billing'
       fullPath: '/settings/billing'
       preLoaderRoute: typeof SettingsBillingRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/settings/account': {
       id: '/settings/account'
-      path: '/settings/account'
+      path: '/account'
       fullPath: '/settings/account'
       preLoaderRoute: typeof SettingsAccountRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/revenue/shadow-systems': {
       id: '/revenue/shadow-systems'
@@ -517,12 +534,29 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface SettingsRouteChildren {
+  SettingsAccountRoute: typeof SettingsAccountRoute
+  SettingsBillingRoute: typeof SettingsBillingRoute
+  SettingsTeamRoute: typeof SettingsTeamRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsAccountRoute: SettingsAccountRoute,
+  SettingsBillingRoute: SettingsBillingRoute,
+  SettingsTeamRoute: SettingsTeamRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   DiagnosticRoute: DiagnosticRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   SignupRoute: SignupRoute,
   HealthCheckHistoryRoute: HealthCheckHistoryRoute,
   HealthCheckStartRoute: HealthCheckStartRoute,
@@ -537,12 +571,19 @@ const rootRouteChildren: RootRouteChildren = {
   RevenueMatrixMapRoute: RevenueMatrixMapRoute,
   RevenueRoadmapBuilderRoute: RevenueRoadmapBuilderRoute,
   RevenueShadowSystemsRoute: RevenueShadowSystemsRoute,
-  SettingsAccountRoute: SettingsAccountRoute,
-  SettingsBillingRoute: SettingsBillingRoute,
-  SettingsTeamRoute: SettingsTeamRoute,
   HealthCheckIndexRoute: HealthCheckIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
