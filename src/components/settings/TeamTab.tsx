@@ -149,8 +149,10 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
 
   const demoMembers = preview
     ? [
-        { id: "1", email: "alex@example.com", display_name: "Alex Carter", initials: "AC", status: "Active" },
-        { id: "2", email: "sam@example.com", display_name: "Sam Patel", initials: "SP", status: "Invited" },
+        { id: "1", email: "alex@example.com", display_name: "Alex Carter", initials: "AC", status: "Completed", completed_at: null },
+        { id: "2", email: "sam@example.com", display_name: "Sam Patel", initials: "SP", status: "In progress", completed_at: null },
+        { id: "3", email: "jordan@example.com", display_name: "Jordan Lee", initials: "JL", status: "Joined", completed_at: null },
+        { id: "4", email: "riley@example.com", display_name: "Riley Kim", initials: "RK", status: "Invited", completed_at: null },
       ]
     : members;
 
@@ -252,19 +254,31 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                     <div style={{ fontSize: 12, color: "var(--mm-mid)" }}>{m.email}</div>
                   )}
                 </div>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: "0.08em",
-                    padding: "4px 10px",
-                    borderRadius: 6,
-                    background: m.status === "Active" ? "#E8F5E9" : "#FFF4E5",
-                    color: m.status === "Active" ? "#1B5E20" : "#8A5A00",
-                  }}
-                >
-                  {String(m.status).toUpperCase()}
-                </span>
+                {(() => {
+                  const palette: Record<string, { bg: string; fg: string }> = {
+                    Completed: { bg: "#E8F5E9", fg: "#1B5E20" },
+                    "In progress": { bg: "#E0F2F1", fg: "#00695C" },
+                    Joined: { bg: "#E3F2FD", fg: "#0D47A1" },
+                    Invited: { bg: "#FFF4E5", fg: "#8A5A00" },
+                  };
+                  const c = palette[m.status as string] ?? palette.Invited;
+                  return (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing: "0.08em",
+                        padding: "4px 10px",
+                        borderRadius: 6,
+                        background: c.bg,
+                        color: c.fg,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {String(m.status).toUpperCase()}
+                    </span>
+                  );
+                })()}
                 <button
                   type="button"
                   onClick={() => remove.mutate(m.id)}
