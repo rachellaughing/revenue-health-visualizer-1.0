@@ -42,7 +42,7 @@ function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/login?verified=1`,
         data: {
           first_name: firstName,
           last_name: lastName,
@@ -53,7 +53,23 @@ function SignupPage() {
     });
     setLoading(false);
     if (error) return setError(error.message);
-    navigate({ to: "/profile/personal" });
+    setSubmitted(true);
+  }
+
+  async function onResend() {
+    if (resendState === "sending") return;
+    setResendState("sending");
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/login?verified=1` },
+    });
+    if (error) {
+      setError(error.message);
+      setResendState("idle");
+      return;
+    }
+    setResendState("sent");
   }
 
   return (
