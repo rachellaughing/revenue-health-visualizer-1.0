@@ -101,26 +101,16 @@ export const redeemCoupon = createServerFn({ method: "POST" })
     if (currentTier !== "starter")
       throw new Error("You're already on a paid plan.");
 
-    // Bump use_count with guard
-    const guard =
-      c.max_uses == null
-        ? supabaseAdmin
-            .from("coupons")
-            .update({ use_count: c.use_count + 1 })
-            .eq("coupon_code", code)
-            .eq("use_count", c.use_count)
-        : supabaseAdmin
-            .from("coupons")
-            .update({ use_count: c.use_count + 1 })
-            .eq("coupon_code", code)
-            .eq("use_count", c.use_count)
-            .lt("use_count", c.max_uses);
-    const { error: bumpErr, count } = await guard.select("*", {
-      count: "exact",
-      head: true,
-    });
+    // Bump use_count with optimistic guard on prior use_count
+    let q = supabaseAdmin
+      .from("coupons")
+      .update({ use_count: c.use_count + 1 })
+      .eq("coupon_code", code)
+      .eq("use_count", c.use_count);
+    if (c.max_uses != null) q = q.lt("use_count", c.max_uses);
+    const { data: bumped, error: bumpErr } = await q.select("coupon_code");
     if (bumpErr) throw new Error(bumpErr.message);
-    if (!count || count < 1)
+    if (!bumped || bumped.length < 1)
       throw new Error("This code was just claimed. Please try another.");
 
     // Flip tier + record code used
