@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
+import { getViewerContext } from "@/lib/viewer.functions";
+import { TeamMemberDashboard } from "@/components/team-member-dashboard";
 import {
   getIllustrativeScores,
   getOverall,
@@ -22,10 +24,21 @@ const TIER_LABEL: Record<string, string> = {
 };
 
 function DashboardPage() {
+  const viewerQ = useQuery({
+    queryKey: ["viewer-context"],
+    queryFn: () => getViewerContext(),
+  });
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard"],
     queryFn: () => getDashboardData(),
+    enabled: viewerQ.data?.role !== "team_member",
   });
+
+  if (viewerQ.data?.role === "team_member") {
+    return <TeamMemberDashboard viewer={viewerQ.data} />;
+  }
+
 
   if (isLoading) {
     return (

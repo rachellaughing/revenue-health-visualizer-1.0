@@ -59,6 +59,12 @@ export type HealthCheckData = {
   responses: ResponseRow[];
   scores: AssessmentScoreRow[];
   totalUnlockedAreas: number;
+  isTeamMember: boolean;
+  teamContext?: {
+    companyName: string | null;
+    ownerFirstName: string | null;
+    ownerEmail: string | null;
+  };
 };
 
 
@@ -179,7 +185,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
-      .select("id,tier")
+      .select("id,tier,role")
       .eq("user_id", userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
@@ -188,6 +194,71 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       | "starter"
       | "pro"
       | "diagnostic";
+    const isTeamMember = (profile?.role ?? "owner") === "team_member";
+
+    // Resolve team context (founder + parent assessment) for team members.
+    let teamContext: HealthCheckData["teamContext"] | undefined;
+    let parentAssessmentId: string | null = null;
+    let parentSelectedChildIds: string[] = [];
+    if (isTeamMember) {
+      const { data: tm } = await supabaseAdmin
+        .from("team_members")
+        .select("team_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (tm) {
+        const { data: team } = await supabaseAdmin
+          .from("teams")
+          .select("owner_id")
+          .eq("id", tm.team_id)
+          .maybeSingle();
+        const ownerUserId = team?.owner_id ?? null;
+        if (ownerUserId) {
+          const [{ data: ownerProfile }, { data: ownerCompany }] =
+            await Promise.all([
+              supabaseAdmin
+                .from("profiles")
+                .select("first_name,email")
+                .eq("user_id", ownerUserId)
+                .maybeSingle(),
+              supabaseAdmin
+                .from("company_profiles")
+                .select("company_name")
+                .eq("user_id", ownerUserId)
+                .maybeSingle(),
+            ]);
+          teamContext = {
+            companyName: ownerCompany?.company_name ?? null,
+            ownerFirstName: ownerProfile?.first_name ?? null,
+            ownerEmail: ownerProfile?.email ?? null,
+          };
+          const { data: completedAsmt } = await supabaseAdmin
+            .from("assessments")
+            .select("id, selected_child_ids")
+            .eq("user_id", ownerUserId)
+            .eq("status", "completed")
+            .order("completed_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          let refAsmt = completedAsmt;
+          if (!refAsmt) {
+            const { data: latestAsmt } = await supabaseAdmin
+              .from("assessments")
+              .select("id, selected_child_ids")
+              .eq("user_id", ownerUserId)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+            refAsmt = latestAsmt ?? null;
+          }
+          if (refAsmt) {
+            parentAssessmentId = refAsmt.id;
+            parentSelectedChildIds =
+              (refAsmt.selected_child_ids as string[] | null) ?? [];
+          }
+        }
+      }
+    }
 
     // 1. Look for an existing in_progress assessment → use it
     let { data: assessment, error: aErr } = await supabaseAdmin
@@ -214,19 +285,24 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       assessment = lastCompleted;
     }
 
-    // 3. Only auto-create for first-time users (no in_progress AND no completed).
-    //    Reassessment is an explicit action — see startNewAssessment.
+    // 3. Auto-create for first-time users.
+    //    For team members, seed parent_assessment_id + selected_child_ids.
     if (!assessment) {
+      const insertPayload: Record<string, unknown> = {
+        user_id: userId,
+        profile_id: profile?.id ?? null,
+        assessment_type: isTeamMember ? "team_member" : tier,
+        tier_at_start: isTeamMember ? "team_member" : tier,
+        status: "in_progress",
+        completion_pct: 0,
+      };
+      if (isTeamMember) {
+        insertPayload.parent_assessment_id = parentAssessmentId;
+        insertPayload.selected_child_ids = parentSelectedChildIds;
+      }
       const { data: created, error: cErr } = await supabaseAdmin
         .from("assessments")
-        .insert({
-          user_id: userId,
-          profile_id: profile?.id ?? null,
-          assessment_type: tier,
-          tier_at_start: tier,
-          status: "in_progress",
-          completion_pct: 0,
-        })
+        .insert(insertPayload as any)
         .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
         .single();
       if (cErr) throw new Error(cErr.message);
@@ -248,12 +324,12 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       .map((id) => fw.children.find((c) => c.id === id)?.code)
       .filter((code): code is string => Boolean(code));
 
-    // Total unlocked areas: for starter, count only selected child areas
+    // Total unlocked areas: for starter / team_member, count only selected child areas
     const selectedChildIdSet = new Set(
       fw.children.filter((c) => selectedCodes.includes(c.code)).map((c) => c.id),
     );
     const total =
-      tier === "starter"
+      tier === "starter" || isTeamMember
         ? fw.areas.filter((a) => selectedChildIdSet.has(a.child_system_id)).length
         : countUnlockedAreas(tier, fw.children, fw.areas);
 
@@ -273,6 +349,8 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       responses: fw.responses,
       scores: (scoresData ?? []) as AssessmentScoreRow[],
       totalUnlockedAreas: total,
+      isTeamMember,
+      teamContext,
     };
   });
 
@@ -389,6 +467,23 @@ export const saveResponse = createServerFn({ method: "POST" })
         await _calculateAssessmentScoresImpl(data.assessment_id, userId);
       } catch (err) {
         console.error("[scores] calculation failed:", err);
+      }
+      // If this is a team member completing their Health Check, mark
+      // their team_members row active so the founder sees them as "Active".
+      try {
+        const { data: roleRow } = await supabaseAdmin
+          .from("profiles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+        if ((roleRow?.role ?? "owner") === "team_member") {
+          await supabaseAdmin
+            .from("team_members")
+            .update({ status: "active" })
+            .eq("user_id", userId);
+        }
+      } catch (err) {
+        console.error("[team_members] status update failed:", err);
       }
     }
 

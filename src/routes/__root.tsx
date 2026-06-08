@@ -15,8 +15,12 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { TopBar } from "../components/top-bar";
+import { TeamMemberShell } from "../components/team-member-shell";
 import { AuthProvider, useAuth } from "../lib/auth-context";
 import { Toaster } from "../components/ui/sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { getViewerContext } from "../lib/viewer.functions";
 
 function NotFoundComponent() {
   return (
@@ -135,6 +139,12 @@ function AuthGate() {
   const navigate = useNavigate();
   const { session, loading } = useAuth();
   const isPublic = PUBLIC_ROUTES.includes(pathname);
+  const fetchViewer = useServerFn(getViewerContext);
+  const viewerQ = useQuery({
+    queryKey: ["viewer-context"],
+    queryFn: () => fetchViewer(),
+    enabled: !!session && !isPublic,
+  });
 
   useEffect(() => {
     if (loading) return;
@@ -143,11 +153,20 @@ function AuthGate() {
 
   if (isPublic) return <Outlet />;
 
-  if (loading || !session) {
+  if (loading || !session || viewerQ.isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center" style={{ backgroundColor: "var(--mm-paper)" }}>
         <p className="text-sm" style={{ color: "var(--mm-mid)" }}>Loading…</p>
       </div>
+    );
+  }
+
+  if (viewerQ.data?.role === "team_member") {
+    return (
+      <>
+        <TeamMemberShell firstName={viewerQ.data.firstName} />
+        <Toaster />
+      </>
     );
   }
 
