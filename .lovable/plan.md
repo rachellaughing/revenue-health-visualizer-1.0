@@ -1,30 +1,44 @@
-# Email-verification UX on signup
+# Fix team-member invite → signup flow
 
-Two small changes, both in `src/routes/signup.tsx`. No DB, no auth-template scaffolding needed.
+## Problem
 
-## 1. Show a "check your email" confirmation after signup
+`inviteTeamMember` calls `supabase.auth.admin.inviteUserByEmail(email)` with no `redirectTo`. The invite email link sends the user to Supabase's default URL, where they land authenticated but with no password and no profile completion path. There's no route in this app to receive them, so the flow appears broken.
 
-Currently the signup handler calls `supabase.auth.signUp(...)` then immediately `navigate({ to: "/profile/personal" })`. Because Supabase requires email confirmation, the user lands on a logged-out profile page and is confused.
+The regular `/signup` page won't work either — invitees already have an auth user; they need to *set* a password on the existing user, not create a new one.
 
-Change: on successful `signUp`, do **not** navigate. Instead, swap the form for a confirmation card in the same page:
+## Solution
 
-> **Check your email**
-> We've sent a verification link to **{email}**. Click the link to activate your account, then sign in to continue.
-> [Resend email] (calls `supabase.auth.resend({ type: 'signup', email })`)
-> [Back to sign in] → `/login`
+Add a dedicated `/join-team` page that:
+1. Receives invitees after they click the email link (they arrive already authenticated via Supabase's recovery/invite token exchange).
+2. Pre-fills their **email** (read-only, from `supabase.auth.getUser()`).
+3. Pre-fills the **inviting company name** (read-only, looked up server-side from the team they were invited to).
+4. Collects first name, last name, and password.
+5. Calls `supabase.auth.updateUser({ password, data: { first_name, last_name } })`.
+6. Flips their `team_members` row from `pending` → `active` and links `user_id`.
+7. Routes them into normal onboarding (`/profile/company` or `/dashboard` if no further info needed).
 
-Implemented via a local `submitted` state flag — no new routes, no new files.
+## Changes
 
-## 2. Redirect the verification link to `/login` with a success banner
+### 1. `src/lib/team.functions.ts`
+- Update `inviteTeamMember` to pass `{ redirectTo: \`${origin}/join-team\` }` to `inviteUserByEmail`. Origin must come from the request (read `getRequestHeader('origin')` or a config) since this runs server-side.
+- Add `getInviteContext` server fn — given the authenticated invitee, look up their `team_members` row by email, return `{ companyName, teamOwnerName, email, alreadyActivated }`. Company name = inviting owner's `company_profiles.company_name` (fallback to `profiles.business_name`).
+- Add `activateTeamMembership` server fn — find pending `team_members` row matching `auth.email()`, set `status='active'`, `user_id=auth.uid()`, `joined_at=now()`.
 
-Change `emailRedirectTo` from `${window.location.origin}/dashboard` to `${window.location.origin}/login?verified=1`.
+### 2. `src/routes/join-team.tsx` (new)
+- Public route (no `_authenticated` gate — invitee may still be mid-token-exchange).
+- On mount: wait for `supabase.auth.getSession()`. If no session, show "Your invite link has expired — ask for a new one."
+- Once authenticated, call `getInviteContext`. If no pending invite found, redirect to `/dashboard`.
+- Render form: email (disabled), company name (disabled, contextual: "You've been invited to join {Company}"), first name, last name, password (with `PasswordRequirements`).
+- On submit: `updateUser` → `activateTeamMembership` → navigate to `/profile/company` (so they finish onboarding) or `/health-check` per existing flow.
 
-In `src/routes/login.tsx`:
-- Add `validateSearch` to accept an optional `verified` flag.
-- When `verified=1` is present, render a green confirmation strip above the form: *"Email verified — sign in to continue."*
-
-This avoids the Supabase-hosted error page entirely. Supabase exchanges the token, sets the session, then bounces the user to `/login?verified=1`. If their session is already active, the login form's existing "already signed in" path (if any) handles it; otherwise they sign in once and proceed.
+### 3. Tiny copy/UX
+- In `settings.team.tsx` invite confirmation toast: mention "They'll get an email with a link to join your team."
 
 ## Out of scope
-- Custom-branded auth email templates (would require `scaffold_auth_email_templates` + a verified email domain). Default Supabase email is fine for now; we're just fixing the redirect target and post-signup UX.
-- Changing the Supabase Auth "Site URL" or redirect allow-list — `${window.location.origin}/login` is already same-origin, so it's covered by the existing Site URL.
+- Customizing the Supabase email template body (separate auth-email task).
+- Changing existing `/signup` for regular users.
+- Team owner notifications when a member activates.
+
+## Notes
+- Existing `handle_new_user` trigger already creates a `profiles` + `company_profiles` stub when the invited user is first created by `inviteUserByEmail`, so we only need to fill personal fields and activate membership — we do NOT create a second profile row.
+- Per project knowledge: use `supabaseAdmin` for all DB writes in server functions.

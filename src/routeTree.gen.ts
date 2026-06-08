@@ -13,6 +13,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as JoinTeamRouteImport } from './routes/join-team'
 import { Route as DiagnosticRouteImport } from './routes/diagnostic'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
@@ -53,6 +54,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinTeamRoute = JoinTeamRouteImport.update({
+  id: '/join-team',
+  path: '/join-team',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DiagnosticRoute = DiagnosticRouteImport.update({
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/diagnostic': typeof DiagnosticRoute
+  '/join-team': typeof JoinTeamRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/diagnostic': typeof DiagnosticRoute
+  '/join-team': typeof JoinTeamRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
@@ -222,6 +230,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/diagnostic': typeof DiagnosticRoute
+  '/join-team': typeof JoinTeamRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRouteWithChildren
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/diagnostic'
+    | '/join-team'
     | '/login'
     | '/reset-password'
     | '/settings'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/diagnostic'
+    | '/join-team'
     | '/login'
     | '/reset-password'
     | '/settings'
@@ -305,6 +316,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/diagnostic'
+    | '/join-team'
     | '/login'
     | '/reset-password'
     | '/settings'
@@ -333,6 +345,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   DiagnosticRoute: typeof DiagnosticRoute
+  JoinTeamRoute: typeof JoinTeamRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRouteWithChildren
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join-team': {
+      id: '/join-team'
+      path: '/join-team'
+      fullPath: '/join-team'
+      preLoaderRoute: typeof JoinTeamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/diagnostic': {
@@ -554,6 +574,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   DiagnosticRoute: DiagnosticRoute,
+  JoinTeamRoute: JoinTeamRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRouteWithChildren,

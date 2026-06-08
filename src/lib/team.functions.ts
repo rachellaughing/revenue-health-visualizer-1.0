@@ -110,7 +110,12 @@ export const listTeamMembers = createServerFn({ method: "GET" })
 export const inviteTeamMember = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ email: z.string().trim().toLowerCase().email().max(255) }).parse(d),
+    z
+      .object({
+        email: z.string().trim().toLowerCase().email().max(255),
+        origin: z.string().url().max(255),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertPaidTier(context.userId);
@@ -139,9 +144,9 @@ export const inviteTeamMember = createServerFn({ method: "POST" })
 
     const { error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
       data.email,
+      { redirectTo: `${data.origin}/join-team` },
     );
     if (inviteErr) {
-      // Roll back the row so the user can retry
       await supabaseAdmin
         .from("team_members")
         .delete()
@@ -151,6 +156,104 @@ export const inviteTeamMember = createServerFn({ method: "POST" })
     }
 
     return { ok: true, email: data.email };
+  });
+
+export const getInviteContext = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: userData, error: userErr } =
+      await supabaseAdmin.auth.admin.getUserById(context.userId);
+    if (userErr) throw new Error(userErr.message);
+    const email = userData.user?.email?.toLowerCase();
+    if (!email) throw new Error("No email on account");
+
+    const { data: member, error: memErr } = await supabaseAdmin
+      .from("team_members")
+      .select("id, team_id, status")
+      .eq("email", email)
+      .maybeSingle();
+    if (memErr) throw new Error(memErr.message);
+    if (!member) {
+      return { email, hasInvite: false as const };
+    }
+
+    const { data: team } = await supabaseAdmin
+      .from("teams")
+      .select("owner_id, team_name")
+      .eq("id", member.team_id as string)
+      .maybeSingle();
+
+    let companyName: string | null = null;
+    let ownerName: string | null = null;
+    if (team?.owner_id) {
+      const { data: cp } = await supabaseAdmin
+        .from("company_profiles")
+        .select("company_name")
+        .eq("user_id", team.owner_id as string)
+        .maybeSingle();
+      companyName = (cp?.company_name as string | null) ?? null;
+
+      const { data: op } = await supabaseAdmin
+        .from("profiles")
+        .select("full_name, business_name")
+        .eq("user_id", team.owner_id as string)
+        .maybeSingle();
+      if (!companyName) companyName = (op?.business_name as string | null) ?? null;
+      ownerName = (op?.full_name as string | null) ?? null;
+    }
+
+    return {
+      email,
+      hasInvite: true as const,
+      alreadyActivated: member.status === "active",
+      companyName,
+      ownerName,
+      teamName: (team?.team_name as string | null) ?? null,
+    };
+  });
+
+export const activateTeamMembership = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        firstName: z.string().trim().min(1).max(100),
+        lastName: z.string().trim().min(1).max(100),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: userData, error: userErr } =
+      await supabaseAdmin.auth.admin.getUserById(context.userId);
+    if (userErr) throw new Error(userErr.message);
+    const email = userData.user?.email?.toLowerCase();
+    if (!email) throw new Error("No email on account");
+
+    const fullName = `${data.firstName} ${data.lastName}`.trim();
+
+    const { error: profErr } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        first_name: data.firstName,
+        last_name: data.lastName,
+        full_name: fullName,
+      })
+      .eq("user_id", context.userId);
+    if (profErr) throw new Error(profErr.message);
+
+    const { error: tmErr } = await supabaseAdmin
+      .from("team_members")
+      .update({
+        status: "active",
+        user_id: context.userId,
+        display_name: fullName,
+        invite_accepted_at: new Date().toISOString(),
+      })
+      .eq("email", email)
+      .eq("status", "pending");
+    if (tmErr) throw new Error(tmErr.message);
+
+    return { ok: true };
   });
 
 export const removeTeamMember = createServerFn({ method: "POST" })
