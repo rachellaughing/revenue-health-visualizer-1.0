@@ -1,50 +1,43 @@
-## Mobile improvements — round 2
+## Health Check — mobile layout fix
 
-Three changes, all scoped to `<768px`. Desktop layout is unchanged.
+Scope: `src/routes/health-check.index.tsx` only. Desktop (≥768px) layout unchanged.
 
-### 1. Sidebar → slide-out drawer on mobile
+### 1. Hide left rail on mobile, show horizontal parent tabs
 
-**File:** `src/routes/__root.tsx`, `src/components/app-sidebar.tsx`, `src/components/top-bar.tsx`
+In `HealthCheckShell`:
 
-- Add `mobileOpen` state in `AuthGate` alongside the existing `collapsed` state.
-- On mobile (`useIsMobile()`), render `AppSidebar` as a fixed-position overlay panel (left: 0, width 280px, full height, z-50, translateX based on `mobileOpen`) with a dark backdrop behind it (z-40, click to close).
-- Desktop continues to render the sidebar inline in the flex row using the existing `collapsed` prop.
-- `TopBar` hamburger calls `onToggleSidebar` — on mobile it toggles `mobileOpen`, on desktop it toggles `collapsed` (same behaviour as today).
-- Auto-close drawer on route change (`useEffect` on `pathname`).
-- Body scroll lock while drawer is open.
+- Read `useIsMobile()` from `@/hooks/use-mobile`.
+- When `isMobile`, do NOT render the existing `<div>` left rail (lines ~1337–1514). Instead, render a new horizontal tab row at the top of the right panel (before the completion banner).
+- Tab row container: `display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 0; border-bottom: 1px solid var(--mm-off-white); margin: -16px -16px 16px;` (bleed to panel edges, scroll horizontally, no wrap).
+- One tab per parent (5 total):
+  - `flex-shrink: 0; white-space: nowrap; padding: 10px 16px; cursor: pointer; background: none; border: none; border-bottom: 2px solid <color | transparent>;`
+  - Contents: colored dot (8px circle, `background: #<parent.color_hex>`) + parent name (12px, `fontWeight: isActive ? 600 : 500`, color: active → `T.ink`, inactive → `T.mid`) + percentage (11px, `T.mid`, shown only when `pct > 0`).
+  - Active tab: `border-bottom: 2px solid #<parent.color_hex>` and darker text; inactive: transparent border.
+  - `onClick` → `selectParent(p.id)` (existing function).
 
-### 2. Bottom tab bar (mobile only)
+- Below the tab row, the existing parent-name heading + child chips + question cards render full width.
 
-**New file:** `src/components/bottom-tab-bar.tsx`
-**Wired in:** `src/routes/__root.tsx`
+### 2. Mobile right-panel padding and body layout
 
-- Fixed bottom bar, height 56px + `env(safe-area-inset-bottom)`, hidden ≥768px.
-- 4 tabs: Dashboard, Health Check, Reports (→ `/reports/executive-summary`), Settings (→ `/settings/account`).
-- Icons from `lucide-react` (LayoutDashboard, ClipboardCheck, FileBarChart, Settings).
-- Active state via `useRouterState` pathname prefix match — ember color for active, mid for inactive.
-- Add `padding-bottom: calc(56px + env(safe-area-inset-bottom))` to the `<main>` element on mobile so content isn't hidden behind the bar.
-- Not rendered for `team_member` role (TeamMemberShell is separate).
+- The body wrapper (line 1334 `<div style={{ display: "flex", flex: 1, overflow: "hidden" }}>`) stays flex; on mobile the left rail is simply not rendered so the right panel takes full width naturally.
+- Right panel padding: `padding: isMobile ? "16px" : "24px 32px"` (line 1517).
 
-### 3. Team tab — stacked mobile layout
+### 3. Completion banner stacks on mobile
 
-**File:** `src/components/settings/TeamTab.tsx`
+Existing banner (lines 1518–1550) uses `display: flex; justifyContent: space-between`. Change to:
+- `flexDirection: isMobile ? "column" : "row"`
+- `alignItems: isMobile ? "stretch" : "center"`
+- CTA `<a>` gets `textAlign: "center"` on mobile so it spans full width of the column.
 
-- Invite form: on mobile, change the form's flex from row to column (`flexDirection: window.innerWidth < 768 ? "column" : "row"` via `useIsMobile()`), input full width, button full width below it.
-- Member row: on mobile, restructure each `<li>` into a vertical card:
-  - Row 1: avatar (36×36) + name/email (flex row)
-  - Row 2: status badge (left-aligned)
-  - Row 3: Resend (if invited) + Remove buttons, full-width, side-by-side with `flex: 1`
-- Desktop layout (single horizontal row) preserved by branching on `useIsMobile()`.
-- Card padding bumped slightly on mobile (14px → 16px) for touch comfort.
+### 4. Out of scope / unchanged
 
-### Out of scope (deferred)
-
-- Health Check one-question-per-screen
-- Reports mobile (matrix carousel, KPI card lists)
-- Dashboard mobile stack
+- Desktop sidebar, collapse button, child sub-list under active parent: untouched.
+- Top bar, tier indicator bar: untouched (already fit mobile width; the top bar is 52px with horizontal padding 24px — leave as-is per "no other changes").
+- Question cards (`AnswerCard`, collapsed cards, edit forms): untouched. They already use percentage widths and will fill the now-wider right panel.
+- `CompletedLanding` (the post-completion screen) and `TeamMemberCompletionInline`: untouched.
 
 ### Technical notes
 
-- `useIsMobile()` already exists at `src/hooks/use-mobile.tsx`; returns `false` during SSR (initial `undefined` → `!!` = false), so mobile-only UI mounts after hydration. No SSR/hydration mismatch because the drawer/bottom-bar start in their desktop-equivalent state.
-- No new dependencies. No route changes. No server function changes.
-- Tokens used: `--mm-paper`, `--mm-abyss`, `--mm-ember`, `--mm-mid`, `--mm-off-white` — no new colors.
+- `useIsMobile()` returns `false` during SSR, so on first paint mobile users briefly see the desktop layout for one frame before hydration — acceptable, consistent with the rest of the app.
+- No new CSS files; all styling stays inline to match the file's existing convention.
+- No new dependencies. No route, server function, or data-shape changes.
