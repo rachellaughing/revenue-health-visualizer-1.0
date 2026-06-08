@@ -1358,17 +1358,18 @@ function HealthCheckShell({
               title={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
               aria-label={leftRailCollapsed ? "Expand systems" : "Collapse systems"}
               style={{
-                background: "transparent",
-                border: `1px solid ${T.offWhite}`,
+                background: T.offWhite,
+                border: `1px solid ${T.mid}`,
                 borderRadius: 6,
-                width: 24,
-                height: 24,
+                width: 28,
+                height: 28,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: T.mid,
-                fontSize: 12,
+                color: T.ink,
+                fontSize: 14,
+                fontWeight: 600,
                 lineHeight: 1,
               }}
             >
