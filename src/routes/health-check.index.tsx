@@ -85,11 +85,67 @@ function HealthCheckPage() {
   }
   if (!data) return null;
 
+  if (data.isTeamMember && data.assessment.status === "completed") {
+    return (
+      <TeamMemberCompletionInline
+        company={data.teamContext?.companyName ?? "your company"}
+        ownerName={data.teamContext?.ownerFirstName ?? "your founder"}
+        ownerEmail={data.teamContext?.ownerEmail ?? null}
+        submittedAt={data.assessment.submitted_at ?? data.assessment.completed_at}
+      />
+    );
+  }
+
   if (data.assessment.status === "completed") {
     return <CompletedLanding data={data} qc={qc} />;
   }
 
   return <HealthCheckShell data={data} saveFn={saveFn} updateSelFn={updateSelFn} qc={qc} />;
+}
+
+function TeamMemberCompletionInline({
+  company,
+  ownerName,
+  ownerEmail,
+  submittedAt,
+}: {
+  company: string;
+  ownerName: string;
+  ownerEmail: string | null;
+  submittedAt: string | null;
+}) {
+  const submitted = submittedAt ? new Date(submittedAt) : new Date();
+  const lockDate = new Date(submitted.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const lockDateStr = lockDate.toLocaleDateString("en-US", {
+    month: "long", day: "numeric", year: "numeric",
+  });
+  return (
+    <div style={{ minHeight: "100%", background: T.paper, padding: "48px 24px", display: "flex", justifyContent: "center" }}>
+      <div style={{ width: "100%", maxWidth: 640 }}>
+        <div style={{ background: T.abyss, borderRadius: 16, padding: "40px 36px", color: T.white }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 16 }}>
+            ✓ HEALTH CHECK COMPLETE
+          </div>
+          <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 32, fontWeight: 400, lineHeight: 1.2, margin: "0 0 16px" }}>
+            Your responses have been submitted.
+          </h1>
+          <p style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.78)", margin: "0 0 24px" }}>
+            Thank you for completing the Health Check for {company}. {ownerName} will see how team
+            scores compare to their own in the Team Alignment report. Your individual responses are
+            always kept anonymous.
+          </p>
+          {ownerEmail && (
+            <a href={`mailto:${ownerEmail}`} style={{ fontSize: 13, color: T.tealBright, textDecoration: "none", borderBottom: `1px solid ${T.tealBright}40` }}>
+              Questions? Contact {ownerEmail}
+            </a>
+          )}
+        </div>
+        <p style={{ marginTop: 18, fontSize: 12, color: T.mid, textAlign: "center", lineHeight: 1.6 }}>
+          You can return to update your answers until {lockDateStr}. After that your responses will be locked.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function quarterFromDate(d: Date) {
