@@ -302,7 +302,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       }
       const { data: created, error: cErr } = await supabaseAdmin
         .from("assessments")
-        .insert(insertPayload)
+        .insert(insertPayload as any)
         .select("id,status,completion_pct,selected_child_ids,submitted_at,completed_at")
         .single();
       if (cErr) throw new Error(cErr.message);
