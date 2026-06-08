@@ -1498,7 +1498,7 @@ function HealthCheckShell({
               </div>
 
               {/* Snapshot selection instruction */}
-              {tier === "starter" && (
+              {tier === "starter" && !data.isTeamMember && (
                 <div
                   style={{
                     fontSize: 12,
