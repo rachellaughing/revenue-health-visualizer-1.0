@@ -1,27 +1,22 @@
-## Resend Team Invite
+## Goal
+Let users collapse the left "parent systems" rail on the Health Check page (between the app sidebar and the main question column) so the answer area can use more width — mirroring how the app sidebar already collapses.
 
-### Goal
-Let team owners resend a Supabase auth invitation email to any team member still in **Invited** status.
+## Scope
+Single file: `src/routes/health-check.index.tsx`, the `HealthCheckShell` component (left nav starts at line ~1316, width 220).
 
-### Changes
+## Behaviour
+- New local state `leftRailCollapsed` (default `false`, persisted to `localStorage` under `hc-leftrail-collapsed` so the choice sticks across reloads).
+- Collapsed width: `48px`. Expanded width: `220px` (unchanged). Smooth `width` transition (200ms).
+- When collapsed:
+  - Hide parent name labels, progress bars, percentage, and the expanded child list.
+  - Keep the coloured dot (8px) centered as a clickable affordance for each parent — clicking it selects that parent AND auto-expands the rail.
+  - Active parent still shows the 3px coloured left border.
+- A small chevron toggle button sits at the top of the rail (`«` when expanded, `»` when collapsed). On mobile (<768px) the rail starts collapsed by default.
+- Tooltips on each parent dot when collapsed (reuse existing `Tooltip` primitive) showing the parent name + % complete.
 
-#### 1. `src/lib/team.functions.ts` — new server function
-Add `resendTeamInvite` (POST, protected by `requireSupabaseAuth`):
-- Accept `{ id: string }` (the `team_members` row ID).
-- Verify the caller owns the team by looking up the member row and checking its `team_id` matches the caller’s team.
-- Call `supabaseAdmin.auth.admin.inviteUserByEmail(member.email, { redirectTo: <origin>/join-team })` to re-send the Supabase auth invite.
-- On success, optionally refresh `invite_sent_at` on the `team_members` row.
-- Return `{ ok: true, email }`.
+## Out of scope
+- No change to the app sidebar, top bar, child-system list rendering, or save logic.
+- No responsive overhaul of the main column (that was discussed separately).
 
-#### 2. `src/components/settings/TeamTab.tsx` — UI button
-- Wire up a `resendTeamInvite` mutation using `useServerFn`.
-- For each member with `status === "Invited"`, render a small **"Resend"** text/link button next to the existing **"Remove"** button.
-- Show a loading state while the mutation is pending.
-- On success, show `toast.success("Invite resent to {email}")`.
-- On error, show `toast.error(...)`.
-- No page refresh or list refetch required — the Supabase email is the only side-effect.
-
-### Notes / Edge Cases
-- If the invited user already activated their account (status is no longer `pending`), the resend call should be rejected with a clear error.
-- The `origin` for `redirectTo` can be passed from the client (`window.location.origin`) just like the initial invite flow.
-- No database schema changes are needed.
+## Files
+- `src/routes/health-check.index.tsx` — add state + toggle button + conditional rendering inside the left-nav `<div>` at line 1316.
