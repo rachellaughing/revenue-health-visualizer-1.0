@@ -163,6 +163,7 @@ export type Database = {
           id: string
           overall_health_score: number | null
           overall_tracking_score: number | null
+          parent_assessment_id: string | null
           profile_id: string | null
           selected_child_ids: string[]
           started_at: string | null
@@ -182,6 +183,7 @@ export type Database = {
           id?: string
           overall_health_score?: number | null
           overall_tracking_score?: number | null
+          parent_assessment_id?: string | null
           profile_id?: string | null
           selected_child_ids?: string[]
           started_at?: string | null
@@ -201,6 +203,7 @@ export type Database = {
           id?: string
           overall_health_score?: number | null
           overall_tracking_score?: number | null
+          parent_assessment_id?: string | null
           profile_id?: string | null
           selected_child_ids?: string[]
           started_at?: string | null
@@ -211,6 +214,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "assessments_parent_assessment_id_fkey"
+            columns: ["parent_assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "assessments_profile_id_fkey"
             columns: ["profile_id"]
@@ -670,6 +680,7 @@ export type Database = {
           primary_background: string | null
           profile_complete: boolean
           profile_photo_url: string | null
+          role: string
           role_title: string | null
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
@@ -703,6 +714,7 @@ export type Database = {
           primary_background?: string | null
           profile_complete?: boolean
           profile_photo_url?: string | null
+          role?: string
           role_title?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
@@ -736,6 +748,7 @@ export type Database = {
           primary_background?: string | null
           profile_complete?: boolean
           profile_photo_url?: string | null
+          role?: string
           role_title?: string | null
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null

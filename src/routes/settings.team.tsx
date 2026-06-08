@@ -1,10 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/settings/team")({
-  head: () => ({ meta: [{ title: "Team" }] }),
-  component: Page,
+  beforeLoad: () => {
+    throw redirect({ to: "/settings", search: { tab: "team" } });
+  },
 });
-
-function Page() {
-  return <h1 className="text-4xl" style={{ color: "var(--mm-ink)" }}>Team</h1>;
-}

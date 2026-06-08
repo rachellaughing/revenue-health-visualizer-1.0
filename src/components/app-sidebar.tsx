@@ -41,6 +41,7 @@ type LockKind =
 type NavItem = {
   title: string;
   url: string;
+  search?: Record<string, string>;
   icon: React.ComponentType<{ className?: string }>;
   lock?: LockKind;
   previewWhenLocked?: boolean;
@@ -85,9 +86,9 @@ const sections: NavSection[] = [
   {
     label: "SETTINGS",
     items: [
-      { title: "Account", url: "/settings/account", icon: Settings },
-      { title: "Billing & Plan", url: "/settings/billing", icon: CreditCard },
-      { title: "Team", url: "/settings/team", icon: UserCog, lock: "pro_or_diagnostic" },
+      { title: "Account", url: "/settings", search: { tab: "account" }, icon: Settings },
+      { title: "Billing & Plan", url: "/settings", search: { tab: "billing" }, icon: CreditCard },
+      { title: "Team", url: "/settings", search: { tab: "team" }, icon: UserCog, lock: "pro_or_diagnostic" },
     ],
   },
 ];
@@ -128,6 +129,7 @@ function evalLock(
 
 export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.fromEntries(sections.map((s) => [s.label, true])),
   );
@@ -194,7 +196,11 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                 {(isOpen || collapsed) && (
                   <ul className="mt-1">
                     {section.items.map((item) => {
-                      const active = pathname === item.url;
+                      const activeTab = item.search?.tab;
+                      const currentTab = new URLSearchParams(searchStr || "").get("tab") ?? "account";
+                      const active =
+                        pathname === item.url &&
+                        (activeTab ? currentTab === activeTab : true);
                       const locked = evalLock(item.lock ?? null, gating);
                       const Icon = item.icon;
 
@@ -227,7 +233,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                       );
 
                       return (
-                        <li key={item.url}>
+                        <li key={item.title}>
                           {locked && !item.previewWhenLocked ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -240,14 +246,14 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                           ) : locked && item.previewWhenLocked ? (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Link to={item.url}>{baseRow}</Link>
+                                <Link to={item.url} search={item.search as any}>{baseRow}</Link>
                               </TooltipTrigger>
                               <TooltipContent side="right">
                                 {LOCK_REASON[item.lock as Exclude<LockKind, null>]} — preview available
                               </TooltipContent>
                             </Tooltip>
                           ) : (
-                            <Link to={item.url}>{baseRow}</Link>
+                            <Link to={item.url} search={item.search as any}>{baseRow}</Link>
                           )}
                         </li>
                       );

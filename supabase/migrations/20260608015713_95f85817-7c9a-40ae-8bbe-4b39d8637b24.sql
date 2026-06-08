@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'owner';
+ALTER TABLE public.assessments ADD COLUMN IF NOT EXISTS parent_assessment_id uuid REFERENCES public.assessments(id);
