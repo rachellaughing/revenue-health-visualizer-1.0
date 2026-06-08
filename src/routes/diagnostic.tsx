@@ -1,4 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useMutation } from "@tanstack/react-query";
+import { checkStripeConnection } from "@/lib/stripe-check.functions";
 
 export const Route = createFileRoute("/diagnostic")({
   head: () => ({ meta: [{ title: "Book a Diagnostic — Revenue Health Diagnostic™" }] }),
@@ -54,6 +57,8 @@ function Page() {
           display: "inline-block", color: T.mid,
           fontFamily: "Inter", fontSize: 13, textDecoration: "none",
         }}>← Back to dashboard</Link>
+
+        <StripeCheckCard />
 
         <div style={{ paddingTop: 24, borderTop: `1px solid ${T.offWhite}`, marginTop: 48, fontSize: 11, fontFamily: "Inter", color: T.mid }}>
           © 2025 Marketplace Maven. All rights reserved.
