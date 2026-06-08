@@ -1216,14 +1216,21 @@ function HealthCheckShell({
   }
 
   // Left rail collapse — persisted; default collapsed on small screens
-  const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const stored = window.localStorage.getItem("hc-leftrail-collapsed");
-    if (stored !== null) return stored === "1";
-    return window.innerWidth < 768;
-  });
+  const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(false);
+  const leftRailHydrated = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Apply initial default once on mount (post-SSR)
+    if (!leftRailHydrated.current) {
+      leftRailHydrated.current = true;
+      const stored = window.localStorage.getItem("hc-leftrail-collapsed");
+      if (stored !== null) {
+        setLeftRailCollapsed(stored === "1");
+      } else if (window.innerWidth < 768) {
+        setLeftRailCollapsed(true);
+      }
+      return;
+    }
     window.localStorage.setItem("hc-leftrail-collapsed", leftRailCollapsed ? "1" : "0");
   }, [leftRailCollapsed]);
 
