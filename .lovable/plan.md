@@ -1,59 +1,58 @@
 ## Goal
-Replace three stub settings routes with one tabbed `/settings` page driven by `?tab=`, lift the existing billing UI into a tab, and add Account + Team tabs. Add a live password-requirements checklist to signup and the Account tab. Add the schema columns the team flow needs (no team-member shell experience this pass).
+Let beta testers redeem a 100%-off coupon code on the Billing tab to upgrade from Snapshot → Assessment (`tier = 'pro'`) without going through Stripe. Seed `BETA100` as the first code.
 
 ## Schema
-Migration adding two columns (idempotent, no data changes):
+No structure changes. Use existing `public.coupons` table:
+- `coupon_code`, `discount_type`, `discount_value`, `active`, `max_uses`, `use_count`, `valid_from`, `valid_until`.
 
+Convention: `discount_type = 'percent'` with `discount_value = 100` means free upgrade (this is what the server checks for the Stripe-skip path). Other discount_type values (`percent` <100, `amount`) would route through Stripe — out of scope this pass.
+
+Seed (via insert tool):
 ```
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'owner';
-ALTER TABLE public.assessments
-  ADD COLUMN IF NOT EXISTS parent_assessment_id uuid REFERENCES public.assessments(id);
+INSERT INTO public.coupons (coupon_code, discount_type, discount_value, active, max_uses)
+VALUES ('BETA100', 'percent', 100, true, NULL);
 ```
 
-Team ownership uses an **owner-based model**: `team_members.user_id` = the owner's user_id (existing column), invitee is identified by email. (No `teams` row required.) If `team_members` already has a different shape I'll reconcile in the same migration — I'll inspect with `read_query` before writing it.
+Also record redemption on the user's profile via the existing `profiles.coupon_code_used` column (already in schema) and bump `coupons.use_count`.
 
-## Routes
-- New: `src/routes/settings.tsx` — the tabbed page. `validateSearch` for `tab: 'account' | 'billing' | 'team'` (default `account`) and `success?: boolean`.
-- Convert existing leaf routes to thin redirects via `beforeLoad`:
-  - `/settings/account` → `/settings?tab=account`
-  - `/settings/billing` → `/settings?tab=billing`
-  - `/settings/team`    → `/settings?tab=team`
-- Sidebar: change the three Settings links to point at `/settings?tab=…` and use `search` props.
+## Server functions (new file `src/lib/coupon.functions.ts`)
+Both use `requireSupabaseAuth` + `supabaseAdmin`.
 
-## Components (new, all under `src/components/settings/`)
-- `SettingsTabs.tsx` — tab strip, switches via `navigate({ search: { tab } })`.
-- `AccountTab.tsx` — composes the two sections.
-- `PersonalDetailsCard.tsx` — `useQuery(getPersonalProfile)` + `useMutation(savePersonalProfile)` (already exist in `profile.functions.ts`). Email shown read-only with muted helper.
-- `ChangePasswordCard.tsx` — three password inputs with eye toggles, live `<PasswordRequirements />`, disabled CTA until all 4 rules met and confirm matches, calls `supabase.auth.updateUser({ password })` client-side.
-- `PasswordRequirements.tsx` — reusable; grey dot → green check. Each rule: ≥8 chars, uppercase A–Z, digit 0–9, special `!@#$%^&*`. Never shows red while typing; only after blur with unmet rules.
-- `BillingTab.tsx` — refactor of the existing `settings.billing.tsx` body. Adds Diagnostic tier branch (current plan confirmed, no upsell) and the always-on muted "Book a discovery call" card linking to `/diagnostic`. Existing checkout mutation + success banner preserved.
-- `TeamTab.tsx` — branches on tier:
-  - Snapshot: renders the active layout inside a `filter: blur(3px)` wrapper with an absolute lock overlay + ember CTA that fires the same `createProCheckoutSession` mutation used in Billing.
-  - Pro/Diagnostic: invite form + member list + amber info card (copy varies by tier).
+1. `validateCoupon({ code })` — uppercases/trims input, looks up active coupon, checks `valid_from`/`valid_until`/`max_uses > use_count`. Returns `{ valid: true, discount_type, discount_value, free: boolean }` or `{ valid: false, reason }`. Used by the inline "Apply" button.
 
-## Signup
-Replace inline password field with shared `<PasswordRequirements />` + same UX rules. CTA disabled until all rules met. No other signup changes.
+2. `redeemCoupon({ code })` — re-validates server-side, requires `free === true` (100% off) in this pass, then in a single transaction:
+   - Update `profiles.tier = 'pro'` and `profiles.coupon_code_used = <code>` for `context.userId` (only if currently `starter`; reject if already `pro`/`diagnostic`).
+   - `UPDATE coupons SET use_count = use_count + 1 WHERE coupon_code = <code>`.
+   - Returns `{ ok: true, tier: 'pro' }`. UI then invalidates `current-tier` query.
 
-## New server functions (`src/lib/team.functions.ts`)
-All use `requireSupabaseAuth` + `supabaseAdmin` per project rule:
-- `listTeamMembers()` — select `team_members` joined to `profiles` by invitee email or user_id, where `team_members.user_id = context.userId` (owner). Returns `{ id, email, display_name, initials, status }[]`.
-- `inviteTeamMember({ email })` — validate email (Zod). Reject if a row already exists. Insert `team_members` with `status='invited'`, then `supabaseAdmin.auth.admin.inviteUserByEmail(email, { redirectTo: '<origin>/signup' })`. Return `{ ok: true }`. Tier-gate (pro/diagnostic) server-side.
-- `removeTeamMember({ id })` — delete row scoped to owner.
+Concurrency: rely on `max_uses IS NULL OR use_count < max_uses` guard inside the UPDATE's WHERE clause and check `rowCount === 1`; reject otherwise. No additional locking.
 
-(Brief mentions `team_members.status='invited'` and a `team` column — I'll inspect the actual columns with `read_query` and adapt field names. If the table already uses `team_id`, I'll create or reuse a `teams` row keyed by owner; that stays internal to these functions and the UI remains owner-based.)
+Reject all non-100% coupons in this pass with a clear `"This code requires checkout — open Stripe Checkout instead"` error (deferred to a future pass that wires Stripe promo codes).
 
-## Tier source
-Reuses `getCurrentTier` from `stripe-checkout.functions.ts`. Stripe code is not touched.
+## UI changes
+### `src/components/settings/BillingTab.tsx` (Snapshot branch only)
+Above the existing ember "Upgrade to Assessment™ — $197" CTA, add a small coupon row:
+- Uppercase-as-you-type input (`placeholder="Have a beta code? Enter it here"`).
+- "Apply" button → calls `validateCoupon`. On success show a green inline confirmation (`"BETA100 applied — free upgrade unlocked"`) and swap the primary CTA to **"Redeem code & upgrade — Free"** (still ember, same size). On invalid show muted red helper text.
+- Redeem button → calls `redeemCoupon`, then `queryClient.invalidateQueries({ queryKey: ['current-tier'] })`; the existing tier card re-renders to Assessment automatically and the upsell block disappears.
+- Original $197 checkout button remains visible until a valid free code is applied.
 
-## Out of scope (explicitly)
-- The team-member stripped-nav experience, `parent_assessment_id` wiring on Health Check submission, dashboard copy for invited team members. Schema column is added now; UI follows in a later plan.
-- Stripe customer portal.
-- Editing `stripe-checkout.functions.ts` or `stripe-webhook.ts`.
+Diagnostic / Pro tiers: no coupon UI (nothing to upgrade).
+
+### Stripe Checkout fallback
+In `src/lib/stripe-checkout.functions.ts → createProCheckoutSession`, add `params.set("allow_promotion_codes", "true")` to the Checkout Session params so partial-discount Stripe promotion codes still work on the hosted page (future-proofs the "% off via Stripe" path without building UI for it yet).
+
+## Data seed
+Single `INSERT` via insert tool for `BETA100` (above). If row already exists, the tool call will error — that's fine, treat as already-seeded.
+
+## Out of scope
+- Partial-discount coupons through Stripe (deferred; Stripe `allow_promotion_codes` handles it server-side until we build dedicated UI).
+- Coupon admin UI (codes managed directly in Supabase).
+- Coupon usage on signup (`profiles.coupon_code_used` already populated from signup metadata by `handle_new_user` — untouched).
+- Refunds / un-redeem.
 
 ## Verification
-- Build passes (typecheck) after route + sidebar changes.
-- Manually: `/settings` opens Account tab; `?tab=billing` and `?tab=team` switch; old `/settings/account|billing|team` URLs redirect; password CTA stays disabled until all rules + match; signup CTA same.
-
-## Footer
-Copyright footer "© 2025 Marketplace Maven. All rights reserved." rendered inside `/settings` page bottom (not global, to keep scope tight).
+- BETA100 in Billing tab → Apply shows green confirmation → Redeem flips tier card to "Revenue Health Assessment™", upsell block disappears, `coupons.use_count` increments.
+- Invalid / expired / exhausted code shows inline error, no state change.
+- A second redeem attempt by the same already-Pro user is rejected server-side.
+- Existing $197 Stripe checkout still works unchanged; Stripe Checkout page now shows the promo-code field.
