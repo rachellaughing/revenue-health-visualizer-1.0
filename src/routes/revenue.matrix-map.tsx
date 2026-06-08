@@ -58,10 +58,10 @@ function Page() {
     queryFn: () => fetchFn({ data: {} }),
   });
 
-  if (!data) return <div style={{ minHeight: "100vh", background: T.paper }} />;
+  if (!data) return <div style={{ minHeight: "100dvh", background: T.paper }} />;
   if ("error" in data) {
     return (
-      <div style={{ minHeight: "100vh", background: T.paper, padding: 40 }}>
+      <div style={{ minHeight: "100dvh", background: T.paper, padding: 40 }}>
         <p style={{ fontFamily: "Inter", color: T.mid }}>
           Complete a Health Check to see your Matrix Map.
         </p>
@@ -89,7 +89,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const effectiveExpanded = expandedScenario === null ? defaultExpanded : expandedScenario;
 
   return (
-    <div style={{ minHeight: "100vh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <main style={{ maxWidth: 1020, margin: "0 auto", padding: "36px 40px 80px" }}>
         <div
           style={{

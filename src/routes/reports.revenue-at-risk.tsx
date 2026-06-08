@@ -98,10 +98,10 @@ function Page() {
     queryFn: () => fetchFn({ data: {} }),
   });
 
-  if (!data) return <div style={{ minHeight: "100vh", background: T.paper }} />;
+  if (!data) return <div style={{ minHeight: "100dvh", background: T.paper }} />;
   if ("error" in data) {
     return (
-      <div style={{ minHeight: "100vh", background: T.paper, padding: 40 }}>
+      <div style={{ minHeight: "100dvh", background: T.paper, padding: 40 }}>
         <p style={{ fontFamily: "Inter", color: T.mid }}>
           Complete a Health Check to see your Revenue at Risk.
         </p>
@@ -142,7 +142,7 @@ function Body({ payload }: { payload: RevenueAtRisk }) {
   const assessedCount = payload.items.filter((it) => selectedSet.has(it.childSystemId)).length;
 
   return (
-    <div style={{ minHeight: "100vh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }}>
         <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
           REVENUE HEALTH MATRIX™ &nbsp;›&nbsp; REVENUE AT RISK

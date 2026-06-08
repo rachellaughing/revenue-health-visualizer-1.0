@@ -391,7 +391,7 @@ function Page() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <div style={{
         height: 52, background: T.paper, borderBottom: `1px solid ${T.offWhite}`,
         display: "flex", alignItems: "center", padding: "0 40px",

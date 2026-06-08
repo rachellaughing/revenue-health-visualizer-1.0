@@ -58,10 +58,10 @@ function Page() {
   const [filterSystem, setFilterSystem] = useState<string>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  if (!data) return <div style={{ minHeight: "100vh", background: T.paper }} />;
+  if (!data) return <div style={{ minHeight: "100dvh", background: T.paper }} />;
   if ("error" in data) {
     return (
-      <div style={{ minHeight: "100vh", background: T.paper, padding: 40 }}>
+      <div style={{ minHeight: "100dvh", background: T.paper, padding: 40 }}>
         <p style={{ fontFamily: "Inter", color: T.mid }}>
           Complete a Health Check to see your Top Opportunities.
         </p>
@@ -140,7 +140,7 @@ function PageBody({
   const assessedCount = payload.opportunities.filter((o) => o.assessed).length;
 
   return (
-    <div style={{ minHeight: "100vh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }}>
         {/* Breadcrumb */}
         <div
