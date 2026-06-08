@@ -85,9 +85,9 @@ const sections: NavSection[] = [
   {
     label: "SETTINGS",
     items: [
-      { title: "Account", url: "/settings/account", icon: Settings },
-      { title: "Billing & Plan", url: "/settings/billing", icon: CreditCard },
-      { title: "Team", url: "/settings/team", icon: UserCog, lock: "pro_or_diagnostic" },
+      { title: "Account", url: "/settings?tab=account", icon: Settings },
+      { title: "Billing & Plan", url: "/settings?tab=billing", icon: CreditCard },
+      { title: "Team", url: "/settings?tab=team", icon: UserCog, lock: "pro_or_diagnostic" },
     ],
   },
 ];
