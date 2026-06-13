@@ -1,52 +1,47 @@
-## Goal
+# Top bar user menu
 
-On mobile (≤768px), make horizontal rows in the report pages stack vertically so cards stop getting squeezed side-by-side. Pure CSS in `src/styles.css` — no JSX changes, no business logic touched.
+Replace the static "U" avatar circle in the top-right of every page with a real user menu that shows the user's first name and lets them jump to account settings or sign out.
 
-## What I'll add to `src/styles.css` (mobile block)
+## What changes
 
-1. **Grid `1fr auto` collapse** (the case we already identified)
-   ```css
-   div[style*="grid-template-columns: 1fr auto"] {
-     grid-template-columns: 1fr !important;
-   }
-   ```
-   Affects: Matrix Map teaser, Tier CTA card, founder-dependency hero, exec-summary side-by-side cards.
+**`src/components/top-bar.tsx`**
+- Accept (or fetch) the user's `first_name` and pass it through to a new menu.
+- Replace the plain `U` circle with a dropdown trigger that shows:
+  - Avatar circle with first initial (existing style, `--mm-abyss` bg)
+  - First name next to it (Inter, 13px, `--mm-ink`) — hidden on very narrow screens, initial-only avatar stays
+  - Small chevron
+- Use the existing shadcn `DropdownMenu` (`src/components/ui/dropdown-menu.tsx`) for the menu.
 
-2. **Flex rows with `space-between` → stack vertically**
-   ```css
-   main div[style*="display: \"flex\""][style*="space-between"],
-   main div[style*="display:flex"][style*="space-between"] {
-     flex-direction: column !important;
-     align-items: stretch !important;
-     gap: 12px !important;
-   }
-   ```
-   (Inline-style attribute selectors match the exact serialized string React emits, so we need both spacing variants.)
+**Dropdown contents**
+1. Header row (non-interactive): first name in bold + email below in muted (`--mm-mid`).
+2. `Account settings` → navigates to `/settings?tab=account` (matches existing route).
+3. `Billing & Plan` → `/settings?tab=billing` (nice-to-have, same menu, one extra item).
+4. Separator.
+5. `Sign out` → calls `signOut()` from `useAuth()` then `navigate({ to: "/login", replace: true })` — same pattern already used in `team-member-shell.tsx`.
 
-   This catches the ~12 `justifyContent: "space-between"` rows across:
-   - reports.executive-summary (lines 415, 710)
-   - reports.founder-dependency (840, 1153, 1329)
-   - reports.revenue-system-health (683, 736)
-   - reports.team-alignment (353, 459, 608)
-   - revenue.matrix-map (111, 846)
+## Data source for first name + email
 
-3. **Carve-outs for rows that should stay horizontal**
-   Small header rows (back button + title, breadcrumb + chip) look fine side-by-side and would look worse stacked. I'll add an opt-out via a wrapper class check — practically: limit the rule to rows whose inline style also contains `marginBottom` ≥ 16 or a `padding` token typical of card bodies, OR exclude rows where `alignItems: "center"` is set on a small header. Pure CSS can't perfectly distinguish, so the pragmatic approach:
-   - Apply the stacking rule broadly first
-   - You eyeball the preview; I tune carve-outs by adding more specific `[style*="..."]` excludes for the 1-2 header rows that shouldn't stack
+- `useAuth()` already exposes `user` (email available as `user.email`).
+- For `first_name`, reuse the existing `viewer-context` query that `__root.tsx` already runs (`getViewerContext` → returns `firstName`). Two options:
+  - **Preferred:** lift the `viewerQ.data` already in `AuthGate` and pass `firstName` as a prop into `<TopBar />`. Minimal, no extra fetch.
+  - Fallback: read `react-query` cache by `["viewer-context"]` key inside `TopBar`.
 
-4. **Keep existing rules** (grid collapses, padding overrides) untouched.
+Plan uses the prop approach: `<TopBar onToggleSidebar={...} firstName={viewerQ.data?.firstName ?? null} email={user?.email ?? null} />`.
+
+## Mobile behaviour
+
+- On `<640px`, hide the first-name text, keep the initial avatar + chevron as the trigger. Dropdown still works.
+- Menu uses shadcn defaults (right-aligned to trigger).
 
 ## Out of scope
 
-- No edits to any `.tsx` file
-- No changes to desktop layout (all rules inside `@media (max-width: 768px)`)
-- No changes to the health-check flow
+- No changes to `TeamMemberShell` (it already has its own sign-out button + name display in its header).
+- No new settings pages, no profile editing here.
+- No design-token changes.
 
-## After applying
+## Files touched
 
-Switch your preview to mobile, scroll each report page, and call out any specific row that:
-- stacked but shouldn't have (I'll add an exclude selector), or
-- is still horizontal and feels squeezed (I'll add another selector).
+- `src/components/top-bar.tsx` — replace avatar with dropdown menu, accept `firstName`/`email` props.
+- `src/routes/__root.tsx` — pass `firstName` and `email` props into `<TopBar />`.
 
-Expect 1–2 iterations to tune.
+No new dependencies (shadcn dropdown-menu and lucide-react already present).
