@@ -242,7 +242,11 @@ function AuthGate() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar onToggleSidebar={handleToggle} />
+        <TopBar
+          onToggleSidebar={handleToggle}
+          firstName={viewerQ.data?.firstName ?? null}
+          email={user?.email ?? null}
+        />
         <main
           className="flex-1 overflow-y-auto p-4 md:p-8"
           style={
