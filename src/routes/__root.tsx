@@ -149,7 +149,7 @@ function AuthGate() {
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
+  const { session, loading, user } = useAuth();
   const isPublic = PUBLIC_ROUTES.includes(pathname);
   const fetchViewer = useServerFn(getViewerContext);
   const viewerQ = useQuery({
