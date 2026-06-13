@@ -657,6 +657,39 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_chunks: {
+        Row: {
+          content: string
+          created_at: string | null
+          embedding: string | null
+          id: string
+          metadata: Json | null
+          source: string
+          source_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+          source: string
+          source_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          embedding?: string | null
+          id?: string
+          metadata?: Json | null
+          source?: string
+          source_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           assessment_completion_pct: number
@@ -965,6 +998,21 @@ export type Database = {
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
+      }
+      match_knowledge_chunks: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          id: string
+          metadata: Json
+          similarity: number
+          source: string
+          source_id: string
+        }[]
       }
       refresh_profile_completion: {
         Args: { _user_id: string }
