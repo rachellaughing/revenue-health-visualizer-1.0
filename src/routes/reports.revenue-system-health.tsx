@@ -1118,7 +1118,7 @@ function ReportBody({
             especially important — they reveal where your confidence may outpace your actual
             operational evidence.{" "}
             <a
-              href="https://marketplacemaven.com/founder-blindspots"
+              href="https://marketplacemaven.com/core-concepts/founder-blindspots/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: T.teal, fontWeight: 500 }}

@@ -1384,12 +1384,12 @@ function HealthCheckShell({
             {tier === "starter" && (
               <span>
                 Revenue Health Snapshot™ · 15 subsystems ·{" "}
-                <a
-                  href="/upgrade"
+                <Link
+                  to="/settings/billing"
                   style={{ color: T.teal, textDecoration: "none", fontWeight: 500 }}
                 >
                   Upgrade for full access ↗
-                </a>
+                </Link>
               </span>
             )}
             {tier === "pro" && (
@@ -1687,8 +1687,8 @@ function HealthCheckShell({
               <span style={{ fontSize: 13, color: T.ink }}>
                 Your Revenue Health Check is complete.
               </span>
-              <a
-                href="/report"
+              <Link
+                to="/reports/executive-summary"
                 style={{
                   background: T.ember,
                   color: T.white,
@@ -1701,7 +1701,7 @@ function HealthCheckShell({
                 }}
               >
                 View your Report →
-              </a>
+              </Link>
             </div>
           )}
 
@@ -1945,8 +1945,8 @@ function HealthCheckShell({
                 <p style={{ fontSize: 14, color: T.teal, fontWeight: 500 }}>
                   {activeChild.name} is available in Revenue Health Assessment™
                 </p>
-                <a
-                  href="/upgrade"
+                <Link
+                  to="/settings/billing"
                   style={{
                     background: T.ember,
                     color: T.white,
@@ -1958,7 +1958,7 @@ function HealthCheckShell({
                   }}
                 >
                   Unlock all 50 subsystems →
-                </a>
+                </Link>
               </div>
             </div>
           ) : (
