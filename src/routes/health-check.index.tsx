@@ -1701,7 +1701,7 @@ function HealthCheckShell({
                 }}
               >
                 View your Report →
-              </a>
+              </Link>
             </div>
           )}
 
@@ -1958,7 +1958,7 @@ function HealthCheckShell({
                   }}
                 >
                   Unlock all 50 subsystems →
-                </a>
+                </Link>
               </div>
             </div>
           ) : (

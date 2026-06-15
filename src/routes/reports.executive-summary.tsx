@@ -1250,8 +1250,8 @@ function ReportBody({
                   Validate these self-assessment findings with operational evidence and produce a sequenced roadmap for your team.
                 </p>
               </div>
-              <a
-                href="/upgrade"
+              <Link
+                to="/settings/billing"
                 style={{
                   background: T.ember,
                   color: T.white,
@@ -1266,7 +1266,7 @@ function ReportBody({
                 }}
               >
                 Learn about the Diagnostic →
-              </a>
+              </Link>
             </Card>
           </div>
         )}
@@ -1337,7 +1337,7 @@ function ReportBody({
                 }}
               >
                 Open Roadmap Builder →
-              </a>
+              </Link>
             </Card>
           </div>
         )}
