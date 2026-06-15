@@ -229,7 +229,7 @@ function PageBody({
             systems may be more fragile than they appear — their true opportunity score may be
             higher than shown.{" "}
             <a
-              href="https://marketplacemaven.com/founder-blindspots"
+              href="https://marketplacemaven.com/core-concepts/founder-blindspots/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: T.teal, fontWeight: 500 }}

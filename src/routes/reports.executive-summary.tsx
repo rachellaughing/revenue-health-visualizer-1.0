@@ -1057,8 +1057,8 @@ function ReportBody({
                 >
                   Revenue problems rarely exist in isolation. The Matrix Map shows where friction originates and how it propagates through the organisation.
                 </p>
-                <a
-                  href="/revenue-intelligence/matrix-map"
+                <Link
+                  to="/revenue/matrix-map"
                   style={{
                     background: T.ember,
                     color: T.white,
@@ -1072,7 +1072,7 @@ function ReportBody({
                   }}
                 >
                   Explore the Matrix Map →
-                </a>
+                </Link>
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1179,8 +1179,8 @@ function ReportBody({
                   Upgrade to Revenue Health Assessment™ to unlock all 50 subsystems, your full report, and PDF export.
                 </p>
               </div>
-              <a
-                href="/upgrade"
+              <Link
+                to="/settings/billing"
                 style={{
                   background: T.ember,
                   color: T.white,
@@ -1195,7 +1195,7 @@ function ReportBody({
                 }}
               >
                 Upgrade to Assessment™ →
-              </a>
+              </Link>
             </Card>
           </div>
         )}
@@ -1321,8 +1321,8 @@ function ReportBody({
                   Turn these findings into a sequenced 90-day operating plan with your team.
                 </p>
               </div>
-              <a
-                href="/revenue-intelligence/roadmap-builder"
+              <Link
+                to="/revenue/roadmap-builder"
                 style={{
                   background: T.ember,
                   color: T.white,

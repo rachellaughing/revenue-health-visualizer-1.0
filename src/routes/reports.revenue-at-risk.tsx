@@ -186,7 +186,7 @@ function Body({ payload }: { payload: RevenueAtRisk }) {
             <span style={{ fontWeight: 600, color: T.ink }}>Self-assessment reminder: </span>
             These risk rankings reflect your current perception. Systems with large visibility gaps
             may be more fragile — and more expensive — than they appear.{" "}
-            <a href="https://marketplacemaven.com/founder-blindspots" target="_blank" rel="noopener noreferrer"
+            <a href="https://marketplacemaven.com/core-concepts/founder-blindspots/" target="_blank" rel="noopener noreferrer"
               style={{ color: T.teal, fontWeight: 500 }}>Read about founder blind spots →</a>
           </div>
         </div>

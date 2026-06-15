@@ -229,7 +229,7 @@ function PBJDivider() {
           <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, margin: "0 0 20px" }}>
             We do this through a series of PBJ Sessions — a structured facilitation methodology that makes the invisible visible.
           </p>
-          <a href="https://marketplacemaven.com/pbj-sessions" target="_blank" rel="noopener noreferrer"
+          <a href="https://marketplacemaven.com/core-concepts/pbj-session/" target="_blank" rel="noopener noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 6, color: T.tealBright, fontFamily: "Inter", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
             What is a PBJ Session? →
           </a>
