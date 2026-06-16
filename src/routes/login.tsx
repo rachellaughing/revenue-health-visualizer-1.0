@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
@@ -32,8 +33,9 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: "var(--mm-paper)" }}>
-      <div className="w-full max-w-md">
+    <AuthSplitLayout>
+      <div className="w-full">
+
         <h1 className="text-5xl mb-2" style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}>
           Sign in
         </h1>
@@ -85,7 +87,7 @@ function LoginPage() {
         onOpenChange={setForgotOpen}
         initialEmail={email}
       />
-    </div>
+    </AuthSplitLayout>
   );
 }
 
