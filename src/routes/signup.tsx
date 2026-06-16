@@ -6,6 +6,7 @@ import {
   PasswordRequirements,
   allRulesMet,
 } from "@/components/settings/PasswordRequirements";
+import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 
 export const Route = createFileRoute("/signup")({
   head: () => ({ meta: [{ title: "Create account — Revenue Health Visualiser" }] }),
