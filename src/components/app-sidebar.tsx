@@ -19,7 +19,10 @@ import {
   UserCog,
   ChevronDown,
   Lock,
+  Stethoscope,
 } from "lucide-react";
+
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardData } from "@/lib/dashboard.functions";
@@ -78,11 +81,14 @@ const sections: NavSection[] = [
   {
     label: "REVENUE INTELLIGENCE",
     items: [
+
       { title: "Matrix Map", url: "/revenue/matrix-map", icon: Grid3x3, lock: "assessment_complete" },
       { title: "Shadow Systems", url: "/revenue/shadow-systems", icon: Eye, lock: "diagnostic" },
       { title: "Roadmap Builder", url: "/revenue/roadmap-builder", icon: Map, lock: "diagnostic" },
+      { title: "Diagnostic", url: "/diagnostic", icon: Stethoscope },
     ],
   },
+
   {
     label: "SETTINGS",
     items: [
