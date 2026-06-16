@@ -20,6 +20,8 @@ import {
   ChevronDown,
   Lock,
   Stethoscope,
+} from "lucide-react";
+
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
