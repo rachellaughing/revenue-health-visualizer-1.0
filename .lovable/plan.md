@@ -1,53 +1,28 @@
-# Diagnostic Page — Implementation Plan
+## Goal
+Combine sign in and create account into a single tabbed right column on `/login`. Keep `/signup` as a deeplink that opens the same page with the Create account tab preselected (useful for marketing pages and ads).
 
-## Scope
-Replace the existing minimal `/diagnostic` route with a full in-app page that matches the report-page design system, and add a sidebar entry under **Revenue Intelligence**.
+## Changes
 
-## Files to change
+### 1. New shared component: `src/components/auth/AuthTabs.tsx`
+- Renders the "Welcome" heading, subcopy, and the two-pill tab switcher (Sign in / Create account) styled like the uploaded reference (dark ember-ink pill for active, outlined for inactive).
+- Props: `active: "signin" | "signup"`, `onChange(next)`.
+- Used inside both routes so the form area swaps but the header stays put.
 
-### 1. `src/routes/diagnostic.tsx` (rewrite)
-Rebuild as an authenticated, in-app page styled like other report routes (`reports.executive-summary.tsx` token set: `--mm-abyss` sidebar, `--mm-paper` cream main, Instrument Serif display, Inter body, ember CTA).
+### 2. `src/routes/login.tsx`
+- Add `validateSearch` to also accept optional `tab: "signin" | "signup"` (keep existing `verified`).
+- Local state `tab` initialised from search param (defaults to `"signin"`).
+- Render `<AuthTabs active={tab} onChange={setTab} />` above the form.
+- When `tab === "signin"` → render existing sign in form + Forgot password + verified banner.
+- When `tab === "signup"` → render the full signup form (lifted from `signup.tsx`): first/last name, email, password with eyeball + `PasswordRequirements`, business name, submit, plus the "Check your email" success state that replaces only the form area (tabs + header remain visible — answers the earlier success-state question implicitly by keeping the page coherent).
+- Drop the bottom "No account? Create one" link (the tabs replace it).
 
-Sections, in order:
-1. **Hero** — dark green `#1C2B2B`, full width. Eyebrow "REVENUE HEALTH DIAGNOSTIC™" (ember), large serif headline, muted-white subhead, score pill badge (overall score + assessment label from latest assessment), ember CTA "Book a Discovery Call" that smooth-scrolls to the form (`#discovery-form`).
-2. **Founder Blindspots blurb** — cream, max-width prose, external link to `https://marketplacemaven.com/core-concepts/founder-blindspots/` (target=_blank, rel=noopener noreferrer).
-3. **PBJ Sessions™ card** — dark green card, 2-col layout. Left: copy + external link to `https://marketplacemaven.com/core-concepts/pbj-session/`. Right: 4-step visual list (Leadership interviews → Cross-functional sessions → Shadow Systems™ surface → Contradictions documented).
-4. **Diagnostic report cards** — cream, 2-col grid, 5 cards each with colored top border, lock badge, title, description, "CONFIRMED IN DIAGNOSTIC™" ember footer label. Roadmap Builder card spans full width. Colors: Health Check History `#F05223`, Team Alignment `#2BB457`, Founder Dependency `#223F99`, Shadow Systems™ `#DE1A58`, Roadmap Builder `#05A4A3`.
-5. **Process timeline** — cream, 4-col grid: Week 01 Discovery / Week 02 PBJ Sessions™ / Week 03 Systems Analysis / Week 04 Strategic Roadmap.
-6. **Discovery form** — white card, `id="discovery-form"`. Read-only display of first_name + email from authenticated profile. Two optional textareas (open_comments, team_members). Ember submit "Send my info — I'll look for the calendar link". Small note below button.
+### 3. `src/routes/signup.tsx`
+- Reduce to a thin redirect route: `beforeLoad` → `redirect({ to: "/login", search: { tab: "signup" } })`. Preserves the public `/signup` URL for marketing/ads deeplinks.
 
-### Data wiring
-Use `useQuery` with the existing `getDashboardData` server fn to read:
-- `profile.first_name`, latest assessment, `overallScore` → hero badge + form prefill.
-
-For email + company fields needed in the webhook payload, reuse existing server fns:
-- `getPersonalProfile` → `email`
-- `getCompanyProfile` → `company_name`, `annual_revenue`, `funding_stage`
-
-Three parallel `useQuery` calls; render hero/form once profile data resolves (skeleton while loading).
-
-### Form submit
-Client-side `fetch` POST (no server fn — third-party webhook, no secrets needed) to:
-```
-https://services.leadconnectorhq.com/hooks/srok4ARuusOq59OlGRRs/webhook-trigger/3794cbdf-5a0c-4c0b-aa46-2ba67918fff6
-```
-JSON payload:
-```
-{ first_name, email, company_name, revenue_health_score,
-  funding_stage, annual_revenue, open_comments, team_members }
-```
-On success: replace form with confirmation message ("You're all set. Check your inbox…"). On error: inline error + retry.
-
-### 2. `src/components/app-sidebar.tsx` (edit)
-Add one item to the `REVENUE INTELLIGENCE` section array:
-```ts
-{ title: "Diagnostic", url: "/diagnostic", icon: Stethoscope }
-```
-No `lock` field (accessible to all tiers per spec). Import `Stethoscope` from `lucide-react`.
+### 4. Link updates
+- `src/routes/login.tsx`: remove the old `<Link to="/signup">` footer (replaced by tabs).
+- Leave other `/login` references (`__root.tsx`, `top-bar.tsx`, `team-member-shell.tsx`, `reset-password.tsx`, `join-team.tsx`, signup `emailRedirectTo`) unchanged — they still resolve correctly.
 
 ## Out of scope
-- No DB migrations, no new server functions, no changes to other pages or styles.
-- No tier gating on the route itself.
-
-## Open question
-The existing `/diagnostic` route currently links externally to `https://marketplacemaven.com/diagnostic` from `diagnostic.tsx`. I will replace that page entirely — confirming this is intended (you asked for a brand-new in-app page at `/diagnostic`, which collides with the existing one).
+- No changes to Supabase auth logic, validation, password rules, forgot-password dialog behaviour, or the left panel.
+- No changes to other routes or styling tokens.
