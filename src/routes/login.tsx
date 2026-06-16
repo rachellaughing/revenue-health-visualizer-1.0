@@ -87,7 +87,6 @@ function LoginPage() {
         onOpenChange={setForgotOpen}
         initialEmail={email}
       />
-      </div>
     </AuthSplitLayout>
   );
 }
