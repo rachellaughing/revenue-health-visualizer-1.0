@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AuthSplitLayout } from "@/components/auth/AuthSplitLayout";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
