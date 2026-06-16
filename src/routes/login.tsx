@@ -33,8 +33,9 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: "var(--mm-paper)" }}>
-      <div className="w-full max-w-md">
+    <AuthSplitLayout>
+      <div className="w-full">
+
         <h1 className="text-5xl mb-2" style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}>
           Sign in
         </h1>
