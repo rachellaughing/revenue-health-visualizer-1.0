@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -410,5 +410,3 @@ function Field({
   );
 }
 
-// Keep Link import referenced for tree shaking parity (used historically by this route).
-export const __keepLink = Link;
