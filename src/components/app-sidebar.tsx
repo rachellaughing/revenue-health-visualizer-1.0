@@ -81,9 +81,7 @@ const sections: NavSection[] = [
   {
     label: "REVENUE INTELLIGENCE",
     items: [
-  {
-    label: "REVENUE INTELLIGENCE",
-    items: [
+
       { title: "Matrix Map", url: "/revenue/matrix-map", icon: Grid3x3, lock: "assessment_complete" },
       { title: "Shadow Systems", url: "/revenue/shadow-systems", icon: Eye, lock: "diagnostic" },
       { title: "Roadmap Builder", url: "/revenue/roadmap-builder", icon: Map, lock: "diagnostic" },
