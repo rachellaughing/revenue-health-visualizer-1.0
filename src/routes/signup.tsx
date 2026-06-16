@@ -175,7 +175,7 @@ function SignupPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </AuthSplitLayout>
   );
 }
 
