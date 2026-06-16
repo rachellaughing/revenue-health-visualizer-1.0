@@ -102,26 +102,117 @@ function NewUserView({ data }: { data: DashboardData }) {
               "radial-gradient(circle at 80% 50%, var(--mm-teal-bright), transparent 70%)",
           }}
         />
-        <div className="relative">
-          <div className="mb-2.5 text-[10px] font-bold tracking-[0.14em] text-[var(--mm-teal-bright)]">
-            {TIER_LABEL[tier].toUpperCase()}
+        <div className="relative grid gap-9 md:grid-cols-[1fr_300px]">
+          {/* Left column — framework credibility */}
+          <div className="flex flex-col gap-5">
+            <p className="text-[16px] font-semibold text-white" style={{ fontFamily: "Inter, sans-serif" }}>
+              A prompt didn’t create the Revenue Health Matrix™.
+            </p>
+            <p className="m-0 max-w-[540px] text-sm leading-[1.65] text-white/60">
+              After years of watching the same patterns surface inside founder-led companies — the
+              same invisible friction, the same structural gaps disguised as execution problems —
+              this framework was built to expose what you can’t see from the inside.
+            </p>
+
+            <div className="rounded-r-lg border-l-4 border-[var(--mm-ember)] bg-white/[0.05] px-4 py-3.5">
+              <p
+                className="m-0 text-[17px] italic leading-[1.4] text-white"
+                style={{ fontFamily: "'Instrument Serif', serif" }}
+              >
+                Like smell blindness — you don’t notice what’s been there all along until someone
+                else points it out.
+              </p>
+            </div>
+            <p className="m-0 text-xs italic text-white/60">
+              The methodology wasn’t generated. It was built.
+            </p>
+
+            <div className="flex items-center">
+              <div className="flex-1 px-3 text-center">
+                <div
+                  className="text-[28px] leading-none text-white"
+                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                >
+                  5
+                </div>
+                <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white/50">
+                  Systems
+                </div>
+              </div>
+              <div className="h-8 w-px bg-white/15" />
+              <div className="flex-1 px-3 text-center">
+                <div
+                  className="text-[28px] leading-none text-white"
+                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                >
+                  10
+                </div>
+                <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white/50">
+                  Subsystems
+                </div>
+              </div>
+              <div className="h-8 w-px bg-white/15" />
+              <div className="flex-1 px-3 text-center">
+                <div
+                  className="text-[28px] leading-none text-white"
+                  style={{ fontFamily: "'Instrument Serif', serif" }}
+                >
+                  200
+                </div>
+                <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white/50">
+                  Questions
+                </div>
+              </div>
+            </div>
+
+            <p className="m-0 text-xs italic text-white/50">
+              Start with the Snapshot — 3 subsystems, right now.
+            </p>
           </div>
-          <h2
-            className="m-0 mb-2.5 text-[26px] leading-[1.35] text-white"
-            style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-          >
-            Welcome, {firstName}.
-          </h2>
-          <p className="mb-5 max-w-[500px] text-sm leading-[1.65] text-white/60">
-            You now have access to the Revenue Health Visualiser™. Complete your profile, then take
-            your first Health Check — a structured diagnostic across 5 revenue systems.
-          </p>
-          <Link
-            to="/profile/personal"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--mm-ember)] px-[22px] py-[11px] text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
-          >
-            Complete Your Profile <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+
+          {/* Right column — action card */}
+          <div className="flex flex-col rounded-xl border border-white/10 bg-[#1C2B2B] p-6">
+            <h3
+              className="m-0 mb-1 text-[20px] text-white"
+              style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
+            >
+              Let’s get started.
+            </h3>
+            <p className="m-0 mb-5 text-xs text-white/60">
+              Complete your profile first, then take your first Health Check.
+            </p>
+
+            <div className="mb-5 space-y-3">
+              {[
+                "Complete your personal profile",
+                "Complete your company profile",
+                "Start your Health Check",
+                "View your Revenue Health Report",
+              ].map((label, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/30 text-[11px] text-white">
+                    {i + 1}
+                  </div>
+                  <span className="text-[13px] text-white/90">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              to="/profile/personal"
+              className="mb-2.5 flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--mm-ember)] px-4 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+            >
+              Complete Your Profile <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <a
+              href="https://marketplacemaven.com/revenue-architecture-matrix/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex w-full items-center justify-center rounded-lg border border-white/30 bg-transparent px-4 py-2.5 text-[13px] font-medium text-white transition-opacity hover:opacity-85"
+            >
+              Learn about the framework
+            </a>
+          </div>
         </div>
       </section>
 
