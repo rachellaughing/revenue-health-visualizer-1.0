@@ -398,16 +398,19 @@ function ConceptCards() {
       title: "The Revenue Health Matrix™",
       body: "Five interconnected systems that determine whether your revenue is predictable, scalable, and resilient.",
       color: "var(--mm-teal)",
+      href: "https://marketplacemaven.com/revenue-architecture/the-revenue-health-matrix-deep-dive/",
     },
     {
       title: "Why Systems, Not Tactics",
       body: "Most scaling problems aren't execution failures — they're systems gaps. The Matrix shows you exactly where.",
       color: "var(--mm-sys-authority)",
+      href: "https://marketplacemaven.com/core-concepts/systems-not-tactics/",
     },
     {
       title: "What is a Health Check?",
       body: "200 questions across 50 child systems. Each answer builds a precise picture of where your revenue architecture is strong and where it's fragile.",
       color: "var(--mm-sys-conversion)",
+      href: "https://marketplacemaven.com/revenue-architecture/revenue-health-check-101/",
     },
   ];
   return (
@@ -422,7 +425,7 @@ function ConceptCards() {
         {cards.map((c, i) => (
           <a
             key={i}
-            href="https://marketplacemaven.com"
+            href={c.href}
             target="_blank"
             rel="noopener noreferrer"
             className="block rounded-xl border border-black/[0.08] bg-white p-5 shadow-[0_2px_8px_rgba(24,40,41,0.06)] transition-shadow hover:shadow-[0_4px_14px_rgba(24,40,41,0.1)]"
