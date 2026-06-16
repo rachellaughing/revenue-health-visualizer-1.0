@@ -19,7 +19,8 @@ import {
   UserCog,
   ChevronDown,
   Lock,
-} from "lucide-react";
+  Stethoscope,
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardData } from "@/lib/dashboard.functions";
