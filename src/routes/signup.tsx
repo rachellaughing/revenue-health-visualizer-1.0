@@ -104,7 +104,7 @@ function SignupPage() {
             Back to sign in
           </Link>
         </div>
-      </div>
+      </AuthSplitLayout>
     );
   }
 
