@@ -561,21 +561,8 @@ function DiscoveryForm({
         />
       </Field>
 
-      {state === "error" && (
-        <div
-          style={{
-            background: "rgba(239,68,68,0.08)",
-            color: "#B91C1C",
-            border: "1px solid rgba(239,68,68,0.2)",
-            padding: "10px 14px",
-            borderRadius: 8,
-            fontSize: 13,
-            marginBottom: 16,
-          }}
-        >
-          {errMsg || "Something went wrong. Please try again."}
-        </div>
-      )}
+
+
 
       <button
         type="submit"
