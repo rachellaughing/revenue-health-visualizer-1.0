@@ -68,9 +68,13 @@ function DiagnosticPage() {
   const { data: company } = useQuery({ queryKey: ["profile", "company"], queryFn: () => getCompanyProfile() });
 
   const firstName = dash?.profile?.first_name ?? personal?.first_name ?? "";
+  const lastName = (personal as any)?.last_name ?? "";
   const email = (personal as any)?.email ?? "";
+  const tier = dash?.profile?.tier ?? "";
+  const healthCheckStatus = dash?.profile?.assessment_status ?? "";
   const overallScore = dash?.overallScore ?? null;
   const label = scoreLabel(overallScore);
+
 
   return (
     <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif", color: T.ink }}>
