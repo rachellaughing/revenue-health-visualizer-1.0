@@ -249,7 +249,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
       done: p.assessment_status !== "not_started",
       locked: !p.profile_complete || !p.company_profile_complete,
       cta: "Start now",
-      href: "/health-check/start" as const,
+      href: "/health-check" as const,
     },
     {
       label: "View your Revenue Health Report",
@@ -560,7 +560,7 @@ function ReturningView({ data }: { data: DashboardData }) {
           </span>
         </div>
         <Link
-          to="/health-check/start"
+          to="/health-check"
           className="whitespace-nowrap rounded-lg border-[1.5px] border-[var(--mm-teal)] px-4 py-2 text-[12px] font-medium text-[var(--mm-teal)] transition-opacity hover:opacity-85"
         >
           Start {nextQ.label} Health Check
