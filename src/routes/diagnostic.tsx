@@ -427,50 +427,60 @@ function ReportCard({
 
 function DiscoveryForm({
   firstName,
+  lastName,
   email,
   companyName,
   annualRevenue,
   fundingStage,
   score,
+  tier,
+  healthCheckStatus,
 }: {
   firstName: string;
+  lastName: string;
   email: string;
   companyName: string;
   annualRevenue: string;
   fundingStage: string;
   score: number | null;
+  tier: string;
+  healthCheckStatus: string;
 }) {
   const [openComments, setOpenComments] = useState("");
   const [teamMembers, setTeamMembers] = useState("");
-  const [state, setState] = useState<"idle" | "submitting" | "done" | "error">("idle");
-  const [errMsg, setErrMsg] = useState("");
+  const [state, setState] = useState<"idle" | "submitting" | "done">("idle");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setState("submitting");
-    setErrMsg("");
+    // Fire-and-forget webhook; always show confirmation regardless of outcome.
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      void fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          event_type: "diagnostic_request",
           first_name: firstName,
+          last_name: lastName,
           email,
           company_name: companyName,
+          tier,
+          health_check_status: healthCheckStatus,
+          diagnostic_requested: "request_diagnostic",
+          diagnostic_request_date: new Date().toISOString(),
+          open_comments: openComments,
+          team_members: teamMembers,
           revenue_health_score: score,
           funding_stage: fundingStage,
           annual_revenue: annualRevenue,
-          open_comments: openComments,
-          team_members: teamMembers,
         }),
-      });
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
-      setState("done");
-    } catch (err: any) {
-      setErrMsg(err?.message ?? "Something went wrong.");
-      setState("error");
+      }).catch(() => {});
+    } catch {
+      // swallow
     }
+    setState("done");
   }
+
 
   if (state === "done") {
     return (
