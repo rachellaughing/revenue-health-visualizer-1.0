@@ -349,12 +349,16 @@ function DiagnosticPage() {
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <DiscoveryForm
             firstName={firstName}
+            lastName={lastName}
             email={email}
             companyName={company?.company_name ?? ""}
             annualRevenue={company?.annual_revenue ?? ""}
             fundingStage={company?.funding_stage ?? ""}
             score={overallScore}
+            tier={tier}
+            healthCheckStatus={healthCheckStatus}
           />
+
         </div>
       </section>
     </div>
