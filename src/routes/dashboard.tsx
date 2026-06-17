@@ -560,7 +560,7 @@ function ReturningView({ data }: { data: DashboardData }) {
           </span>
         </div>
         <Link
-          to="/health-check/start"
+          to="/health-check"
           className="whitespace-nowrap rounded-lg border-[1.5px] border-[var(--mm-teal)] px-4 py-2 text-[12px] font-medium text-[var(--mm-teal)] transition-opacity hover:opacity-85"
         >
           Start {nextQ.label} Health Check
