@@ -147,8 +147,34 @@ function SignUpForm() {
     });
     setLoading(false);
     if (error) return setError(error.message);
+
+    // Fire-and-forget GHL signup webhook (do not block UI on result).
+    try {
+      void fetch(
+        "https://services.leadconnectorhq.com/hooks/srok4ARuusOq59OlGRRs/webhook-trigger/3794cbdf-5a0c-4c0b-aa46-2ba67918fff6",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event_type: "signup",
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            company_name: businessName || "",
+            signup_date: new Date().toISOString(),
+            tier: "snapshot",
+            health_check_status: "not_started",
+            diagnostic_requested: "",
+          }),
+        },
+      ).catch(() => {});
+    } catch {
+      // swallow
+    }
+
     setSubmitted(true);
   }
+
 
   async function onResend() {
     if (resendState === "sending") return;
