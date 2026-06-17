@@ -68,9 +68,13 @@ function DiagnosticPage() {
   const { data: company } = useQuery({ queryKey: ["profile", "company"], queryFn: () => getCompanyProfile() });
 
   const firstName = dash?.profile?.first_name ?? personal?.first_name ?? "";
+  const lastName = (personal as any)?.last_name ?? "";
   const email = (personal as any)?.email ?? "";
+  const tier = dash?.profile?.tier ?? "";
+  const healthCheckStatus = dash?.profile?.assessment_status ?? "";
   const overallScore = dash?.overallScore ?? null;
   const label = scoreLabel(overallScore);
+
 
   return (
     <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif", color: T.ink }}>
@@ -345,12 +349,16 @@ function DiagnosticPage() {
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <DiscoveryForm
             firstName={firstName}
+            lastName={lastName}
             email={email}
             companyName={company?.company_name ?? ""}
             annualRevenue={company?.annual_revenue ?? ""}
             fundingStage={company?.funding_stage ?? ""}
             score={overallScore}
+            tier={tier}
+            healthCheckStatus={healthCheckStatus}
           />
+
         </div>
       </section>
     </div>
@@ -419,50 +427,60 @@ function ReportCard({
 
 function DiscoveryForm({
   firstName,
+  lastName,
   email,
   companyName,
   annualRevenue,
   fundingStage,
   score,
+  tier,
+  healthCheckStatus,
 }: {
   firstName: string;
+  lastName: string;
   email: string;
   companyName: string;
   annualRevenue: string;
   fundingStage: string;
   score: number | null;
+  tier: string;
+  healthCheckStatus: string;
 }) {
   const [openComments, setOpenComments] = useState("");
   const [teamMembers, setTeamMembers] = useState("");
-  const [state, setState] = useState<"idle" | "submitting" | "done" | "error">("idle");
-  const [errMsg, setErrMsg] = useState("");
+  const [state, setState] = useState<"idle" | "submitting" | "done">("idle");
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setState("submitting");
-    setErrMsg("");
+    // Fire-and-forget webhook; always show confirmation regardless of outcome.
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      void fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          event_type: "diagnostic_request",
           first_name: firstName,
+          last_name: lastName,
           email,
           company_name: companyName,
+          tier,
+          health_check_status: healthCheckStatus,
+          diagnostic_requested: "request_diagnostic",
+          diagnostic_request_date: new Date().toISOString(),
+          open_comments: openComments,
+          team_members: teamMembers,
           revenue_health_score: score,
           funding_stage: fundingStage,
           annual_revenue: annualRevenue,
-          open_comments: openComments,
-          team_members: teamMembers,
         }),
-      });
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
-      setState("done");
-    } catch (err: any) {
-      setErrMsg(err?.message ?? "Something went wrong.");
-      setState("error");
+      }).catch(() => {});
+    } catch {
+      // swallow
     }
+    setState("done");
   }
+
 
   if (state === "done") {
     return (
@@ -543,21 +561,8 @@ function DiscoveryForm({
         />
       </Field>
 
-      {state === "error" && (
-        <div
-          style={{
-            background: "rgba(239,68,68,0.08)",
-            color: "#B91C1C",
-            border: "1px solid rgba(239,68,68,0.2)",
-            padding: "10px 14px",
-            borderRadius: 8,
-            fontSize: 13,
-            marginBottom: 16,
-          }}
-        >
-          {errMsg || "Something went wrong. Please try again."}
-        </div>
-      )}
+
+
 
       <button
         type="submit"
