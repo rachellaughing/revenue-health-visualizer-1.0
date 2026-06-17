@@ -249,7 +249,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
       done: p.assessment_status !== "not_started",
       locked: !p.profile_complete || !p.company_profile_complete,
       cta: "Start now",
-      href: "/health-check/start" as const,
+      href: "/health-check" as const,
     },
     {
       label: "View your Revenue Health Report",
