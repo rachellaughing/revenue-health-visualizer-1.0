@@ -146,7 +146,7 @@ const EMPTY: Form = {
   open_friction_text: "",
 };
 
-function CompanyProfilePage() {
+function OwnerCompanyForm() {
   const navigate = useNavigate();
   const fetchCompany = useServerFn(getCompanyProfile);
   const fetchSymptoms = useServerFn(getSymptomCategories);
