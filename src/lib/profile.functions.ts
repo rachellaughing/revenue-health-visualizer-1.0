@@ -54,13 +54,11 @@ const companySchema = z.object({
 export const getPersonalProfile = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    console.log("[profile] handler reached, userId:", context.userId);
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("first_name,last_name,role_title,years_in_role,primary_background,email")
+      .select("first_name,last_name,role_title,years_in_role,primary_background,email,team_owner_id,job_function,pain_point_categories,pain_point_ranking,pain_point_open_text")
       .eq("user_id", context.userId)
       .maybeSingle();
-    console.log("[profile] data:", data, "error:", error);
     if (error) throw new Error(error.message);
     return data;
   });
