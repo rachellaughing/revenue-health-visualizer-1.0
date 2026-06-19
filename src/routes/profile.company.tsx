@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Lock } from "lucide-react";
 import {
   ProgressSteps,
   SectionCard,
@@ -17,8 +18,11 @@ import {
 } from "@/components/profile/profile-ui";
 import {
   getCompanyProfile,
+  getOwnerCompanyView,
+  getPersonalProfile,
   getSymptomCategories,
   saveCompanyProfile,
+  saveTeamMemberPerspective,
   type SymptomCategory,
 } from "@/lib/profile.functions";
 
@@ -26,6 +30,27 @@ export const Route = createFileRoute("/profile/company")({
   head: () => ({ meta: [{ title: "Company Profile — Revenue Health Visualiser" }] }),
   component: CompanyProfilePage,
 });
+
+function CompanyProfilePage() {
+  const fetchPersonal = useServerFn(getPersonalProfile);
+  const { data: personal, isLoading } = useQuery({
+    queryKey: ["personal-profile"],
+    queryFn: () => fetchPersonal(),
+  });
+
+  if (isLoading) {
+    return (
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: 40, color: "var(--mm-mid)" }}>
+        Loading…
+      </div>
+    );
+  }
+
+  const teamOwnerId = (personal as any)?.team_owner_id ?? null;
+  if (teamOwnerId) return <TeamMemberCompanyView personal={personal} />;
+  return <OwnerCompanyForm />;
+}
+
 
 const INDUSTRY = ["B2B SaaS", "B2B Services", "Marketplace", "E-commerce", "Other"];
 const BUSINESS_MODEL = ["Subscription", "Project/Retainer", "Transactional", "Mixed"];
