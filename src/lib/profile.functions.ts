@@ -164,3 +164,76 @@ export const getSymptomCategories = createServerFn({ method: "GET" })
     }
     return Array.from(byCat.values());
   });
+
+const teamMemberPerspectiveSchema = z.object({
+  first_name: z.string().trim().min(1).max(80),
+  last_name: z.string().trim().min(1).max(80),
+  role_title: z.string().trim().min(1).max(120),
+  job_function: z.string().trim().min(1).max(80),
+  pain_point_categories: z.array(z.string().min(1).max(80)).max(5),
+  pain_point_ranking: z.array(z.string().min(1).max(80)).max(5),
+  pain_point_open_text: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? null : v),
+    z.string().trim().max(2000).nullable().optional(),
+  ),
+});
+
+export const saveTeamMemberPerspective = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => teamMemberPerspectiveSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        full_name: `${data.first_name} ${data.last_name}`.trim(),
+        role_title: data.role_title,
+        job_function: data.job_function,
+        pain_point_categories: data.pain_point_categories as any,
+        pain_point_ranking: data.pain_point_ranking as any,
+        pain_point_open_text: data.pain_point_open_text ?? null,
+      } as any)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    const { error: rpcErr } = await supabaseAdmin.rpc(
+      "refresh_profile_completion",
+      { _user_id: context.userId },
+    );
+    if (rpcErr) throw new Error(rpcErr.message);
+    return { ok: true };
+  });
+
+export const getOwnerCompanyView = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: me, error: meErr } = await supabaseAdmin
+      .from("profiles")
+      .select("team_owner_id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (meErr) throw new Error(meErr.message);
+    const ownerId = (me as any)?.team_owner_id;
+    if (!ownerId) return null;
+
+    const [{ data: ownerProfile, error: opErr }, { data: ownerCompany, error: ocErr }] =
+      await Promise.all([
+        supabaseAdmin
+          .from("profiles")
+          .select("first_name,last_name,business_name")
+          .eq("user_id", ownerId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("company_profiles")
+          .select("*")
+          .eq("user_id", ownerId)
+          .maybeSingle(),
+      ]);
+    if (opErr) throw new Error(opErr.message);
+    if (ocErr) throw new Error(ocErr.message);
+
+    return {
+      owner_profile: ownerProfile,
+      owner_company: ownerCompany,
+    };
+  });
