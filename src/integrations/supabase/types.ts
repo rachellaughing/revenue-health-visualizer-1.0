@@ -708,8 +708,12 @@ export type Database = {
           id: string
           invite_accepted_at: string | null
           invite_token: string | null
+          job_function: string | null
           last_active_at: string | null
           last_name: string | null
+          pain_point_categories: Json | null
+          pain_point_open_text: string | null
+          pain_point_ranking: Json | null
           primary_background: string | null
           profile_complete: boolean
           profile_photo_url: string | null
@@ -742,8 +746,12 @@ export type Database = {
           id?: string
           invite_accepted_at?: string | null
           invite_token?: string | null
+          job_function?: string | null
           last_active_at?: string | null
           last_name?: string | null
+          pain_point_categories?: Json | null
+          pain_point_open_text?: string | null
+          pain_point_ranking?: Json | null
           primary_background?: string | null
           profile_complete?: boolean
           profile_photo_url?: string | null
@@ -776,8 +784,12 @@ export type Database = {
           id?: string
           invite_accepted_at?: string | null
           invite_token?: string | null
+          job_function?: string | null
           last_active_at?: string | null
           last_name?: string | null
+          pain_point_categories?: Json | null
+          pain_point_open_text?: string | null
+          pain_point_ranking?: Json | null
           primary_background?: string | null
           profile_complete?: boolean
           profile_photo_url?: string | null
