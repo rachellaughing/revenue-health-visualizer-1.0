@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Lock } from "lucide-react";
 import {
   ProgressSteps,
   SectionCard,
@@ -17,8 +18,11 @@ import {
 } from "@/components/profile/profile-ui";
 import {
   getCompanyProfile,
+  getOwnerCompanyView,
+  getPersonalProfile,
   getSymptomCategories,
   saveCompanyProfile,
+  saveTeamMemberPerspective,
   type SymptomCategory,
 } from "@/lib/profile.functions";
 
@@ -26,6 +30,27 @@ export const Route = createFileRoute("/profile/company")({
   head: () => ({ meta: [{ title: "Company Profile — Revenue Health Visualiser" }] }),
   component: CompanyProfilePage,
 });
+
+function CompanyProfilePage() {
+  const fetchPersonal = useServerFn(getPersonalProfile);
+  const { data: personal, isLoading } = useQuery({
+    queryKey: ["personal-profile"],
+    queryFn: () => fetchPersonal(),
+  });
+
+  if (isLoading) {
+    return (
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: 40, color: "var(--mm-mid)" }}>
+        Loading…
+      </div>
+    );
+  }
+
+  const teamOwnerId = (personal as any)?.team_owner_id ?? null;
+  if (teamOwnerId) return <TeamMemberCompanyView personal={personal} />;
+  return <OwnerCompanyForm />;
+}
+
 
 const INDUSTRY = ["B2B SaaS", "B2B Services", "Marketplace", "E-commerce", "Other"];
 const BUSINESS_MODEL = ["Subscription", "Project/Retainer", "Transactional", "Mixed"];
@@ -121,7 +146,7 @@ const EMPTY: Form = {
   open_friction_text: "",
 };
 
-function CompanyProfilePage() {
+function OwnerCompanyForm() {
   const navigate = useNavigate();
   const fetchCompany = useServerFn(getCompanyProfile);
   const fetchSymptoms = useServerFn(getSymptomCategories);
@@ -643,6 +668,416 @@ function SymptomSelector({
               <button
                 type="button"
                 onClick={() => onChange(selected.filter((c) => c !== code))}
+                className="ml-auto text-sm"
+                style={{ color: "var(--mm-mid)", background: "none", border: "none", cursor: "pointer" }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Team Member view
+// ──────────────────────────────────────────────────────────────────────────
+
+const CATEGORY_KEYS: { key: string; label: string }[] = [
+  { key: "revenue_growth", label: "Revenue & Growth" },
+  { key: "sales", label: "Sales" },
+  { key: "marketing", label: "Marketing" },
+  { key: "customer_success", label: "Customer Success & Friction" },
+  { key: "brand_market", label: "Brand & Market" },
+  { key: "leadership_scaling", label: "Leadership & Scaling" },
+  { key: "team_operations", label: "Team & Operations" },
+  { key: "people_culture", label: "People & Culture" },
+  { key: "visibility_data", label: "Visibility & Data" },
+];
+
+const JOB_FUNCTIONS = [
+  "Sales",
+  "Marketing",
+  "Customer Success",
+  "Finance",
+  "Operations",
+  "Product",
+  "Engineering",
+  "Executive/Founder",
+  "Other",
+];
+
+function dash(v: unknown) {
+  if (v === null || v === undefined || v === "") return "—";
+  return String(v);
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: unknown }) {
+  return (
+    <Field>
+      <Label>{label}</Label>
+      <div
+        style={{
+          padding: "11px 14px",
+          background: "var(--mm-off-white)",
+          borderRadius: 8,
+          fontSize: 14,
+          color: "var(--mm-ink)",
+          minHeight: 42,
+          boxSizing: "border-box",
+        }}
+      >
+        {dash(value)}
+      </div>
+    </Field>
+  );
+}
+
+function TeamMemberCompanyView({ personal }: { personal: any }) {
+  const navigate = useNavigate();
+  const fetchOwner = useServerFn(getOwnerCompanyView);
+  const saveMine = useServerFn(saveTeamMemberPerspective);
+
+  const { data: ownerView, isLoading: ownerLoading } = useQuery({
+    queryKey: ["owner-company-view"],
+    queryFn: () => fetchOwner(),
+  });
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [roleTitle, setRoleTitle] = useState("");
+  const [jobFunction, setJobFunction] = useState("");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [openText, setOpenText] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!personal) return;
+    setFirstName(personal.first_name ?? "");
+    setLastName(personal.last_name ?? "");
+    setRoleTitle(personal.role_title ?? "");
+    setJobFunction(personal.job_function ?? "");
+    const cats = Array.isArray(personal.pain_point_categories)
+      ? (personal.pain_point_categories as string[]).filter((c) =>
+          CATEGORY_KEYS.some((k) => k.key === c),
+        )
+      : [];
+    setSelected(cats);
+    setOpenText(personal.pain_point_open_text ?? "");
+  }, [personal]);
+
+  const ownerProfile = (ownerView as any)?.owner_profile;
+  const ownerCompany = (ownerView as any)?.owner_company;
+  const ownerName = useMemo(() => {
+    const fn = ownerProfile?.first_name ?? "";
+    const ln = ownerProfile?.last_name ?? "";
+    return `${fn} ${ln}`.trim() || "your team owner";
+  }, [ownerProfile]);
+
+  const toggleCategory = (key: string) => {
+    setSelected((prev) => {
+      if (prev.includes(key)) return prev.filter((k) => k !== key);
+      if (prev.length >= 5) return prev;
+      return [...prev, key];
+    });
+  };
+
+  const canSave =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    roleTitle.trim().length > 0 &&
+    jobFunction.trim().length > 0 &&
+    !saving;
+
+  async function onSave() {
+    if (!canSave) return;
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+    try {
+      await saveMine({
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          role_title: roleTitle.trim(),
+          job_function: jobFunction.trim(),
+          pain_point_categories: selected,
+          pain_point_ranking: selected,
+          pain_point_open_text: openText.trim() || null,
+        } as any,
+      });
+      setSaved(true);
+    } catch (e: any) {
+      setError(e?.message ?? "Could not save");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{ maxWidth: 760, margin: "0 auto" }}>
+      <ProgressSteps steps={["Personal Profile", "Company Profile", "Done"]} current={1} />
+
+      {/* ── Section 1 — Organization Profile (read-only) ── */}
+      <div
+        className="rounded-xl p-7 mb-6"
+        style={{
+          background: "#fff",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+        }}
+      >
+        <div className="pb-4 mb-5" style={{ borderBottom: "1px solid var(--mm-off-white)" }}>
+          <div
+            className="text-[10px] font-bold mb-1 flex items-center gap-1.5"
+            style={{ color: "var(--mm-mid)", letterSpacing: "0.12em" }}
+          >
+            <Lock size={12} color="var(--mm-ink-soft, #888880)" />
+            ORGANIZATION PROFILE
+          </div>
+          <h3
+            className="text-[17px] m-0"
+            style={{ fontFamily: "'Instrument Serif', Georgia, serif", color: "var(--mm-ink)" }}
+          >
+            Managed by {ownerName}
+          </h3>
+        </div>
+
+        {ownerLoading ? (
+          <div style={{ color: "var(--mm-mid)", fontSize: 14 }}>Loading organization details…</div>
+        ) : !ownerCompany && !ownerProfile ? (
+          <div style={{ color: "var(--mm-mid)", fontSize: 14 }}>
+            Your team owner hasn't completed their company profile yet.
+          </div>
+        ) : (
+          <>
+            <FieldGroup>
+              <ReadOnlyField label="Company Name" value={ownerProfile?.business_name ?? ownerCompany?.company_name} />
+            </FieldGroup>
+            <FieldGroup columns={2}>
+              <ReadOnlyField label="Industry" value={ownerCompany?.industry} />
+              <ReadOnlyField label="Business Model" value={ownerCompany?.business_model} />
+            </FieldGroup>
+            <FieldGroup columns={2}>
+              <ReadOnlyField label="Founded Year" value={ownerCompany?.founded_year} />
+              <ReadOnlyField label="Headquarters" value={ownerCompany?.headquarters} />
+            </FieldGroup>
+            <FieldGroup>
+              <ReadOnlyField label="Website" value={ownerCompany?.website} />
+            </FieldGroup>
+            <FieldGroup columns={2}>
+              <ReadOnlyField label="Annual Revenue" value={ownerCompany?.annual_revenue} />
+              <ReadOnlyField label="Funding Stage" value={ownerCompany?.funding_stage} />
+            </FieldGroup>
+            <FieldGroup columns={3}>
+              <ReadOnlyField label="Average Customer Value (ACV)" value={ownerCompany?.acv} />
+              <ReadOnlyField label="Customer Acquisition Cost (CAC)" value={ownerCompany?.cac} />
+              <ReadOnlyField label="Estimated LTV" value={ownerCompany?.estimated_ltv} />
+            </FieldGroup>
+            <FieldGroup columns={3}>
+              <ReadOnlyField label="Average Sales Cycle" value={ownerCompany?.avg_sales_cycle} />
+              <ReadOnlyField label="Average Close Rate" value={ownerCompany?.avg_close_rate} />
+              <ReadOnlyField label="Annual Customer Churn" value={ownerCompany?.annual_churn} />
+            </FieldGroup>
+            <FieldGroup columns={2}>
+              <ReadOnlyField label="Primary Growth Constraint" value={ownerCompany?.primary_growth_constraint} />
+              <ReadOnlyField label="Primary Sales Motion" value={ownerCompany?.primary_sales_motion} />
+            </FieldGroup>
+            <FieldGroup columns={2}>
+              <ReadOnlyField label="Revenue Model" value={ownerCompany?.revenue_model} />
+              <ReadOnlyField label="Do you have a defined ICP?" value={ownerCompany?.has_defined_icp} />
+            </FieldGroup>
+          </>
+        )}
+      </div>
+
+      {/* ── Section 2 — Your Perspective (editable) ── */}
+      <div
+        className="rounded-xl p-7 mb-6"
+        style={{
+          background: "#fff",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+        }}
+      >
+        <div className="pb-4 mb-5" style={{ borderBottom: "1px solid var(--mm-off-white)" }}>
+          <div
+            className="text-[10px] font-bold mb-1"
+            style={{ color: "var(--mm-mid)", letterSpacing: "0.12em" }}
+          >
+            YOUR PERSPECTIVE
+          </div>
+          <h3
+            className="text-[17px] m-0"
+            style={{ fontFamily: "'Instrument Serif', Georgia, serif", color: "var(--mm-ink)" }}
+          >
+            Your role and what you're seeing from your seat
+          </h3>
+        </div>
+
+        <SectionSubheading>Your Role</SectionSubheading>
+        <FieldGroup columns={2}>
+          <Field>
+            <Label required>First Name</Label>
+            <TextInput value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          </Field>
+          <Field>
+            <Label required>Last Name</Label>
+            <TextInput value={lastName} onChange={(e) => setLastName(e.target.value)} />
+          </Field>
+        </FieldGroup>
+        <FieldGroup columns={2}>
+          <Field>
+            <Label required>Job Title / Role</Label>
+            <TextInput value={roleTitle} onChange={(e) => setRoleTitle(e.target.value)} />
+          </Field>
+          <Field>
+            <Label required>Job Function</Label>
+            <Select
+              value={jobFunction}
+              onChange={setJobFunction}
+              placeholder="Select..."
+              options={JOB_FUNCTIONS}
+            />
+          </Field>
+        </FieldGroup>
+
+        <div className="mt-6 mb-5">
+          <SectionSubheading>Your Pain Points</SectionSubheading>
+          <Label>What's feeling hardest from your seat?</Label>
+          <Helper>Select up to 5. Order of selection is your ranking — most painful first.</Helper>
+          <div className="mt-3.5">
+            <CategoryPainSelector
+              selected={selected}
+              onToggle={toggleCategory}
+              onRemove={(k) => setSelected((p) => p.filter((x) => x !== k))}
+            />
+          </div>
+        </div>
+
+        <FieldGroup>
+          <Field>
+            <Label>What feels harder in your role right now than it should?</Label>
+            <TextArea
+              value={openText}
+              onChange={(e) => setOpenText(e.target.value)}
+              placeholder="Your perspective on where things feel stuck or harder than they should be..."
+              rows={4}
+            />
+          </Field>
+        </FieldGroup>
+
+        {error && (
+          <p className="text-sm mb-3" style={{ color: "var(--mm-ember)" }}>
+            {error}
+          </p>
+        )}
+        {saved && !error && (
+          <p className="text-sm mb-3" style={{ color: "var(--mm-teal)" }}>
+            Saved.
+          </p>
+        )}
+
+        <div className="flex justify-between items-center pt-2">
+          <GhostButton onClick={() => navigate({ to: "/dashboard" })}>← Back to dashboard</GhostButton>
+          <PrimaryButton enabled={canSave} onClick={onSave}>
+            {saving ? "Saving…" : "Save"}
+          </PrimaryButton>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionSubheading({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="text-[11px] font-bold mb-3"
+      style={{ color: "var(--mm-teal)", letterSpacing: "0.08em" }}
+    >
+      {children?.toString().toUpperCase()}
+    </div>
+  );
+}
+
+function CategoryPainSelector({
+  selected,
+  onToggle,
+  onRemove,
+}: {
+  selected: string[];
+  onToggle: (key: string) => void;
+  onRemove: (key: string) => void;
+}) {
+  const labelFor = (k: string) => CATEGORY_KEYS.find((c) => c.key === k)?.label ?? k;
+  return (
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-4">
+        {CATEGORY_KEYS.map((cat) => {
+          const idx = selected.indexOf(cat.key);
+          const isSelected = idx >= 0;
+          const maxReached = selected.length >= 5 && !isSelected;
+          return (
+            <button
+              key={cat.key}
+              type="button"
+              onClick={() => !maxReached && onToggle(cat.key)}
+              className="text-left rounded-[10px] p-3.5 transition-all relative"
+              style={{
+                background: isSelected ? "var(--mm-abyss)" : "var(--mm-off-white)",
+                border: `1.5px solid ${isSelected ? "var(--mm-abyss)" : "rgba(0,0,0,0.08)"}`,
+                cursor: maxReached ? "not-allowed" : "pointer",
+                opacity: maxReached ? 0.45 : 1,
+              }}
+            >
+              <div
+                className="text-xs font-semibold leading-tight"
+                style={{ color: isSelected ? "#fff" : "var(--mm-ink)" }}
+              >
+                {cat.label}
+              </div>
+              {isSelected && (
+                <div
+                  className="absolute top-2 right-2 w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                  style={{ background: "var(--mm-ember)" }}
+                >
+                  {idx + 1}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {selected.length > 0 && (
+        <div
+          className="rounded-lg px-4 py-3"
+          style={{
+            background: "rgba(42,107,110,0.07)",
+            border: "1px solid rgba(42,107,110,0.2)",
+          }}
+        >
+          <div className="text-[11px] font-semibold mb-1.5" style={{ color: "var(--mm-teal)" }}>
+            {selected.length}/5 SELECTED — RANKED BY ORDER CHOSEN
+          </div>
+          {selected.map((k, i) => (
+            <div key={k} className="flex items-center gap-2 mb-1">
+              <div
+                className="w-[18px] h-[18px] rounded shrink-0 flex items-center justify-center"
+                style={{ background: "var(--mm-ember)" }}
+              >
+                <span className="text-[10px] text-white font-bold">{i + 1}</span>
+              </div>
+              <span className="text-xs" style={{ color: "var(--mm-ink)" }}>
+                {labelFor(k)}
+              </span>
+              <button
+                type="button"
+                onClick={() => onRemove(k)}
                 className="ml-auto text-sm"
                 style={{ color: "var(--mm-mid)", background: "none", border: "none", cursor: "pointer" }}
               >
