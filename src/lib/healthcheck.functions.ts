@@ -201,16 +201,28 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 
     // Team members inherit their owner's tier — their own tier column is
     // never used for access gating.
+    let ownerTierFetched: string | null = null;
     if (isTeamMember && teamOwnerId) {
       const { data: ownerProfile } = await supabaseAdmin
         .from("profiles")
         .select("tier")
         .eq("user_id", teamOwnerId)
         .maybeSingle();
+      ownerTierFetched = (ownerProfile?.tier as string) ?? null;
       if (ownerProfile?.tier) {
         tier = ownerProfile.tier as "starter" | "pro" | "diagnostic";
       }
     }
+
+    console.info("[getHealthCheckData] tier resolution", {
+      userId,
+      role,
+      team_owner_id: teamOwnerId,
+      isTeamMember,
+      ownerProfileTier: ownerTierFetched,
+      effectiveTier: tier,
+      profileOwnTier: profile?.tier ?? null,
+    });
 
     // Resolve team context (founder + parent assessment) for team members.
     let teamContext: HealthCheckData["teamContext"] | undefined;
