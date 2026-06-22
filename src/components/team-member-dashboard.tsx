@@ -72,27 +72,15 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
             <h1
               style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 34,
+                fontSize: 30,
                 fontWeight: 400,
-                lineHeight: 1.15,
-                margin: "0 0 16px",
-              }}
-            >
-              You've been invited to complete a Health Check.
-            </h1>
-            <p
-              style={{
-                fontSize: 14,
-                lineHeight: 1.65,
-                color: "rgba(255,255,255,0.78)",
+                lineHeight: 1.2,
                 margin: "0 0 28px",
               }}
             >
-              {ownerName} at {company} has invited you to contribute to their
-              Revenue Health Assessment™. Your responses are completely
-              anonymous — {ownerName} will only see aggregated scores, never
-              your individual answers.
-            </p>
+              Complete your Health Check to unlock the Team Alignment report
+              for {ownerName}'s organization.
+            </h1>
             <Link
               to="/health-check"
               style={{
@@ -106,9 +94,10 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
                 textDecoration: "none",
               }}
             >
-              {inProgress ? "Resume Health Check →" : "Start Health Check →"}
+              {inProgress ? "Continue Health Check →" : "Start Health Check →"}
             </Link>
           </div>
+
         </div>
 
         <div
