@@ -1,6 +1,7 @@
 import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import rhIconDark from "@/assets/rh-icon-dark.svg.asset.json";
 
 const T = {
   abyss: "#182829",
