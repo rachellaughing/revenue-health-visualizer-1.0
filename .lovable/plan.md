@@ -1,42 +1,33 @@
-## Goal
+## Plan: Wire up brand logo + favicon
 
-In `src/routes/profile.company.tsx`, the team member view (`TeamMemberCompanyView`) currently renders a simplified single-step `CategoryPainSelector`. Replace it with the **exact same** `SymptomSelector` component the owner uses — same two-step UX (categories → ranked specific pain points, max 5).
+### Assets (upload to CDN via lovable-assets)
 
-## What I'll change (single file: `src/routes/profile.company.tsx`)
+1. **`RHIcon-Dark.svg`** → `src/assets/rh-icon-dark.svg.asset.json` — use as the site favicon (works on light browser chrome) and as the brand mark on light/paper backgrounds (team-member top bar).
+2. **`RH-Icon-Light.svg`** → `src/assets/rh-icon-light.svg.asset.json` — use as the brand mark on dark backgrounds (main app sidebar header).
+3. **`RH - Logo - Light.svg`** (full wordmark, white text) → `src/assets/rh-logo-light.svg.asset.json` — use on the dark auth split-layout panel in place of the small "Revenue Health Matrix™" eyebrow.
 
-1. **Load symptom categories** in `TeamMemberCompanyView` using the existing `getSymptomCategories` server function (already imported and used by the owner view) via `useQuery`.
+After upload, the original binaries are not added to the repo — only the `.asset.json` pointers.
 
-2. **Change `selected` state semantics** from category keys (e.g. `"sales"`) to symptom codes (`SYM-###`), matching what `SymptomSelector` expects.
+### Code changes
 
-3. **Initialize `selected`** from `personal.pain_point_ranking` (filtered to `/^SYM-\d{3}$/`) instead of `pain_point_categories`. This is the field that already stores the ranked list.
+1. **Favicon** — `src/routes/__root.tsx` `links: [...]`: add
+   `{ rel: "icon", type: "image/svg+xml", href: rhIconDark.url }` (import the dark icon `.asset.json`).
 
-4. **Replace the JSX block** (around lines 949–960) — swap `<CategoryPainSelector …>` for:
-   ```tsx
-   <SymptomSelector
-     categories={categories ?? []}
-     selected={selected}
-     onChange={setSelected}
-   />
-   ```
-   Keep the surrounding `SectionSubheading`, label, helper text, and the open-text TextArea exactly as they are.
+2. **Main sidebar** — `src/components/app-sidebar.tsx` (dark abyss background, lines 172–182):
+   Replace the "Revenue Health" text span with `<img src={rhIconLight.url} alt="Revenue Health Visualiser" />` (24px high when expanded; centered 24px icon when `collapsed`).
 
-5. **Update the save payload** in `onSave`:
-   - `pain_point_ranking`: `selected` (SYM codes in selection order — this is the ranking)
-   - `pain_point_categories`: distinct categories derived from `selected` by looking up each code's category in the loaded `categories` data
-   - `pain_point_open_text`: unchanged
+3. **Team-member top bar** — `src/components/team-member-shell.tsx` (white background, lines 50–61):
+   Replace the wordmark `<Link>` text with the dark icon (`rh-icon-dark`) at ~28px height, keep the Link to `/dashboard`, keep ™ semantics via `alt`.
 
-6. **Remove now-dead code**: `CategoryPainSelector` function, `CATEGORY_KEYS` array, `CATEGORY_META` references used only by the removed selector, and the local `toggleCategory` helper. (Verify each isn't used elsewhere before deleting — `CATEGORY_META` is shared with `SymptomSelector`, so keep it.)
+4. **Auth split layout** — `src/components/auth/AuthSplitLayout.tsx` (dark panel, lines 52–64):
+   Replace the small uppercase "Revenue Health Matrix™" eyebrow with the full light wordmark logo (`rh-logo-light`) at ~180px wide. The existing headline + faint background graphic underneath are unchanged.
 
-## What stays unchanged
+### Not changing
 
-- Owner's Company Profile view — untouched
-- `saveTeamMemberPerspective` server function and its Zod schema already accept `string[]` for both fields, so no backend change
-- Database schema, profile fields written, and 5-item cap
-- "What feels harder in your role right now…" open text field
-- Read-only Organization Profile section, role fields, save/cancel buttons, navigation
-- Every other page in the app
+- Brand text elsewhere (footers, page bodies, report headers) — text-only mentions of "Revenue Health Matrix™" / "Revenue Health Visualiser™" stay as-is.
+- The faint background SVG diagram in `AuthSplitLayout`.
+- No new routes, no token changes, no schema changes.
 
-## Verification
+### Verification
 
-- Typecheck (build runs automatically)
-- Trace: team member loads page → sees category grid identical to owner's → clicks a category → sees Step 2 pain point statements → ranks up to 5 → saves → `profiles.pain_point_ranking` contains SYM codes in order, `profiles.pain_point_categories` contains the distinct categories
+Build passes; manually open `/login` (dark panel shows full wordmark), `/dashboard` (sidebar shows light icon, browser tab shows dark icon), and a team-member session (top bar shows dark icon).
