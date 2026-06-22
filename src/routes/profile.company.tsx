@@ -809,6 +809,7 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
         } as any,
       });
       setSaved(true);
+      navigate({ to: "/dashboard" });
     } catch (e: any) {
       setError(e?.message ?? "Could not save");
     } finally {
