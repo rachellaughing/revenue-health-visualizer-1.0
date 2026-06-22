@@ -433,10 +433,23 @@ export const saveResponse = createServerFn({ method: "POST" })
     // Recompute completion
     const { data: profile } = await supabaseAdmin
       .from("profiles")
-      .select("tier")
+      .select("tier,role,team_owner_id")
       .eq("user_id", userId)
       .maybeSingle();
-    const tier = (profile?.tier ?? "starter") as string;
+    let tier = (profile?.tier ?? "starter") as string;
+    const _role = (profile as any)?.role ?? "owner";
+    const _ownerId = (profile as any)?.team_owner_id ?? null;
+    if (
+      (_role === "team_member" || (_role === "member" && _ownerId)) &&
+      _ownerId
+    ) {
+      const { data: ownerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("tier")
+        .eq("user_id", _ownerId)
+        .maybeSingle();
+      if (ownerProfile?.tier) tier = ownerProfile.tier as string;
+    }
 
     const fw = await loadFrameworkAndResponses(data.assessment_id);
     const selectedChildUuids = ((asmt as any).selected_child_ids ?? []) as string[];
