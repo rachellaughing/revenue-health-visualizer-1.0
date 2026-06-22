@@ -138,7 +138,7 @@ function InfoTile({ title, body }: { title: string; body: string }) {
 export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
   const tm = viewer.teamMember!;
   const ownerName = tm.ownerFirstName ?? "Your founder";
-  const company = tm.companyName ?? "your company";
+  void tm.companyName;
   const submittedAt = tm.submittedAt ? new Date(tm.submittedAt) : new Date();
   const lockDate = new Date(submittedAt.getTime() + 7 * 24 * 60 * 60 * 1000);
   const lockDateStr = lockDate.toLocaleDateString("en-US", {
