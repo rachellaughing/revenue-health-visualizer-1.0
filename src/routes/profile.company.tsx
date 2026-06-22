@@ -812,7 +812,9 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
           last_name: lastName.trim(),
           role_title: roleTitle.trim(),
           job_function: jobFunction.trim(),
-          pain_point_categories: selected,
+          pain_point_categories: Array.from(
+            new Set(selected.map((c) => categoryByCode.get(c)).filter(Boolean) as string[]),
+          ),
           pain_point_ranking: selected,
           pain_point_open_text: openText.trim() || null,
         } as any,
