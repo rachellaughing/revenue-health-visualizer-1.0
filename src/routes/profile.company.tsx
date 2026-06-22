@@ -960,10 +960,10 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
           <Label>What's feeling hardest from your seat?</Label>
           <Helper>Select up to 5. Order of selection is your ranking — most painful first.</Helper>
           <div className="mt-3.5">
-            <CategoryPainSelector
+            <SymptomSelector
+              categories={categories ?? []}
               selected={selected}
-              onToggle={toggleCategory}
-              onRemove={(k) => setSelected((p) => p.filter((x) => x !== k))}
+              onChange={setSelected}
             />
           </div>
         </div>
