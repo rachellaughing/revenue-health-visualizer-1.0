@@ -58,7 +58,7 @@ export const getDashboardData = createServerFn({ method: "GET" })
           tier: profile.tier,
         }
       : null;
-    if (pErr) throw new Error(pErr.message);
+
 
     const { data: latest, error: aErr } = await supabaseAdmin
       .from("assessments")
