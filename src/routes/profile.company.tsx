@@ -685,17 +685,6 @@ function SymptomSelector({
 // Team Member view
 // ──────────────────────────────────────────────────────────────────────────
 
-const CATEGORY_KEYS: { key: string; label: string }[] = [
-  { key: "revenue_growth", label: "Revenue & Growth" },
-  { key: "sales", label: "Sales" },
-  { key: "marketing", label: "Marketing" },
-  { key: "customer_success", label: "Customer Success & Friction" },
-  { key: "brand_market", label: "Brand & Market" },
-  { key: "leadership_scaling", label: "Leadership & Scaling" },
-  { key: "team_operations", label: "Team & Operations" },
-  { key: "people_culture", label: "People & Culture" },
-  { key: "visibility_data", label: "Visibility & Data" },
-];
 
 const JOB_FUNCTIONS = [
   "Sales",
