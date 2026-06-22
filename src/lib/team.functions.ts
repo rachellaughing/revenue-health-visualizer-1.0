@@ -241,6 +241,30 @@ export const activateTeamMembership = createServerFn({ method: "POST" })
       .eq("user_id", context.userId);
     if (profErr) throw new Error(profErr.message);
 
+    // Link the new member's profile to their team owner. Non-fatal on failure
+    // so the user is never blocked from accessing the app.
+    try {
+      const { data: tm, error: tmLookupErr } = await supabaseAdmin
+        .from("team_members")
+        .select("team_id, teams:team_id(owner_id)")
+        .eq("email", email)
+        .eq("status", "pending")
+        .maybeSingle();
+      if (tmLookupErr) throw new Error(tmLookupErr.message);
+      const ownerId = (tm as any)?.teams?.owner_id as string | undefined;
+      if (ownerId) {
+        const { error: linkErr } = await supabaseAdmin
+          .from("profiles")
+          .update({ team_owner_id: ownerId, role: "member" } as any)
+          .eq("user_id", context.userId);
+        if (linkErr) throw new Error(linkErr.message);
+      } else {
+        console.error("activateTeamMembership: no owner_id found for", email);
+      }
+    } catch (e) {
+      console.error("activateTeamMembership: failed to link team_owner_id/role", e);
+    }
+
     const { error: tmErr } = await supabaseAdmin
       .from("team_members")
       .update({
