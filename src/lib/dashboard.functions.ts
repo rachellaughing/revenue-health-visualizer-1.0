@@ -36,6 +36,8 @@ export const getDashboardData = createServerFn({ method: "GET" })
       )
       .eq("user_id", userId)
       .maybeSingle();
+    if (pErr) throw new Error(pErr.message);
+
 
     // Team members inherit company context from their team owner — they don't
     // fill out their own company_profiles row, so treat company profile as
