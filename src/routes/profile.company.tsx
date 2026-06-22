@@ -784,13 +784,14 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
     return `${fn} ${ln}`.trim() || "your team owner";
   }, [ownerProfile]);
 
-  const toggleCategory = (key: string) => {
-    setSelected((prev) => {
-      if (prev.includes(key)) return prev.filter((k) => k !== key);
-      if (prev.length >= 5) return prev;
-      return [...prev, key];
-    });
-  };
+  const categoryByCode = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of categories ?? []) {
+      for (const s of c.symptoms) map.set(s.symptom_code, c.category);
+    }
+    return map;
+  }, [categories]);
+
 
   const canSave =
     firstName.trim().length > 0 &&
