@@ -79,7 +79,7 @@ function SettingsPage() {
           }}
         >
           {TABS.map((t) => {
-            const active = t.key === tab;
+            const active = t.key === activeTab;
             return (
               <button
                 key={t.key}
@@ -106,14 +106,14 @@ function SettingsPage() {
           })}
         </div>
 
-        {tab === "account" && (
+        {activeTab === "account" && (
           <div>
             <PersonalDetailsCard />
             <ChangePasswordCard />
           </div>
         )}
-        {tab === "billing" && <BillingTab success={success} />}
-        {tab === "team" && <TeamTab />}
+        {activeTab === "billing" && <BillingTab success={success} />}
+        {activeTab === "team" && !isMember && <TeamTab />}
       </main>
 
       <footer
