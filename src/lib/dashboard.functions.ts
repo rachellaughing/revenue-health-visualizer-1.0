@@ -32,11 +32,33 @@ export const getDashboardData = createServerFn({ method: "GET" })
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
       .select(
-        "first_name,business_name,profile_complete,company_profile_complete,assessment_status,assessment_completion_pct,tier",
+        "first_name,business_name,profile_complete,company_profile_complete,assessment_status,assessment_completion_pct,tier,role,team_owner_id",
       )
       .eq("user_id", userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
+
+
+    // Team members inherit company context from their team owner — they don't
+    // fill out their own company_profiles row, so treat company profile as
+    // complete for them to avoid blocking Health Check access.
+    const isTeamMember =
+      (profile as any)?.role === "member" &&
+      (profile as any)?.team_owner_id != null;
+    const effectiveProfile = profile
+      ? {
+          first_name: profile.first_name,
+          business_name: profile.business_name,
+          profile_complete: profile.profile_complete,
+          company_profile_complete: isTeamMember
+            ? true
+            : profile.company_profile_complete,
+          assessment_status: profile.assessment_status,
+          assessment_completion_pct: profile.assessment_completion_pct,
+          tier: profile.tier,
+        }
+      : null;
+
 
     const { data: latest, error: aErr } = await supabaseAdmin
       .from("assessments")
@@ -75,7 +97,7 @@ export const getDashboardData = createServerFn({ method: "GET" })
     }
 
     return {
-      profile: profile as DashboardData["profile"],
+      profile: effectiveProfile as DashboardData["profile"],
       latestAssessment: latest,
       completedCount: completedCount ?? 0,
       hasScores,
