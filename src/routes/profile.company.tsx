@@ -738,11 +738,17 @@ function ReadOnlyField({ label, value }: { label: string; value: unknown }) {
 function TeamMemberCompanyView({ personal }: { personal: any }) {
   const navigate = useNavigate();
   const fetchOwner = useServerFn(getOwnerCompanyView);
+  const fetchCategories = useServerFn(getSymptomCategories);
   const saveMine = useServerFn(saveTeamMemberPerspective);
 
   const { data: ownerView, isLoading: ownerLoading } = useQuery({
     queryKey: ["owner-company-view"],
     queryFn: () => fetchOwner(),
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ["symptom-categories"],
+    queryFn: () => fetchCategories(),
   });
 
   const [firstName, setFirstName] = useState("");
@@ -761,12 +767,12 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
     setLastName(personal.last_name ?? "");
     setRoleTitle(personal.role_title ?? "");
     setJobFunction(personal.job_function ?? "");
-    const cats = Array.isArray(personal.pain_point_categories)
-      ? (personal.pain_point_categories as string[]).filter((c) =>
-          CATEGORY_KEYS.some((k) => k.key === c),
+    const codes = Array.isArray(personal.pain_point_ranking)
+      ? (personal.pain_point_ranking as string[]).filter((c) =>
+          /^SYM-\d{3}$/.test(c),
         )
       : [];
-    setSelected(cats);
+    setSelected(codes);
     setOpenText(personal.pain_point_open_text ?? "");
   }, [personal]);
 
