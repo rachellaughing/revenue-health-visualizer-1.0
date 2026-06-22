@@ -685,17 +685,6 @@ function SymptomSelector({
 // Team Member view
 // ──────────────────────────────────────────────────────────────────────────
 
-const CATEGORY_KEYS: { key: string; label: string }[] = [
-  { key: "revenue_growth", label: "Revenue & Growth" },
-  { key: "sales", label: "Sales" },
-  { key: "marketing", label: "Marketing" },
-  { key: "customer_success", label: "Customer Success & Friction" },
-  { key: "brand_market", label: "Brand & Market" },
-  { key: "leadership_scaling", label: "Leadership & Scaling" },
-  { key: "team_operations", label: "Team & Operations" },
-  { key: "people_culture", label: "People & Culture" },
-  { key: "visibility_data", label: "Visibility & Data" },
-];
 
 const JOB_FUNCTIONS = [
   "Sales",
@@ -738,11 +727,17 @@ function ReadOnlyField({ label, value }: { label: string; value: unknown }) {
 function TeamMemberCompanyView({ personal }: { personal: any }) {
   const navigate = useNavigate();
   const fetchOwner = useServerFn(getOwnerCompanyView);
+  const fetchCategories = useServerFn(getSymptomCategories);
   const saveMine = useServerFn(saveTeamMemberPerspective);
 
   const { data: ownerView, isLoading: ownerLoading } = useQuery({
     queryKey: ["owner-company-view"],
     queryFn: () => fetchOwner(),
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ["symptom-categories"],
+    queryFn: () => fetchCategories(),
   });
 
   const [firstName, setFirstName] = useState("");
@@ -761,12 +756,12 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
     setLastName(personal.last_name ?? "");
     setRoleTitle(personal.role_title ?? "");
     setJobFunction(personal.job_function ?? "");
-    const cats = Array.isArray(personal.pain_point_categories)
-      ? (personal.pain_point_categories as string[]).filter((c) =>
-          CATEGORY_KEYS.some((k) => k.key === c),
+    const codes = Array.isArray(personal.pain_point_ranking)
+      ? (personal.pain_point_ranking as string[]).filter((c) =>
+          /^SYM-\d{3}$/.test(c),
         )
       : [];
-    setSelected(cats);
+    setSelected(codes);
     setOpenText(personal.pain_point_open_text ?? "");
   }, [personal]);
 
@@ -778,13 +773,14 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
     return `${fn} ${ln}`.trim() || "your team owner";
   }, [ownerProfile]);
 
-  const toggleCategory = (key: string) => {
-    setSelected((prev) => {
-      if (prev.includes(key)) return prev.filter((k) => k !== key);
-      if (prev.length >= 5) return prev;
-      return [...prev, key];
-    });
-  };
+  const categoryByCode = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const c of categories ?? []) {
+      for (const s of c.symptoms) map.set(s.symptom_code, c.category);
+    }
+    return map;
+  }, [categories]);
+
 
   const canSave =
     firstName.trim().length > 0 &&
@@ -805,7 +801,9 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
           last_name: lastName.trim(),
           role_title: roleTitle.trim(),
           job_function: jobFunction.trim(),
-          pain_point_categories: selected,
+          pain_point_categories: Array.from(
+            new Set(selected.map((c) => categoryByCode.get(c)).filter(Boolean) as string[]),
+          ),
           pain_point_ranking: selected,
           pain_point_open_text: openText.trim() || null,
         } as any,
@@ -951,10 +949,10 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
           <Label>What's feeling hardest from your seat?</Label>
           <Helper>Select up to 5. Order of selection is your ranking — most painful first.</Helper>
           <div className="mt-3.5">
-            <CategoryPainSelector
+            <SymptomSelector
+              categories={categories ?? []}
               selected={selected}
-              onToggle={toggleCategory}
-              onRemove={(k) => setSelected((p) => p.filter((x) => x !== k))}
+              onChange={setSelected}
             />
           </div>
         </div>
@@ -1004,89 +1002,3 @@ function SectionSubheading({ children }: { children: React.ReactNode }) {
   );
 }
 
-function CategoryPainSelector({
-  selected,
-  onToggle,
-  onRemove,
-}: {
-  selected: string[];
-  onToggle: (key: string) => void;
-  onRemove: (key: string) => void;
-}) {
-  const labelFor = (k: string) => CATEGORY_KEYS.find((c) => c.key === k)?.label ?? k;
-  return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-4">
-        {CATEGORY_KEYS.map((cat) => {
-          const idx = selected.indexOf(cat.key);
-          const isSelected = idx >= 0;
-          const maxReached = selected.length >= 5 && !isSelected;
-          return (
-            <button
-              key={cat.key}
-              type="button"
-              onClick={() => !maxReached && onToggle(cat.key)}
-              className="text-left rounded-[10px] p-3.5 transition-all relative"
-              style={{
-                background: isSelected ? "var(--mm-abyss)" : "var(--mm-off-white)",
-                border: `1.5px solid ${isSelected ? "var(--mm-abyss)" : "rgba(0,0,0,0.08)"}`,
-                cursor: maxReached ? "not-allowed" : "pointer",
-                opacity: maxReached ? 0.45 : 1,
-              }}
-            >
-              <div
-                className="text-xs font-semibold leading-tight"
-                style={{ color: isSelected ? "#fff" : "var(--mm-ink)" }}
-              >
-                {cat.label}
-              </div>
-              {isSelected && (
-                <div
-                  className="absolute top-2 right-2 w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ background: "var(--mm-ember)" }}
-                >
-                  {idx + 1}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {selected.length > 0 && (
-        <div
-          className="rounded-lg px-4 py-3"
-          style={{
-            background: "rgba(42,107,110,0.07)",
-            border: "1px solid rgba(42,107,110,0.2)",
-          }}
-        >
-          <div className="text-[11px] font-semibold mb-1.5" style={{ color: "var(--mm-teal)" }}>
-            {selected.length}/5 SELECTED — RANKED BY ORDER CHOSEN
-          </div>
-          {selected.map((k, i) => (
-            <div key={k} className="flex items-center gap-2 mb-1">
-              <div
-                className="w-[18px] h-[18px] rounded shrink-0 flex items-center justify-center"
-                style={{ background: "var(--mm-ember)" }}
-              >
-                <span className="text-[10px] text-white font-bold">{i + 1}</span>
-              </div>
-              <span className="text-xs" style={{ color: "var(--mm-ink)" }}>
-                {labelFor(k)}
-              </span>
-              <button
-                type="button"
-                onClick={() => onRemove(k)}
-                className="ml-auto text-sm"
-                style={{ color: "var(--mm-mid)", background: "none", border: "none", cursor: "pointer" }}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
