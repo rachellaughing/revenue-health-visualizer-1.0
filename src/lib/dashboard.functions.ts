@@ -45,6 +45,21 @@ export const getDashboardData = createServerFn({ method: "GET" })
     const isTeamMember =
       (profile as any)?.role === "member" &&
       (profile as any)?.team_owner_id != null;
+
+    // Team members inherit their owner's tier — their own tier column is
+    // never used for access gating.
+    let inheritedTier = profile?.tier;
+    if (isTeamMember) {
+      const { data: ownerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("tier")
+        .eq("user_id", (profile as any).team_owner_id)
+        .maybeSingle();
+      if (ownerProfile?.tier) {
+        inheritedTier = ownerProfile.tier;
+      }
+    }
+
     const effectiveProfile = profile
       ? {
           first_name: profile.first_name,
@@ -55,7 +70,7 @@ export const getDashboardData = createServerFn({ method: "GET" })
             : profile.company_profile_complete,
           assessment_status: profile.assessment_status,
           assessment_completion_pct: profile.assessment_completion_pct,
-          tier: profile.tier,
+          tier: inheritedTier,
         }
       : null;
 
