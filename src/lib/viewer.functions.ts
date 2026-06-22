@@ -9,6 +9,7 @@ export type ViewerContext = {
   teamMember?: {
     ownerUserId: string;
     ownerFirstName: string | null;
+    ownerLastName: string | null;
     ownerEmail: string | null;
     companyName: string | null;
     teamId: string;
