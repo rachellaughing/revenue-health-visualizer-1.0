@@ -26,6 +26,7 @@ import {
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getDashboardData } from "@/lib/dashboard.functions";
+import rhIconLight from "@/assets/rh-icon-light.svg.asset.json";
 import {
   Tooltip,
   TooltipContent,
