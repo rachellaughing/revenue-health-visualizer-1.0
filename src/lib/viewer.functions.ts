@@ -9,6 +9,7 @@ export type ViewerContext = {
   teamMember?: {
     ownerUserId: string;
     ownerFirstName: string | null;
+    ownerLastName: string | null;
     ownerEmail: string | null;
     companyName: string | null;
     teamId: string;
@@ -33,7 +34,8 @@ export const getViewerContext = createServerFn({ method: "GET" })
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
 
-    const role = (profile?.role ?? "owner") === "team_member"
+    const roleRaw = profile?.role ?? "owner";
+    const role = (roleRaw === "team_member" || roleRaw === "member")
       ? "team_member"
       : "owner";
 
@@ -70,6 +72,7 @@ export const getViewerContext = createServerFn({ method: "GET" })
     const ownerUserId = team?.owner_id ?? null;
 
     let ownerFirstName: string | null = null;
+    let ownerLastName: string | null = null;
     let ownerEmail: string | null = null;
     let companyName: string | null = null;
     let parentAssessmentId: string | null = null;
@@ -78,10 +81,11 @@ export const getViewerContext = createServerFn({ method: "GET" })
     if (ownerUserId) {
       const { data: ownerProfile } = await supabaseAdmin
         .from("profiles")
-        .select("first_name, email")
+        .select("first_name, last_name, email")
         .eq("user_id", ownerUserId)
         .maybeSingle();
       ownerFirstName = ownerProfile?.first_name ?? null;
+      ownerLastName = (ownerProfile as any)?.last_name ?? null;
       ownerEmail = ownerProfile?.email ?? null;
 
       const { data: ownerCompany } = await supabaseAdmin
@@ -135,6 +139,7 @@ export const getViewerContext = createServerFn({ method: "GET" })
       teamMember: {
         ownerUserId: ownerUserId ?? "",
         ownerFirstName,
+        ownerLastName,
         ownerEmail,
         companyName,
         teamId: tm.team_id,

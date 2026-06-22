@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { PersonalDetailsCard } from "@/components/settings/PersonalDetailsCard";
 import { ChangePasswordCard } from "@/components/settings/ChangePasswordCard";
 import { BillingTab } from "@/components/settings/BillingTab";
 import { TeamTab } from "@/components/settings/TeamTab";
+import { getViewerContext } from "@/lib/viewer.functions";
 
 type TabKey = "account" | "billing" | "team";
 
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/settings")({
   component: SettingsPage,
 });
 
-const TABS: { key: TabKey; label: string }[] = [
+const ALL_TABS: { key: TabKey; label: string }[] = [
   { key: "account", label: "Account" },
   { key: "billing", label: "Billing & Plan" },
   { key: "team", label: "Team" },
@@ -29,6 +31,16 @@ const TABS: { key: TabKey; label: string }[] = [
 function SettingsPage() {
   const { tab, success } = useSearch({ from: "/settings" });
   const navigate = useNavigate({ from: "/settings" });
+
+  const viewerQ = useQuery({
+    queryKey: ["viewer-context"],
+    queryFn: () => getViewerContext(),
+  });
+  const isMember = viewerQ.data?.role === "team_member";
+  const TABS = isMember
+    ? ALL_TABS.filter((t) => t.key !== "team")
+    : ALL_TABS;
+  const activeTab: TabKey = isMember && tab === "team" ? "account" : tab;
 
   return (
     <div
@@ -67,7 +79,7 @@ function SettingsPage() {
           }}
         >
           {TABS.map((t) => {
-            const active = t.key === tab;
+            const active = t.key === activeTab;
             return (
               <button
                 key={t.key}
@@ -94,14 +106,14 @@ function SettingsPage() {
           })}
         </div>
 
-        {tab === "account" && (
+        {activeTab === "account" && (
           <div>
             <PersonalDetailsCard />
             <ChangePasswordCard />
           </div>
         )}
-        {tab === "billing" && <BillingTab success={success} />}
-        {tab === "team" && <TeamTab />}
+        {activeTab === "billing" && <BillingTab success={success} />}
+        {activeTab === "team" && !isMember && <TeamTab />}
       </main>
 
       <footer

@@ -72,27 +72,15 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
             <h1
               style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 34,
+                fontSize: 30,
                 fontWeight: 400,
-                lineHeight: 1.15,
-                margin: "0 0 16px",
-              }}
-            >
-              You've been invited to complete a Health Check.
-            </h1>
-            <p
-              style={{
-                fontSize: 14,
-                lineHeight: 1.65,
-                color: "rgba(255,255,255,0.78)",
+                lineHeight: 1.2,
                 margin: "0 0 28px",
               }}
             >
-              {ownerName} at {company} has invited you to contribute to their
-              Revenue Health Assessment™. Your responses are completely
-              anonymous — {ownerName} will only see aggregated scores, never
-              your individual answers.
-            </p>
+              Complete your Health Check to unlock the Team Alignment report
+              for {ownerName}'s organization.
+            </h1>
             <Link
               to="/health-check"
               style={{
@@ -106,9 +94,10 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
                 textDecoration: "none",
               }}
             >
-              {inProgress ? "Resume Health Check →" : "Start Health Check →"}
+              {inProgress ? "Continue Health Check →" : "Start Health Check →"}
             </Link>
           </div>
+
         </div>
 
         <div
@@ -149,7 +138,7 @@ function InfoTile({ title, body }: { title: string; body: string }) {
 export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
   const tm = viewer.teamMember!;
   const ownerName = tm.ownerFirstName ?? "Your founder";
-  const company = tm.companyName ?? "your company";
+  
   const submittedAt = tm.submittedAt ? new Date(tm.submittedAt) : new Date();
   const lockDate = new Date(submittedAt.getTime() + 7 * 24 * 60 * 60 * 1000);
   const lockDateStr = lockDate.toLocaleDateString("en-US", {
@@ -191,13 +180,13 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
           <h1
             style={{
               fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: 400,
-              lineHeight: 1.2,
-              margin: "0 0 16px",
+              lineHeight: 1.25,
+              margin: "0 0 20px",
             }}
           >
-            Your responses have been submitted.
+            Your responses have been added to the Team Alignment report.
           </h1>
           <p
             style={{
@@ -207,10 +196,11 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
               margin: "0 0 24px",
             }}
           >
-            Thank you for completing the Health Check for {company}. {ownerName}{" "}
-            will see how team scores compare to their own in the Team Alignment
-            report. Your individual responses are always kept anonymous.
+            {ownerName} can now see where your perspective adds to the
+            leadership view. Your individual responses are always kept
+            anonymous.
           </p>
+
           {tm.ownerEmail && (
             <a
               href={`mailto:${tm.ownerEmail}`}

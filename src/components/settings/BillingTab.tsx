@@ -7,6 +7,7 @@ import {
   getCurrentTier,
 } from "@/lib/stripe-checkout.functions";
 import { validateCoupon, redeemCoupon } from "@/lib/coupon.functions";
+import { getViewerContext } from "@/lib/viewer.functions";
 
 const T = {
   abyss: "#182829",
@@ -20,6 +21,14 @@ const T = {
 };
 
 export function BillingTab({ success }: { success?: boolean }) {
+  const viewerQ = useQuery({
+    queryKey: ["viewer-context"],
+    queryFn: () => getViewerContext(),
+  });
+  if (viewerQ.data?.role === "team_member") {
+    return <MemberBillingPanel viewer={viewerQ.data} />;
+  }
+
   const tierFn = useServerFn(getCurrentTier);
   const checkoutFn = useServerFn(createProCheckoutSession);
   const validateFn = useServerFn(validateCoupon);
@@ -368,5 +377,116 @@ function TierBadge({ tier }: { tier: string }) {
     >
       {label}
     </span>
+  );
+}
+
+function MemberBillingPanel({
+  viewer,
+}: {
+  viewer: { firstName: string | null; teamMember?: { ownerFirstName: string | null; ownerLastName: string | null; ownerEmail: string | null } };
+}) {
+  const tm = viewer.teamMember;
+  const ownerFirst = tm?.ownerFirstName ?? "your team owner";
+  const ownerLast = tm?.ownerLastName ?? "";
+  const ownerEmail = tm?.ownerEmail ?? null;
+  const memberFirst = viewer.firstName ?? "your teammate";
+  const ownerFullName = `${ownerFirst}${ownerLast ? " " + ownerLast : ""}`;
+
+  const subject = "Revenue Health Diagnostic — worth a look";
+  const body = `Hey ${ownerFirst},
+
+I just finished my Revenue Health Check. Based on what I'm seeing from my seat, I think it's worth exploring the Revenue Health Diagnostic™ — the team alignment data alone seems worth the conversation.
+
+— ${memberFirst}`;
+  const mailto = ownerEmail
+    ? `mailto:${ownerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    : null;
+
+  return (
+    <div style={{ display: "grid", gap: 20 }}>
+      {/* Current plan card */}
+      <div
+        style={{
+          background: T.white,
+          border: `1px solid #F0EFEA`,
+          borderRadius: 14,
+          padding: "24px 28px",
+        }}
+      >
+        <div style={{ fontSize: 11, color: T.mid, letterSpacing: "0.08em", marginBottom: 6 }}>
+          CURRENT PLAN
+        </div>
+        <div
+          style={{
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: 28,
+            color: T.ink,
+            marginBottom: 14,
+          }}
+        >
+          Revenue Health Assessment™
+        </div>
+        <div style={{ fontSize: 14, color: T.ink, lineHeight: 1.65 }}>
+          Your access is provided through {ownerFullName}'s organization.
+          {ownerEmail ? (
+            <>
+              {" "}To make changes to your plan, contact {ownerFirst} at{" "}
+              <a href={`mailto:${ownerEmail}`} style={{ color: T.ember, textDecoration: "none" }}>
+                {ownerEmail}
+              </a>.
+            </>
+          ) : (
+            <> To make changes to your plan, contact {ownerFirst}.</>
+          )}
+        </div>
+      </div>
+
+      {/* Want to go deeper card */}
+      <div
+        style={{
+          background: T.white,
+          border: `1px solid #F0EFEA`,
+          borderRadius: 14,
+          padding: "24px 28px",
+        }}
+      >
+        <div
+          style={{
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: 24,
+            color: T.ink,
+            marginBottom: 12,
+          }}
+        >
+          Want to go deeper?
+        </div>
+        <p style={{ fontSize: 14, color: T.ink, lineHeight: 1.7, margin: "0 0 12px" }}>
+          The Revenue Health Diagnostic™ includes a facilitated session where
+          your team's alignment gaps are reviewed together — with a consultant
+          in the room.
+        </p>
+        <p style={{ fontSize: 14, color: T.ink, lineHeight: 1.7, margin: "0 0 20px" }}>
+          If you think your organization is ready for that conversation, let{" "}
+          {ownerFirst} know.
+        </p>
+        {mailto && (
+          <a
+            href={mailto}
+            style={{
+              display: "inline-block",
+              background: T.ember,
+              color: T.white,
+              padding: "12px 22px",
+              borderRadius: 10,
+              fontWeight: 700,
+              fontSize: 14,
+              textDecoration: "none",
+            }}
+          >
+            Send {ownerFirst} a nudge →
+          </a>
+        )}
+      </div>
+    </div>
   );
 }
