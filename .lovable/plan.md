@@ -1,13 +1,21 @@
-I’ll add temporary server-side diagnostics inside `getHealthCheckData` only.
+## Fix: Owner tier lookup column mismatch in healthcheck.functions.ts
 
-Plan:
-1. Add a single structured `console.info` log after the team-owner tier override block, before the function uses `tier` for access/completion calculations.
-2. Log exactly these fields:
-   - `userId`
-   - `role`
-   - `team_owner_id`
-   - fetched `ownerProfile.tier`
-   - final returned/effective `tier`
-3. Keep the existing tier override logic unchanged.
-4. Do not touch `saveResponse`, `startNewAssessment`, `editCompletedResponse`, schemas, Stripe, or database code.
-5. After implementation, publish/republish is still required for production logs to show on `app.revenuevisualizer.com`.
+### Problem
+`profiles.team_owner_id` stores the owner's `profiles.id` (primary key), but the owner tier fetch in `getHealthCheckData` uses `.eq("user_id", teamOwnerId)` — filtering by `profiles.user_id` (auth ID). Because these are different values, the query returns nothing and the tier override silently fails, leaving team members on the free tier.
+
+### Solution
+Replace the single incorrect column reference at line 209 of `src/lib/healthcheck.functions.ts`:
+
+```typescript
+// Before
+.eq("user_id", teamOwnerId)
+
+// After
+.eq("id", teamOwnerId)
+```
+
+### Verification
+- Search confirmed only one occurrence of `.eq("user_id", teamOwnerId)` exists in this file.
+- No other functions in this file fetch owner profiles using `team_owner_id`.
+- No schema changes required.
+- Existing logging added in a previous turn will immediately confirm the fix works after deployment.

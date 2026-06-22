@@ -206,7 +206,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
       const { data: ownerProfile } = await supabaseAdmin
         .from("profiles")
         .select("tier")
-        .eq("user_id", teamOwnerId)
+        .eq("id", teamOwnerId)
         .maybeSingle();
       ownerTierFetched = (ownerProfile?.tier as string) ?? null;
       if (ownerProfile?.tier) {
