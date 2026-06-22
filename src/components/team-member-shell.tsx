@@ -1,6 +1,7 @@
 import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import rhIconDark from "@/assets/rh-icon-dark.svg.asset.json";
 
 const T = {
   abyss: "#182829",
@@ -49,16 +50,16 @@ export function TeamMemberShell({ firstName }: { firstName: string | null }) {
       >
         <Link
           to="/dashboard"
-          style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 18,
-            color: T.abyss,
-            textDecoration: "none",
-            letterSpacing: "-0.01em",
-          }}
+          style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
+          aria-label="Revenue Health Visualiser"
         >
-          Revenue Health Visualiser<span style={{ fontSize: 10, verticalAlign: "super" }}>™</span>
+          <img
+            src={rhIconDark.url}
+            alt="Revenue Health Visualiser"
+            style={{ height: 36, width: "auto", display: "block" }}
+          />
         </Link>
+
 
         <nav style={{ display: "flex", gap: 24 }}>
           <Link

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import rhLogoLight from "@/assets/rh-logo-light.svg.asset.json";
 
 export function AuthSplitLayout({ children }: { children: ReactNode }) {
   return (
@@ -50,18 +51,14 @@ function LeftPanel() {
 
       {/* Center content */}
       <div className="relative z-10 w-full" style={{ maxWidth: 420 }}>
-        <div
-          style={{
-            color: "#F05223",
-            fontSize: 10,
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            marginBottom: 24,
-          }}
-        >
-          Revenue Health Matrix™
+        <div style={{ marginBottom: 24 }}>
+          <img
+            src={rhLogoLight.url}
+            alt="Revenue Health Visualiser™"
+            style={{ width: 260, maxWidth: "100%", height: "auto", display: "block" }}
+          />
         </div>
+
         <h2
           style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
