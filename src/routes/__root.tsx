@@ -12,6 +12,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import rhFavicon from "../assets/rh-icon-dark.svg.asset.json";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { TopBar } from "../components/top-bar";
