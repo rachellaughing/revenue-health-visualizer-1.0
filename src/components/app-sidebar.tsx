@@ -172,15 +172,15 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       >
         <div
           className="flex h-14 items-center px-4"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", justifyContent: collapsed ? "center" : "flex-start" }}
         >
-          <span
-            className="font-display text-lg"
-            style={{ color: "#FFFEFA", opacity: collapsed ? 0 : 1 }}
-          >
-            Revenue Health
-          </span>
+          <img
+            src={rhIconLight.url}
+            alt="Revenue Health Visualiser"
+            style={{ height: 32, width: "auto", display: "block" }}
+          />
         </div>
+
 
         <nav className="flex-1 overflow-y-auto py-4">
           {sections.map((section) => {
