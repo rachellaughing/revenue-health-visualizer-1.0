@@ -97,7 +97,7 @@ export const getDashboardData = createServerFn({ method: "GET" })
     }
 
     return {
-      profile: profile as DashboardData["profile"],
+      profile: effectiveProfile as DashboardData["profile"],
       latestAssessment: latest,
       completedCount: completedCount ?? 0,
       hasScores,
