@@ -17,7 +17,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "../components/app-sidebar";
 import { TopBar } from "../components/top-bar";
 import { BottomTabBar } from "../components/bottom-tab-bar";
-import { TeamMemberShell } from "../components/team-member-shell";
+
 import { AuthProvider, useAuth } from "../lib/auth-context";
 import { Toaster } from "../components/ui/sonner";
 import { useIsMobile } from "../hooks/use-mobile";
@@ -191,14 +191,6 @@ function AuthGate() {
     );
   }
 
-  if (viewerQ.data?.role === "team_member") {
-    return (
-      <>
-        <TeamMemberShell firstName={viewerQ.data.firstName} />
-        <Toaster />
-      </>
-    );
-  }
 
   const handleToggle = () => {
     if (isMobile) setMobileOpen((o) => !o);
