@@ -1,87 +1,35 @@
-## Team-member experience for Settings + Dashboard
+## Restore the full app layout for team members
 
-### 1. Surface owner data to the client
+### Root cause
 
-Extend `getViewerContext` (`src/lib/viewer.functions.ts`) so the `teamMember` payload includes the fields needed for the new copy:
+`src/routes/__root.tsx` (lines 194–201) swaps the entire authenticated shell for the stripped-down `TeamMemberShell` whenever `viewer.role === "team_member"`:
 
-- `ownerLastName: string | null` (add to select on `profiles`)
-- `ownerEmail` is already returned
-- `ownerFirstName` is already returned
-
-Also fix a latent role-check mismatch in the same file: the DB stores `profiles.role = "member"` (see `team.functions.ts` `activateTeamMembership`), but `getViewerContext` only flips to `team_member` when the value is `"team_member"`. Change the check to treat both `"member"` and `"team_member"` as team-member viewers. This is what currently keeps Rick out of `TeamMemberDashboard`/team‑member Settings and is the prerequisite for everything below.
-
-No schema changes, no other server-function changes.
-
-### 2. Settings page — hide the Team tab for members
-
-In `src/routes/settings.tsx`:
-
-- Call `getViewerContext` via `useQuery` and derive `isMember = viewer?.role === "team_member"`.
-- Build the `TABS` array dynamically: omit `{ key: "team", … }` when `isMember`.
-- In `validateSearch`, if `tab === "team"` for a member, coerce to `"account"` so a direct `/settings?tab=team` URL doesn't render a hidden tab.
-
-No change to the Account tab.
-
-### 3. Billing & Plan tab — member variant
-
-In `src/components/settings/BillingTab.tsx`, branch at the top of the component on viewer role (fetched via `getViewerContext`). Owner path is unchanged.
-
-When `isMember`, render only:
-
-**Card 1 — Current plan (no upgrade UI):**
-
-```
-CURRENT PLAN
-Revenue Health Assessment™
-
-Your access is provided through {ownerFirstName} {ownerLastName}'s organization.
-To make changes to your plan, contact {ownerFirstName} at {ownerEmail}.
+```tsx
+if (viewerQ.data?.role === "team_member") {
+  return (
+    <>
+      <TeamMemberShell firstName={viewerQ.data.firstName} />
+      <Toaster />
+    </>
+  );
+}
 ```
 
-Styling matches the existing "current plan card" (white panel, paper background, Instrument Serif title). No `TierBadge`, no upgrade panel, no coupon row, no diagnostic link.
+`TeamMemberShell` renders only a minimal top bar (logo + "Health Check" link + sign‑out) with `<Outlet />` underneath — no sidebar, no `TopBar`, no `BottomTabBar`. Before the recent viewer-context fix that made `role === "member"` actually evaluate as `team_member`, this branch never ran for real members, so Rick saw the full owner shell. Once the role check started working, this branch took over and stripped the chrome on every route — including `/health-check`.
 
-**Card 2 — "Want to go deeper?":**
+The team-member-specific "anonymous" banner the user wants to keep already lives inside the Health Check content itself (`src/routes/health-check.index.tsx` ~line 1365, gated on `data.isTeamMember`). It is independent of the outer shell.
 
-Same card chrome as Card 1. Body copy verbatim from the spec, with `{ownerFirstName}` interpolated. Primary CTA button uses `--mm-ember`:
+### Fix
 
-```
-Send {ownerFirstName} a nudge →
-```
+Delete the `TeamMemberShell` branch in `src/routes/__root.tsx` so team members fall through to the same shell owners see (sidebar + top bar + bottom tab bar + `<Outlet />`). Also drop the now-unused `TeamMemberShell` import.
 
-The button is a plain `<a>` with a `mailto:` href:
+That's the entire change to restore the reported behavior. The full owner shell will render on every authenticated route for members — matching the user's spec ("the same layout an owner sees when taking their Health Check") — and the in-page anonymous banner on `/health-check` is unaffected.
 
-- `to`: `ownerEmail`
-- `subject`: `Revenue Health Diagnostic — worth a look`
-- `body`: spec copy verbatim, with `{ownerFirstName}` and `{memberFirstName}` (= `viewer.firstName`) interpolated
+### Explicitly not changing
 
-URL-encode subject + body, fall back gracefully (hide the button) if `ownerEmail` is missing.
-
-### 4. Dashboard — completion nudge for members
-
-The existing `TeamMemberDashboard` (`src/components/team-member-dashboard.tsx`) already branches between in-progress and completed; update its copy to match the spec instead of layering a second banner.
-
-- **In-progress / not started** (`completion_pct < 100`): replace the current hero copy with a banner that reads:
-
-  > Complete your Health Check to unlock the Team Alignment report for {ownerFirstName}'s organization.
-
-  Keep the existing `Continue Health Check →` / `Start Health Check →` CTA (already links to `/health-check`). Keep the three info tiles below.
-
-- **Completed**: in `CompletedCard`, swap the body copy for:
-
-  > ✓ Your responses have been added to the Team Alignment report. {ownerFirstName} can now see where your perspective adds to the leadership view.
-
-  Remove the CTA per spec (the "Questions? Contact …" mailto stays).
-
-The `ownerFirstName` comes from the already-fetched `viewer.teamMember`.
-
-### 5. What is explicitly unchanged
-
-- `getDashboardData` and the owner Dashboard path
-- Owner Billing & Plan view (entire existing component renders unchanged when `role !== "team_member"`)
-- Owner Team tab and `TeamTab` component internals
-- All other routes, server functions, schema, RLS, and migrations
-
-### Technical notes
-
-- The fastest place to read role on the client is `getViewerContext` (already used by Dashboard). `BillingTab` and `settings.tsx` will both add a `useQuery(["viewer-context"], …)` — React Query dedupes so it's a single network call.
-- The role-check fix in `getViewerContext` is the same class of bug as the recent `team_owner_id` lookup: a DB-stored value that disagrees with the discriminator string the code compares against. Without the fix, Rick still falls through to the owner branch and none of the member-only UI above will render.
+- `TeamMemberShell` component file — left in place; no other route references it, but I'll leave the file rather than delete it in case it's wanted later. (Happy to delete it if you'd prefer.)
+- `health-check.index.tsx` — no edits; the existing `data.isTeamMember` banner and `TeamMemberCompletionInline` keep working as-is.
+- `TeamMemberDashboard` rendered from `/dashboard` — still works because that branching lives inside `dashboard.tsx`, not in the root shell.
+- `viewer.functions.ts` role detection — keep the `member`/`team_member` fix from the previous turn; it's still required for the in-page banner, Billing tab variant, and dashboard variant to render.
+- No route guards added/removed. The `ALLOWED_PREFIXES` redirect logic inside `TeamMemberShell` (which forced members onto `/dashboard` or `/health-check`) goes away with the shell; if you later want to restrict members from `/reports/*` etc., that's a separate piece of work.
+- No schema, server-function, or RLS changes.
