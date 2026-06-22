@@ -180,13 +180,13 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
           <h1
             style={{
               fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: 400,
-              lineHeight: 1.2,
-              margin: "0 0 16px",
+              lineHeight: 1.25,
+              margin: "0 0 20px",
             }}
           >
-            Your responses have been submitted.
+            Your responses have been added to the Team Alignment report.
           </h1>
           <p
             style={{
@@ -196,10 +196,11 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
               margin: "0 0 24px",
             }}
           >
-            Thank you for completing the Health Check for {company}. {ownerName}{" "}
-            will see how team scores compare to their own in the Team Alignment
-            report. Your individual responses are always kept anonymous.
+            {ownerName} can now see where your perspective adds to the
+            leadership view. Your individual responses are always kept
+            anonymous.
           </p>
+
           {tm.ownerEmail && (
             <a
               href={`mailto:${tm.ownerEmail}`}
