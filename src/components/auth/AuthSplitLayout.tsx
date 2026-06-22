@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import rhLogoLight from "@/assets/rh-logo-light.svg.asset.json";
 
 export function AuthSplitLayout({ children }: { children: ReactNode }) {
   return (
