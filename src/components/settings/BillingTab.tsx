@@ -7,6 +7,7 @@ import {
   getCurrentTier,
 } from "@/lib/stripe-checkout.functions";
 import { validateCoupon, redeemCoupon } from "@/lib/coupon.functions";
+import { getViewerContext } from "@/lib/viewer.functions";
 
 const T = {
   abyss: "#182829",
@@ -20,6 +21,14 @@ const T = {
 };
 
 export function BillingTab({ success }: { success?: boolean }) {
+  const viewerQ = useQuery({
+    queryKey: ["viewer-context"],
+    queryFn: () => getViewerContext(),
+  });
+  if (viewerQ.data?.role === "team_member") {
+    return <MemberBillingPanel viewer={viewerQ.data} />;
+  }
+
   const tierFn = useServerFn(getCurrentTier);
   const checkoutFn = useServerFn(createProCheckoutSession);
   const validateFn = useServerFn(validateCoupon);
