@@ -185,16 +185,32 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
-      .select("id,tier,role")
+      .select("id,tier,role,team_owner_id")
       .eq("user_id", userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
 
-    const tier = (profile?.tier ?? "starter") as
+    let tier = (profile?.tier ?? "starter") as
       | "starter"
       | "pro"
       | "diagnostic";
-    const isTeamMember = (profile?.role ?? "owner") === "team_member";
+    const role = (profile as any)?.role ?? "owner";
+    const teamOwnerId = (profile as any)?.team_owner_id ?? null;
+    const isTeamMember =
+      role === "team_member" || (role === "member" && teamOwnerId != null);
+
+    // Team members inherit their owner's tier — their own tier column is
+    // never used for access gating.
+    if (isTeamMember && teamOwnerId) {
+      const { data: ownerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("tier")
+        .eq("user_id", teamOwnerId)
+        .maybeSingle();
+      if (ownerProfile?.tier) {
+        tier = ownerProfile.tier as "starter" | "pro" | "diagnostic";
+      }
+    }
 
     // Resolve team context (founder + parent assessment) for team members.
     let teamContext: HealthCheckData["teamContext"] | undefined;
