@@ -750,12 +750,27 @@ export const startNewAssessment = createServerFn({ method: "POST" })
 
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
-      .select("id,tier")
+      .select("id,tier,role,team_owner_id")
       .eq("user_id", userId)
       .maybeSingle();
     if (pErr) throw new Error(pErr.message);
 
-    const tier = (profile?.tier ?? "starter") as "starter" | "pro" | "diagnostic";
+    let tier = (profile?.tier ?? "starter") as "starter" | "pro" | "diagnostic";
+    const _role = (profile as any)?.role ?? "owner";
+    const _ownerId = (profile as any)?.team_owner_id ?? null;
+    if (
+      (_role === "team_member" || (_role === "member" && _ownerId)) &&
+      _ownerId
+    ) {
+      const { data: ownerProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("tier")
+        .eq("user_id", _ownerId)
+        .maybeSingle();
+      if (ownerProfile?.tier) {
+        tier = ownerProfile.tier as "starter" | "pro" | "diagnostic";
+      }
+    }
 
     // If there's already an in_progress one, reuse it instead of stacking duplicates.
     const { data: existing, error: eErr } = await supabaseAdmin
