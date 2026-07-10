@@ -1359,49 +1359,6 @@ function HealthCheckShell({
         </div>
       </div>
 
-      {/* Tier indicator bar */}
-      <div
-        style={{
-          minHeight: 32,
-          background: data.isTeamMember ? T.abyss : T.offWhite,
-          display: "flex",
-          alignItems: "center",
-          padding: data.isTeamMember ? "8px 24px" : "0 24px",
-          fontSize: 11,
-          color: data.isTeamMember ? T.white : T.mid,
-          flexShrink: 0,
-        }}
-      >
-        {data.isTeamMember ? (
-          <span style={{ lineHeight: 1.5 }}>
-            You are completing this Health Check on behalf of{" "}
-            <strong style={{ color: T.tealBright }}>
-              {data.teamContext?.companyName ?? "your company"}
-            </strong>
-            . Your responses are anonymous.
-          </span>
-        ) : (
-          <>
-            {tier === "starter" && (
-              <span>
-                Revenue Health Snapshot™ · 15 subsystems ·{" "}
-                <Link
-                  to="/settings/billing"
-                  style={{ color: T.teal, textDecoration: "none", fontWeight: 500 }}
-                >
-                  Upgrade for full access ↗
-                </Link>
-              </span>
-            )}
-            {tier === "pro" && (
-              <span>Revenue Health Assessment™ · All 50 subsystems unlocked</span>
-            )}
-            {tier === "diagnostic" && (
-              <span>Revenue Health Diagnostic™ · All 50 subsystems unlocked</span>
-            )}
-          </>
-        )}
-      </div>
 
       {/* Framework explainer — pinned above the tab row on all viewports */}
       {!data.isTeamMember && (
