@@ -14,6 +14,7 @@ import {
   type Area,
 } from "@/lib/healthcheck.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FrameworkExplainer } from "@/components/FrameworkExplainer";
 
 
 
