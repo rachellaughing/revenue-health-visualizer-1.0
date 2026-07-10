@@ -4,6 +4,7 @@ import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
 import { getViewerContext } from "@/lib/viewer.functions";
 import { TeamMemberDashboard } from "@/components/team-member-dashboard";
+import { FrameworkExplainer } from "@/components/FrameworkExplainer";
 import {
   getIllustrativeScores,
   getOverall,
