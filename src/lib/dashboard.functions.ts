@@ -119,19 +119,19 @@ export const getDashboardData = createServerFn({ method: "GET" })
 
     // Framework taxonomy for the FrameworkExplainer widget.
     const [parentsRes, childrenRes] = await Promise.all([
-      supabaseAdmin
-        .schema("revhealth2" as any)
+      (supabaseAdmin as any)
+        .schema("revhealth2")
         .from("parent_systems")
         .select("id,code,name,color_hex,sort_order")
         .order("sort_order"),
-      supabaseAdmin
-        .schema("revhealth2" as any)
+      (supabaseAdmin as any)
+        .schema("revhealth2")
         .from("child_systems")
         .select("id,parent_system_id,code,name,access_tier,sort_order")
         .order("sort_order"),
     ]);
-    if (parentsRes.error) throw new Error(parentsRes.error.message);
-    if (childrenRes.error) throw new Error(childrenRes.error.message);
+    if ((parentsRes as any).error) throw new Error((parentsRes as any).error.message);
+    if ((childrenRes as any).error) throw new Error((childrenRes as any).error.message);
 
     return {
       profile: effectiveProfile as DashboardData["profile"],
