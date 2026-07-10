@@ -114,7 +114,7 @@ export function FrameworkExplainer({
       : allChildCodes;
 
   const totalSelected = effectiveSelected.size;
-  const totalQuestions = totalSelected * 4;
+  const totalEvaluationAreas = totalSelected * 4;
 
   const dotColors = sortedParents.map(
     (p) => SYSTEM_COLORS[p.name] ?? `#${p.color_hex}`,
