@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
 
 export type DashboardData = {
   profile: {
@@ -18,10 +19,15 @@ export type DashboardData = {
     submitted_at: string | null;
     created_at: string | null;
     assessment_version: number;
+    selected_child_ids: string[];
   } | null;
   completedCount: number;
   hasScores: boolean;
   overallScore: number | null;
+  framework: {
+    parents: ParentSystem[];
+    children: ChildSystem[];
+  };
 };
 
 export const getDashboardData = createServerFn({ method: "GET" })
