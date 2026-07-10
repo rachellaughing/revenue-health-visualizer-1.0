@@ -4,6 +4,7 @@ import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
 import { getViewerContext } from "@/lib/viewer.functions";
 import { TeamMemberDashboard } from "@/components/team-member-dashboard";
+import { FrameworkExplainer } from "@/components/FrameworkExplainer";
 import {
   getIllustrativeScores,
   getOverall,
@@ -222,7 +223,16 @@ function NewUserView({ data }: { data: DashboardData }) {
         <TierIncluded tier={tier} />
       </div>
 
-      <ConceptCards />
+      <FrameworkExplainer
+        context="dashboard"
+        defaultOpen={false}
+        parents={data.framework.parents}
+        children={data.framework.children}
+        selectedChildCodes={
+          data.latestAssessment?.selected_child_ids ?? []
+        }
+        tier={data.profile?.tier ?? "starter"}
+      />
     </>
   );
 }
@@ -392,59 +402,6 @@ function TierIncluded({ tier }: { tier: string }) {
   );
 }
 
-function ConceptCards() {
-  const cards = [
-    {
-      title: "The Revenue Health Matrix™",
-      body: "Five interconnected systems that determine whether your revenue is predictable, scalable, and resilient.",
-      color: "var(--mm-teal)",
-      href: "https://marketplacemaven.com/revenue-architecture/the-revenue-health-matrix-deep-dive/",
-    },
-    {
-      title: "Why Systems, Not Tactics",
-      body: "Most scaling problems aren't execution failures — they're systems gaps. The Matrix shows you exactly where.",
-      color: "var(--mm-sys-authority)",
-      href: "https://marketplacemaven.com/core-concepts/systems-not-tactics/",
-    },
-    {
-      title: "What is a Health Check?",
-      body: "200 questions across 50 child systems. Each answer builds a precise picture of where your revenue architecture is strong and where it's fragile.",
-      color: "var(--mm-sys-conversion)",
-      href: "https://marketplacemaven.com/revenue-architecture/revenue-health-check-101/",
-    },
-  ];
-  return (
-    <div>
-      <h3
-        className="m-0 mb-3.5 text-[17px] text-[var(--mm-ink)]"
-        style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-      >
-        Understanding Your Revenue Health
-      </h3>
-      <div className="grid gap-4 md:grid-cols-3">
-        {cards.map((c, i) => (
-          <a
-            key={i}
-            href={c.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block rounded-xl border border-black/[0.08] bg-white p-5 shadow-[0_2px_8px_rgba(24,40,41,0.06)] transition-shadow hover:shadow-[0_4px_14px_rgba(24,40,41,0.1)]"
-            style={{ borderTop: `3px solid ${c.color}` }}
-          >
-            <h4 className="m-0 mb-2 text-[13px] font-semibold text-[var(--mm-ink)]">{c.title}</h4>
-            <p className="m-0 mb-3 text-[12px] leading-[1.6] text-[var(--mm-mid)]">{c.body}</p>
-            <span
-              className="text-[12px] font-medium"
-              style={{ color: c.color }}
-            >
-              Learn more →
-            </span>
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 /* ─────────────────────────  RETURNING USER  ───────────────────────── */
 

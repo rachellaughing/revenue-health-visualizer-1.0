@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
 
 export type DashboardData = {
   profile: {
@@ -18,10 +19,15 @@ export type DashboardData = {
     submitted_at: string | null;
     created_at: string | null;
     assessment_version: number;
+    selected_child_ids: string[];
   } | null;
   completedCount: number;
   hasScores: boolean;
   overallScore: number | null;
+  framework: {
+    parents: ParentSystem[];
+    children: ChildSystem[];
+  };
 };
 
 export const getDashboardData = createServerFn({ method: "GET" })
@@ -77,7 +83,7 @@ export const getDashboardData = createServerFn({ method: "GET" })
 
     const { data: latest, error: aErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,status,submitted_at,created_at,assessment_version")
+      .select("id,status,submitted_at,created_at,assessment_version,selected_child_ids")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -111,11 +117,40 @@ export const getDashboardData = createServerFn({ method: "GET" })
       }
     }
 
+    // Framework taxonomy for the FrameworkExplainer widget.
+    const [parentsRes, childrenRes] = await Promise.all([
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("parent_systems")
+        .select("id,code,name,color_hex,sort_order")
+        .order("sort_order"),
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("child_systems")
+        .select("id,parent_system_id,code,name,access_tier,sort_order")
+        .order("sort_order"),
+    ]);
+    if ((parentsRes as any).error) throw new Error((parentsRes as any).error.message);
+    if ((childrenRes as any).error) throw new Error((childrenRes as any).error.message);
+
     return {
       profile: effectiveProfile as DashboardData["profile"],
-      latestAssessment: latest,
+      latestAssessment: latest
+        ? {
+            id: latest.id,
+            status: latest.status,
+            submitted_at: latest.submitted_at,
+            created_at: latest.created_at,
+            assessment_version: latest.assessment_version,
+            selected_child_ids: (latest as any).selected_child_ids ?? [],
+          }
+        : null,
       completedCount: completedCount ?? 0,
       hasScores,
       overallScore,
+      framework: {
+        parents: (parentsRes.data ?? []) as any,
+        children: (childrenRes.data ?? []) as any,
+      },
     };
   });
