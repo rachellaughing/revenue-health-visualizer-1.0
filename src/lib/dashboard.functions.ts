@@ -83,7 +83,7 @@ export const getDashboardData = createServerFn({ method: "GET" })
 
     const { data: latest, error: aErr } = await supabaseAdmin
       .from("assessments")
-      .select("id,status,submitted_at,created_at,assessment_version")
+      .select("id,status,submitted_at,created_at,assessment_version,selected_child_ids")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
@@ -117,11 +117,40 @@ export const getDashboardData = createServerFn({ method: "GET" })
       }
     }
 
+    // Framework taxonomy for the FrameworkExplainer widget.
+    const [parentsRes, childrenRes] = await Promise.all([
+      supabaseAdmin
+        .schema("revhealth2" as any)
+        .from("parent_systems")
+        .select("id,code,name,color_hex,sort_order")
+        .order("sort_order"),
+      supabaseAdmin
+        .schema("revhealth2" as any)
+        .from("child_systems")
+        .select("id,parent_system_id,code,name,access_tier,sort_order")
+        .order("sort_order"),
+    ]);
+    if (parentsRes.error) throw new Error(parentsRes.error.message);
+    if (childrenRes.error) throw new Error(childrenRes.error.message);
+
     return {
       profile: effectiveProfile as DashboardData["profile"],
-      latestAssessment: latest,
+      latestAssessment: latest
+        ? {
+            id: latest.id,
+            status: latest.status,
+            submitted_at: latest.submitted_at,
+            created_at: latest.created_at,
+            assessment_version: latest.assessment_version,
+            selected_child_ids: (latest as any).selected_child_ids ?? [],
+          }
+        : null,
       completedCount: completedCount ?? 0,
       hasScores,
       overallScore,
+      framework: {
+        parents: (parentsRes.data ?? []) as any,
+        children: (childrenRes.data ?? []) as any,
+      },
     };
   });
