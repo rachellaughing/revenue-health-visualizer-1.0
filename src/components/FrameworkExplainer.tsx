@@ -218,12 +218,24 @@ export function FrameworkExplainer({
             }}
           >
             {[
-              ["5", "SYSTEMS"],
-              ["10", "SUBSYSTEMS EACH"],
-              ["200", "QUESTIONS TOTAL"],
-            ].map(([num, label], i) => (
+              { num: "5", label: "SYSTEMS", muted: false },
+              {
+                num: "10",
+                label: "SUBSYSTEMS EACH",
+                muted: true,
+                annotation:
+                  tier === "starter" ? "3 in your Snapshot" : null,
+              },
+              {
+                num: "200",
+                label: "EVALUATION AREAS",
+                muted: true,
+                annotation:
+                  tier === "starter" ? "60 in your Snapshot" : null,
+              },
+            ].map((item, i) => (
               <div
-                key={label}
+                key={item.label}
                 style={{
                   flex: 1,
                   borderLeft: i > 0 ? "1px solid rgba(255,254,250,0.12)" : "none",
@@ -234,11 +246,13 @@ export function FrameworkExplainer({
                   style={{
                     fontFamily: "'Instrument Serif', Georgia, serif",
                     fontSize: 30,
-                    color: C.paper,
+                    color: item.muted
+                      ? "rgba(255,254,250,0.5)"
+                      : C.paper,
                     lineHeight: 1,
                   }}
                 >
-                  {num}
+                  {item.num}
                 </div>
                 <div
                   style={{
@@ -248,8 +262,19 @@ export function FrameworkExplainer({
                     marginTop: 4,
                   }}
                 >
-                  {label}
+                  {item.label}
                 </div>
+                {item.annotation && (
+                  <div
+                    style={{
+                      fontSize: 9.5,
+                      color: C.tealBright,
+                      marginTop: 4,
+                    }}
+                  >
+                    {item.annotation}
+                  </div>
+                )}
               </div>
             ))}
           </div>
