@@ -1403,9 +1403,23 @@ function HealthCheckShell({
         )}
       </div>
 
+      {/* Framework explainer — pinned above the tab row on all viewports */}
+      {!data.isTeamMember && (
+        <div style={{ padding: isMobile ? "8px 12px 0" : "10px 24px 0", flexShrink: 0 }}>
+          <FrameworkExplainer
+            context="healthcheck"
+            defaultOpen={false}
+            parents={parents}
+            children={data.children}
+            selectedChildCodes={selectedCodes}
+            tier={tier}
+          />
+        </div>
+      )}
 
       {/* Body */}
       <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+
 
         {/* Mobile tabs (sibling of content row) */}
         <div
