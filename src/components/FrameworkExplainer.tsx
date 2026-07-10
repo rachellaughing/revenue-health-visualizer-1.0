@@ -171,7 +171,7 @@ export function FrameworkExplainer({
             }}
           >
             Revenue Health Snapshot™ · {totalSelected} of 50 subsystems ·{" "}
-            {totalQuestions} questions{" "}
+            {totalEvaluationAreas} evaluation areas{" "}
             <span style={{ color: C.tealLink, fontWeight: 600, marginLeft: 6 }}>
               How it works
             </span>
