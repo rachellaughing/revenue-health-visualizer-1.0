@@ -223,7 +223,16 @@ function NewUserView({ data }: { data: DashboardData }) {
         <TierIncluded tier={tier} />
       </div>
 
-      <ConceptCards />
+      <FrameworkExplainer
+        context="dashboard"
+        defaultOpen={false}
+        parents={data.framework.parents}
+        children={data.framework.children}
+        selectedChildCodes={
+          data.latestAssessment?.selected_child_ids ?? []
+        }
+        tier={data.profile?.tier ?? "starter"}
+      />
     </>
   );
 }
