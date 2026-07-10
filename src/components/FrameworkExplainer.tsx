@@ -259,14 +259,15 @@ export function FrameworkExplainer({
             {tier === "starter" ? (
               <>
                 Your Snapshot™ covers <strong>{totalSelected} of 50</strong>{" "}
-                subsystems — <strong>{totalQuestions} questions</strong>. The
-                Snapshot covers 3 subsystems per system by design.
+                subsystems — <strong>{totalEvaluationAreas} evaluation areas</strong>.
+                The Snapshot covers 3 subsystems per system by design.
               </>
             ) : (
               <>
                 You have access to all <strong>50 subsystems</strong> —{" "}
-                <strong>200 questions</strong> across every system. The Snapshot
-                tier covers 3 per system by design; your tier unlocks the rest.
+                <strong>200 evaluation areas</strong> across every system. The
+                Snapshot tier covers 3 per system by design; your tier unlocks
+                the rest.
               </>
             )}
           </div>
