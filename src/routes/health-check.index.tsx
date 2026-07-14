@@ -79,10 +79,10 @@ function SelectionBreadcrumb({
   const [open, setOpen] = useState(false);
   const productLabel =
     tier === "diagnostic"
-      ? "Revenue Health Diagnostic\u2122"
+      ? "Revenue Health Diagnostic™"
       : tier === "pro"
-      ? "Revenue Health Assessment\u2122"
-      : "Revenue Health Snapshot\u2122";
+      ? "Revenue Health Assessment™"
+      : "Revenue Health Snapshot™";
   const selectedSet = new Set(selectedCodes);
   const sand = "#F6F2EA";
   const sandDeep = "#ECE6D9";
@@ -133,7 +133,7 @@ function SelectionBreadcrumb({
             ))}
           </div>
           <span style={{ fontSize: 13.5, color: T.ink }}>
-            {productLabel} \u00b7 <strong>{totalUnlockedAreas} evaluation areas</strong>
+            {productLabel} · <strong>{totalUnlockedAreas} evaluation areas</strong>
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -152,7 +152,7 @@ function SelectionBreadcrumb({
               gap: 4,
             }}
           >
-            How it works \u2197
+            How it works ↗
           </a>
           <span
             style={{
@@ -163,7 +163,7 @@ function SelectionBreadcrumb({
               color: inkSoft,
             }}
           >
-            \u25be
+            ▾
           </span>
         </div>
       </button>
@@ -178,7 +178,7 @@ function SelectionBreadcrumb({
           }}
         >
           <div style={{ fontSize: 12, color: inkSoft, marginBottom: 14 }}>
-            Here's what you're evaluating \u2014 chosen on your Dashboard.{" "}
+            Here's what you're evaluating — chosen on your Dashboard.{" "}
             <Link to="/dashboard" style={{ color: T.teal, fontWeight: 600, textDecoration: "none" }}>
               Edit selections
             </Link>
@@ -243,7 +243,7 @@ function CavitySearchCTA() {
           maxWidth: 560,
         }}
       >
-        If this feels less like a survey and more like a business cavity search \u2014 good.
+        If this feels less like a survey and more like a business cavity search — good.
         That's the point. This isn't a lead-gen quiz. It's a thorough exam with a differential
         diagnosis.
       </p>
@@ -257,7 +257,7 @@ function CavitySearchCTA() {
         }}
       >
         Don't know the answer to some of these? Also good. That's exactly what the Revenue Health
-        Diagnostic\u2122 is for. We interview your team and find the systems nobody documented.
+        Diagnostic™ is for. We interview your team and find the systems nobody documented.
       </p>
       <Link
         to="/diagnostic"
@@ -272,7 +272,7 @@ function CavitySearchCTA() {
           textDecoration: "none",
         }}
       >
-        Learn about the Diagnostic\u2122 \u2192
+        Learn about the Diagnostic™ →
       </Link>
     </div>
   );
