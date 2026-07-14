@@ -729,67 +729,6 @@ function GettingStarted({ data }: { data: DashboardData }) {
   );
 }
 
-function TierIncluded({ tier }: { tier: string }) {
-  const content: Record<string, { items: { label: string; sub: string }[]; upgradeCta?: string }> =
-    {
-      starter: {
-        items: [
-          { label: "15 child systems evaluated", sub: "3 per parent system" },
-          { label: "Revenue Health Report", sub: "Illustrative data for locked systems" },
-          { label: "Getting Started Roadmap", sub: "Your top 3 priority actions" },
-        ],
-        upgradeCta: "Upgrade to Assessment™",
-      },
-      pro: {
-        items: [
-          { label: "All 50 child systems", sub: "Full revenue system coverage" },
-          { label: "Full Revenue Health Report", sub: "PDF export + history" },
-          { label: "Quarterly Health Checks", sub: "Track progress over time" },
-        ],
-        upgradeCta: "Upgrade to Diagnostic™",
-      },
-      diagnostic: {
-        items: [
-          { label: "Everything in Assessment™", sub: "All 50 child systems + reports" },
-          { label: "Team seats & consultant view", sub: "Diagnostic-tier reports unlocked" },
-          { label: "Team Alignment + Founder Dependency", sub: "Advanced diagnostic insights" },
-        ],
-      },
-    };
-  const c = content[tier] || content.starter;
-  return (
-    <div className="rounded-xl border border-black/[0.08] bg-white p-[22px] shadow-[0_2px_8px_rgba(24,40,41,0.06)]">
-      <h3
-        className="m-0 mb-3.5 text-[16px] text-[var(--mm-ink)]"
-        style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-      >
-        Your {TIER_LABEL[tier].replace("Revenue Health ", "")} includes
-      </h3>
-      {c.items.map((item, i) => (
-        <div key={i} className="mb-3.5 flex gap-2.5">
-          <div className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[rgba(74,191,196,0.15)]">
-            <Check className="h-2.5 w-2.5 text-[var(--mm-teal-bright)]" strokeWidth={3} />
-          </div>
-          <div>
-            <div className="text-[12px] font-medium text-[var(--mm-ink)]">{item.label}</div>
-            <div className="mt-px text-[11px] text-[var(--mm-mid)]">{item.sub}</div>
-          </div>
-        </div>
-      ))}
-      {c.upgradeCta && (
-        <div className="mt-3.5 border-t border-[var(--mm-off-white)] pt-3.5">
-          <div className="mb-2.5 text-[11px] text-[var(--mm-mid)]">Want the full picture?</div>
-          <button
-            type="button"
-            className="w-full rounded-lg border-[1.5px] border-[var(--mm-teal)] bg-transparent px-2 py-[9px] text-[12px] font-medium text-[var(--mm-teal)] transition-opacity hover:opacity-85"
-          >
-            {c.upgradeCta}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 
 /* ─────────────────────────  RETURNING USER  ───────────────────────── */
