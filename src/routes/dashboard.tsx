@@ -1,10 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
 import { getViewerContext } from "@/lib/viewer.functions";
+import {
+  getHealthCheckData,
+  updateSelectedChildIds,
+} from "@/lib/healthcheck.functions";
 import { TeamMemberDashboard } from "@/components/team-member-dashboard";
-import { FrameworkExplainer } from "@/components/FrameworkExplainer";
 import {
   getIllustrativeScores,
   getOverall,
@@ -17,6 +21,7 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Revenue Health Visualiser" }] }),
   component: DashboardPage,
 });
+
 
 const TIER_LABEL: Record<string, string> = {
   starter: "Revenue Health Snapshot™",
