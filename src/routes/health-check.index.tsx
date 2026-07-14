@@ -1845,6 +1845,18 @@ function HealthCheckShell({
         {/* Right panel */}
         <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : "24px 32px" }}>
 
+          {!data.isTeamMember && (
+            <SelectionBreadcrumb
+              parents={parents}
+              children={data.children}
+              selectedCodes={selectedCodes}
+              tier={tier}
+              totalUnlockedAreas={data.totalUnlockedAreas}
+            />
+          )}
+
+
+
           {completedBanner && (
             <div
               style={{
