@@ -2437,7 +2437,19 @@ function HealthCheckShell({
                 );
               })}
 
+              {(() => {
+                const visible =
+                  tier === "starter"
+                    ? activeChildren.filter((c) => selectedSet.has(c.code))
+                    : activeChildren;
+                const last = visible[visible.length - 1];
+                return last && activeChild?.id === last.id && childComplete ? (
+                  <CavitySearchCTA />
+                ) : null;
+              })()}
+
               {showSkipWarning && childSkippedCount > 0 && (
+
                 <div
                   style={{
                     background: "rgba(240,82,35,0.06)",
