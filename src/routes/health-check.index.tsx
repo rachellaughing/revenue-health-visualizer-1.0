@@ -63,6 +63,222 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
+function SelectionBreadcrumb({
+  parents,
+  children,
+  selectedCodes,
+  tier,
+  totalUnlockedAreas,
+}: {
+  parents: HealthCheckData["parents"];
+  children: HealthCheckData["children"];
+  selectedCodes: string[];
+  tier: HealthCheckData["tier"];
+  totalUnlockedAreas: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const productLabel =
+    tier === "diagnostic"
+      ? "Revenue Health Diagnostic\u2122"
+      : tier === "pro"
+      ? "Revenue Health Assessment\u2122"
+      : "Revenue Health Snapshot\u2122";
+  const selectedSet = new Set(selectedCodes);
+  const sand = "#F6F2EA";
+  const sandDeep = "#ECE6D9";
+  const inkSoft = "#6B6560";
+
+  const childrenByParent = new Map<string, ChildSystem[]>();
+  for (const c of children) {
+    const arr = childrenByParent.get(c.parent_system_id) ?? [];
+    arr.push(c);
+    childrenByParent.set(c.parent_system_id, arr);
+  }
+  for (const v of childrenByParent.values()) v.sort((a, b) => a.sort_order - b.sort_order);
+
+  return (
+    <div style={{ position: "sticky", top: 0, zIndex: 10, background: T.paper, marginBottom: 16 }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 8,
+          background: sand,
+          border: `1px solid ${sandDeep}`,
+          borderRadius: open ? "10px 10px 0 0" : 10,
+          padding: "12px 16px",
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex" }}>
+            {parents.map((p, i) => (
+              <div
+                key={p.id}
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: `#${p.color_hex}`,
+                  marginLeft: i === 0 ? 0 : -2.5,
+                  border: `1.5px solid ${sand}`,
+                }}
+              />
+            ))}
+          </div>
+          <span style={{ fontSize: 13.5, color: T.ink }}>
+            {productLabel} \u00b7 <strong>{totalUnlockedAreas} evaluation areas</strong>
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <a
+            href="https://marketplacemaven.com/revenue-architecture-framework/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontSize: 12.5,
+              color: T.teal,
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            How it works \u2197
+          </a>
+          <span
+            style={{
+              display: "inline-block",
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 200ms ease",
+              fontSize: 11,
+              color: inkSoft,
+            }}
+          >
+            \u25be
+          </span>
+        </div>
+      </button>
+      {open && (
+        <div
+          style={{
+            background: T.paper,
+            border: `1px solid ${sandDeep}`,
+            borderTop: "none",
+            borderRadius: "0 0 10px 10px",
+            padding: 20,
+          }}
+        >
+          <div style={{ fontSize: 12, color: inkSoft, marginBottom: 14 }}>
+            Here's what you're evaluating \u2014 chosen on your Dashboard.{" "}
+            <Link to="/dashboard" style={{ color: T.teal, fontWeight: 600, textDecoration: "none" }}>
+              Edit selections
+            </Link>
+          </div>
+          {parents.map((p) => {
+            const color = `#${p.color_hex}`;
+            const list = childrenByParent.get(p.id) ?? [];
+            const shown =
+              tier === "starter" ? list.filter((c) => selectedSet.has(c.code)) : list;
+            return (
+              <div key={p.id} style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: color }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>{p.name}</span>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {shown.map((sub) => (
+                    <span
+                      key={sub.id}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 999,
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        background: color,
+                        color: "#fff",
+                      }}
+                    >
+                      {sub.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CavitySearchCTA() {
+  return (
+    <div style={{ background: T.abyss, borderRadius: 16, padding: "26px 28px", marginTop: 20 }}>
+      <div
+        style={{
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 22,
+          color: T.paper,
+          lineHeight: 1.25,
+          marginBottom: 8,
+        }}
+      >
+        Is this a lot?
+      </div>
+      <p
+        style={{
+          fontSize: 13,
+          color: "rgba(255,254,250,0.7)",
+          lineHeight: 1.6,
+          margin: "0 0 10px",
+          maxWidth: 560,
+        }}
+      >
+        If this feels less like a survey and more like a business cavity search \u2014 good.
+        That's the point. This isn't a lead-gen quiz. It's a thorough exam with a differential
+        diagnosis.
+      </p>
+      <p
+        style={{
+          fontSize: 13,
+          color: "rgba(255,254,250,0.7)",
+          lineHeight: 1.6,
+          margin: "0 0 18px",
+          maxWidth: 560,
+        }}
+      >
+        Don't know the answer to some of these? Also good. That's exactly what the Revenue Health
+        Diagnostic\u2122 is for. We interview your team and find the systems nobody documented.
+      </p>
+      <Link
+        to="/diagnostic"
+        style={{
+          display: "inline-block",
+          padding: "10px 18px",
+          borderRadius: 8,
+          background: T.ember,
+          color: "#fff",
+          fontSize: 13,
+          fontWeight: 700,
+          textDecoration: "none",
+        }}
+      >
+        Learn about the Diagnostic\u2122 \u2192
+      </Link>
+    </div>
+  );
+}
+
+
 function HealthCheckPage() {
   const fetchData = useServerFn(getHealthCheckData);
   const saveFn = useServerFn(saveResponse);
