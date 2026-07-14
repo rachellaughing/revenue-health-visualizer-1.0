@@ -81,12 +81,19 @@ function DashboardPage() {
 
   return (
     <div className="min-h-full bg-[var(--mm-paper)] px-9 py-8">
-      <div className="mx-auto max-w-[880px]">
-        {isReturning ? <ReturningView data={data} /> : <NewUserView data={data} />}
+      <div className="mx-auto max-w-[1140px]">
+        {isReturning ? (
+          <div className="mx-auto max-w-[880px]">
+            <ReturningView data={data} />
+          </div>
+        ) : (
+          <NewUserView data={data} />
+        )}
       </div>
     </div>
   );
 }
+
 
 
 /* ─────────────────────────  NEW USER  ───────────────────────── */
