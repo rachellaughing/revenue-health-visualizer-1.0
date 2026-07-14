@@ -10,36 +10,28 @@ import {
   type RoadmapHorizon,
   type RoadmapSelection,
 } from "@/lib/report.functions";
+import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 
 export const Route = createFileRoute("/revenue/roadmap-builder")({
   head: () => ({ meta: [{ title: "Roadmap Builder — Revenue Health Visualiser™" }] }),
   component: Page,
 });
 
-const T = {
+export const T = {
   abyss: "#182829", paper: "#FFFEFA", offWhite: "#F5F5F0",
   ember: "#F05223", teal: "#2A6B6E", tealBright: "#4ABFC4",
   mid: "#888880", ink: "#111111", white: "#FFFFFF",
   sys: { POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B" },
 };
 
-const HORIZONS: { id: RoadmapHorizon; label: string; sub: string; color: string; max: number }[] = [
+export const HORIZONS: { id: RoadmapHorizon; label: string; sub: string; color: string; max: number }[] = [
   { id: "quick_win", label: "Quick Wins", sub: "Under 30 days, low effort", color: T.sys.AUTH, max: 3 },
   { id: "30_days", label: "Next 30 Days", sub: "Foundational fixes", color: T.sys.VIS, max: 3 },
   { id: "90_days", label: "30-90 Days", sub: "Structural improvements", color: T.sys.LFC, max: 2 },
   { id: "120_days", label: "90-120 Days", sub: "Strategic capability building", color: T.sys.CONV, max: 2 },
 ];
 
-const DIAGNOSTIC_PREVIEW = [
-  { title: "Founder dependency extraction plan", horizon: "30 days", detail: "7 action items with assigned owners, success criteria, and weekly check-in protocol" },
-  { title: "CRM governance and pipeline hygiene sprint", horizon: "30-60 days", detail: "Stage definitions, required fields, data cleanup, and team training sequence" },
-  { title: "Revenue visibility infrastructure build", horizon: "60-90 days", detail: "Dashboard design, KPI ownership matrix, automated data pulls, board reporting template" },
-  { title: "Positioning operationalisation programme", horizon: "60-90 days", detail: "ICP embedding in sales motion, messaging audit, team certification process" },
-  { title: "Customer success system rebuild", horizon: "90-120 days", detail: "Churn model, EWS framework, playbook build, CS technology review and consolidation" },
-  { title: "Demand generation engine build", horizon: "90-120 days", detail: "Channel strategy, content calendar, attribution setup, non-founder ownership transfer" },
-];
-
-function exportToCSV(selections: RoadmapSelection[], items: RoadmapItem[]) {
+export function exportToCSV(selections: RoadmapSelection[], items: RoadmapItem[]) {
   const rows: string[][] = [
     ["Time Horizon", "System", "Parent System", "Initiative", "Task", "Expected Outcome", "KPI to Track"],
   ];
@@ -62,7 +54,7 @@ function exportToCSV(selections: RoadmapSelection[], items: RoadmapItem[]) {
   URL.revokeObjectURL(url);
 }
 
-function ItemChip({ item, selected, onToggle, disabled }: { item: RoadmapItem; selected: boolean; onToggle: () => void; disabled: boolean }) {
+export function ItemChip({ item, selected, onToggle, disabled }: { item: RoadmapItem; selected: boolean; onToggle: () => void; disabled: boolean }) {
   return (
     <button
       onClick={() => !(disabled && !selected) && onToggle()}
@@ -86,7 +78,7 @@ function ItemChip({ item, selected, onToggle, disabled }: { item: RoadmapItem; s
   );
 }
 
-function SelectedItemDetail({ item }: { item: RoadmapItem }) {
+export function SelectedItemDetail({ item }: { item: RoadmapItem }) {
   const [tab, setTab] = useState<"tasks" | "outcomes" | "kpis">("tasks");
   return (
     <div style={{
@@ -165,7 +157,7 @@ function SelectedItemDetail({ item }: { item: RoadmapItem }) {
   );
 }
 
-function HorizonSection({
+export function HorizonSection({
   horizon, items, selections, onToggle,
 }: {
   horizon: typeof HORIZONS[number];
@@ -251,90 +243,8 @@ function HorizonSection({
   );
 }
 
-function DiagnosticPreview() {
-  return (
-    <div style={{ margin: "36px 0" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
-        <div style={{ flex: 1, height: 1, background: T.offWhite }} />
-        <div style={{
-          padding: "6px 16px", borderRadius: 20, background: T.abyss, color: T.white,
-          fontSize: 11, fontFamily: "Inter", fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap",
-        }}>DIAGNOSTIC ROADMAP PREVIEW</div>
-        <div style={{ flex: 1, height: 1, background: T.offWhite }} />
-      </div>
-
-      <div style={{
-        background: T.abyss, borderRadius: 16, padding: "28px 32px", marginBottom: 20,
-        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32,
-      }}>
-        <div>
-          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 10 }}>
-            REVENUE HEALTH DIAGNOSTIC™
-          </div>
-          <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: T.white, margin: "0 0 14px", lineHeight: 1.3 }}>
-            Your self-serve roadmap is a starting point. The Diagnostic builds the full plan.
-          </h3>
-          <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, margin: "0 0 14px" }}>
-            The self-serve roadmap gives you the right initiatives. The Diagnostic Roadmap gives you the right sequence, the right owners, the right dependencies between initiatives, and a week-by-week action plan validated against what Rachel found in your PBJ sessions.
-          </p>
-          <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, margin: 0 }}>
-            It is the difference between knowing what to do and having a plan that will actually get done.
-          </p>
-        </div>
-        <div style={{
-          background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: "20px 22px",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}>
-          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.tealBright, letterSpacing: "0.1em", marginBottom: 14 }}>
-            WHAT THE DIAGNOSTIC ROADMAP INCLUDES
-          </div>
-          {[
-            "Week-by-week action plan for 120 days",
-            "Assigned owners for every initiative (not just the founder)",
-            "Dependency mapping — which initiatives unlock others",
-            "Sequencing rationale based on PBJ session findings",
-            "Shadow system remediation integrated into the plan",
-            "90-day and 120-day review checkpoints with Rachel",
-          ].map((item, i, arr) => (
-            <div key={i} style={{ display: "flex", gap: 10, marginBottom: i < arr.length - 1 ? 10 : 0 }}>
-              <span style={{ color: T.tealBright, fontSize: 13, flexShrink: 0, marginTop: 1 }}>+</span>
-              <span style={{ fontSize: 12, fontFamily: "Inter", color: "rgba(255,255,255,0.65)", lineHeight: 1.5 }}>{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ position: "relative" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {DIAGNOSTIC_PREVIEW.map((item, i) => (
-            <div key={i} style={{
-              background: T.white, border: "1px solid rgba(0,0,0,0.07)",
-              borderRadius: 12, padding: "16px 18px",
-              filter: "blur(4px)", userSelect: "none", pointerEvents: "none", opacity: 0.6,
-            }}>
-              <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, marginBottom: 4 }}>{item.horizon}</div>
-              <div style={{ fontSize: 13, fontFamily: "Inter", fontWeight: 600, color: T.ink, marginBottom: 6 }}>{item.title}</div>
-              <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, lineHeight: 1.5 }}>{item.detail}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{
-          position: "absolute", inset: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          background: `linear-gradient(to bottom, transparent 0%, ${T.paper}88 50%, ${T.paper} 100%)`,
-        }}>
-          <div style={{ textAlign: "center", paddingTop: 40 }}>
-            <p style={{ fontSize: 13, fontFamily: "Inter", color: T.mid, margin: 0 }}>
-              Your full Diagnostic Roadmap is waiting.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Page() {
+  const gate = useDiagnosticTierGate("/revenue/roadmap-builder-preview");
   const fetchRoadmap = useServerFn(getRoadmap);
   const saveSel = useServerFn(saveRoadmapSelection);
   const deleteSel = useServerFn(deleteRoadmapSelection);
@@ -342,6 +252,7 @@ function Page() {
   const { data, isLoading } = useQuery({
     queryKey: ["roadmap"],
     queryFn: () => fetchRoadmap({ data: {} }),
+    enabled: gate.ready,
   });
 
   const [selections, setSelections] = useState<RoadmapSelection[]>([]);
@@ -351,16 +262,8 @@ function Page() {
   }, [data?.selections]);
 
   const items = data?.items ?? [];
-  const tier = data?.tier ?? "starter";
   const assessmentId = data?.assessmentId ?? null;
-  const isDiagnostic = tier === "diagnostic";
   const totalSelected = selections.length;
-
-  const itemsByCode = useMemo(() => {
-    const m = new Map<string, RoadmapItem>();
-    for (const it of items) m.set(`${it.code}:${it.horizon}`, it);
-    return m;
-  }, [items]);
 
   function toggleSelection(item: RoadmapItem, horizonId: RoadmapHorizon) {
     const exists = selections.find((s) => s.code === item.code && s.horizon === horizonId);
@@ -384,6 +287,9 @@ function Page() {
     exportToCSV(selections, items);
   }
 
+  if (gate.checking || !gate.ready) {
+    return <div style={{ padding: 40, fontFamily: "Inter", color: T.mid }}>Loading…</div>;
+  }
   if (isLoading) {
     return (
       <div style={{ padding: 40, fontFamily: "Inter", color: T.mid }}>Loading roadmap…</div>
@@ -449,58 +355,20 @@ function Page() {
           />
         ))}
 
-        {!isDiagnostic && (
-          <>
-            <DiagnosticPreview />
-            <div style={{
-              background: T.ember, borderRadius: 16, padding: "28px 32px",
-              display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "center",
-            }}>
-              <div>
-                <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: "0.12em", marginBottom: 8 }}>
-                  GET THE FULL ROADMAP
-                </div>
-                <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
-                  Turn your self-serve roadmap into a delivered plan.
-                </h3>
-                <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.75)", margin: 0, lineHeight: 1.6 }}>
-                  The Revenue Health Diagnostic™ delivers a week-by-week 120-day roadmap with assigned owners, sequenced initiatives, and 90-day review checkpoints with Rachel.
-                </p>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
-                <a href="/diagnostic" style={{
-                  display: "inline-block", background: T.white, color: T.ember,
-                  fontFamily: "Inter", fontSize: 13, fontWeight: 700,
-                  padding: "12px 24px", borderRadius: 10,
-                  textDecoration: "none", textAlign: "center", whiteSpace: "nowrap",
-                }}>Book a Diagnostic →</a>
-                <a href="https://marketplacemaven.com/diagnostic" target="_blank" rel="noopener noreferrer"
-                  style={{
-                    display: "inline-block", color: "rgba(255,255,255,0.8)",
-                    fontFamily: "Inter", fontSize: 12,
-                    textDecoration: "none", textAlign: "center",
-                  }}>Learn more first →</a>
-              </div>
-            </div>
-          </>
-        )}
-
-        {isDiagnostic && (
-          <div style={{
-            background: T.tealBright + "10", border: `1px solid ${T.tealBright}30`,
-            borderRadius: 14, padding: "24px 28px", marginTop: 8,
-          }}>
-            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.teal, letterSpacing: "0.12em", marginBottom: 8 }}>
-              YOUR DIAGNOSTIC ROADMAP
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: T.ink, margin: "0 0 6px" }}>
-              Your full 120-day roadmap has been delivered.
-            </h3>
-            <p style={{ fontFamily: "Inter", fontSize: 13, color: T.mid, margin: 0, lineHeight: 1.6 }}>
-              The self-serve builder above lets you track progress and adjust priorities between sessions.
-            </p>
+        <div style={{
+          background: T.tealBright + "10", border: `1px solid ${T.tealBright}30`,
+          borderRadius: 14, padding: "24px 28px", marginTop: 8,
+        }}>
+          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.teal, letterSpacing: "0.12em", marginBottom: 8 }}>
+            YOUR DIAGNOSTIC ROADMAP
           </div>
-        )}
+          <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: T.ink, margin: "0 0 6px" }}>
+            Your full 120-day roadmap has been delivered.
+          </h3>
+          <p style={{ fontFamily: "Inter", fontSize: 13, color: T.mid, margin: 0, lineHeight: 1.6 }}>
+            The self-serve builder above lets you track progress and adjust priorities between sessions.
+          </p>
+        </div>
 
         <div style={{ paddingTop: 24, borderTop: `1px solid ${T.offWhite}`, marginTop: 32, fontSize: 11, fontFamily: "Inter", color: T.mid }}>
           © 2025 Marketplace Maven. All rights reserved.

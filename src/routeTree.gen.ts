@@ -21,13 +21,17 @@ import { Route as HealthCheckIndexRouteImport } from './routes/health-check.inde
 import { Route as SettingsTeamRouteImport } from './routes/settings.team'
 import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
 import { Route as SettingsAccountRouteImport } from './routes/settings.account'
+import { Route as RevenueShadowSystemsPreviewRouteImport } from './routes/revenue.shadow-systems-preview'
 import { Route as RevenueShadowSystemsRouteImport } from './routes/revenue.shadow-systems'
+import { Route as RevenueRoadmapBuilderPreviewRouteImport } from './routes/revenue.roadmap-builder-preview'
 import { Route as RevenueRoadmapBuilderRouteImport } from './routes/revenue.roadmap-builder'
 import { Route as RevenueMatrixMapRouteImport } from './routes/revenue.matrix-map'
 import { Route as ReportsTopOpportunitiesRouteImport } from './routes/reports.top-opportunities'
+import { Route as ReportsTeamAlignmentPreviewRouteImport } from './routes/reports.team-alignment-preview'
 import { Route as ReportsTeamAlignmentRouteImport } from './routes/reports.team-alignment'
 import { Route as ReportsRevenueSystemHealthRouteImport } from './routes/reports.revenue-system-health'
 import { Route as ReportsRevenueAtRiskRouteImport } from './routes/reports.revenue-at-risk'
+import { Route as ReportsFounderDependencyPreviewRouteImport } from './routes/reports.founder-dependency-preview'
 import { Route as ReportsFounderDependencyRouteImport } from './routes/reports.founder-dependency'
 import { Route as ReportsExecutiveSummaryRouteImport } from './routes/reports.executive-summary'
 import { Route as ProfilePersonalRouteImport } from './routes/profile.personal'
@@ -96,11 +100,23 @@ const SettingsAccountRoute = SettingsAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => SettingsRoute,
 } as any)
+const RevenueShadowSystemsPreviewRoute =
+  RevenueShadowSystemsPreviewRouteImport.update({
+    id: '/revenue/shadow-systems-preview',
+    path: '/revenue/shadow-systems-preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RevenueShadowSystemsRoute = RevenueShadowSystemsRouteImport.update({
   id: '/revenue/shadow-systems',
   path: '/revenue/shadow-systems',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RevenueRoadmapBuilderPreviewRoute =
+  RevenueRoadmapBuilderPreviewRouteImport.update({
+    id: '/revenue/roadmap-builder-preview',
+    path: '/revenue/roadmap-builder-preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RevenueRoadmapBuilderRoute = RevenueRoadmapBuilderRouteImport.update({
   id: '/revenue/roadmap-builder',
   path: '/revenue/roadmap-builder',
@@ -116,6 +132,12 @@ const ReportsTopOpportunitiesRoute = ReportsTopOpportunitiesRouteImport.update({
   path: '/reports/top-opportunities',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportsTeamAlignmentPreviewRoute =
+  ReportsTeamAlignmentPreviewRouteImport.update({
+    id: '/reports/team-alignment-preview',
+    path: '/reports/team-alignment-preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ReportsTeamAlignmentRoute = ReportsTeamAlignmentRouteImport.update({
   id: '/reports/team-alignment',
   path: '/reports/team-alignment',
@@ -132,6 +154,12 @@ const ReportsRevenueAtRiskRoute = ReportsRevenueAtRiskRouteImport.update({
   path: '/reports/revenue-at-risk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportsFounderDependencyPreviewRoute =
+  ReportsFounderDependencyPreviewRouteImport.update({
+    id: '/reports/founder-dependency-preview',
+    path: '/reports/founder-dependency-preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ReportsFounderDependencyRoute =
   ReportsFounderDependencyRouteImport.update({
     id: '/reports/founder-dependency',
@@ -184,13 +212,17 @@ export interface FileRoutesByFullPath {
   '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
+  '/reports/founder-dependency-preview': typeof ReportsFounderDependencyPreviewRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
   '/reports/revenue-system-health': typeof ReportsRevenueSystemHealthRoute
   '/reports/team-alignment': typeof ReportsTeamAlignmentRoute
+  '/reports/team-alignment-preview': typeof ReportsTeamAlignmentPreviewRoute
   '/reports/top-opportunities': typeof ReportsTopOpportunitiesRoute
   '/revenue/matrix-map': typeof RevenueMatrixMapRoute
   '/revenue/roadmap-builder': typeof RevenueRoadmapBuilderRoute
+  '/revenue/roadmap-builder-preview': typeof RevenueRoadmapBuilderPreviewRoute
   '/revenue/shadow-systems': typeof RevenueShadowSystemsRoute
+  '/revenue/shadow-systems-preview': typeof RevenueShadowSystemsPreviewRoute
   '/settings/account': typeof SettingsAccountRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/team': typeof SettingsTeamRoute
@@ -212,13 +244,17 @@ export interface FileRoutesByTo {
   '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
+  '/reports/founder-dependency-preview': typeof ReportsFounderDependencyPreviewRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
   '/reports/revenue-system-health': typeof ReportsRevenueSystemHealthRoute
   '/reports/team-alignment': typeof ReportsTeamAlignmentRoute
+  '/reports/team-alignment-preview': typeof ReportsTeamAlignmentPreviewRoute
   '/reports/top-opportunities': typeof ReportsTopOpportunitiesRoute
   '/revenue/matrix-map': typeof RevenueMatrixMapRoute
   '/revenue/roadmap-builder': typeof RevenueRoadmapBuilderRoute
+  '/revenue/roadmap-builder-preview': typeof RevenueRoadmapBuilderPreviewRoute
   '/revenue/shadow-systems': typeof RevenueShadowSystemsRoute
+  '/revenue/shadow-systems-preview': typeof RevenueShadowSystemsPreviewRoute
   '/settings/account': typeof SettingsAccountRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/team': typeof SettingsTeamRoute
@@ -241,13 +277,17 @@ export interface FileRoutesById {
   '/profile/personal': typeof ProfilePersonalRoute
   '/reports/executive-summary': typeof ReportsExecutiveSummaryRoute
   '/reports/founder-dependency': typeof ReportsFounderDependencyRoute
+  '/reports/founder-dependency-preview': typeof ReportsFounderDependencyPreviewRoute
   '/reports/revenue-at-risk': typeof ReportsRevenueAtRiskRoute
   '/reports/revenue-system-health': typeof ReportsRevenueSystemHealthRoute
   '/reports/team-alignment': typeof ReportsTeamAlignmentRoute
+  '/reports/team-alignment-preview': typeof ReportsTeamAlignmentPreviewRoute
   '/reports/top-opportunities': typeof ReportsTopOpportunitiesRoute
   '/revenue/matrix-map': typeof RevenueMatrixMapRoute
   '/revenue/roadmap-builder': typeof RevenueRoadmapBuilderRoute
+  '/revenue/roadmap-builder-preview': typeof RevenueRoadmapBuilderPreviewRoute
   '/revenue/shadow-systems': typeof RevenueShadowSystemsRoute
+  '/revenue/shadow-systems-preview': typeof RevenueShadowSystemsPreviewRoute
   '/settings/account': typeof SettingsAccountRoute
   '/settings/billing': typeof SettingsBillingRoute
   '/settings/team': typeof SettingsTeamRoute
@@ -271,13 +311,17 @@ export interface FileRouteTypes {
     | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
+    | '/reports/founder-dependency-preview'
     | '/reports/revenue-at-risk'
     | '/reports/revenue-system-health'
     | '/reports/team-alignment'
+    | '/reports/team-alignment-preview'
     | '/reports/top-opportunities'
     | '/revenue/matrix-map'
     | '/revenue/roadmap-builder'
+    | '/revenue/roadmap-builder-preview'
     | '/revenue/shadow-systems'
+    | '/revenue/shadow-systems-preview'
     | '/settings/account'
     | '/settings/billing'
     | '/settings/team'
@@ -299,13 +343,17 @@ export interface FileRouteTypes {
     | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
+    | '/reports/founder-dependency-preview'
     | '/reports/revenue-at-risk'
     | '/reports/revenue-system-health'
     | '/reports/team-alignment'
+    | '/reports/team-alignment-preview'
     | '/reports/top-opportunities'
     | '/revenue/matrix-map'
     | '/revenue/roadmap-builder'
+    | '/revenue/roadmap-builder-preview'
     | '/revenue/shadow-systems'
+    | '/revenue/shadow-systems-preview'
     | '/settings/account'
     | '/settings/billing'
     | '/settings/team'
@@ -327,13 +375,17 @@ export interface FileRouteTypes {
     | '/profile/personal'
     | '/reports/executive-summary'
     | '/reports/founder-dependency'
+    | '/reports/founder-dependency-preview'
     | '/reports/revenue-at-risk'
     | '/reports/revenue-system-health'
     | '/reports/team-alignment'
+    | '/reports/team-alignment-preview'
     | '/reports/top-opportunities'
     | '/revenue/matrix-map'
     | '/revenue/roadmap-builder'
+    | '/revenue/roadmap-builder-preview'
     | '/revenue/shadow-systems'
+    | '/revenue/shadow-systems-preview'
     | '/settings/account'
     | '/settings/billing'
     | '/settings/team'
@@ -356,13 +408,17 @@ export interface RootRouteChildren {
   ProfilePersonalRoute: typeof ProfilePersonalRoute
   ReportsExecutiveSummaryRoute: typeof ReportsExecutiveSummaryRoute
   ReportsFounderDependencyRoute: typeof ReportsFounderDependencyRoute
+  ReportsFounderDependencyPreviewRoute: typeof ReportsFounderDependencyPreviewRoute
   ReportsRevenueAtRiskRoute: typeof ReportsRevenueAtRiskRoute
   ReportsRevenueSystemHealthRoute: typeof ReportsRevenueSystemHealthRoute
   ReportsTeamAlignmentRoute: typeof ReportsTeamAlignmentRoute
+  ReportsTeamAlignmentPreviewRoute: typeof ReportsTeamAlignmentPreviewRoute
   ReportsTopOpportunitiesRoute: typeof ReportsTopOpportunitiesRoute
   RevenueMatrixMapRoute: typeof RevenueMatrixMapRoute
   RevenueRoadmapBuilderRoute: typeof RevenueRoadmapBuilderRoute
+  RevenueRoadmapBuilderPreviewRoute: typeof RevenueRoadmapBuilderPreviewRoute
   RevenueShadowSystemsRoute: typeof RevenueShadowSystemsRoute
+  RevenueShadowSystemsPreviewRoute: typeof RevenueShadowSystemsPreviewRoute
   HealthCheckIndexRoute: typeof HealthCheckIndexRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
@@ -453,11 +509,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsAccountRouteImport
       parentRoute: typeof SettingsRoute
     }
+    '/revenue/shadow-systems-preview': {
+      id: '/revenue/shadow-systems-preview'
+      path: '/revenue/shadow-systems-preview'
+      fullPath: '/revenue/shadow-systems-preview'
+      preLoaderRoute: typeof RevenueShadowSystemsPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/revenue/shadow-systems': {
       id: '/revenue/shadow-systems'
       path: '/revenue/shadow-systems'
       fullPath: '/revenue/shadow-systems'
       preLoaderRoute: typeof RevenueShadowSystemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenue/roadmap-builder-preview': {
+      id: '/revenue/roadmap-builder-preview'
+      path: '/revenue/roadmap-builder-preview'
+      fullPath: '/revenue/roadmap-builder-preview'
+      preLoaderRoute: typeof RevenueRoadmapBuilderPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/revenue/roadmap-builder': {
@@ -481,6 +551,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsTopOpportunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reports/team-alignment-preview': {
+      id: '/reports/team-alignment-preview'
+      path: '/reports/team-alignment-preview'
+      fullPath: '/reports/team-alignment-preview'
+      preLoaderRoute: typeof ReportsTeamAlignmentPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reports/team-alignment': {
       id: '/reports/team-alignment'
       path: '/reports/team-alignment'
@@ -500,6 +577,13 @@ declare module '@tanstack/react-router' {
       path: '/reports/revenue-at-risk'
       fullPath: '/reports/revenue-at-risk'
       preLoaderRoute: typeof ReportsRevenueAtRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/founder-dependency-preview': {
+      id: '/reports/founder-dependency-preview'
+      path: '/reports/founder-dependency-preview'
+      fullPath: '/reports/founder-dependency-preview'
+      preLoaderRoute: typeof ReportsFounderDependencyPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/founder-dependency': {
@@ -585,16 +669,30 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilePersonalRoute: ProfilePersonalRoute,
   ReportsExecutiveSummaryRoute: ReportsExecutiveSummaryRoute,
   ReportsFounderDependencyRoute: ReportsFounderDependencyRoute,
+  ReportsFounderDependencyPreviewRoute: ReportsFounderDependencyPreviewRoute,
   ReportsRevenueAtRiskRoute: ReportsRevenueAtRiskRoute,
   ReportsRevenueSystemHealthRoute: ReportsRevenueSystemHealthRoute,
   ReportsTeamAlignmentRoute: ReportsTeamAlignmentRoute,
+  ReportsTeamAlignmentPreviewRoute: ReportsTeamAlignmentPreviewRoute,
   ReportsTopOpportunitiesRoute: ReportsTopOpportunitiesRoute,
   RevenueMatrixMapRoute: RevenueMatrixMapRoute,
   RevenueRoadmapBuilderRoute: RevenueRoadmapBuilderRoute,
+  RevenueRoadmapBuilderPreviewRoute: RevenueRoadmapBuilderPreviewRoute,
   RevenueShadowSystemsRoute: RevenueShadowSystemsRoute,
+  RevenueShadowSystemsPreviewRoute: RevenueShadowSystemsPreviewRoute,
   HealthCheckIndexRoute: HealthCheckIndexRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

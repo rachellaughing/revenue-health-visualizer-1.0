@@ -1643,9 +1643,20 @@ function illustrativeAlignment(seed: string, code: string): {
   return { founderScore, teamAvg, clusters };
 }
 
+const teamAlignmentSchema = z
+  .object({
+    assessmentId: z.string().uuid().optional(),
+    // Full browser origin (e.g. https://app.example.com), passed from the client the
+    // same way inviteTeamMember/resendTeamInvite already do. Never build an invite URL
+    // from a server-side env var that may not be set - that is how this link previously
+    // rendered as a bare relative path (/team/invite/...) with no domain.
+    origin: z.string().url().optional(),
+  })
+  .optional();
+
 export const getTeamAlignment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => summarySchema.parse(d) ?? {})
+  .inputValidator((d: unknown) => teamAlignmentSchema.parse(d) ?? {})
   .handler(async ({ data, context }): Promise<TeamAlignmentData | { error: "no_completed_assessment" }> => {
     const userId = context.userId;
 
@@ -1723,7 +1734,8 @@ export const getTeamAlignment = createServerFn({ method: "POST" })
       invitedCount = members?.length ?? 0;
       completedCount = members?.filter((m: any) => m.status === "completed").length ?? 0;
       const firstToken = members?.find((m: any) => m.invite_token)?.invite_token;
-      if (firstToken) teamInviteUrl = `${process.env.APP_URL ?? ""}/team/invite/${firstToken}`;
+      // Only build an absolute URL - never fall back to a relative path.
+      if (firstToken && data?.origin) teamInviteUrl = `${data.origin}/team/invite/${firstToken}`;
     }
 
     // Diagnostic-only auxiliary data
