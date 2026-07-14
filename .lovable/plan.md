@@ -1,66 +1,70 @@
-## Goal
+## Scope
 
-Replace the current `NewUserView` in `src/routes/dashboard.tsx` with the 3-row layout from `dashboard-full-2.0.jsx`, including a live interactive subsystem picker that writes to `assessments.selected_child_ids` via the existing server function. `ReturningView` and `TeamMemberDashboard` are untouched.
+Modify `src/routes/health-check.index.tsx` only. Do not touch scoring, `saveResponse`, `advanceToNext`, collapse-on-answer, or `AnswerCard`/`ChildBlock`/`CompletedLanding`. All work is in `HealthCheckShell` + one new component.
 
-## Layout
+---
 
-**Row 1 — dark, two columns**
-- `HeroCard`: manifesto teaser + 5/10/200 stat row. 10 and 200 rendered greyed (`rgba(255,254,250,0.4)`) with teal annotations "3 in your Snapshot" / "60 in your Snapshot". Starter tier only shows the annotations; Pro/Diagnostic hides them and keeps all three stats bright.
-- `SnapshotIncludesCard`: deliverables list — content varies by tier (reuse the existing `TierIncluded` copy map).
+## 1. Subsystem chip row (in-progress state)
 
-**Row 2 — light, two columns (grid: `1fr 320px`)**
-- `SubsystemPickerCard` (Starter) or `FullAccessCard` (Pro/Diagnostic) — left column, scrolls with page.
-- `GettingStarted` (existing component, unchanged) — right column, `position: sticky; top: 24px` so it stays in view while the picker scrolls.
+Currently: renders every child in `activeChildren` with `isChildLocked` styling (lock icon, greyed).
 
-**Row 3 — full width, single card**
-- Short "About the Revenue Health Matrix™" reminder: one-sentence description + inline stat line "5 systems · 10 subsystems each · 4 evaluation areas · 200 total" + right-aligned link "How the Matrix works →" pointing to `https://marketplacemaven.com/revenue-architecture-framework/` with `target="_blank" rel="noopener noreferrer"`. No interactive explorer.
-- Nested inside the same card, below a divider: the existing Diagnostic CTA block (pulled from current dashboard, or a simple ember CTA linking to `/diagnostic`).
+Change (Starter tier, `!inSelectionMode`):
+- Filter `activeChildren` to only those with `selectedSet.has(c.code)` — max 3.
+- Remove all lock UI (`🔒`, disabled state, "not-allowed" cursor, opacity, `isChildLocked` branches for these chips).
+- Each chip shows its own progress: `${answeredCount}/${areas.length}` (e.g. `2/4`) using the existing per-area response check (`r.health !== null && r.health > 0 && r.tracking !== null`). Fully done shows `4/4` in teal.
+- Active chip: filled tint background (`systemColor + "15"`) + bold border (`1.5px solid systemColor`) + `fontWeight: 700`. Inactive: paper background, sand border.
+- Drop the `"X of 3 selected"` counter and the `"Change selection"` inline link. Selection editing now happens via the breadcrumb (§3).
 
-The existing `FrameworkExplainer` widget is removed from `NewUserView` (its role is now covered by Row 2 + Row 3).
+Selection mode (`inSelectionMode` = starter with <3 picks in this system): keep the existing full-list picker chips as-is — the reference is for the answering state, and picking still needs to happen somewhere. (Once 3 chosen the row collapses to §1 above.)
 
-## Selection Picker Behavior (Starter tier)
+Pro / Diagnostic: no `selected_child_ids` filter — show all 10 chips; each chip shows its own `n/4` progress. No lock UI (never applies).
 
-Component reads canonical framework from `data.framework.parents` + `data.framework.children` (already loaded by `getDashboardData`), rendered in the fixed order Positioning → Authority → Conversion → Lifecycle → Visibility. Pills use each parent's `SYSTEM_COLORS` mapping already defined in `FrameworkExplainer.tsx` (Positioning #3B82F6, Authority #10B981, Conversion #E11D48, Lifecycle #8B5CF6, Visibility #F59E0B) to match the mockup.
+## 2. Left rail — same filter
 
-State:
-- `picks: Record<parentId, childCode[]>` seeded from `data.latestAssessment.selected_child_ids` if present. The stored IDs are UUIDs; map to codes via `data.framework.children` on init.
-- Cap: 3 per system (`FREE_LIMIT`-equivalent). Once 3 chosen for a system, remaining pills in that system render disabled/greyed and non-clickable.
-- Tapping a selected pill unselects it.
-- Live counters: header shows `{total}/15`; per-system row shows `{n} of 3 selected` (teal + bold when 3).
-- Info bar copy switches at 15/15 to "All set — 15 of 15 selected · 60 evaluation areas ready to go".
+Under each parent in the desktop left rail (`!leftRailCollapsed && isActiveParent && list.map…`):
+- Starter: filter `list` to `list.filter(c => selectedSet.has(c.code))` before mapping. Drop the `🔒` icon and the `locked ? "not-allowed" : "pointer"` styling.
+- Pro / Diagnostic: unchanged (all 10 shown).
 
-Persistence:
-- On every change, debounce 400ms then call `updateSelectedChildIds({ assessment_id, selected_child_ids: codes })`. Codes are sent — the server function already converts to UUIDs.
-- If `data.latestAssessment` is null (no assessment row yet), skip the debounced write and defer persistence to Continue-click.
+Same filter for the mobile tab list children if any (currently only parent-level, no change needed).
 
-Continue button:
-- Disabled until `total === 15`. Label reflects state ("Select N more to continue" vs "Continue to Health Check →").
-- On click:
-  1. If no assessment id, call `getHealthCheckData()` (creates one on first read) and use its `assessment.id`.
-  2. `await updateSelectedChildIds({ assessment_id, selected_child_ids: codes })`.
-  3. `router.navigate({ to: "/health-check" })`.
-- Uses `useMutation` for loading/disabled state; catch errors into a small inline error line.
+## 3. Sticky breadcrumb bar
 
-## Tier-Conditional Rendering
+Replace the existing `<FrameworkExplainer …>` block (lines ~1363–1375) with a new local component `SelectionBreadcrumb`.
 
-Read tier from `data.profile.tier` (already resolved by `getDashboardData`, including inherited-owner tier).
+Structure (mirrors reference `StickyBreadcrumb`):
+- Outer wrapper: `position: sticky; top: 0; z-index: 10; background: paper` — sits below the fixed 52px top bar, above the content row. Since the top bar and current mobile tab strip live in a `flexDirection: column` scroll parent, put the breadcrumb inside the scrolling right panel (move it into `<div style={{ flex: 1, overflowY: "auto" }}>` at line ~1642) so `sticky` works against that scroll container. Render it as the first child of that panel, before the `completedBanner`.
+- Collapsed row:
+  - Dot cluster: 5 dots, one per parent, using `#${p.color_hex}`, overlapping (marginLeft -2.5, sand ring).
+  - Label: `Revenue Health Snapshot™ · **60 evaluation areas**` (bold the number). Compute number as `data.totalUnlockedAreas` so pro/diagnostic reads "200 evaluation areas" and starter reads "60"; product label switches to `Revenue Health Assessment™` / `Revenue Health Diagnostic™` based on `tier`.
+  - Right side: `How it works ↗` link to `https://marketplacemaven.com/revenue-architecture-framework/` (`target="_blank"`, `rel="noopener noreferrer"`, `stopPropagation` on click) + chevron (rotates on open).
+- Expanded panel (below, seamless border):
+  - Heading line: `Here's what you're evaluating — chosen on your Dashboard.` + `Edit selections` link → TanStack `<Link to="/dashboard">`.
+  - For each parent (in `parents` order): color dot + name, then a flex-wrap row of filled colored pills — one per selected child, `background: systemColor, color: white, fontWeight: 700`. For pro/diagnostic show all children as pills.
 
-- `tier === "starter"` → render `SubsystemPickerCard` as above.
-- `tier === "pro" | "diagnostic"` → render `FullAccessCard`:
-  - Heading: "You have full access".
-  - Body: "All 50 subsystems included — 200 evaluation areas across every system."
-  - Static grid of all subsystems as filled "included" pills (no click handler, no cap indicator).
-  - Continue button always enabled, no counter, navigates straight to `/health-check`.
-  - Hero annotations ("3 in your Snapshot" / "60 in your Snapshot") are suppressed and the greyed stat treatment is dropped (all three stats bright).
+State: `useState(false)` for open; no persistence needed (session-scoped is fine but not required by the spec).
+
+Delete the `FrameworkExplainer` import from this file. (Component itself stays — still used on Dashboard.)
+
+## 4. "Is this a lot?" CTA — once per system
+
+New local component `CavitySearchCTA` matching the reference (dark `T.abyss` card, Instrument Serif heading "Is this a lot?", two paragraphs of copy verbatim from reference lines 343–348, ember button "Learn about the Diagnostic™ →" linking to `/diagnostic`).
+
+Placement logic — inside the areas render block (right panel, after the `activeAreas.map(…)`, before `showSkipWarning`):
+- Compute `visibleChildrenForParent`: for starter = `activeChildren.filter(c => selectedSet.has(c.code))`; for pro/diagnostic = `activeChildren`.
+- Compute `isLastVisibleChild = visibleChildrenForParent[visibleChildrenForParent.length - 1]?.id === activeChild?.id`.
+- Compute `childComplete` (already exists) for the active child.
+- Render `<CavitySearchCTA />` only when `isLastVisibleChild && childComplete`.
+
+This gives exactly one appearance per system (5 total across the flow), tied to finishing the last selected subsystem — regardless of tier.
 
 ## Files touched
 
-- `src/routes/dashboard.tsx` — replace `NewUserView`; add `HeroCard`, `SnapshotIncludesCard`, `SubsystemPickerCard`, `FullAccessCard`, `AboutMatrixCard` local components. Keep `GettingStarted`, `TierIncluded` map (reused by `SnapshotIncludesCard`), `ReturningView`, and `ScoreRing` untouched. Remove the `FrameworkExplainer` import + usage from `NewUserView` only.
+- `src/routes/health-check.index.tsx` — only this file. Remove `FrameworkExplainer` import; add `SelectionBreadcrumb` + `CavitySearchCTA` local components; edit chip row, left-rail child map, and areas-render tail as described.
 
-No changes to server functions, styles.css, or the Health Check page.
+## Out of scope (explicit)
 
-## Non-goals
-
-- No read-only "confirm your picks" landing page between dashboard and Health Check — noted as a separate follow-up.
-- No changes to `ReturningView`, `TeamMemberDashboard`, `FrameworkExplainer`, `getDashboardData`, `updateSelectedChildIds`, or CSS tokens.
-- Diagnostic CTA content is a plain ember button linking to `/diagnostic`; no new copy/design system.
+- `AnswerCard`, `ChildBlock`, `CompletedLanding`, `TeamMemberCompletionInline`.
+- `saveResponse` / `updateSelectedChildIds` / scoring / `advanceToNext`.
+- Collapse-on-answer behavior for individual areas.
+- `FrameworkExplainer.tsx` (kept for Dashboard usage).
+- Dashboard, styles.css, server functions.
