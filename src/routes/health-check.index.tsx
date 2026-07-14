@@ -1780,8 +1780,10 @@ function HealthCheckShell({
                 </button>
 
                 {!leftRailCollapsed && isActiveParent &&
-                  list.map((c) => {
-                    const locked = isChildLocked(c);
+                  (tier === "starter"
+                    ? list.filter((c) => selectedSet.has(c.code))
+                    : list
+                  ).map((c) => {
                     const arr = areasByChild.get(c.id) ?? [];
                     const complete =
                       arr.length > 0 &&
@@ -1813,14 +1815,14 @@ function HealthCheckShell({
                           borderLeft: `3px solid ${
                             isActive ? color : "transparent"
                           }`,
-                          cursor: locked ? "not-allowed" : "pointer",
-                          opacity: locked ? 0.45 : 1,
+                          cursor: "pointer",
                           textAlign: "left",
                         }}
                       >
                         <span style={{ fontSize: 11, width: 14, flexShrink: 0 }}>
-                          {locked ? "🔒" : complete ? "✓" : hasSkipped ? "○" : ""}
+                          {complete ? "✓" : hasSkipped ? "○" : ""}
                         </span>
+
                         <span
                           style={{
                             fontSize: 12,
