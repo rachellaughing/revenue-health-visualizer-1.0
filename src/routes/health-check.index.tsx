@@ -1939,92 +1939,83 @@ function HealthCheckShell({
                   alignItems: "center",
                 }}
               >
-                {activeChildren.map((c) => {
-                  const locked = isChildLocked(c);
-                  const selected = tier === "starter" && selectedSet.has(c.code);
-                  const hasResp = childHasResponses(c);
+                {(tier === "starter" && !inSelectionMode
+                  ? activeChildren.filter((c) => selectedSet.has(c.code))
+                  : tier === "starter"
+                  ? activeChildren
+                  : activeChildren
+                ).map((c) => {
                   const arr = areasByChild.get(c.id) ?? [];
-                  const complete =
-                    arr.length > 0 &&
-                    arr.every((a) => {
-                      const r = responses[a.question_id];
-                      return (
-                        r &&
-                        r.health !== null &&
-                        r.health > 0 &&
-                        r.tracking !== null
-                      );
-                    });
-                  const hasSkipped = arr.some(
-                    (a) => responses[a.question_id]?.health === -1,
-                  );
+                  const answered = arr.filter((a) => {
+                    const r = responses[a.question_id];
+                    return r && r.health !== null && r.health > 0 && r.tracking !== null;
+                  }).length;
+                  const complete = arr.length > 0 && answered === arr.length;
                   const active = c.id === activeChild?.id;
-                  const highlight =
-                    tier === "starter" ? selected || active : active;
+                  // Selection-mode only: show "picked" tint on non-active chips already selected
+                  const selectedInSelMode =
+                    tier === "starter" && inSelectionMode && selectedSet.has(c.code);
+                  const parentSelFull =
+                    tier === "starter" && inSelectionMode && activeParentSelectedCount >= 3;
+                  const disabledForPick =
+                    tier === "starter" &&
+                    inSelectionMode &&
+                    parentSelFull &&
+                    !selectedSet.has(c.code);
                   return (
                     <button
                       key={c.id}
                       onClick={() => selectChild(c)}
-                      disabled={locked}
+                      disabled={disabledForPick}
                       style={{
                         padding: "6px 14px",
                         borderRadius: 20,
                         border: `1.5px solid ${
-                          locked
-                            ? "rgba(0,0,0,0.08)"
-                            : highlight
+                          active
+                            ? systemColor
+                            : selectedInSelMode
                             ? systemColor
                             : complete
                             ? `${T.tealBright}60`
                             : "rgba(0,0,0,0.1)"
                         }`,
-                        background: highlight
+                        background: active
                           ? `${systemColor}15`
                           : complete
                           ? `${T.tealBright}10`
                           : T.white,
-                        color: locked
-                          ? T.mid
-                          : highlight
+                        color: active
                           ? systemColor
                           : complete
                           ? T.teal
                           : T.ink,
                         fontSize: 12,
-                        fontWeight: highlight ? 600 : 400,
-                        cursor: locked ? "not-allowed" : "pointer",
-                        opacity: locked ? 0.5 : 1,
+                        fontWeight: active ? 700 : 500,
+                        cursor: disabledForPick ? "not-allowed" : "pointer",
+                        opacity: disabledForPick ? 0.4 : 1,
                         display: "flex",
                         alignItems: "center",
-                        gap: 5,
+                        gap: 6,
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {locked && <span style={{ fontSize: 10 }}>🔒</span>}
-                      {complete && !locked && (
-                        <span style={{ fontSize: 10, color: T.tealBright }}>✓</span>
-                      )}
-                      {hasSkipped && !complete && !locked && (
-                        <span style={{ fontSize: 10, color: T.mid }}>○</span>
-                      )}
                       {c.name}
-                      {tier === "starter" && selected && hasResp && (
+                      {(!inSelectionMode || tier !== "starter") && (
                         <span
                           style={{
-                            fontSize: 10,
-                            color: T.mid,
-                            marginLeft: 4,
-                            fontWeight: 400,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: complete ? T.teal : active ? systemColor : T.mid,
                           }}
                         >
-                          · In progress
+                          {answered}/{arr.length}
                         </span>
                       )}
                     </button>
                   );
                 })}
 
-                {tier === "starter" && !data.isTeamMember && (
+                {tier === "starter" && !data.isTeamMember && inSelectionMode && (
                   <span
                     style={{
                       fontSize: 11,
@@ -2038,22 +2029,7 @@ function HealthCheckShell({
                 )}
               </div>
 
-              {/* Change selection link */}
-              {tier === "starter" && !data.isTeamMember &&
-                activeParentSelectedCount > 0 &&
-                activeParentSelectedCount < 3 && (
-                  <div style={{ marginBottom: 14 }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: T.mid,
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Change selection
-                    </span>
-                  </div>
-                )}
+
 
               <div style={{ height: 12 }} />
 
