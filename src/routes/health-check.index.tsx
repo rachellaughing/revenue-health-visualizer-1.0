@@ -14,7 +14,7 @@ import {
   type Area,
 } from "@/lib/healthcheck.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { FrameworkExplainer } from "@/components/FrameworkExplainer";
+
 
 
 
@@ -62,6 +62,222 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
     </div>
   );
 }
+
+function SelectionBreadcrumb({
+  parents,
+  children,
+  selectedCodes,
+  tier,
+  totalUnlockedAreas,
+}: {
+  parents: HealthCheckData["parents"];
+  children: HealthCheckData["children"];
+  selectedCodes: string[];
+  tier: HealthCheckData["tier"];
+  totalUnlockedAreas: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const productLabel =
+    tier === "diagnostic"
+      ? "Revenue Health Diagnostic™"
+      : tier === "pro"
+      ? "Revenue Health Assessment™"
+      : "Revenue Health Snapshot™";
+  const selectedSet = new Set(selectedCodes);
+  const sand = "#F6F2EA";
+  const sandDeep = "#ECE6D9";
+  const inkSoft = "#6B6560";
+
+  const childrenByParent = new Map<string, ChildSystem[]>();
+  for (const c of children) {
+    const arr = childrenByParent.get(c.parent_system_id) ?? [];
+    arr.push(c);
+    childrenByParent.set(c.parent_system_id, arr);
+  }
+  for (const v of childrenByParent.values()) v.sort((a, b) => a.sort_order - b.sort_order);
+
+  return (
+    <div style={{ position: "sticky", top: 0, zIndex: 10, background: T.paper, marginBottom: 16 }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 8,
+          background: sand,
+          border: `1px solid ${sandDeep}`,
+          borderRadius: open ? "10px 10px 0 0" : 10,
+          padding: "12px 16px",
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex" }}>
+            {parents.map((p, i) => (
+              <div
+                key={p.id}
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: `#${p.color_hex}`,
+                  marginLeft: i === 0 ? 0 : -2.5,
+                  border: `1.5px solid ${sand}`,
+                }}
+              />
+            ))}
+          </div>
+          <span style={{ fontSize: 13.5, color: T.ink }}>
+            {productLabel} · <strong>{totalUnlockedAreas} evaluation areas</strong>
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <a
+            href="https://marketplacemaven.com/revenue-architecture-framework/"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              fontSize: 12.5,
+              color: T.teal,
+              fontWeight: 600,
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            How it works ↗
+          </a>
+          <span
+            style={{
+              display: "inline-block",
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 200ms ease",
+              fontSize: 11,
+              color: inkSoft,
+            }}
+          >
+            ▾
+          </span>
+        </div>
+      </button>
+      {open && (
+        <div
+          style={{
+            background: T.paper,
+            border: `1px solid ${sandDeep}`,
+            borderTop: "none",
+            borderRadius: "0 0 10px 10px",
+            padding: 20,
+          }}
+        >
+          <div style={{ fontSize: 12, color: inkSoft, marginBottom: 14 }}>
+            Here's what you're evaluating — chosen on your Dashboard.{" "}
+            <Link to="/dashboard" style={{ color: T.teal, fontWeight: 600, textDecoration: "none" }}>
+              Edit selections
+            </Link>
+          </div>
+          {parents.map((p) => {
+            const color = `#${p.color_hex}`;
+            const list = childrenByParent.get(p.id) ?? [];
+            const shown =
+              tier === "starter" ? list.filter((c) => selectedSet.has(c.code)) : list;
+            return (
+              <div key={p.id} style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: color }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>{p.name}</span>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {shown.map((sub) => (
+                    <span
+                      key={sub.id}
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: 999,
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        background: color,
+                        color: "#fff",
+                      }}
+                    >
+                      {sub.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CavitySearchCTA() {
+  return (
+    <div style={{ background: T.abyss, borderRadius: 16, padding: "26px 28px", marginTop: 20 }}>
+      <div
+        style={{
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 22,
+          color: T.paper,
+          lineHeight: 1.25,
+          marginBottom: 8,
+        }}
+      >
+        Is this a lot?
+      </div>
+      <p
+        style={{
+          fontSize: 13,
+          color: "rgba(255,254,250,0.7)",
+          lineHeight: 1.6,
+          margin: "0 0 10px",
+          maxWidth: 560,
+        }}
+      >
+        If this feels less like a survey and more like a business cavity search — good.
+        That's the point. This isn't a lead-gen quiz. It's a thorough exam with a differential
+        diagnosis.
+      </p>
+      <p
+        style={{
+          fontSize: 13,
+          color: "rgba(255,254,250,0.7)",
+          lineHeight: 1.6,
+          margin: "0 0 18px",
+          maxWidth: 560,
+        }}
+      >
+        Don't know the answer to some of these? Also good. That's exactly what the Revenue Health
+        Diagnostic™ is for. We interview your team and find the systems nobody documented.
+      </p>
+      <Link
+        to="/diagnostic"
+        style={{
+          display: "inline-block",
+          padding: "10px 18px",
+          borderRadius: 8,
+          background: T.ember,
+          color: "#fff",
+          fontSize: 13,
+          fontWeight: 700,
+          textDecoration: "none",
+        }}
+      >
+        Learn about the Diagnostic™ →
+      </Link>
+    </div>
+  );
+}
+
 
 function HealthCheckPage() {
   const fetchData = useServerFn(getHealthCheckData);
@@ -1360,19 +1576,7 @@ function HealthCheckShell({
       </div>
 
 
-      {/* Framework explainer — pinned above the tab row on all viewports */}
-      {!data.isTeamMember && (
-        <div style={{ padding: isMobile ? "8px 12px 0" : "10px 24px 0", flexShrink: 0 }}>
-          <FrameworkExplainer
-            context="healthcheck"
-            defaultOpen={false}
-            parents={parents}
-            children={data.children}
-            selectedChildCodes={selectedCodes}
-            tier={tier}
-          />
-        </div>
-      )}
+
 
       {/* Body */}
       <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
@@ -1576,8 +1780,10 @@ function HealthCheckShell({
                 </button>
 
                 {!leftRailCollapsed && isActiveParent &&
-                  list.map((c) => {
-                    const locked = isChildLocked(c);
+                  (tier === "starter"
+                    ? list.filter((c) => selectedSet.has(c.code))
+                    : list
+                  ).map((c) => {
                     const arr = areasByChild.get(c.id) ?? [];
                     const complete =
                       arr.length > 0 &&
@@ -1609,14 +1815,14 @@ function HealthCheckShell({
                           borderLeft: `3px solid ${
                             isActive ? color : "transparent"
                           }`,
-                          cursor: locked ? "not-allowed" : "pointer",
-                          opacity: locked ? 0.45 : 1,
+                          cursor: "pointer",
                           textAlign: "left",
                         }}
                       >
                         <span style={{ fontSize: 11, width: 14, flexShrink: 0 }}>
-                          {locked ? "🔒" : complete ? "✓" : hasSkipped ? "○" : ""}
+                          {complete ? "✓" : hasSkipped ? "○" : ""}
                         </span>
+
                         <span
                           style={{
                             fontSize: 12,
@@ -1640,6 +1846,18 @@ function HealthCheckShell({
 
         {/* Right panel */}
         <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : "24px 32px" }}>
+
+          {!data.isTeamMember && (
+            <SelectionBreadcrumb
+              parents={parents}
+              children={data.children}
+              selectedCodes={selectedCodes}
+              tier={tier}
+              totalUnlockedAreas={data.totalUnlockedAreas}
+            />
+          )}
+
+
 
           {completedBanner && (
             <div
@@ -1723,92 +1941,83 @@ function HealthCheckShell({
                   alignItems: "center",
                 }}
               >
-                {activeChildren.map((c) => {
-                  const locked = isChildLocked(c);
-                  const selected = tier === "starter" && selectedSet.has(c.code);
-                  const hasResp = childHasResponses(c);
+                {(tier === "starter" && !inSelectionMode
+                  ? activeChildren.filter((c) => selectedSet.has(c.code))
+                  : tier === "starter"
+                  ? activeChildren
+                  : activeChildren
+                ).map((c) => {
                   const arr = areasByChild.get(c.id) ?? [];
-                  const complete =
-                    arr.length > 0 &&
-                    arr.every((a) => {
-                      const r = responses[a.question_id];
-                      return (
-                        r &&
-                        r.health !== null &&
-                        r.health > 0 &&
-                        r.tracking !== null
-                      );
-                    });
-                  const hasSkipped = arr.some(
-                    (a) => responses[a.question_id]?.health === -1,
-                  );
+                  const answered = arr.filter((a) => {
+                    const r = responses[a.question_id];
+                    return r && r.health !== null && r.health > 0 && r.tracking !== null;
+                  }).length;
+                  const complete = arr.length > 0 && answered === arr.length;
                   const active = c.id === activeChild?.id;
-                  const highlight =
-                    tier === "starter" ? selected || active : active;
+                  // Selection-mode only: show "picked" tint on non-active chips already selected
+                  const selectedInSelMode =
+                    tier === "starter" && inSelectionMode && selectedSet.has(c.code);
+                  const parentSelFull =
+                    tier === "starter" && inSelectionMode && activeParentSelectedCount >= 3;
+                  const disabledForPick =
+                    tier === "starter" &&
+                    inSelectionMode &&
+                    parentSelFull &&
+                    !selectedSet.has(c.code);
                   return (
                     <button
                       key={c.id}
                       onClick={() => selectChild(c)}
-                      disabled={locked}
+                      disabled={disabledForPick}
                       style={{
                         padding: "6px 14px",
                         borderRadius: 20,
                         border: `1.5px solid ${
-                          locked
-                            ? "rgba(0,0,0,0.08)"
-                            : highlight
+                          active
+                            ? systemColor
+                            : selectedInSelMode
                             ? systemColor
                             : complete
                             ? `${T.tealBright}60`
                             : "rgba(0,0,0,0.1)"
                         }`,
-                        background: highlight
+                        background: active
                           ? `${systemColor}15`
                           : complete
                           ? `${T.tealBright}10`
                           : T.white,
-                        color: locked
-                          ? T.mid
-                          : highlight
+                        color: active
                           ? systemColor
                           : complete
                           ? T.teal
                           : T.ink,
                         fontSize: 12,
-                        fontWeight: highlight ? 600 : 400,
-                        cursor: locked ? "not-allowed" : "pointer",
-                        opacity: locked ? 0.5 : 1,
+                        fontWeight: active ? 700 : 500,
+                        cursor: disabledForPick ? "not-allowed" : "pointer",
+                        opacity: disabledForPick ? 0.4 : 1,
                         display: "flex",
                         alignItems: "center",
-                        gap: 5,
+                        gap: 6,
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {locked && <span style={{ fontSize: 10 }}>🔒</span>}
-                      {complete && !locked && (
-                        <span style={{ fontSize: 10, color: T.tealBright }}>✓</span>
-                      )}
-                      {hasSkipped && !complete && !locked && (
-                        <span style={{ fontSize: 10, color: T.mid }}>○</span>
-                      )}
                       {c.name}
-                      {tier === "starter" && selected && hasResp && (
+                      {(!inSelectionMode || tier !== "starter") && (
                         <span
                           style={{
-                            fontSize: 10,
-                            color: T.mid,
-                            marginLeft: 4,
-                            fontWeight: 400,
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: complete ? T.teal : active ? systemColor : T.mid,
                           }}
                         >
-                          · In progress
+                          {answered}/{arr.length}
                         </span>
                       )}
                     </button>
                   );
                 })}
 
-                {tier === "starter" && !data.isTeamMember && (
+                {tier === "starter" && !data.isTeamMember && inSelectionMode && (
                   <span
                     style={{
                       fontSize: 11,
@@ -1822,22 +2031,7 @@ function HealthCheckShell({
                 )}
               </div>
 
-              {/* Change selection link */}
-              {tier === "starter" && !data.isTeamMember &&
-                activeParentSelectedCount > 0 &&
-                activeParentSelectedCount < 3 && (
-                  <div style={{ marginBottom: 14 }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: T.mid,
-                        textDecoration: "underline",
-                      }}
-                    >
-                      Change selection
-                    </span>
-                  </div>
-                )}
+
 
               <div style={{ height: 12 }} />
 
@@ -2243,7 +2437,19 @@ function HealthCheckShell({
                 );
               })}
 
+              {(() => {
+                const visible =
+                  tier === "starter"
+                    ? activeChildren.filter((c) => selectedSet.has(c.code))
+                    : activeChildren;
+                const last = visible[visible.length - 1];
+                return last && activeChild?.id === last.id && childComplete ? (
+                  <CavitySearchCTA />
+                ) : null;
+              })()}
+
               {showSkipWarning && childSkippedCount > 0 && (
+
                 <div
                   style={{
                     background: "rgba(240,82,35,0.06)",
