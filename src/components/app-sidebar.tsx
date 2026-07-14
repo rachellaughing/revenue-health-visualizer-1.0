@@ -76,7 +76,7 @@ const sections: NavSection[] = [
       { title: "Top Opportunities", url: "/reports/top-opportunities", icon: Target, lock: "assessment_complete" },
       { title: "Revenue at Risk", url: "/reports/revenue-at-risk", icon: AlertTriangle, lock: "assessment_complete" },
       { title: "Team Alignment", url: "/reports/team-alignment", icon: Users, lock: "diagnostic", previewWhenLocked: true },
-      { title: "Founder Dependency", url: "/reports/founder-dependency", icon: Crown, lock: "diagnostic" },
+      { title: "Founder Dependency", url: "/reports/founder-dependency", icon: Crown, lock: "diagnostic", previewWhenLocked: true },
     ],
   },
   {
@@ -84,8 +84,8 @@ const sections: NavSection[] = [
     items: [
 
       { title: "Matrix Map", url: "/revenue/matrix-map", icon: Grid3x3, lock: "assessment_complete" },
-      { title: "Shadow Systems", url: "/revenue/shadow-systems", icon: Eye, lock: "diagnostic" },
-      { title: "Roadmap Builder", url: "/revenue/roadmap-builder", icon: Map, lock: "diagnostic" },
+      { title: "Shadow Systems", url: "/revenue/shadow-systems", icon: Eye, lock: "diagnostic", previewWhenLocked: true },
+      { title: "Roadmap Builder", url: "/revenue/roadmap-builder", icon: Map, lock: "diagnostic", previewWhenLocked: true },
       { title: "Diagnostic", url: "/diagnostic", icon: Stethoscope },
     ],
   },
