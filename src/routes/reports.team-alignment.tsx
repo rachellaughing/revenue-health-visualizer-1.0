@@ -1,15 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { getTeamAlignment, type TeamAlignmentData, type AlignmentSystem } from "@/lib/report.functions";
+import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 
 export const Route = createFileRoute("/reports/team-alignment")({
   head: () => ({ meta: [{ title: "Team Alignment — Revenue Health Visualiser" }] }),
   component: Page,
 });
 
-const T = {
+export const T = {
   abyss: "#182829",
   paper: "#FFFEFA",
   offWhite: "#F5F5F0",
@@ -23,28 +24,28 @@ const T = {
   white: "#FFFFFF",
 };
 
-function gapColor(status: AlignmentSystem["status"]): string {
+export function gapColor(status: AlignmentSystem["status"]): string {
   if (status === "critical_gap") return "#EF4444";
   if (status === "significant_gap") return T.sand;
   if (status === "moderate_gap") return "#F59E0B";
   return "#10B981";
 }
 
-function statusLabel(status: AlignmentSystem["status"]): string {
+export function statusLabel(status: AlignmentSystem["status"]): string {
   if (status === "critical_gap") return "Critical Gap";
   if (status === "significant_gap") return "Significant Gap";
   if (status === "moderate_gap") return "Moderate Gap";
   return "Aligned";
 }
 
-function gapLabel(direction: AlignmentSystem["direction"], gap: number): string {
+export function gapLabel(direction: AlignmentSystem["direction"], gap: number): string {
   const abs = Math.abs(gap);
   if (direction === "aligned") return "Consistent perception";
   if (direction === "founder_high") return `Leadership sees this ${abs} pts stronger than the team`;
   return `Team sees this ${abs} pts stronger than leadership`;
 }
 
-function gapInterpretation(d: AlignmentSystem): string {
+export function gapInterpretation(d: AlignmentSystem): string {
   const abs = Math.abs(d.gap);
   if (d.direction === "aligned") {
     return `You and your team see ${d.name} consistently. This shared perception is a foundation to build on.`;
@@ -56,7 +57,7 @@ function gapInterpretation(d: AlignmentSystem): string {
 }
 
 // ---------- Radar Chart ----------
-function RadarChart({ data, size = 280 }: { data: AlignmentSystem[]; size?: number }) {
+export function RadarChart({ data, size = 280 }: { data: AlignmentSystem[]; size?: number }) {
   const cx = size / 2;
   const cy = size / 2;
   const r = size * 0.38;
@@ -117,7 +118,7 @@ function RadarChart({ data, size = 280 }: { data: AlignmentSystem[]; size?: numb
 }
 
 // ---------- Side by Side Bars ----------
-function SideBySideBars({ data }: { data: AlignmentSystem[] }) {
+export function SideBySideBars({ data }: { data: AlignmentSystem[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, width: "100%" }}>
       {data.map((d) => {
@@ -155,7 +156,7 @@ function SideBySideBars({ data }: { data: AlignmentSystem[] }) {
 }
 
 // ---------- System Card ----------
-function SystemCard({
+export function SystemCard({
   d,
   expanded,
   onToggle,
@@ -253,15 +254,20 @@ function SystemCard({
 }
 
 function Page() {
+  const gate = useDiagnosticTierGate("/reports/team-alignment-preview");
   const fetchData = useServerFn(getTeamAlignment);
   const { data, isLoading, error } = useQuery({
     queryKey: ["team-alignment"],
-    queryFn: () => fetchData({ data: {} }),
+    queryFn: () => fetchData({ data: { origin: window.location.origin } }),
+    enabled: gate.ready,
   });
 
   const [chartView, setChartView] = useState<"radar" | "bars">("radar");
   const [expandedSystem, setExpandedSystem] = useState<string | null>(null);
 
+  if (gate.checking || !gate.ready) {
+    return <div style={{ padding: 40, color: T.mid }}>Loading…</div>;
+  }
   if (isLoading) {
     return <div style={{ padding: 40, color: T.mid }}>Loading…</div>;
   }
@@ -278,13 +284,16 @@ function Page() {
   }
 
   const d = data as TeamAlignmentData;
-  const isStarter = d.tier === "starter";
-  const isDiagnostic = d.tier === "diagnostic";
+  // This route only ever renders for Diagnostic tier - Starter/Pro are
+  // redirected to the -preview route by the tier gate above.
+  const isDiagnostic = true;
   const submitted = d.assessment?.submitted_at
     ? new Date(d.assessment.submitted_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : null;
 
-  // Waiting state — only render this
+  // Waiting state — team invited but hasn't finished the Health Check yet.
+  // Inviting/managing the team happens in Settings > Team only — this report
+  // page never renders a live invite link or copy button.
   if (d.state === "waiting") {
     return (
       <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif" }}>
@@ -296,32 +305,19 @@ function Page() {
             <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: T.ink, margin: "0 0 12px" }}>Waiting for your team</h1>
             <p style={{ color: T.mid, fontSize: 14, lineHeight: 1.65, margin: "0 0 24px" }}>
               Your team members haven&apos;t completed the Health Check yet ({d.completedCount}/{d.invitedCount} complete).
-              Share the link below to get started.
             </p>
-            {d.teamInviteUrl && (
-              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                <input
-                  readOnly
-                  value={d.teamInviteUrl}
-                  style={{ flex: 1, maxWidth: 380, padding: "10px 14px", border: `1px solid ${T.offWhite}`, borderRadius: 8, fontSize: 12, color: T.ink, background: T.offWhite }}
-                />
-                <button
-                  onClick={() => navigator.clipboard.writeText(d.teamInviteUrl!)}
-                  style={{ background: T.ember, color: T.white, border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
-                >
-                  Copy link
-                </button>
-              </div>
-            )}
+            <Link
+              to="/settings"
+              search={{ tab: "team", success: undefined }}
+              style={{ background: T.ember, color: T.white, border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, textDecoration: "none", display: "inline-block" }}
+            >
+              Go to Settings → Team to invite or resend
+            </Link>
           </div>
         </main>
       </div>
     );
   }
-
-  const blurStyle: React.CSSProperties = isStarter
-    ? { filter: "blur(3px)", userSelect: "none", pointerEvents: "none" }
-    : {};
 
   return (
     <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif" }}>
@@ -341,52 +337,6 @@ function Page() {
         </p>
 
         {/* Tier banner */}
-        {!isDiagnostic && (
-          <div
-            style={{
-              background: T.abyss,
-              borderRadius: 14,
-              padding: "24px 28px",
-              marginBottom: 28,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 20,
-            }}
-          >
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 8 }}>
-                {isStarter ? "REVENUE HEALTH SNAPSHOT™" : "REVENUE HEALTH ASSESSMENT™"}
-              </div>
-              <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
-                {isStarter
-                  ? "This is a preview of the Team Alignment Report."
-                  : "Your Team Alignment Report shows real scores — consultant observations unlock with the Diagnostic."}
-              </h3>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", margin: 0, lineHeight: 1.6, maxWidth: 480 }}>
-                {isStarter
-                  ? "The Team Alignment Report compares how you see your revenue systems versus how your team sees them. It requires team members to complete the Health Check — available in Revenue Health Assessment™ and above."
-                  : "You can see how your scores compare to your team. The Revenue Health Diagnostic™ adds consultant observations and prioritised focus recommendations."}
-              </p>
-            </div>
-            <button
-              style={{
-                background: T.ember,
-                color: T.white,
-                border: "none",
-                borderRadius: 8,
-                padding: "12px 22px",
-                whiteSpace: "nowrap",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              {isStarter ? "Upgrade to Assessment™" : "Learn about the Diagnostic™"}
-            </button>
-          </div>
-        )}
-
         {/* Anonymity callout */}
         <div
           style={{
@@ -407,7 +357,7 @@ function Page() {
           </div>
         </div>
 
-        <div style={blurStyle}>
+        <div>
           {/* Summary cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
             {[
@@ -596,48 +546,6 @@ function Page() {
             </div>
           )}
 
-          {/* Non-diagnostic upsell */}
-          {!isDiagnostic && !isStarter && (
-            <div
-              style={{
-                background: T.abyss,
-                borderRadius: 12,
-                padding: "24px 28px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 20,
-                marginBottom: 28,
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 6 }}>
-                  REVENUE HEALTH DIAGNOSTIC™
-                </div>
-                <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 17, fontWeight: 400, color: T.white, margin: "0 0 4px" }}>
-                  Get consultant observations and prioritised focus areas.
-                </h3>
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: 0 }}>
-                  The Diagnostic adds per-system consultant observations and sequenced recommendations.
-                </p>
-              </div>
-              <button
-                style={{
-                  background: T.ember,
-                  color: T.white,
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "11px 20px",
-                  whiteSpace: "nowrap",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Learn about the Diagnostic™
-              </button>
-            </div>
-          )}
         </div>
 
         <div style={{ paddingTop: 24, borderTop: `1px solid ${T.offWhite}`, fontSize: 11, color: T.mid }}>

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/reports/founder-dependency")({
   component: Page,
 });
 
-const T = {
+export const T = {
   abyss: "#182829",
   paper: "#FFFEFA",
   offWhite: "#F5F5F0",
@@ -29,41 +30,41 @@ const T = {
   danger: "#EF4444",
 };
 
-const BLAST_WINDOWS: FDProcess["window"][] = ["immediate", "1-7 days", "7-30 days", "30-90 days"];
-const WINDOW_LABELS: Record<FDProcess["window"], string> = {
+export const BLAST_WINDOWS: FDProcess["window"][] = ["immediate", "1-7 days", "7-30 days", "30-90 days"];
+export const WINDOW_LABELS: Record<FDProcess["window"], string> = {
   "immediate": "Immediate",
   "1-7 days": "1-7 Days",
   "7-30 days": "7-30 Days",
   "30-90 days": "30-90 Days",
 };
 
-function depColor(label: string): string {
+export function depColor(label: string): string {
   if (label === "critical" || label === "dangerous") return T.danger;
   if (label === "high") return T.sand;
   if (label === "moderate" || label === "mixed" || label === "low-moderate") return "#F59E0B";
   return T.healthy;
 }
-function depBg(label: string): string {
+export function depBg(label: string): string {
   if (label === "critical" || label === "dangerous") return "rgba(239,68,68,0.08)";
   if (label === "high") return "rgba(196,149,106,0.1)";
   if (label === "moderate" || label === "mixed" || label === "low-moderate") return "rgba(245,158,11,0.08)";
   return "rgba(16,185,129,0.08)";
 }
 
-function ringLabel(score: number): string {
+export function ringLabel(score: number): string {
   if (score > 70) return "High Dependency";
   if (score > 50) return "Moderate";
   if (score > 30) return "Low-Moderate";
   return "Low";
 }
-function ringColor(score: number): string {
+export function ringColor(score: number): string {
   if (score > 70) return T.danger;
   if (score > 50) return T.sand;
   if (score > 30) return "#F59E0B";
   return T.healthy;
 }
 
-function RiskDots({ level }: { level: number }) {
+export function RiskDots({ level }: { level: number }) {
   return (
     <div style={{ display: "flex", gap: 3 }}>
       {[0, 1, 2, 3, 4].map((i) => (
@@ -81,7 +82,7 @@ function RiskDots({ level }: { level: number }) {
   );
 }
 
-function DependencyRing({ score, size = 120 }: { score: number; size?: number }) {
+export function DependencyRing({ score, size = 120 }: { score: number; size?: number }) {
   const r = (size - 12) / 2;
   const circ = 2 * Math.PI * r;
   const fill = (score / 100) * circ;
@@ -122,7 +123,7 @@ function DependencyRing({ score, size = 120 }: { score: number; size?: number })
   );
 }
 
-function DependencySplit({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
+export function DependencySplit({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
   const colorByCode = new Map(systems.map((s) => [s.code, s.color]));
   const dangerous = processes.filter((p) => p.type === "dangerous");
   const healthy = processes.filter((p) => p.type === "healthy");
@@ -205,7 +206,7 @@ function DependencySplit({ processes, systems }: { processes: FDProcess[]; syste
   );
 }
 
-function BlastRadiusTimeline({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
+export function BlastRadiusTimeline({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
   const colorByCode = new Map(systems.map((s) => [s.code, s.color]));
   const dangerous = processes.filter((p) => p.type === "dangerous");
   const dotColors = [T.danger, "#F97316", T.sand, "#F59E0B"];
@@ -336,7 +337,7 @@ function BlastRadiusTimeline({ processes, systems }: { processes: FDProcess[]; s
   );
 }
 
-function ActionPlan({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
+export function ActionPlan({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
   const colorByCode = new Map(systems.map((s) => [s.code, s.color]));
   const dangerous = processes.filter((p) => p.type === "dangerous").sort((a, b) => b.risk - a.risk);
   const diffColor: Record<string, string> = { easy: T.healthy, medium: T.sand, hard: T.danger };
@@ -480,7 +481,7 @@ function ActionPlan({ processes, systems }: { processes: FDProcess[]; systems: F
   );
 }
 
-function SystemsTab({
+export function SystemsTab({
   systems,
   processes,
   isDiagnostic,
@@ -736,7 +737,7 @@ function SystemsTab({
   );
 }
 
-function Tile({ value, label, color }: { value: number; label: string; color: string }) {
+export function Tile({ value, label, color }: { value: number; label: string; color: string }) {
   return (
     <div
       style={{
@@ -772,15 +773,22 @@ function Tile({ value, label, color }: { value: number; label: string; color: st
 }
 
 function Page() {
+  const gate = useDiagnosticTierGate("/reports/founder-dependency-preview");
   const fetchFn = useServerFn(getFounderDependency);
   const { data, isLoading, error } = useQuery({
     queryKey: ["founder-dependency"],
     queryFn: () => fetchFn({ data: {} }),
+    enabled: gate.ready,
   });
   const [activeTab, setActiveTab] = useState<"overview" | "systems" | "timeline" | "actions">(
     "overview",
   );
 
+  if (gate.checking || !gate.ready) {
+    return (
+      <div style={{ padding: 40, color: T.mid, fontFamily: "Inter" }}>Loading…</div>
+    );
+  }
   if (isLoading) {
     return (
       <div style={{ padding: 40, color: T.mid, fontFamily: "Inter" }}>Loading report…</div>
@@ -802,10 +810,11 @@ function Page() {
   }
 
   const d = data as FounderDependencyData;
-  const isDiagnostic = d.tier === "diagnostic";
-  const isStarter = d.tier === "starter";
-  const blurContent = isStarter;
-  const showIllustrativeLabel = d.tier === "pro";
+  // This route only ever renders for Diagnostic tier - Starter/Pro are
+  // redirected to the -preview route by the tier gate above.
+  const isDiagnostic = true;
+  const blurContent = false;
+  const showIllustrativeLabel = false;
 
   const TABS: { id: typeof activeTab; label: string }[] = [
     { id: "overview", label: "Overview" },
@@ -827,83 +836,6 @@ function Page() {
         >
           REVENUE HEALTH MATRIX™ › FOUNDER DEPENDENCY
         </div>
-
-        {!isDiagnostic && (
-          <div
-            style={{
-              background: T.abyss,
-              borderRadius: 14,
-              padding: "24px 28px",
-              marginBottom: 28,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 20,
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: T.tealBright,
-                  letterSpacing: "0.12em",
-                  marginBottom: 8,
-                }}
-              >
-                REVENUE HEALTH DIAGNOSTIC™
-              </div>
-              <h3
-                style={{
-                  fontFamily: "Instrument Serif, Georgia, serif",
-                  fontSize: 18,
-                  fontWeight: 400,
-                  color: T.white,
-                  margin: "0 0 6px",
-                }}
-              >
-                {isStarter
-                  ? "Founder Dependency analysis is available in the Revenue Health Diagnostic™."
-                  : "Your Dependency Index is estimated from your Health Check scores. Full analysis requires the Diagnostic."}
-              </h3>
-              <p
-                style={{
-                  fontFamily: "Inter",
-                  fontSize: 13,
-                  color: "rgba(255,255,255,0.6)",
-                  margin: 0,
-                  lineHeight: 1.6,
-                  maxWidth: 500,
-                }}
-              >
-                {isStarter
-                  ? "This report identifies every process that runs through you, classifies dependency as healthy or dangerous, shows a blast radius timeline, and delivers a sequenced action plan."
-                  : "The Diagnostic adds consultant observations, process-level dependency classification, the blast radius timeline, and a sequenced action plan."}
-              </p>
-            </div>
-            <a
-              href="https://marketplacemaven.com"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                background: T.ember,
-                color: T.white,
-                border: "none",
-                borderRadius: 8,
-                padding: "12px 22px",
-                whiteSpace: "nowrap",
-                fontFamily: "Inter",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                textDecoration: "none",
-              }}
-            >
-              Learn about the Diagnostic™
-            </a>
-          </div>
-        )}
 
         <div
           style={{
@@ -1316,42 +1248,6 @@ function Page() {
                 </div>
               )}
             </div>
-
-            {d.tier === "pro" && (
-              <div
-                style={{
-                  background: T.abyss,
-                  borderRadius: 14,
-                  padding: "20px 24px",
-                  marginTop: 28,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 16,
-                }}
-              >
-                <div style={{ color: T.white, fontFamily: "Inter", fontSize: 13 }}>
-                  Ready for the full dependency analysis with consultant observations?
-                </div>
-                <a
-                  href="https://marketplacemaven.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    background: T.ember,
-                    color: T.white,
-                    borderRadius: 8,
-                    padding: "10px 18px",
-                    fontFamily: "Inter",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  Learn about the Diagnostic™
-                </a>
-              </div>
-            )}
           </>
         )}
 
