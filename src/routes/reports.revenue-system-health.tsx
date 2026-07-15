@@ -215,8 +215,8 @@ function ChildRow({
         )}
       </div>
 
-      <div style={{ fontSize: 15, fontFamily: "Inter", fontWeight: 700, color: T.ink }}>
-        {child.healthScore}
+      <div style={{ fontSize: 15, fontFamily: "Inter", fontWeight: 700, color: notAssessed ? T.mid : T.ink }}>
+        {notAssessed ? "—" : child.healthScore}
       </div>
 
       <div
