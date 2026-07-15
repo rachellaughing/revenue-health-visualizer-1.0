@@ -814,8 +814,9 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
         const multiplier = 1 + 0.15 * weakCascadeCount;
         const opportunityScore = Math.round(baseScore * multiplier);
 
-        const severity: OpportunityItem["severity"] =
-          info.healthScore < 40
+        const severity: OpportunityItem["severity"] = !info.assessed
+          ? "not_assessed"
+          : info.healthScore < 40
             ? "critical"
             : info.healthScore < 60
               ? "fragile"
