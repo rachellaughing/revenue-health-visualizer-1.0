@@ -236,68 +236,30 @@ function ChildRow({
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div
-            style={{
-              height: 5,
-              flex: 1,
-              background: T.offWhite,
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${child.healthScore}%`,
-                background: systemColor,
-                borderRadius: 3,
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 10,
-              color: T.mid,
-              fontFamily: "Inter",
-              width: 28,
-              textAlign: "right",
-            }}
-          >
-            {child.healthScore}
+        {notAssessed ? (
+          <span style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, fontStyle: "italic" }}>
+            No responses recorded
           </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div
-            style={{
-              height: 3,
-              flex: 1,
-              background: T.offWhite,
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${child.trackingScore}%`,
-                background: systemColor + "60",
-                borderRadius: 2,
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 10,
-              color: T.mid,
-              fontFamily: "Inter",
-              width: 28,
-              textAlign: "right",
-            }}
-          >
-            {child.trackingScore}
-          </span>
-        </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ height: 5, flex: 1, background: T.offWhite, borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${child.healthScore}%`, background: systemColor, borderRadius: 3 }} />
+              </div>
+              <span style={{ fontSize: 10, color: T.mid, fontFamily: "Inter", width: 28, textAlign: "right" }}>
+                {child.healthScore}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ height: 3, flex: 1, background: T.offWhite, borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${child.trackingScore}%`, background: systemColor + "60", borderRadius: 2 }} />
+              </div>
+              <span style={{ fontSize: 10, color: T.mid, fontFamily: "Inter", width: 28, textAlign: "right" }}>
+                {child.trackingScore}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <div>
