@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
 import { getViewerContext } from "@/lib/viewer.functions";
@@ -8,14 +9,13 @@ import {
   getHealthCheckData,
   updateSelectedChildIds,
 } from "@/lib/healthcheck.functions";
+import { getExecutiveSummary } from "@/lib/report.functions";
 import { TeamMemberDashboard } from "@/components/team-member-dashboard";
 import {
-  getIllustrativeScores,
-  getOverall,
   quarterOf,
   nextQuarter,
-  type SystemScore,
 } from "@/lib/illustrative-scores";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Revenue Health Visualiser" }] }),
