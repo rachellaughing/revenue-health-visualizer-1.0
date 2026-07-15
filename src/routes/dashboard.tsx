@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
 import { getViewerContext } from "@/lib/viewer.functions";
@@ -8,14 +9,13 @@ import {
   getHealthCheckData,
   updateSelectedChildIds,
 } from "@/lib/healthcheck.functions";
+import { getExecutiveSummary } from "@/lib/report.functions";
 import { TeamMemberDashboard } from "@/components/team-member-dashboard";
 import {
-  getIllustrativeScores,
-  getOverall,
   quarterOf,
   nextQuarter,
-  type SystemScore,
 } from "@/lib/illustrative-scores";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Revenue Health Visualiser" }] }),
@@ -740,12 +740,30 @@ function ReturningView({ data }: { data: DashboardData }) {
   const lastQ = quarterOf(submittedAt);
   const nextQ = nextQuarter(submittedAt);
 
-  const scores: SystemScore[] = getIllustrativeScores(latest.id);
-  const overall = data.hasScores && data.overallScore !== null ? data.overallScore : getOverall(scores);
+  const fetchSummary = useServerFn(getExecutiveSummary);
+  const { data: summary, isLoading: summaryLoading } = useQuery({
+    queryKey: ["report", "executive-summary"],
+    queryFn: () => fetchSummary({ data: {} }),
+  });
 
-  const weakest = scores.reduce((a, b) => (a.score <= b.score ? a : b));
+  const SYS_COLOR: Record<string, string> = {
+    POS: "var(--mm-sys-positioning)",
+    AUTH: "var(--mm-sys-authority)",
+    CONV: "var(--mm-sys-conversion)",
+    LFC: "var(--mm-sys-lifecycle)",
+    VIS: "var(--mm-sys-visibility)",
+  };
+
+  const hasSummary = summary && !("error" in summary);
+  const systems = hasSummary ? (summary as any).systems as Array<any> : [];
+  const overall = hasSummary ? (summary as any).overallScore as number : 0;
+  const assessedSystems = systems.filter((s) => s.assessed > 0);
+  const weakest = assessedSystems.length
+    ? assessedSystems.reduce((a, b) => (a.healthScore <= b.healthScore ? a : b))
+    : null;
   const tier = p.tier || "starter";
   const teamUnlocked = tier === "pro" || tier === "diagnostic";
+
 
   return (
     <>
@@ -777,39 +795,49 @@ function ReturningView({ data }: { data: DashboardData }) {
           <div className="mt-1.5 text-[9px] font-bold tracking-[0.1em] text-white/40">OVERALL</div>
         </div>
         <div className="grid gap-x-7 gap-y-2.5 md:grid-cols-2">
-          {scores.map((sys) => (
-            <div key={sys.id}>
-              <div className="mb-1 flex justify-between">
-                <span className="text-[11px] font-medium text-white/70">{sys.label}</span>
-                <span className="text-[11px] font-bold" style={{ color: sys.colorVar }}>
-                  {sys.score.toFixed(1)}
-                </span>
+          {systems.map((sys) => {
+            const color = SYS_COLOR[sys.code] || "var(--mm-teal-bright)";
+            const assessed = sys.assessed > 0;
+            const val = assessed ? Math.round(sys.healthScore) : 0;
+            return (
+              <div key={sys.id}>
+                <div className="mb-1 flex justify-between">
+                  <span className="text-[11px] font-medium text-white/70">{sys.name}</span>
+                  <span className="text-[11px] font-bold" style={{ color: assessed ? color : "rgba(255,255,255,0.4)" }}>
+                    {assessed ? val : "—"}
+                  </span>
+                </div>
+                <div className="h-1 rounded-sm bg-white/[0.08]">
+                  <div
+                    className="h-full rounded-sm"
+                    style={{ width: `${val}%`, background: color }}
+                  />
+                </div>
               </div>
-              <div className="h-1 rounded-sm bg-white/[0.08]">
-                <div
-                  className="h-full rounded-sm"
-                  style={{
-                    width: `${(sys.score / 4) * 100}%`,
-                    background: sys.colorVar,
-                  }}
-                />
-              </div>
+            );
+          })}
+          {!hasSummary && !summaryLoading && (
+            <div className="col-span-2 text-[11px] text-white/50">
+              Complete your Health Check to see your scores.
             </div>
-          ))}
+          )}
         </div>
       </section>
 
       {/* Insight cards */}
       <div className="mb-[22px] grid gap-[18px] md:grid-cols-3">
-        <InsightCard
-          label="Weakest System"
-          title={weakest.label}
-          value={`${weakest.score.toFixed(1)} / 4.0`}
-          sub="This system shows the largest gap. Prioritise it in your roadmap."
-          color={weakest.colorVar}
-          cta="View System Report"
-          href="/reports/revenue-system-health"
-        />
+        {weakest && (
+          <InsightCard
+            label="Weakest System"
+            title={weakest.name}
+            value={`${Math.round(weakest.healthScore)} / 100`}
+            sub="This system shows the largest gap. Prioritise it in your roadmap."
+            color={SYS_COLOR[weakest.code] || "var(--mm-ember)"}
+            cta="View System Report"
+            href="/reports/revenue-system-health"
+          />
+        )}
+
         <InsightCard
           label="Top Priority"
           title="Address your weakest system"
@@ -900,7 +928,7 @@ function InsightCard({
 function ScoreRing({ score, color, size = 56 }: { score: number; color: string; size?: number }) {
   const r = (size - 8) / 2;
   const circ = 2 * Math.PI * r;
-  const fill = (score / 4) * circ;
+  const fill = (Math.max(0, Math.min(100, score)) / 100) * circ;
   return (
     <svg width={size} height={size} className="inline-block">
       <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
@@ -926,8 +954,9 @@ function ScoreRing({ score, color, size = 56 }: { score: number; color: string; 
         fontFamily="Inter"
         fontWeight={600}
       >
-        {score.toFixed(1)}
+        {Math.round(score)}
       </text>
     </svg>
   );
 }
+
