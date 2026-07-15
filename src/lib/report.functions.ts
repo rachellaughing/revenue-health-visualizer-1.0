@@ -637,7 +637,7 @@ export type OpportunityItem = {
   parentColorHex: string;
   healthScore: number;
   trackingScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   opportunityScore: number;
   coreSymptom: string;
   likelyRootCause: string;
@@ -884,7 +884,7 @@ export type RiskItemFull = {
   trackingScore: number;
   visibilityGap: number;
   isSoftShadow: boolean;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   riskCategory: RiskCategory;
   riskLabel: string;
   financialDriverLabel: string;
@@ -1120,7 +1120,7 @@ export type MatrixParentNode = {
   colorHex: string;
   healthScore: number;
   trackingScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   x: number;
   y: number;
 };
@@ -1144,7 +1144,7 @@ export type MatrixChildNode = {
   code: string;
   name: string;
   healthScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   assessed: boolean;
   coreSymptom: string;
   likelyRootCause: string;
