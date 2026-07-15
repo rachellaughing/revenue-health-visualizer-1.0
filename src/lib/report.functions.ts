@@ -196,6 +196,7 @@ function aggregateByParent(
   return parents
     .map((p) => {
       const b = byParent.get(p.id);
+      const assessedCount = b?.health.length ?? 0;
       const healthScore = b ? avg(b.health) : 0;
       const trackingScore = b ? avg(b.tracking) : 0;
       const visibilityGap = b ? avg(b.gap) : 0;
@@ -208,10 +209,10 @@ function aggregateByParent(
         healthScore,
         trackingScore,
         visibilityGap,
-        severity: severityFor(healthScore),
+        severity: assessedCount === 0 ? "not_assessed" : severityFor(healthScore),
         isSoftShadow: (b?.soft ?? 0) > 0,
         isHardShadow: (b?.hard ?? 0) > 0,
-        assessed: b?.health.length ?? 0,
+        assessed: assessedCount,
         childCount: childCountByParent.get(p.id) ?? 0,
       } as ParentScore;
     })
