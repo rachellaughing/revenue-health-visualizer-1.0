@@ -510,7 +510,7 @@ export type ChildSystemScore = {
   healthScore: number;
   trackingScore: number;
   visibilityGap: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   isShadow: boolean;
   assessed: boolean;
 };
