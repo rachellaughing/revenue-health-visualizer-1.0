@@ -2437,16 +2437,8 @@ function HealthCheckShell({
                 );
               })}
 
-              {(() => {
-                const visible =
-                  tier === "starter"
-                    ? activeChildren.filter((c) => selectedSet.has(c.code))
-                    : activeChildren;
-                const last = visible[visible.length - 1];
-                return last && activeChild?.id === last.id && childComplete ? (
-                  <CavitySearchCTA />
-                ) : null;
-              })()}
+              {activeChild && !isChildLocked(activeChild) && <CavitySearchCTA />}
+
 
               {showSkipWarning && childSkippedCount > 0 && (
 
