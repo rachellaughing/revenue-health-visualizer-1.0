@@ -321,7 +321,8 @@ function SystemSection({
   const isStarter = tier === "starter";
   const isDiagnostic = tier === "diagnostic";
   const systemColor = T.sys[system.code] ?? system.color_hex;
-  const sev = severity(system.healthScore);
+  const parentNotAssessed = system.severity === "not_assessed";
+  const sev = parentNotAssessed ? NOT_ASSESSED : severity(system.healthScore);
   const visGap = Math.round(system.healthScore - system.trackingScore);
 
   // Build child rows; for starter, non-selected children show illustrative blurred data.
