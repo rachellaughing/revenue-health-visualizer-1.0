@@ -1027,22 +1027,15 @@ export const getRevenueAtRisk = createServerFn({ method: "POST" })
         const parent = parentById.get(c.parent_system_id);
         const s = scoreByChild.get(c.id);
         const assessed = !!s;
+        if (!assessed) continue; // Exclude unassessed from Revenue at Risk
         let healthScore: number;
         let trackingScore: number;
         let visibilityGap: number;
         let isSoftShadow: boolean;
-        if (assessed) {
-          healthScore = Math.round(Number(s.health_score ?? 0));
-          trackingScore = Math.round(Number(s.tracking_score ?? 0));
-          visibilityGap = s.visibility_gap !== null ? Math.round(Number(s.visibility_gap)) : healthScore - trackingScore;
-          isSoftShadow = !!s.is_soft_shadow;
-        } else {
-          const illus = illustrativeScore(seed, c.code);
-          healthScore = illus.healthScore;
-          trackingScore = illus.trackingScore;
-          visibilityGap = healthScore - trackingScore;
-          isSoftShadow = false;
-        }
+        healthScore = Math.round(Number(s.health_score ?? 0));
+        trackingScore = Math.round(Number(s.tracking_score ?? 0));
+        visibilityGap = s.visibility_gap !== null ? Math.round(Number(s.visibility_gap)) : healthScore - trackingScore;
+        isSoftShadow = !!s.is_soft_shadow;
 
         // Risk filter: health<50 OR visibilityGap>25 OR isSoftShadow
         const flagged = healthScore < 50 || visibilityGap > 25 || isSoftShadow;
