@@ -263,61 +263,41 @@ function ChildRow({
       </div>
 
       <div>
-        <div
-          style={{
-            fontSize: 12,
-            fontFamily: "Inter",
-            fontWeight: 600,
-            color: visGap > 25 ? T.danger : visGap > 15 ? T.sand : T.sys.AUTH,
-          }}
-        >
-          {visGap > 0 ? `+${visGap}` : visGap}
-        </div>
-        {visGap > 25 && !isDiagnostic && (
-          <div
-            style={{
-              fontSize: 10,
-              fontFamily: "Inter",
-              color: T.danger,
-              marginTop: 2,
-              lineHeight: 1.4,
-              maxWidth: 90,
-            }}
-          >
-            Investigate
-          </div>
-        )}
-        {visGap > 25 && isDiagnostic && (
-          <div
-            style={{
-              fontSize: 10,
-              fontFamily: "Inter",
-              color: T.danger,
-              marginTop: 2,
-              lineHeight: 1.4,
-              maxWidth: 90,
-            }}
-          >
-            Shadow risk
-          </div>
-        )}
-        {visGap > 15 && visGap <= 25 && (
-          <div
-            style={{
-              fontSize: 10,
-              fontFamily: "Inter",
-              color: T.sand,
-              marginTop: 2,
-              lineHeight: 1.4,
-            }}
-          >
-            Watch
-          </div>
+        {notAssessed ? (
+          <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>—</div>
+        ) : (
+          <>
+            <div
+              style={{
+                fontSize: 12,
+                fontFamily: "Inter",
+                fontWeight: 600,
+                color: visGap > 25 ? T.danger : visGap > 15 ? T.sand : T.sys.AUTH,
+              }}
+            >
+              {visGap > 0 ? `+${visGap}` : visGap}
+            </div>
+            {visGap > 25 && !isDiagnostic && (
+              <div style={{ fontSize: 10, fontFamily: "Inter", color: T.danger, marginTop: 2, lineHeight: 1.4, maxWidth: 90 }}>
+                Investigate
+              </div>
+            )}
+            {visGap > 25 && isDiagnostic && (
+              <div style={{ fontSize: 10, fontFamily: "Inter", color: T.danger, marginTop: 2, lineHeight: 1.4, maxWidth: 90 }}>
+                Shadow risk
+              </div>
+            )}
+            {visGap > 15 && visGap <= 25 && (
+              <div style={{ fontSize: 10, fontFamily: "Inter", color: T.sand, marginTop: 2, lineHeight: 1.4 }}>
+                Watch
+              </div>
+            )}
+          </>
         )}
       </div>
 
       <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
-        {confidenceLabel(child.trackingScore)}
+        {notAssessed ? "—" : confidenceLabel(child.trackingScore)}
       </div>
     </div>
   );
