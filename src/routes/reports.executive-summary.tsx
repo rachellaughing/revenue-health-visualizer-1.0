@@ -497,7 +497,7 @@ function ReportBody({
     return { ...s, illustrative: false as const };
   });
 
-  const realScores = visibleSystems.filter((s) => !s.illustrative).map((s) => s.healthScore);
+  const realScores = visibleSystems.filter((s) => !s.illustrative && s.severity !== "not_assessed").map((s) => s.healthScore);
   const realCount = realScores.length;
   const minReal = realScores.length ? Math.min(...realScores) : 0;
   const maxReal = realScores.length ? Math.max(...realScores) : 0;
