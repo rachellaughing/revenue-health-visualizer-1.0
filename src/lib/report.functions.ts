@@ -14,7 +14,7 @@ export type ParentScore = {
   healthScore: number;
   trackingScore: number;
   visibilityGap: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   isSoftShadow: boolean;
   isHardShadow: boolean;
   assessed: number; // # child systems with scores
