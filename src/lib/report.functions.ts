@@ -580,10 +580,11 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
       const systems: SystemHealthSystem[] = parentAgg.map((p) => {
         const kids = (childrenByParent.get(p.id) ?? []).map((c: any): ChildSystemScore => {
           const s = scoreByChild.get(c.id);
-          const health = s ? Number(s.health_score ?? 0) : 0;
-          const tracking = s ? Number(s.tracking_score ?? 0) : 0;
+          const assessed = !!s;
+          const health = assessed ? Number(s.health_score ?? 0) : 0;
+          const tracking = assessed ? Number(s.tracking_score ?? 0) : 0;
           const visibilityGap =
-            s && s.visibility_gap !== null ? Number(s.visibility_gap) : health - tracking;
+            assessed && s.visibility_gap !== null ? Number(s.visibility_gap) : health - tracking;
           return {
             id: c.id,
             parentCode: p.code,
@@ -592,9 +593,9 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
             healthScore: Math.round(health),
             trackingScore: Math.round(tracking),
             visibilityGap: Math.round(visibilityGap),
-            severity: severityFor(health),
-            isShadow: health >= 60 && tracking < 40,
-            assessed: !!s,
+            severity: assessed ? severityFor(health) : "not_assessed",
+            isShadow: assessed && health >= 60 && tracking < 40,
+            assessed,
           };
         });
 
