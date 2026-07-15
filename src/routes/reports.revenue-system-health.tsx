@@ -393,7 +393,7 @@ function SystemSection({
           textAlign: "left",
         }}
       >
-        <ScoreRing score={Math.round(system.healthScore)} size={60} color={systemColor} />
+        <ScoreRing score={parentNotAssessed ? 0 : Math.round(system.healthScore)} size={60} color={parentNotAssessed ? T.mid : systemColor} />
 
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
