@@ -39,7 +39,12 @@ function severityStyle(s: string) {
   if (s === "critical") return { color: T.danger, bg: "rgba(239,68,68,0.1)" };
   if (s === "fragile") return { color: T.sand, bg: "rgba(196,149,106,0.12)" };
   if (s === "stable") return { color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
+  if (s === "not_assessed") return { color: T.mid, bg: "rgba(136,136,128,0.10)" };
   return { color: T.mid, bg: T.offWhite };
+}
+function severityLabel(s: string) {
+  if (s === "not_assessed") return "Not assessed";
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function effortStyle(e: string) {
   if (e === "Low") return { color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
@@ -493,7 +498,7 @@ function OpportunityCard({
             whiteSpace: "nowrap",
           }}
         >
-          {opp.severity.charAt(0).toUpperCase() + opp.severity.slice(1)}
+          {severityLabel(opp.severity)}
         </div>
 
         <div style={{ textAlign: "center", minWidth: 56 }}>

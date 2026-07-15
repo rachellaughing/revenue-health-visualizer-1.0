@@ -60,6 +60,11 @@ function severity(score: number) {
   if (score < 75) return { label: "Stable", color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
   return { label: "Strong", color: T.tealBright, bg: "rgba(74,191,196,0.12)" };
 }
+const NOT_ASSESSED = { label: "Not assessed", color: T.mid, bg: "rgba(136,136,128,0.10)" };
+function sevFor(child: ChildSystemScore & { illustrative?: boolean }) {
+  if (child.severity === "not_assessed" && !(child as any).illustrative) return NOT_ASSESSED;
+  return severity(child.healthScore);
+}
 
 function confidenceLabel(score: number) {
   if (score < 30) return "Very Low";
@@ -154,7 +159,8 @@ function ChildRow({
   locked: boolean;
   isDiagnostic: boolean;
 }) {
-  const sev = severity(child.healthScore);
+  const notAssessed = child.severity === "not_assessed" && !(child as any).illustrative;
+  const sev = sevFor(child);
   const visGap = child.visibilityGap;
 
   return (
@@ -209,8 +215,8 @@ function ChildRow({
         )}
       </div>
 
-      <div style={{ fontSize: 15, fontFamily: "Inter", fontWeight: 700, color: T.ink }}>
-        {child.healthScore}
+      <div style={{ fontSize: 15, fontFamily: "Inter", fontWeight: 700, color: notAssessed ? T.mid : T.ink }}>
+        {notAssessed ? "—" : child.healthScore}
       </div>
 
       <div
@@ -230,126 +236,68 @@ function ChildRow({
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div
-            style={{
-              height: 5,
-              flex: 1,
-              background: T.offWhite,
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${child.healthScore}%`,
-                background: systemColor,
-                borderRadius: 3,
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 10,
-              color: T.mid,
-              fontFamily: "Inter",
-              width: 28,
-              textAlign: "right",
-            }}
-          >
-            {child.healthScore}
+        {notAssessed ? (
+          <span style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, fontStyle: "italic" }}>
+            No responses recorded
           </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div
-            style={{
-              height: 3,
-              flex: 1,
-              background: T.offWhite,
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${child.trackingScore}%`,
-                background: systemColor + "60",
-                borderRadius: 2,
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontSize: 10,
-              color: T.mid,
-              fontFamily: "Inter",
-              width: 28,
-              textAlign: "right",
-            }}
-          >
-            {child.trackingScore}
-          </span>
-        </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ height: 5, flex: 1, background: T.offWhite, borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${child.healthScore}%`, background: systemColor, borderRadius: 3 }} />
+              </div>
+              <span style={{ fontSize: 10, color: T.mid, fontFamily: "Inter", width: 28, textAlign: "right" }}>
+                {child.healthScore}
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ height: 3, flex: 1, background: T.offWhite, borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${child.trackingScore}%`, background: systemColor + "60", borderRadius: 2 }} />
+              </div>
+              <span style={{ fontSize: 10, color: T.mid, fontFamily: "Inter", width: 28, textAlign: "right" }}>
+                {child.trackingScore}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <div>
-        <div
-          style={{
-            fontSize: 12,
-            fontFamily: "Inter",
-            fontWeight: 600,
-            color: visGap > 25 ? T.danger : visGap > 15 ? T.sand : T.sys.AUTH,
-          }}
-        >
-          {visGap > 0 ? `+${visGap}` : visGap}
-        </div>
-        {visGap > 25 && !isDiagnostic && (
-          <div
-            style={{
-              fontSize: 10,
-              fontFamily: "Inter",
-              color: T.danger,
-              marginTop: 2,
-              lineHeight: 1.4,
-              maxWidth: 90,
-            }}
-          >
-            Investigate
-          </div>
-        )}
-        {visGap > 25 && isDiagnostic && (
-          <div
-            style={{
-              fontSize: 10,
-              fontFamily: "Inter",
-              color: T.danger,
-              marginTop: 2,
-              lineHeight: 1.4,
-              maxWidth: 90,
-            }}
-          >
-            Shadow risk
-          </div>
-        )}
-        {visGap > 15 && visGap <= 25 && (
-          <div
-            style={{
-              fontSize: 10,
-              fontFamily: "Inter",
-              color: T.sand,
-              marginTop: 2,
-              lineHeight: 1.4,
-            }}
-          >
-            Watch
-          </div>
+        {notAssessed ? (
+          <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>—</div>
+        ) : (
+          <>
+            <div
+              style={{
+                fontSize: 12,
+                fontFamily: "Inter",
+                fontWeight: 600,
+                color: visGap > 25 ? T.danger : visGap > 15 ? T.sand : T.sys.AUTH,
+              }}
+            >
+              {visGap > 0 ? `+${visGap}` : visGap}
+            </div>
+            {visGap > 25 && !isDiagnostic && (
+              <div style={{ fontSize: 10, fontFamily: "Inter", color: T.danger, marginTop: 2, lineHeight: 1.4, maxWidth: 90 }}>
+                Investigate
+              </div>
+            )}
+            {visGap > 25 && isDiagnostic && (
+              <div style={{ fontSize: 10, fontFamily: "Inter", color: T.danger, marginTop: 2, lineHeight: 1.4, maxWidth: 90 }}>
+                Shadow risk
+              </div>
+            )}
+            {visGap > 15 && visGap <= 25 && (
+              <div style={{ fontSize: 10, fontFamily: "Inter", color: T.sand, marginTop: 2, lineHeight: 1.4 }}>
+                Watch
+              </div>
+            )}
+          </>
         )}
       </div>
 
       <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
-        {confidenceLabel(child.trackingScore)}
+        {notAssessed ? "—" : confidenceLabel(child.trackingScore)}
       </div>
     </div>
   );
@@ -373,7 +321,8 @@ function SystemSection({
   const isStarter = tier === "starter";
   const isDiagnostic = tier === "diagnostic";
   const systemColor = T.sys[system.code] ?? system.color_hex;
-  const sev = severity(system.healthScore);
+  const parentNotAssessed = system.severity === "not_assessed";
+  const sev = parentNotAssessed ? NOT_ASSESSED : severity(system.healthScore);
   const visGap = Math.round(system.healthScore - system.trackingScore);
 
   // Build child rows; for starter, non-selected children show illustrative blurred data.
@@ -396,8 +345,8 @@ function SystemSection({
     return { ...c, illustrative: false };
   });
 
-  const realChildren = childRows.filter((c) => !c.illustrative);
-  const weakest = (realChildren.length ? realChildren : childRows)
+  const realChildren = childRows.filter((c) => !c.illustrative && c.severity !== "not_assessed");
+  const weakest = (realChildren.length ? realChildren : childRows.filter((c) => c.severity !== "not_assessed"))
     .slice()
     .sort((a, b) => a.healthScore - b.healthScore)[0];
 
@@ -444,7 +393,7 @@ function SystemSection({
           textAlign: "left",
         }}
       >
-        <ScoreRing score={Math.round(system.healthScore)} size={60} color={systemColor} />
+        <ScoreRing score={parentNotAssessed ? 0 : Math.round(system.healthScore)} size={60} color={parentNotAssessed ? T.mid : systemColor} />
 
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
@@ -496,14 +445,12 @@ function SystemSection({
               fontSize: 18,
               fontFamily: "Inter",
               fontWeight: 700,
-              color: systemColor + "C0",
+              color: parentNotAssessed ? T.mid : systemColor + "C0",
             }}
           >
-            {Math.round(system.trackingScore)}
+            {parentNotAssessed ? "—" : Math.round(system.trackingScore)}
           </div>
-          <div
-            style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}
-          >
+          <div style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}>
             TRACKING
           </div>
         </div>
@@ -514,14 +461,12 @@ function SystemSection({
               fontSize: 18,
               fontFamily: "Inter",
               fontWeight: 700,
-              color: visGap > 20 ? T.sand : T.sys.AUTH,
+              color: parentNotAssessed ? T.mid : visGap > 20 ? T.sand : T.sys.AUTH,
             }}
           >
-            {visGap > 0 ? `+${visGap}` : visGap}
+            {parentNotAssessed ? "—" : visGap > 0 ? `+${visGap}` : visGap}
           </div>
-          <div
-            style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}
-          >
+          <div style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}>
             VIS. GAP
           </div>
         </div>

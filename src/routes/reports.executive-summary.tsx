@@ -66,7 +66,12 @@ function severityBg(s: string) {
   if (s === "fragile") return "rgba(196,149,106,0.12)";
   if (s === "stable") return "rgba(16,185,129,0.1)";
   if (s === "strong") return "rgba(16,185,129,0.12)";
+  if (s === "not_assessed") return "rgba(136,136,128,0.10)";
   return T.offWhite;
+}
+function severityLabelText(s: string) {
+  if (s === "not_assessed") return "Not assessed";
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // ─── Reusable bits ──────────────────────────────────────────────────────────
@@ -492,7 +497,7 @@ function ReportBody({
     return { ...s, illustrative: false as const };
   });
 
-  const realScores = visibleSystems.filter((s) => !s.illustrative).map((s) => s.healthScore);
+  const realScores = visibleSystems.filter((s) => !s.illustrative && s.severity !== "not_assessed").map((s) => s.healthScore);
   const realCount = realScores.length;
   const minReal = realScores.length ? Math.min(...realScores) : 0;
   const maxReal = realScores.length ? Math.max(...realScores) : 0;
@@ -880,10 +885,10 @@ function ReportBody({
                       fontSize: 20,
                       fontFamily: "Inter",
                       fontWeight: 700,
-                      color: T.ink,
+                      color: sys.severity === "not_assessed" ? T.mid : T.ink,
                     }}
                   >
-                    {Math.round(sys.healthScore)}
+                    {sys.severity === "not_assessed" ? "—" : Math.round(sys.healthScore)}
                   </div>
 
                   <div
@@ -900,7 +905,7 @@ function ReportBody({
                       width: "fit-content",
                     }}
                   >
-                    {sys.severity.charAt(0).toUpperCase() + sys.severity.slice(1)}
+                    {severityLabelText(sys.severity)}
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

@@ -14,7 +14,7 @@ export type ParentScore = {
   healthScore: number;
   trackingScore: number;
   visibilityGap: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   isSoftShadow: boolean;
   isHardShadow: boolean;
   assessed: number; // # child systems with scores
@@ -196,6 +196,7 @@ function aggregateByParent(
   return parents
     .map((p) => {
       const b = byParent.get(p.id);
+      const assessedCount = b?.health.length ?? 0;
       const healthScore = b ? avg(b.health) : 0;
       const trackingScore = b ? avg(b.tracking) : 0;
       const visibilityGap = b ? avg(b.gap) : 0;
@@ -208,10 +209,10 @@ function aggregateByParent(
         healthScore,
         trackingScore,
         visibilityGap,
-        severity: severityFor(healthScore),
+        severity: assessedCount === 0 ? "not_assessed" : severityFor(healthScore),
         isSoftShadow: (b?.soft ?? 0) > 0,
         isHardShadow: (b?.hard ?? 0) > 0,
-        assessed: b?.health.length ?? 0,
+        assessed: assessedCount,
         childCount: childCountByParent.get(p.id) ?? 0,
       } as ParentScore;
     })
@@ -510,7 +511,7 @@ export type ChildSystemScore = {
   healthScore: number;
   trackingScore: number;
   visibilityGap: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   isShadow: boolean;
   assessed: boolean;
 };
@@ -579,10 +580,11 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
       const systems: SystemHealthSystem[] = parentAgg.map((p) => {
         const kids = (childrenByParent.get(p.id) ?? []).map((c: any): ChildSystemScore => {
           const s = scoreByChild.get(c.id);
-          const health = s ? Number(s.health_score ?? 0) : 0;
-          const tracking = s ? Number(s.tracking_score ?? 0) : 0;
+          const assessed = !!s;
+          const health = assessed ? Number(s.health_score ?? 0) : 0;
+          const tracking = assessed ? Number(s.tracking_score ?? 0) : 0;
           const visibilityGap =
-            s && s.visibility_gap !== null ? Number(s.visibility_gap) : health - tracking;
+            assessed && s.visibility_gap !== null ? Number(s.visibility_gap) : health - tracking;
           return {
             id: c.id,
             parentCode: p.code,
@@ -591,9 +593,9 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
             healthScore: Math.round(health),
             trackingScore: Math.round(tracking),
             visibilityGap: Math.round(visibilityGap),
-            severity: severityFor(health),
-            isShadow: health >= 60 && tracking < 40,
-            assessed: !!s,
+            severity: assessed ? severityFor(health) : "not_assessed",
+            isShadow: assessed && health >= 60 && tracking < 40,
+            assessed,
           };
         });
 
@@ -637,7 +639,7 @@ export type OpportunityItem = {
   parentColorHex: string;
   healthScore: number;
   trackingScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   opportunityScore: number;
   coreSymptom: string;
   likelyRootCause: string;
@@ -812,8 +814,9 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
         const multiplier = 1 + 0.15 * weakCascadeCount;
         const opportunityScore = Math.round(baseScore * multiplier);
 
-        const severity: OpportunityItem["severity"] =
-          info.healthScore < 40
+        const severity: OpportunityItem["severity"] = !info.assessed
+          ? "not_assessed"
+          : info.healthScore < 40
             ? "critical"
             : info.healthScore < 60
               ? "fragile"
@@ -850,7 +853,10 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
         });
       }
 
-      opportunities.sort((a, b) => b.opportunityScore - a.opportunityScore);
+      opportunities.sort((a, b) => {
+        if (a.assessed !== b.assessed) return a.assessed ? -1 : 1;
+        return b.opportunityScore - a.opportunityScore;
+      });
 
       const tier = ((profileRes.data?.tier ?? "starter") as Tier);
 
@@ -884,7 +890,7 @@ export type RiskItemFull = {
   trackingScore: number;
   visibilityGap: number;
   isSoftShadow: boolean;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   riskCategory: RiskCategory;
   riskLabel: string;
   financialDriverLabel: string;
@@ -1021,22 +1027,15 @@ export const getRevenueAtRisk = createServerFn({ method: "POST" })
         const parent = parentById.get(c.parent_system_id);
         const s = scoreByChild.get(c.id);
         const assessed = !!s;
+        if (!assessed) continue; // Exclude unassessed from Revenue at Risk
         let healthScore: number;
         let trackingScore: number;
         let visibilityGap: number;
         let isSoftShadow: boolean;
-        if (assessed) {
-          healthScore = Math.round(Number(s.health_score ?? 0));
-          trackingScore = Math.round(Number(s.tracking_score ?? 0));
-          visibilityGap = s.visibility_gap !== null ? Math.round(Number(s.visibility_gap)) : healthScore - trackingScore;
-          isSoftShadow = !!s.is_soft_shadow;
-        } else {
-          const illus = illustrativeScore(seed, c.code);
-          healthScore = illus.healthScore;
-          trackingScore = illus.trackingScore;
-          visibilityGap = healthScore - trackingScore;
-          isSoftShadow = false;
-        }
+        healthScore = Math.round(Number(s.health_score ?? 0));
+        trackingScore = Math.round(Number(s.tracking_score ?? 0));
+        visibilityGap = s.visibility_gap !== null ? Math.round(Number(s.visibility_gap)) : healthScore - trackingScore;
+        isSoftShadow = !!s.is_soft_shadow;
 
         // Risk filter: health<50 OR visibilityGap>25 OR isSoftShadow
         const flagged = healthScore < 50 || visibilityGap > 25 || isSoftShadow;
@@ -1055,8 +1054,9 @@ export const getRevenueAtRisk = createServerFn({ method: "POST" })
           trackingScore,
           visibilityGap,
           isSoftShadow,
-          severity:
-            healthScore < 40 ? "critical" : healthScore < 60 ? "fragile" : healthScore < 75 ? "stable" : "strong",
+          severity: !assessed
+            ? "not_assessed"
+            : healthScore < 40 ? "critical" : healthScore < 60 ? "fragile" : healthScore < 75 ? "stable" : "strong",
           riskCategory: cat.cat,
           riskLabel: cat.label,
           financialDriverLabel: cat.driver,
@@ -1120,7 +1120,7 @@ export type MatrixParentNode = {
   colorHex: string;
   healthScore: number;
   trackingScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   x: number;
   y: number;
 };
@@ -1144,7 +1144,7 @@ export type MatrixChildNode = {
   code: string;
   name: string;
   healthScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong";
+  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   assessed: boolean;
   coreSymptom: string;
   likelyRootCause: string;
