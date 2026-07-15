@@ -885,10 +885,10 @@ function ReportBody({
                       fontSize: 20,
                       fontFamily: "Inter",
                       fontWeight: 700,
-                      color: T.ink,
+                      color: sys.severity === "not_assessed" ? T.mid : T.ink,
                     }}
                   >
-                    {Math.round(sys.healthScore)}
+                    {sys.severity === "not_assessed" ? "—" : Math.round(sys.healthScore)}
                   </div>
 
                   <div
