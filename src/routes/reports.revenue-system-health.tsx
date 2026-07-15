@@ -159,7 +159,8 @@ function ChildRow({
   locked: boolean;
   isDiagnostic: boolean;
 }) {
-  const sev = severity(child.healthScore);
+  const notAssessed = child.severity === "not_assessed" && !(child as any).illustrative;
+  const sev = sevFor(child);
   const visGap = child.visibilityGap;
 
   return (
