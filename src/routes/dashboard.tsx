@@ -795,39 +795,49 @@ function ReturningView({ data }: { data: DashboardData }) {
           <div className="mt-1.5 text-[9px] font-bold tracking-[0.1em] text-white/40">OVERALL</div>
         </div>
         <div className="grid gap-x-7 gap-y-2.5 md:grid-cols-2">
-          {scores.map((sys) => (
-            <div key={sys.id}>
-              <div className="mb-1 flex justify-between">
-                <span className="text-[11px] font-medium text-white/70">{sys.label}</span>
-                <span className="text-[11px] font-bold" style={{ color: sys.colorVar }}>
-                  {sys.score.toFixed(1)}
-                </span>
+          {systems.map((sys) => {
+            const color = SYS_COLOR[sys.code] || "var(--mm-teal-bright)";
+            const assessed = sys.assessed > 0;
+            const val = assessed ? Math.round(sys.healthScore) : 0;
+            return (
+              <div key={sys.id}>
+                <div className="mb-1 flex justify-between">
+                  <span className="text-[11px] font-medium text-white/70">{sys.name}</span>
+                  <span className="text-[11px] font-bold" style={{ color: assessed ? color : "rgba(255,255,255,0.4)" }}>
+                    {assessed ? val : "—"}
+                  </span>
+                </div>
+                <div className="h-1 rounded-sm bg-white/[0.08]">
+                  <div
+                    className="h-full rounded-sm"
+                    style={{ width: `${val}%`, background: color }}
+                  />
+                </div>
               </div>
-              <div className="h-1 rounded-sm bg-white/[0.08]">
-                <div
-                  className="h-full rounded-sm"
-                  style={{
-                    width: `${(sys.score / 4) * 100}%`,
-                    background: sys.colorVar,
-                  }}
-                />
-              </div>
+            );
+          })}
+          {!hasSummary && !summaryLoading && (
+            <div className="col-span-2 text-[11px] text-white/50">
+              Complete your Health Check to see your scores.
             </div>
-          ))}
+          )}
         </div>
       </section>
 
       {/* Insight cards */}
       <div className="mb-[22px] grid gap-[18px] md:grid-cols-3">
-        <InsightCard
-          label="Weakest System"
-          title={weakest.label}
-          value={`${weakest.score.toFixed(1)} / 4.0`}
-          sub="This system shows the largest gap. Prioritise it in your roadmap."
-          color={weakest.colorVar}
-          cta="View System Report"
-          href="/reports/revenue-system-health"
-        />
+        {weakest && (
+          <InsightCard
+            label="Weakest System"
+            title={weakest.name}
+            value={`${Math.round(weakest.healthScore)} / 100`}
+            sub="This system shows the largest gap. Prioritise it in your roadmap."
+            color={SYS_COLOR[weakest.code] || "var(--mm-ember)"}
+            cta="View System Report"
+            href="/reports/revenue-system-health"
+          />
+        )}
+
         <InsightCard
           label="Top Priority"
           title="Address your weakest system"
