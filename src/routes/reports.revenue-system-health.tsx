@@ -445,14 +445,12 @@ function SystemSection({
               fontSize: 18,
               fontFamily: "Inter",
               fontWeight: 700,
-              color: systemColor + "C0",
+              color: parentNotAssessed ? T.mid : systemColor + "C0",
             }}
           >
-            {Math.round(system.trackingScore)}
+            {parentNotAssessed ? "—" : Math.round(system.trackingScore)}
           </div>
-          <div
-            style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}
-          >
+          <div style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}>
             TRACKING
           </div>
         </div>
@@ -463,14 +461,12 @@ function SystemSection({
               fontSize: 18,
               fontFamily: "Inter",
               fontWeight: 700,
-              color: visGap > 20 ? T.sand : T.sys.AUTH,
+              color: parentNotAssessed ? T.mid : visGap > 20 ? T.sand : T.sys.AUTH,
             }}
           >
-            {visGap > 0 ? `+${visGap}` : visGap}
+            {parentNotAssessed ? "—" : visGap > 0 ? `+${visGap}` : visGap}
           </div>
-          <div
-            style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}
-          >
+          <div style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em" }}>
             VIS. GAP
           </div>
         </div>
