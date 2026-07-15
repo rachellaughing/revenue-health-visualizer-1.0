@@ -66,7 +66,12 @@ function severityBg(s: string) {
   if (s === "fragile") return "rgba(196,149,106,0.12)";
   if (s === "stable") return "rgba(16,185,129,0.1)";
   if (s === "strong") return "rgba(16,185,129,0.12)";
+  if (s === "not_assessed") return "rgba(136,136,128,0.10)";
   return T.offWhite;
+}
+function severityLabelText(s: string) {
+  if (s === "not_assessed") return "Not assessed";
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 // ─── Reusable bits ──────────────────────────────────────────────────────────
