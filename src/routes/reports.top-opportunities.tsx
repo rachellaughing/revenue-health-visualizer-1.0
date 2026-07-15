@@ -498,7 +498,7 @@ function OpportunityCard({
             whiteSpace: "nowrap",
           }}
         >
-          {opp.severity.charAt(0).toUpperCase() + opp.severity.slice(1)}
+          {severityLabel(opp.severity)}
         </div>
 
         <div style={{ textAlign: "center", minWidth: 56 }}>
