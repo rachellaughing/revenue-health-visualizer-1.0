@@ -853,7 +853,10 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
         });
       }
 
-      opportunities.sort((a, b) => b.opportunityScore - a.opportunityScore);
+      opportunities.sort((a, b) => {
+        if (a.assessed !== b.assessed) return a.assessed ? -1 : 1;
+        return b.opportunityScore - a.opportunityScore;
+      });
 
       const tier = ((profileRes.data?.tier ?? "starter") as Tier);
 
