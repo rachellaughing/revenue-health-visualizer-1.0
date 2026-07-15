@@ -740,12 +740,30 @@ function ReturningView({ data }: { data: DashboardData }) {
   const lastQ = quarterOf(submittedAt);
   const nextQ = nextQuarter(submittedAt);
 
-  const scores: SystemScore[] = getIllustrativeScores(latest.id);
-  const overall = data.hasScores && data.overallScore !== null ? data.overallScore : getOverall(scores);
+  const fetchSummary = useServerFn(getExecutiveSummary);
+  const { data: summary, isLoading: summaryLoading } = useQuery({
+    queryKey: ["report", "executive-summary"],
+    queryFn: () => fetchSummary({ data: {} }),
+  });
 
-  const weakest = scores.reduce((a, b) => (a.score <= b.score ? a : b));
+  const SYS_COLOR: Record<string, string> = {
+    POS: "var(--mm-sys-positioning)",
+    AUTH: "var(--mm-sys-authority)",
+    CONV: "var(--mm-sys-conversion)",
+    LFC: "var(--mm-sys-lifecycle)",
+    VIS: "var(--mm-sys-visibility)",
+  };
+
+  const hasSummary = summary && !("error" in summary);
+  const systems = hasSummary ? (summary as any).systems as Array<any> : [];
+  const overall = hasSummary ? (summary as any).overallScore as number : 0;
+  const assessedSystems = systems.filter((s) => s.assessed > 0);
+  const weakest = assessedSystems.length
+    ? assessedSystems.reduce((a, b) => (a.healthScore <= b.healthScore ? a : b))
+    : null;
   const tier = p.tier || "starter";
   const teamUnlocked = tier === "pro" || tier === "diagnostic";
+
 
   return (
     <>
