@@ -60,6 +60,11 @@ function severity(score: number) {
   if (score < 75) return { label: "Stable", color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
   return { label: "Strong", color: T.tealBright, bg: "rgba(74,191,196,0.12)" };
 }
+const NOT_ASSESSED = { label: "Not assessed", color: T.mid, bg: "rgba(136,136,128,0.10)" };
+function sevFor(child: ChildSystemScore & { illustrative?: boolean }) {
+  if (child.severity === "not_assessed" && !(child as any).illustrative) return NOT_ASSESSED;
+  return severity(child.healthScore);
+}
 
 function confidenceLabel(score: number) {
   if (score < 30) return "Very Low";
