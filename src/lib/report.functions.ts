@@ -1061,8 +1061,9 @@ export const getRevenueAtRisk = createServerFn({ method: "POST" })
           trackingScore,
           visibilityGap,
           isSoftShadow,
-          severity:
-            healthScore < 40 ? "critical" : healthScore < 60 ? "fragile" : healthScore < 75 ? "stable" : "strong",
+          severity: !assessed
+            ? "not_assessed"
+            : healthScore < 40 ? "critical" : healthScore < 60 ? "fragile" : healthScore < 75 ? "stable" : "strong",
           riskCategory: cat.cat,
           riskLabel: cat.label,
           financialDriverLabel: cat.driver,
