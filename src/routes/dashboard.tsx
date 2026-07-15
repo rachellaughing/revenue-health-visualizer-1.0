@@ -928,7 +928,7 @@ function InsightCard({
 function ScoreRing({ score, color, size = 56 }: { score: number; color: string; size?: number }) {
   const r = (size - 8) / 2;
   const circ = 2 * Math.PI * r;
-  const fill = (score / 4) * circ;
+  const fill = (Math.max(0, Math.min(100, score)) / 100) * circ;
   return (
     <svg width={size} height={size} className="inline-block">
       <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
@@ -954,8 +954,9 @@ function ScoreRing({ score, color, size = 56 }: { score: number; color: string; 
         fontFamily="Inter"
         fontWeight={600}
       >
-        {score.toFixed(1)}
+        {Math.round(score)}
       </text>
     </svg>
   );
 }
+
