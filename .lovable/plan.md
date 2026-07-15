@@ -1,33 +1,14 @@
-## Problem
+Update the `CavitySearchCTA` component in `src/routes/health-check.index.tsx`.
 
-In `src/routes/health-check.index.tsx`, `autoCollapsed` starts as an empty `{}` on every mount (line 1196). A card only collapses when its `question_id` is present in `autoCollapsed`, which currently only happens as a side effect of answering in the current session. On navigating away and back, previously-answered questions load from the DB into `responses`, but `autoCollapsed` is empty, so every completed question renders fully expanded.
+1. Add an internal `open` state using `useState` so the card can be toggled open/closed.
+2. Make the header row a clickable button that toggles the state and shows an expand/collapse indicator (chevron).
+3. When collapsed, show only the header title "Is this a lot?".
+4. When expanded, show the new body copy and the existing "Learn about the Diagnostic™ →" CTA button.
+5. Replace the existing two paragraphs with the new single paragraph provided by the user:
 
-## Fix
+> If this feels less like a survey and more like a business cavity search — good. That's the point. We're not trying to figure out which Disney princess you are. This is a thorough exam, with a differential diagnosis.
+> Can't answer some of these? Even better. That's what the Revenue Health Diagnostic™ is for — we interview your team, find what nobody documented, and hand you back the business bible for how your revenue actually works.
 
-Initialize `autoCollapsed` from the already-loaded responses so any question that is complete or skipped starts collapsed.
+6. Preserve existing visual styling (dark abyss background, Instrument Serif heading, ember CTA button, rounded corners, padding, and max-width on body text).
 
-Change line 1196 from:
-
-```ts
-const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>({});
-```
-
-to seed from `initialResponses`:
-
-```ts
-const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>(() => {
-  const seed: Record<string, boolean> = {};
-  for (const [qid, r] of Object.entries(initialResponses)) {
-    const isSkipped = r.health === -1;
-    const isComplete = r.health !== null && r.health > 0 && r.tracking !== null;
-    if (isSkipped || isComplete) seed[qid] = true;
-  }
-  return seed;
-});
-```
-
-`manuallyExpanded` stays empty on mount, so returning users see collapsed cards; clicking one still expands as before.
-
-## Non-goals
-
-No changes to answer/save logic, scoring, the sticky breadcrumb, the CTA, or styling.
+No other components or logic will be changed.

@@ -221,59 +221,83 @@ function SelectionBreadcrumb({
 }
 
 function CavitySearchCTA() {
+  const [open, setOpen] = useState(false);
   return (
-    <div style={{ background: T.abyss, borderRadius: 16, padding: "26px 28px", marginTop: 20 }}>
-      <div
+    <div style={{ background: T.abyss, borderRadius: 16, padding: "20px 24px", marginTop: 20 }}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
         style={{
-          fontFamily: "'Instrument Serif', Georgia, serif",
-          fontSize: 22,
-          color: T.paper,
-          lineHeight: 1.25,
-          marginBottom: 8,
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: "transparent",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          textAlign: "left",
         }}
       >
-        Is this a lot?
-      </div>
-      <p
-        style={{
-          fontSize: 13,
-          color: "rgba(255,254,250,0.7)",
-          lineHeight: 1.6,
-          margin: "0 0 10px",
-          maxWidth: 560,
-        }}
-      >
-        If this feels less like a survey and more like a business cavity search — good.
-        That's the point. This isn't a lead-gen quiz. It's a thorough exam with a differential
-        diagnosis.
-      </p>
-      <p
-        style={{
-          fontSize: 13,
-          color: "rgba(255,254,250,0.7)",
-          lineHeight: 1.6,
-          margin: "0 0 18px",
-          maxWidth: 560,
-        }}
-      >
-        Don't know the answer to some of these? Also good. That's exactly what the Revenue Health
-        Diagnostic™ is for. We interview your team and find the systems nobody documented.
-      </p>
-      <Link
-        to="/diagnostic"
-        style={{
-          display: "inline-block",
-          padding: "10px 18px",
-          borderRadius: 8,
-          background: T.ember,
-          color: "#fff",
-          fontSize: 13,
-          fontWeight: 700,
-          textDecoration: "none",
-        }}
-      >
-        Learn about the Diagnostic™ →
-      </Link>
+        <div
+          style={{
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: 22,
+            color: T.paper,
+            lineHeight: 1.25,
+          }}
+        >
+          Is this a lot?
+        </div>
+        <span
+          style={{
+            display: "inline-block",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 200ms ease",
+            fontSize: 13,
+            color: "rgba(255,254,250,0.7)",
+          }}
+        >
+          ▾
+        </span>
+      </button>
+      {open && (
+        <>
+          <p
+            style={{
+              fontSize: 13,
+              color: "rgba(255,254,250,0.7)",
+              lineHeight: 1.6,
+              margin: "14px 0 18px",
+              maxWidth: 560,
+            }}
+          >
+            If this feels less like a survey and more like a business cavity search — good.
+            That's the point. We're not trying to figure out which Disney princess you are. This
+            is a thorough exam, with a differential diagnosis.
+            <br />
+            <br />
+            Can't answer some of these? Even better. That's what the Revenue Health Diagnostic™ is
+            for — we interview your team, find what nobody documented, and hand you back the
+            business bible for how your revenue actually works.
+          </p>
+          <Link
+            to="/diagnostic"
+            style={{
+              display: "inline-block",
+              padding: "10px 18px",
+              borderRadius: 8,
+              background: T.ember,
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            Learn about the Diagnostic™ →
+          </Link>
+        </>
+      )}
     </div>
   );
 }
