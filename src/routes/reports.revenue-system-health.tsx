@@ -345,8 +345,8 @@ function SystemSection({
     return { ...c, illustrative: false };
   });
 
-  const realChildren = childRows.filter((c) => !c.illustrative);
-  const weakest = (realChildren.length ? realChildren : childRows)
+  const realChildren = childRows.filter((c) => !c.illustrative && c.severity !== "not_assessed");
+  const weakest = (realChildren.length ? realChildren : childRows.filter((c) => c.severity !== "not_assessed"))
     .slice()
     .sort((a, b) => a.healthScore - b.healthScore)[0];
 
