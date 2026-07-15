@@ -905,7 +905,7 @@ function ReportBody({
                       width: "fit-content",
                     }}
                   >
-                    {sys.severity.charAt(0).toUpperCase() + sys.severity.slice(1)}
+                    {severityLabelText(sys.severity)}
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
