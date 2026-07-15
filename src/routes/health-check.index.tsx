@@ -1193,7 +1193,15 @@ function HealthCheckShell({
   const [responses, setResponses] = useState<ResponseMap>(initialResponses);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
   const [showSkipWarning, setShowSkipWarning] = useState(false);
-  const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>({});
+  const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>(() => {
+    const seed: Record<string, boolean> = {};
+    for (const [qid, r] of Object.entries(initialResponses)) {
+      const isSkipped = r.health === -1;
+      const isComplete = r.health !== null && r.health > 0 && r.tracking !== null;
+      if (isSkipped || isComplete) seed[qid] = true;
+    }
+    return seed;
+  });
   const [manuallyExpanded, setManuallyExpanded] = useState<Record<string, boolean>>({});
   const [completedBanner, setCompletedBanner] = useState(
     assessment.status === "completed",
