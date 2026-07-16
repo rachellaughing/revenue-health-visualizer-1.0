@@ -1450,50 +1450,26 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         childrenByParent[code] = arr;
       }
 
-      const sortedByWeakness = Array.from(childInfoById.values())
-        .filter((c) => c.assessed)
-        .sort((a, b) => a.healthScore - b.healthScore);
-      const seedsForChains =
-        sortedByWeakness.length >= 3
-          ? sortedByWeakness.slice(0, 3)
-          : Array.from(childInfoById.values())
-              .sort((a, b) => a.healthScore - b.healthScore)
-              .slice(0, 3);
-
-      function walkChain(startId: string, length = 4): string[] {
-        const out: string[] = [];
-        const seenSet = new Set<string>();
-        let cursorId: string | null = startId;
-        for (let i = 0; i < length && cursorId; i++) {
-          const info = childInfoById.get(cursorId);
-          if (!info || seenSet.has(cursorId)) break;
-          seenSet.add(cursorId);
-          out.push(info.name);
-          const f = failureByChild.get(cursorId);
-          if (!f) break;
-          const nextName: string | null =
-            f.impacted_system_1 ?? f.impacted_system_2 ?? f.impacted_system_3 ?? null;
-          if (!nextName) break;
-          const next = childInfoByName.get(String(nextName).trim().toLowerCase());
-          cursorId = next?.id ?? null;
-        }
-        return out;
+      const pathMembers = (pathMembersRes.data ?? []) as any[];
+      const membersByPath = new Map<string, string[]>();
+      for (const m of pathMembers) {
+        const arr = membersByPath.get(m.critical_path_id) ?? [];
+        arr.push(m.child_system_id);
+        membersByPath.set(m.critical_path_id, arr);
       }
 
-      const fallbackLabels = ["Primary breakdown chain", "Compounding pressure", "Visibility gap chain"];
-      const fallbackNotes = [
-        "The primary breakdown begins here. Every downstream system is degraded as a direct consequence.",
-        "Weakness in this subsystem compounds across the funnel — each downstream stage absorbs the problem.",
-        "Fragility here cascades into all downstream visibility and planning capabilities.",
-      ];
-      const criticalChains: MatrixChain[] = seedsForChains.map((s, i) => {
-        const nodes = walkChain(s.id, 4);
-        const pathRow = paths[i];
+      const criticalChains: MatrixChain[] = paths.map((pathRow: any, i: number) => {
+        const memberIds = membersByPath.get(pathRow.id) ?? [];
+        const members = memberIds
+          .map((id) => childInfoById.get(id))
+          .filter((x): x is ChildInfo => !!x);
+        const nodes = members.map((m) => m.name);
+        const parentCode = members[0]?.parent?.code ?? "POS";
         return {
-          label: pathRow?.name ?? fallbackLabels[i] ?? `Chain ${i + 1}`,
-          parentCode: s.parent?.code ?? "POS",
-          nodes: nodes.length ? nodes : [s.name],
-          note: pathRow?.bottleneck_logic ?? fallbackNotes[i] ?? "",
+          label: pathRow?.name ?? `Chain ${i + 1}`,
+          parentCode,
+          nodes,
+          note: pathRow?.bottleneck_logic ?? "",
         };
       });
 
