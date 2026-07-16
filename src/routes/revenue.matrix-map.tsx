@@ -524,7 +524,83 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   );
 }
 
+function MatrixBreadcrumb({
+  zoomedSystemName,
+  zoomedSystemColor,
+  onRoot,
+}: {
+  zoomedSystemName: string | null;
+  zoomedSystemColor?: string;
+  onRoot: (e: React.MouseEvent) => void;
+}) {
+  const atRoot = !zoomedSystemName;
+  const rootColor = atRoot ? T.ink : T.teal;
+  const displayName =
+    zoomedSystemName && !/\bSystem$/i.test(zoomedSystemName)
+      ? `${zoomedSystemName} System`
+      : zoomedSystemName;
+  return (
+    <nav
+      aria-label="Matrix Map breadcrumb"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 8,
+        fontSize: 13,
+        fontFamily: "Inter",
+        color: T.mid,
+        marginBottom: 12,
+      }}
+    >
+      <button
+        type="button"
+        onClick={atRoot ? undefined : onRoot}
+        disabled={atRoot}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: atRoot ? "default" : "pointer",
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 18,
+          color: rootColor,
+          fontWeight: atRoot ? 600 : 400,
+          letterSpacing: "0.01em",
+          textDecoration: "none",
+        }}
+        onMouseEnter={(e) => {
+          if (!atRoot) e.currentTarget.style.textDecoration = "underline";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.textDecoration = "none";
+        }}
+      >
+        Revenue Health Matrix™
+      </button>
+      {zoomedSystemName && (
+        <>
+          <span aria-hidden="true" style={{ color: T.mid }}>
+            ›
+          </span>
+          <span
+            style={{
+              fontFamily: "Inter",
+              fontSize: 13,
+              fontWeight: 600,
+              color: zoomedSystemColor ?? T.ink,
+            }}
+          >
+            {displayName}
+          </span>
+        </>
+      )}
+    </nav>
+  );
+}
+
 function MatrixMapSVG({
+
   parents: parentsIn,
   connections,
   activeNode,
