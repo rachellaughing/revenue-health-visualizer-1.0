@@ -594,19 +594,37 @@ function MatrixMapSVG({
             >
               {severityLabel(sys.healthScore).toUpperCase()}
             </text>
-            {isActive && (
+            {isActive ? (
               <text
                 x={sys.x}
                 y={sys.y + 42}
                 textAnchor="middle"
                 fontSize="8"
                 fontFamily="Inter"
+                fontWeight="700"
                 fill={T.teal}
-                opacity="0.8"
+                opacity="0.9"
+                letterSpacing="0.5"
               >
-                CLICK TO ZOOM IN →
+                CLICK AGAIN TO DRILL IN →
               </text>
+            ) : (
+              <g opacity="0.7">
+                <text
+                  x={sys.x}
+                  y={sys.y + 42}
+                  textAnchor="middle"
+                  fontSize="8"
+                  fontFamily="Inter"
+                  fontWeight="600"
+                  fill={T.mid}
+                  letterSpacing="0.3"
+                >
+                  ⇄ SEE WHAT'S CONNECTED
+                </text>
+              </g>
             )}
+
           </g>
         );
       })}
