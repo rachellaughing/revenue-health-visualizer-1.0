@@ -298,10 +298,12 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                       color: T.mid,
                       textAlign: "center",
                       marginBottom: 8,
+                      lineHeight: 1.5,
                     }}
                   >
-                    Click a node once to select · click again to zoom into subsystems
+                    Click a system to see what's affecting it and what it's driving downstream · click again to drill into its subsystems
                   </div>
+
                   <MatrixMapSVG
                     parents={payload.parents}
                     connections={payload.connections}
