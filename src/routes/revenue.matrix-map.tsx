@@ -628,8 +628,9 @@ function MatrixMapSVG({
             key={sys.code}
             onClick={(e) => {
               e.stopPropagation();
-              onNodeClick(sys.code);
+              onNodeClick(sys.code, e);
             }}
+
             style={{ cursor: "pointer" }}
             filter={isActive ? "url(#glow)" : undefined}
           >
