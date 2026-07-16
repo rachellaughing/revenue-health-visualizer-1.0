@@ -125,13 +125,9 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const handleNodeClick = useCallback(
     (code: string, e: React.MouseEvent) => {
       if (zoomedSystem) return;
-      if (activeNode === code) {
-        zoomInTo(code, e);
-      } else {
-        setActiveNode(code);
-      }
+      zoomInTo(code, e);
     },
-    [activeNode, zoomedSystem, zoomInTo],
+    [zoomedSystem, zoomInTo],
   );
 
 
