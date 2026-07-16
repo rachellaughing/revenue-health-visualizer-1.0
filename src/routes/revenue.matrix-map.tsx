@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getMatrixMap,
   type MatrixMapData,
@@ -76,27 +76,59 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const [zoomedSystem, setZoomedSystem] = useState<string | null>(null);
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
+  // Click-point transform origin (percent within stage) + a monotonically
+  // increasing key that forces the animation to re-fire on every transition.
+  const [zoomOrigin, setZoomOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
+  const [zoomDir, setZoomDir] = useState<"in" | "out" | null>(null);
+  const [zoomKey, setZoomKey] = useState(0);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
   const isStarter = payload.tier === "starter";
 
-  const handleNodeClick = useCallback((code: string) => {
-    // Ignore clicks that arrive while we're already zoomed in — the SVG
-    // is unmounting and further state churn can wedge the suspense boundary.
-    setZoomedSystem((currentZoom) => {
-      if (currentZoom) return currentZoom;
-      setActiveNode((currentActive) => {
-        if (currentActive === code) {
-          // Second click on the same node — promote to zoom.
-          // Defer to a microtask so we don't set two pieces of state that
-          // depend on each other inside the same updater.
-          queueMicrotask(() => setZoomedSystem(code));
-          return currentActive;
-        }
-        return code;
-      });
-      return currentZoom;
-    });
+  const originFromEvent = useCallback((e: { clientX: number; clientY: number }) => {
+    const stage = stageRef.current;
+    if (!stage) return { x: 50, y: 50 };
+    const r = stage.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)),
+      y: Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)),
+    };
   }, []);
+
+  const zoomInTo = useCallback(
+    (code: string, e: { clientX: number; clientY: number }) => {
+      setZoomOrigin(originFromEvent(e));
+      setZoomDir("in");
+      setZoomKey((k) => k + 1);
+      setZoomedSystem(code);
+    },
+    [originFromEvent],
+  );
+
+  const zoomOut = useCallback(
+    (e?: { clientX: number; clientY: number }) => {
+      if (e) setZoomOrigin(originFromEvent(e));
+      else setZoomOrigin({ x: 50, y: 50 });
+      setZoomDir("out");
+      setZoomKey((k) => k + 1);
+      setZoomedSystem(null);
+      setActiveNode(null);
+    },
+    [originFromEvent],
+  );
+
+  const handleNodeClick = useCallback(
+    (code: string, e: React.MouseEvent) => {
+      if (zoomedSystem) return;
+      if (activeNode === code) {
+        zoomInTo(code, e);
+      } else {
+        setActiveNode(code);
+      }
+    },
+    [activeNode, zoomedSystem, zoomInTo],
+  );
+
 
 
   const counts = payload.summaryCounts;
@@ -284,50 +316,78 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
               </div>
             )}
 
+            <MatrixBreadcrumb
+              zoomedSystemName={
+                zoomedSystem
+                  ? payload.parents.find((p) => p.code === zoomedSystem)?.name ?? null
+                  : null
+              }
+              zoomedSystemColor={zoomedSystem ? T.sys[zoomedSystem] : undefined}
+              onRoot={(e: React.MouseEvent) => zoomOut(e)}
+            />
+
+
             <div
+              ref={stageRef}
               style={{
+                position: "relative",
                 background: T.white,
                 border: "1px solid rgba(0,0,0,0.07)",
                 borderRadius: 14,
                 padding: 24,
                 boxShadow: "0 2px 12px rgba(24,40,41,0.06)",
                 marginBottom: 24,
+                overflow: "hidden",
               }}
             >
-              {zoomedSystem ? (
-                <ZoomedSystem
-                  payload={payload}
-                  systemCode={zoomedSystem}
-                  isStarter={isStarter}
-                  onBack={() => {
-                    setZoomedSystem(null);
-                    setActiveNode(null);
-                  }}
-                />
-              ) : (
-                <>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontFamily: "Inter",
-                      color: T.mid,
-                      textAlign: "center",
-                      marginBottom: 8,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    Click a system to see what's affecting it and what it's driving downstream · click again to drill into its subsystems
-                  </div>
-
-                  <MatrixMapSVG
-                    parents={payload.parents}
-                    connections={payload.connections}
-                    activeNode={activeNode}
-                    onNodeClick={handleNodeClick}
+              <style>{`
+                @keyframes mmZoomIn { from { transform: scale(0.12); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+                @keyframes mmZoomOut { from { transform: scale(5.5); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+                @media (prefers-reduced-motion: reduce) { .mm-anim-layer { animation: none !important } }
+              `}</style>
+              <div
+                key={zoomKey}
+                className="mm-anim-layer"
+                style={{
+                  transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
+                  animation: zoomDir
+                    ? `${zoomDir === "in" ? "mmZoomIn" : "mmZoomOut"} 420ms cubic-bezier(0.22,0.9,0.3,1) both`
+                    : "none",
+                }}
+              >
+                {zoomedSystem ? (
+                  <ZoomedSystem
+                    payload={payload}
+                    systemCode={zoomedSystem}
+                    isStarter={isStarter}
+                    onBack={(e) => zoomOut(e)}
                   />
-                </>
-              )}
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontFamily: "Inter",
+                        color: T.mid,
+                        textAlign: "center",
+                        marginBottom: 8,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Click a system to see what's affecting it and what it's driving downstream · click again to zoom into its subsystems
+                    </div>
+
+                    <MatrixMapSVG
+                      parents={payload.parents}
+                      connections={payload.connections}
+                      activeNode={activeNode}
+                      onNodeClick={handleNodeClick}
+                    />
+                  </>
+                )}
+              </div>
             </div>
+
 
             {!zoomedSystem && (
               <div style={{ marginBottom: 24 }}>
@@ -464,8 +524,84 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   );
 }
 
+function MatrixBreadcrumb({
+  zoomedSystemName,
+  zoomedSystemColor,
+  onRoot,
+}: {
+  zoomedSystemName: string | null;
+  zoomedSystemColor?: string;
+  onRoot: (e: React.MouseEvent) => void;
+}) {
+  const atRoot = !zoomedSystemName;
+  const rootColor = atRoot ? T.ink : T.teal;
+  const displayName =
+    zoomedSystemName && !/\bSystem$/i.test(zoomedSystemName)
+      ? `${zoomedSystemName} System`
+      : zoomedSystemName;
+  return (
+    <nav
+      aria-label="Matrix Map breadcrumb"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 8,
+        fontSize: 13,
+        fontFamily: "Inter",
+        color: T.mid,
+        marginBottom: 12,
+      }}
+    >
+      <button
+        type="button"
+        onClick={atRoot ? undefined : onRoot}
+        disabled={atRoot}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: atRoot ? "default" : "pointer",
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 18,
+          color: rootColor,
+          fontWeight: atRoot ? 600 : 400,
+          letterSpacing: "0.01em",
+          textDecoration: "none",
+        }}
+        onMouseEnter={(e) => {
+          if (!atRoot) e.currentTarget.style.textDecoration = "underline";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.textDecoration = "none";
+        }}
+      >
+        Revenue Health Matrix™
+      </button>
+      {zoomedSystemName && (
+        <>
+          <span aria-hidden="true" style={{ color: T.mid }}>
+            ›
+          </span>
+          <span
+            style={{
+              fontFamily: "Inter",
+              fontSize: 13,
+              fontWeight: 600,
+              color: zoomedSystemColor ?? T.ink,
+            }}
+          >
+            {displayName}
+          </span>
+        </>
+      )}
+    </nav>
+  );
+}
+
 function MatrixMapSVG({
-  parents,
+
+  parents: parentsIn,
   connections,
   activeNode,
   onNodeClick,
@@ -473,15 +609,29 @@ function MatrixMapSVG({
   parents: MatrixParentNode[];
   connections: MatrixConnection[];
   activeNode: string | null;
-  onNodeClick: (code: string) => void;
+  onNodeClick: (code: string, e: React.MouseEvent) => void;
 }) {
   const W = 860;
   const H = 500;
+  // Radial layout — arrange systems evenly around a center point, starting at
+  // 12 o'clock and going clockwise. This overrides any server-supplied x/y so
+  // the diagram feels like a symmetric "orbit" ready to be zoomed into.
+  const parents = useMemo(() => {
+    const cx = W / 2;
+    const cy = H / 2 - 10;
+    const radius = 170;
+    const n = parentsIn.length || 1;
+    return parentsIn.map((p, i) => {
+      const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+      return { ...p, x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+    });
+  }, [parentsIn]);
   const byCode = useMemo(() => {
     const m = new Map<string, MatrixParentNode>();
     for (const p of parents) m.set(p.code, p);
     return m;
   }, [parents]);
+
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }}>
@@ -555,8 +705,9 @@ function MatrixMapSVG({
             key={sys.code}
             onClick={(e) => {
               e.stopPropagation();
-              onNodeClick(sys.code);
+              onNodeClick(sys.code, e);
             }}
+
             style={{ cursor: "pointer" }}
             filter={isActive ? "url(#glow)" : undefined}
           >
@@ -689,7 +840,7 @@ function ZoomedSystem({
   payload: MatrixMapData;
   systemCode: string;
   isStarter: boolean;
-  onBack: () => void;
+  onBack: (e: React.MouseEvent) => void;
 }) {
   const sys = payload.parents.find((p) => p.code === systemCode)!;
   const children = payload.childrenByParent[systemCode] ?? [];
@@ -699,27 +850,77 @@ function ZoomedSystem({
   const child = children.find((c) => c.code === selectedChildCode);
   const unassessedCount = children.filter((c) => !c.assessed).length;
   const assessedCount = children.filter((c) => c.assessed).length;
+  const displayName = /\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`;
 
   return (
     <div>
-      <button
-        onClick={onBack}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          fontFamily: "Inter",
-          fontSize: 13,
-          color: T.teal,
-          padding: 0,
-          marginBottom: 16,
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-        }}
-      >
-        ← Back to full map
-      </button>
+      {/* Big center system node — doubles as the zoom-out control. */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <button
+          onClick={onBack}
+          aria-label={`Zoom out from ${displayName}`}
+          title="Click to zoom out"
+          style={{
+            width: 168,
+            height: 168,
+            borderRadius: "50%",
+            border: `3px solid ${sysColor}`,
+            background: `radial-gradient(circle at 50% 40%, ${sysColor}22, ${sysColor}08)`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            cursor: "pointer",
+            fontFamily: "Inter",
+            textAlign: "center",
+            boxShadow: `0 6px 24px ${sysColor}22`,
+            transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.03)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          <div
+            style={{
+              fontSize: 32,
+              fontFamily: "Inter",
+              fontWeight: 700,
+              color: sysColor,
+              lineHeight: 1,
+            }}
+          >
+            {sys.healthScore}
+          </div>
+          <div
+            style={{
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontSize: 20,
+              fontWeight: 400,
+              color: T.ink,
+              marginTop: 6,
+              lineHeight: 1.15,
+            }}
+          >
+            {displayName}
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              fontFamily: "Inter",
+              fontWeight: 700,
+              color: T.mid,
+              letterSpacing: "0.08em",
+              marginTop: 8,
+            }}
+          >
+            ← CLICK TO ZOOM OUT
+          </div>
+        </button>
+      </div>
 
       <div
         style={{
@@ -730,49 +931,15 @@ function ZoomedSystem({
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: "50%",
-                border: `3px solid ${sysColor}`,
-                background: sysColor + "15",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 18,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: sysColor,
-                }}
-              >
-                {sys.healthScore}
-              </span>
-            </div>
-            <div>
-              <h3
-                style={{
-                  fontFamily: "'Instrument Serif', Georgia, serif",
-                  fontSize: 22,
-                  fontWeight: 400,
-                  color: sysColor,
-                  margin: "0 0 2px",
-                }}
-              >
-                {/\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`}
-              </h3>
-              <span style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
-                {isStarter && unassessedCount > 0
-                  ? `Click any subsystem to explore · ${unassessedCount} locked, assessed ${assessedCount} of ${children.length}`
-                  : "Click any subsystem to explore"}
-              </span>
-            </div>
+          <div style={{ marginBottom: 14 }}>
+            <span style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
+              {isStarter && unassessedCount > 0
+                ? `Click any subsystem to explore · ${unassessedCount} locked, assessed ${assessedCount} of ${children.length}`
+                : "Click any subsystem to explore"}
+            </span>
           </div>
+
+
 
           <div
             style={{
