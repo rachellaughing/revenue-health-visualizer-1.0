@@ -125,13 +125,9 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const handleNodeClick = useCallback(
     (code: string, e: React.MouseEvent) => {
       if (zoomedSystem) return;
-      if (activeNode === code) {
-        zoomInTo(code, e);
-      } else {
-        setActiveNode(code);
-      }
+      zoomInTo(code, e);
     },
-    [activeNode, zoomedSystem, zoomInTo],
+    [zoomedSystem, zoomInTo],
   );
 
 
@@ -379,7 +375,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                         lineHeight: 1.5,
                       }}
                     >
-                      Click a system to see what's affecting it and what it's driving downstream · click again to zoom into its subsystems
+                      Click a system to zoom in and see what's affecting it and what it's driving downstream
                     </div>
 
                     <MatrixMapSVG
