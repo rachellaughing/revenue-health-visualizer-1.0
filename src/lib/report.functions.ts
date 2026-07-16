@@ -1218,7 +1218,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         assessmentId = latest.id;
       }
 
-      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, profileRes] =
+      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes] =
         await Promise.all([
           supabaseAdmin
             .from("assessments")
@@ -1247,9 +1247,14 @@ export const getMatrixMap = createServerFn({ method: "POST" })
           (supabaseAdmin as any)
             .schema("revhealth2")
             .from("critical_paths")
-            .select("name,tagline,definition,bottleneck_logic,sort_order")
+            .select("id,name,tagline,definition,bottleneck_logic,sort_order")
             .order("sort_order")
             .limit(3),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("critical_path_members")
+            .select("critical_path_id,child_system_id,sort_order")
+            .order("sort_order"),
           supabaseAdmin
             .from("profiles")
             .select("first_name,tier")
@@ -1257,7 +1262,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             .maybeSingle(),
         ]);
 
-      for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, profileRes]) {
+      for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes]) {
         if ((r as any).error) throw new Error((r as any).error.message);
       }
       if (!asmtRes.data) throw new Error("Assessment not found");
