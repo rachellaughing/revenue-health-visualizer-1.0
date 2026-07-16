@@ -1292,6 +1292,8 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         parent: any;
         healthScore: number;
         trackingScore: number;
+        isSoftShadow: boolean;
+        isHardShadow: boolean;
         assessed: boolean;
       };
       const childInfoById = new Map<string, ChildInfo>();
@@ -1311,6 +1313,8 @@ export const getMatrixMap = createServerFn({ method: "POST" })
           parent: parentById.get(c.parent_system_id),
           healthScore,
           trackingScore,
+          isSoftShadow: assessed ? !!s.is_soft_shadow : false,
+          isHardShadow: assessed ? !!s.is_hard_shadow : false,
           assessed,
         };
         childInfoById.set(c.id, info);
