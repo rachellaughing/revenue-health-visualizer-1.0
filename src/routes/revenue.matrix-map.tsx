@@ -637,9 +637,32 @@ function MatrixMapSVG({
     return m;
   }, [parents]);
 
+  const [linkTooltip, setLinkTooltip] = useState<{
+    conn: MatrixConnection;
+    from: MatrixParentNode;
+    to: MatrixParentNode;
+    x: number;
+    y: number;
+    persistent: boolean;
+  } | null>(null);
+
+  const toSvgPoint = useCallback(
+    (e: { clientX: number; clientY: number }, target: SVGElement) => {
+      const svg = target.ownerSVGElement;
+      if (!svg) return { x: 0, y: 0 };
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return { x: 0, y: 0 };
+      return {
+        x: (e.clientX - ctm.e) / ctm.a,
+        y: (e.clientY - ctm.f) / ctm.d,
+      };
+    },
+    []
+  );
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }}>
+
       <defs>
         {parents.map((sys) => (
           <radialGradient
@@ -674,6 +697,10 @@ function MatrixMapSVG({
         const opacity = from.healthScore < 60 ? 0.7 : 0.35;
         const mx = (from.x + to.x) / 2;
         const my = (from.y + to.y) / 2 - 30;
+        const showTooltip = (e: React.MouseEvent<SVGPathElement>, persistent: boolean) => {
+          const p = toSvgPoint(e, e.currentTarget);
+          setLinkTooltip({ conn, from, to, x: p.x, y: p.y, persistent });
+        };
         return (
           <g key={i}>
             <path
@@ -685,20 +712,38 @@ function MatrixMapSVG({
               strokeDasharray={from.healthScore < 60 ? "6,4" : "none"}
               markerEnd="url(#arrow)"
             />
-            <text
-              x={mx}
-              y={my - 8}
-              textAnchor="middle"
-              fontSize="9"
-              fontFamily="Inter"
-              fill={color}
-              opacity="0.6"
-            >
-              {conn.strength} {conn.strength === 1 ? "link" : "links"}
-            </text>
+            {/* Wide transparent hit-area shows detail on hover/tap instead of permanently cluttering the diagram. */}
+            <path
+              d={`M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={Math.max(18, strokeWidth + 14)}
+              style={{ cursor: "pointer" }}
+              onMouseEnter={(e) => showTooltip(e, false)}
+              onMouseMove={(e) => {
+                const p = toSvgPoint(e, e.currentTarget);
+                setLinkTooltip((t) =>
+                  t && t.conn === conn ? { ...t, x: p.x, y: p.y } : t
+                );
+              }}
+              onMouseLeave={() =>
+                setLinkTooltip((t) =>
+                  t && t.conn === conn && !t.persistent ? null : t
+                )
+              }
+              onClick={(e) => {
+                e.stopPropagation();
+                setLinkTooltip((t) =>
+                  t && t.conn === conn && t.persistent
+                    ? null
+                    : { conn, from, to, x: t?.x ?? mx, y: t?.y ?? my, persistent: true }
+                );
+              }}
+            />
           </g>
         );
       })}
+
 
       {parents.map((sys) => {
         const isActive = activeNode === sys.code;
@@ -823,7 +868,34 @@ function MatrixMapSVG({
           </text>
         </g>
       </g>
+
+      {linkTooltip && (
+        <g transform={`translate(${linkTooltip.x + 10}, ${linkTooltip.y - 10})`}>
+          <rect
+            x={0}
+            y={-26}
+            width={150}
+            height={26}
+            rx={6}
+            fill={T.ink}
+            opacity={0.95}
+          />
+          <text
+            x={75}
+            y={-8}
+            textAnchor="middle"
+            fontSize="10"
+            fontFamily="Inter"
+            fill={T.white}
+          >
+            {linkTooltip.conn.strength}{" "}
+            {linkTooltip.conn.strength === 1 ? "link" : "links"} ·{" "}
+            {linkTooltip.from.name} → {linkTooltip.to.name}
+          </text>
+        </g>
+      )}
     </svg>
+
   );
 }
 
