@@ -76,27 +76,59 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const [zoomedSystem, setZoomedSystem] = useState<string | null>(null);
   const [expandedScenario, setExpandedScenario] = useState<string | null>(null);
+  // Click-point transform origin (percent within stage) + a monotonically
+  // increasing key that forces the animation to re-fire on every transition.
+  const [zoomOrigin, setZoomOrigin] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
+  const [zoomDir, setZoomDir] = useState<"in" | "out" | null>(null);
+  const [zoomKey, setZoomKey] = useState(0);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
   const isStarter = payload.tier === "starter";
 
-  const handleNodeClick = useCallback((code: string) => {
-    // Ignore clicks that arrive while we're already zoomed in — the SVG
-    // is unmounting and further state churn can wedge the suspense boundary.
-    setZoomedSystem((currentZoom) => {
-      if (currentZoom) return currentZoom;
-      setActiveNode((currentActive) => {
-        if (currentActive === code) {
-          // Second click on the same node — promote to zoom.
-          // Defer to a microtask so we don't set two pieces of state that
-          // depend on each other inside the same updater.
-          queueMicrotask(() => setZoomedSystem(code));
-          return currentActive;
-        }
-        return code;
-      });
-      return currentZoom;
-    });
+  const originFromEvent = useCallback((e: { clientX: number; clientY: number }) => {
+    const stage = stageRef.current;
+    if (!stage) return { x: 50, y: 50 };
+    const r = stage.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)),
+      y: Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)),
+    };
   }, []);
+
+  const zoomInTo = useCallback(
+    (code: string, e: { clientX: number; clientY: number }) => {
+      setZoomOrigin(originFromEvent(e));
+      setZoomDir("in");
+      setZoomKey((k) => k + 1);
+      setZoomedSystem(code);
+    },
+    [originFromEvent],
+  );
+
+  const zoomOut = useCallback(
+    (e?: { clientX: number; clientY: number }) => {
+      if (e) setZoomOrigin(originFromEvent(e));
+      else setZoomOrigin({ x: 50, y: 50 });
+      setZoomDir("out");
+      setZoomKey((k) => k + 1);
+      setZoomedSystem(null);
+      setActiveNode(null);
+    },
+    [originFromEvent],
+  );
+
+  const handleNodeClick = useCallback(
+    (code: string, e: React.MouseEvent) => {
+      if (zoomedSystem) return;
+      if (activeNode === code) {
+        zoomInTo(code, e);
+      } else {
+        setActiveNode(code);
+      }
+    },
+    [activeNode, zoomedSystem, zoomInTo],
+  );
+
 
 
   const counts = payload.summaryCounts;
