@@ -323,8 +323,9 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                   : null
               }
               zoomedSystemColor={zoomedSystem ? T.sys[zoomedSystem] : undefined}
-              onRoot={(e) => zoomOut(e as unknown as React.MouseEvent)}
+              onRoot={(e: React.MouseEvent) => zoomOut(e)}
             />
+
 
             <div
               ref={stageRef}
