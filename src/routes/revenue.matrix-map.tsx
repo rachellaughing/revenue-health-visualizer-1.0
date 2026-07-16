@@ -524,7 +524,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
 }
 
 function MatrixMapSVG({
-  parents,
+  parents: parentsIn,
   connections,
   activeNode,
   onNodeClick,
@@ -532,15 +532,29 @@ function MatrixMapSVG({
   parents: MatrixParentNode[];
   connections: MatrixConnection[];
   activeNode: string | null;
-  onNodeClick: (code: string) => void;
+  onNodeClick: (code: string, e: React.MouseEvent) => void;
 }) {
   const W = 860;
   const H = 500;
+  // Radial layout — arrange systems evenly around a center point, starting at
+  // 12 o'clock and going clockwise. This overrides any server-supplied x/y so
+  // the diagram feels like a symmetric "orbit" ready to be zoomed into.
+  const parents = useMemo(() => {
+    const cx = W / 2;
+    const cy = H / 2 - 10;
+    const radius = 170;
+    const n = parentsIn.length || 1;
+    return parentsIn.map((p, i) => {
+      const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+      return { ...p, x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+    });
+  }, [parentsIn]);
   const byCode = useMemo(() => {
     const m = new Map<string, MatrixParentNode>();
     for (const p of parents) m.set(p.code, p);
     return m;
   }, [parents]);
+
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }}>
