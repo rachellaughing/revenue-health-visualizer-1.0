@@ -868,7 +868,34 @@ function MatrixMapSVG({
           </text>
         </g>
       </g>
+
+      {linkTooltip && (
+        <g transform={`translate(${linkTooltip.x + 10}, ${linkTooltip.y - 10})`}>
+          <rect
+            x={0}
+            y={-26}
+            width={150}
+            height={26}
+            rx={6}
+            fill={T.ink}
+            opacity={0.95}
+          />
+          <text
+            x={75}
+            y={-8}
+            textAnchor="middle"
+            fontSize="10"
+            fontFamily="Inter"
+            fill={T.white}
+          >
+            {linkTooltip.conn.strength}{" "}
+            {linkTooltip.conn.strength === 1 ? "link" : "links"} ·{" "}
+            {linkTooltip.from.name} → {linkTooltip.to.name}
+          </text>
+        </g>
+      )}
     </svg>
+
   );
 }
 
