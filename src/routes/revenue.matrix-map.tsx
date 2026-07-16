@@ -726,7 +726,7 @@ function ZoomedSystem({
                   margin: "0 0 2px",
                 }}
               >
-                {sys.name} System
+                {/\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`}
               </h3>
               <span style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
                 {isStarter && unassessedCount > 0
