@@ -1230,7 +1230,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             .maybeSingle(),
           supabaseAdmin
             .from("assessment_scores")
-            .select("child_system_id,health_score,tracking_score")
+            .select("child_system_id,health_score,tracking_score,is_soft_shadow,is_hard_shadow")
             .eq("assessment_id", assessmentId)
             .eq("user_id", userId),
           (supabaseAdmin as any)
