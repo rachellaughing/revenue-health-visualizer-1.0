@@ -818,6 +818,24 @@ function ZoomedSystem({
                   >
                     {c.name}
                   </div>
+                  {c.assessed && (c.isHardShadow || c.isSoftShadow) && (
+                    <div
+                      style={{
+                        display: "inline-block",
+                        marginTop: 4,
+                        fontSize: 8,
+                        fontFamily: "Inter",
+                        fontWeight: 700,
+                        color: T.sand,
+                        background: "rgba(196,149,106,0.15)",
+                        padding: "1px 5px",
+                        borderRadius: 8,
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {c.isHardShadow ? "HARD SHADOW" : "SHADOW"}
+                    </div>
+                  )}
                   <div
                     style={{
                       fontSize: 9,
@@ -826,7 +844,11 @@ function ZoomedSystem({
                       marginTop: 2,
                     }}
                   >
-                    {isLocked ? "not assessed" : !c.assessed ? "illustrative" : "assessed"}
+                    {isLocked
+                      ? "not assessed"
+                      : !c.assessed
+                        ? "illustrative"
+                        : `tracking ${c.trackingScore}`}
                   </div>
                 </button>
               );
@@ -904,20 +926,43 @@ function ZoomedSystem({
               >
                 {child.name}
               </h4>
-              <div
-                style={{
-                  display: "inline-flex",
-                  padding: "3px 10px",
-                  borderRadius: 20,
-                  background: healthColor(child.healthScore) + "18",
-                  color: healthColor(child.healthScore),
-                  fontSize: 11,
-                  fontFamily: "Inter",
-                  fontWeight: 600,
-                  marginBottom: 14,
-                }}
-              >
-                {severityLabel(child.healthScore)} · {child.healthScore}/100
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    padding: "3px 10px",
+                    borderRadius: 20,
+                    background: healthColor(child.healthScore) + "18",
+                    color: healthColor(child.healthScore),
+                    fontSize: 11,
+                    fontFamily: "Inter",
+                    fontWeight: 600,
+                  }}
+                >
+                  {severityLabel(child.healthScore)} · {child.healthScore}/100
+                </div>
+                {child.assessed && (child.isHardShadow || child.isSoftShadow) && (
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      padding: "3px 10px",
+                      borderRadius: 20,
+                      background: "rgba(196,149,106,0.15)",
+                      color: T.sand,
+                      fontSize: 10,
+                      fontFamily: "Inter",
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    {child.isHardShadow ? "HARD SHADOW RISK" : "SHADOW RISK"}
+                  </div>
+                )}
+                {child.assessed && (
+                  <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
+                    Tracking {child.trackingScore}/100
+                  </div>
+                )}
               </div>
               {!child.assessed && (
                 <div
@@ -946,8 +991,10 @@ function ZoomedSystem({
                   lineHeight: 1.65,
                 }}
               >
-                {child.coreSymptom ||
-                  'Click "View in Top Opportunities" to see improvement potential and cascade impacts.'}
+                {child.assessed && (child.isHardShadow || child.isSoftShadow)
+                  ? `Health looks ${severityLabel(child.healthScore).toLowerCase()} on the surface, but tracking is only ${child.trackingScore}/100 — a ${child.healthScore - child.trackingScore}-point visibility gap. You may be running on undocumented, founder-held knowledge that won't survive scale or turnover.`
+                  : child.coreSymptom ||
+                    'Click "View in Top Opportunities" to see improvement potential and cascade impacts.'}
               </div>
               <Link
                 to="/reports/top-opportunities"

@@ -1144,6 +1144,9 @@ export type MatrixChildNode = {
   code: string;
   name: string;
   healthScore: number;
+  trackingScore: number;
+  isSoftShadow: boolean;
+  isHardShadow: boolean;
   severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   assessed: boolean;
   coreSymptom: string;
@@ -1227,7 +1230,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             .maybeSingle(),
           supabaseAdmin
             .from("assessment_scores")
-            .select("child_system_id,health_score,tracking_score")
+            .select("child_system_id,health_score,tracking_score,is_soft_shadow,is_hard_shadow")
             .eq("assessment_id", assessmentId)
             .eq("user_id", userId),
           (supabaseAdmin as any)
@@ -1289,6 +1292,8 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         parent: any;
         healthScore: number;
         trackingScore: number;
+        isSoftShadow: boolean;
+        isHardShadow: boolean;
         assessed: boolean;
       };
       const childInfoById = new Map<string, ChildInfo>();
@@ -1308,6 +1313,8 @@ export const getMatrixMap = createServerFn({ method: "POST" })
           parent: parentById.get(c.parent_system_id),
           healthScore,
           trackingScore,
+          isSoftShadow: assessed ? !!s.is_soft_shadow : false,
+          isHardShadow: assessed ? !!s.is_hard_shadow : false,
           assessed,
         };
         childInfoById.set(c.id, info);
@@ -1437,6 +1444,9 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             code: info.code,
             name: info.name,
             healthScore: info.healthScore,
+            trackingScore: info.trackingScore,
+            isSoftShadow: info.isSoftShadow,
+            isHardShadow: info.isHardShadow,
             severity: severityFor(info.healthScore),
             assessed: info.assessed,
             coreSymptom: f?.core_symptoms ?? "",
