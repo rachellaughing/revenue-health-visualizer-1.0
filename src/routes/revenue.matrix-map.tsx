@@ -316,50 +316,77 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
               </div>
             )}
 
+            <MatrixBreadcrumb
+              zoomedSystemName={
+                zoomedSystem
+                  ? payload.parents.find((p) => p.code === zoomedSystem)?.name ?? null
+                  : null
+              }
+              zoomedSystemColor={zoomedSystem ? T.sys[zoomedSystem] : undefined}
+              onRoot={(e) => zoomOut(e as unknown as React.MouseEvent)}
+            />
+
             <div
+              ref={stageRef}
               style={{
+                position: "relative",
                 background: T.white,
                 border: "1px solid rgba(0,0,0,0.07)",
                 borderRadius: 14,
                 padding: 24,
                 boxShadow: "0 2px 12px rgba(24,40,41,0.06)",
                 marginBottom: 24,
+                overflow: "hidden",
               }}
             >
-              {zoomedSystem ? (
-                <ZoomedSystem
-                  payload={payload}
-                  systemCode={zoomedSystem}
-                  isStarter={isStarter}
-                  onBack={() => {
-                    setZoomedSystem(null);
-                    setActiveNode(null);
-                  }}
-                />
-              ) : (
-                <>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontFamily: "Inter",
-                      color: T.mid,
-                      textAlign: "center",
-                      marginBottom: 8,
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    Click a system to see what's affecting it and what it's driving downstream · click again to drill into its subsystems
-                  </div>
-
-                  <MatrixMapSVG
-                    parents={payload.parents}
-                    connections={payload.connections}
-                    activeNode={activeNode}
-                    onNodeClick={handleNodeClick}
+              <style>{`
+                @keyframes mmZoomIn { from { transform: scale(0.12); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+                @keyframes mmZoomOut { from { transform: scale(5.5); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+                @media (prefers-reduced-motion: reduce) { .mm-anim-layer { animation: none !important } }
+              `}</style>
+              <div
+                key={zoomKey}
+                className="mm-anim-layer"
+                style={{
+                  transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
+                  animation: zoomDir
+                    ? `${zoomDir === "in" ? "mmZoomIn" : "mmZoomOut"} 420ms cubic-bezier(0.22,0.9,0.3,1) both`
+                    : "none",
+                }}
+              >
+                {zoomedSystem ? (
+                  <ZoomedSystem
+                    payload={payload}
+                    systemCode={zoomedSystem}
+                    isStarter={isStarter}
+                    onBack={(e) => zoomOut(e)}
                   />
-                </>
-              )}
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontFamily: "Inter",
+                        color: T.mid,
+                        textAlign: "center",
+                        marginBottom: 8,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Click a system to see what's affecting it and what it's driving downstream · click again to zoom into its subsystems
+                    </div>
+
+                    <MatrixMapSVG
+                      parents={payload.parents}
+                      connections={payload.connections}
+                      activeNode={activeNode}
+                      onNodeClick={handleNodeClick}
+                    />
+                  </>
+                )}
+              </div>
             </div>
+
 
             {!zoomedSystem && (
               <div style={{ marginBottom: 24 }}>
