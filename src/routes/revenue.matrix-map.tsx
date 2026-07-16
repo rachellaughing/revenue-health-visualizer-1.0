@@ -818,6 +818,24 @@ function ZoomedSystem({
                   >
                     {c.name}
                   </div>
+                  {c.assessed && (c.isHardShadow || c.isSoftShadow) && (
+                    <div
+                      style={{
+                        display: "inline-block",
+                        marginTop: 4,
+                        fontSize: 8,
+                        fontFamily: "Inter",
+                        fontWeight: 700,
+                        color: T.sand,
+                        background: "rgba(196,149,106,0.15)",
+                        padding: "1px 5px",
+                        borderRadius: 8,
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {c.isHardShadow ? "HARD SHADOW" : "SHADOW"}
+                    </div>
+                  )}
                   <div
                     style={{
                       fontSize: 9,
@@ -826,7 +844,11 @@ function ZoomedSystem({
                       marginTop: 2,
                     }}
                   >
-                    {isLocked ? "not assessed" : !c.assessed ? "illustrative" : "assessed"}
+                    {isLocked
+                      ? "not assessed"
+                      : !c.assessed
+                        ? "illustrative"
+                        : `tracking ${c.trackingScore}`}
                   </div>
                 </button>
               );
