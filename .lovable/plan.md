@@ -1,32 +1,30 @@
 ## Problem
 
-The returning-user Dashboard panel (`ReturningView` in `src/routes/dashboard.tsx`, ~line 743) shows parent-system scores from `getIllustrativeScores(latest.id)` — a deterministic fake generator on a 0–4 scale. The Executive Summary reads real rolled-up parent scores from `assessment_scores` via `getExecutiveSummary` (`src/lib/report.functions.ts`), which returns `systems: ParentScore[]` with `healthScore` on a 0–100 scale and `overallScore` on the same scale. Same assessment, two different numbers.
+In `getMatrixMap` (`src/lib/report.functions.ts`, ~lines 1447–1493), the "Key Cause & Effect Chains" cards derive their `nodes` by taking the 3 weakest child systems and calling `walkChain()` — a traversal of `failure_map.impacted_system_*`. Only the card `label` and `note` come from `revhealth2.critical_paths`; the child-system list has no connection to the path at all. That's why Demand Engine renders Visibility children and Customer/Market Authority both render the same Authority children.
 
 ## Fix
 
-Reuse the Executive Summary's exact query in the Dashboard widget — no new server function, no duplicated aggregation.
+Load the actual path membership from `revhealth2.critical_path_members` and render those exact child systems, in order, per path.
 
-### `src/routes/dashboard.tsx` — `ReturningView` only
+### `src/lib/report.functions.ts` — `getMatrixMap` only
 
-1. Add `useQuery` + `useServerFn` calls mirroring `reports.executive-summary.tsx`:
-   ```ts
-   const fetchSummary = useServerFn(getExecutiveSummary);
-   const { data: summary } = useQuery({
-     queryKey: ["report", "executive-summary"],
-     queryFn: () => fetchSummary({ data: {} }),
-   });
-   ```
-   Share the queryKey with the Executive Summary route so both surfaces hit one cache entry.
-2. Derive the panel data from `summary.systems` (ParentScore[]) and `summary.overallScore`:
-   - `overall = summary.overallScore` (0–100)
-   - Per-parent rows map from `summary.systems`, using `healthScore` (0–100), `name`/`code` for label, and the existing brand color lookup by parent `code` (POS/AUTH/CONV/LFC/VIS → the `--mm-sys-*` tokens already used elsewhere).
-   - `weakest` = system with lowest `healthScore` among `assessed > 0`; unassessed systems excluded (matches the not-assessed rule already applied in reports).
-3. Update `ScoreRing` usage and the per-system bars to a 0–100 scale: `fill = (score / 100) * circ`, bar width `${score}%`, label `score.toFixed(0)` (or `Math.round(score)`), overall label `${Math.round(overall)}`. Keep the existing ring/bar visuals — only the denominator and formatter change.
-4. Loading/empty states:
-   - While `summary` is loading, render the panel skeleton (reuse existing shell with zeroed bars or a simple pulse — do not fall back to illustrative data).
-   - If `summary` returns `{ error: "no_completed_assessment" }`, render the same panel with dashes and hide the weakest-system card, matching how Executive Summary handles the same case.
-5. Remove `getIllustrativeScores` / `getOverall` / `SystemScore` imports and usages inside `ReturningView`. Leave `data.overallScore` / `data.hasScores` from `getDashboardData` untouched (used elsewhere; no longer needed here). Do not touch `NewUserView`, tier logic, insight cards' copy, or any other file.
+1. Extend the `pathsRes` query (~line 1247) to select `id` in addition to `name,tagline,definition,bottleneck_logic,sort_order`.
+2. Add a parallel fetch for `revhealth2.critical_path_members`, selecting `critical_path_id, child_system_id, sort_order`. No filter — 3 paths × 6 members is tiny.
+3. Build `membersByPath: Map<pathId, childSystemId[]>` ordered by `sort_order`.
+4. Replace the current `criticalChains` construction (the `seedsForChains` + `walkChain` block, ~1447–1493) with:
+   - For each path row in `paths` (already ordered by `sort_order`, limit 3):
+     - Resolve member child IDs → `childInfoById` entries in member order.
+     - `nodes` = member `name`s in that order.
+     - `parentCode` = parent code of the first member (falls back to `"POS"` if missing) — matches how the card colors itself via `T.sys[chain.parentCode]`.
+     - `label` = `path.name`.
+     - `note` = `path.bottleneck_logic ?? ""`.
+   - Drop any member whose id isn't in `childInfoById` (defensive; shouldn't happen).
+5. Remove the now-unused `seedsForChains` and `walkChain` helper (scoped to this block; nothing else calls them — confirm with a quick grep before deleting; if referenced elsewhere, leave them and only stop calling them here).
+
+Nothing else on the Matrix Map page or in the response shape changes. `MatrixChain` type is unchanged.
 
 ## Out of scope
 
-- Executive Summary, Matrix Map, illustrative-scores helper (still used by the new-user preview if any), Dashboard scoring for the pre-first-Health-Check state, and every other file.
+- The failure-map-driven `connections` / `systemConnections` sections (unrelated).
+- Ordering, styling, or copy of the chain cards.
+- Any other report or page.
