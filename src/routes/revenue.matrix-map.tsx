@@ -11,6 +11,8 @@ import {
   type MatrixSysConnItem,
   type MatrixScenario,
 } from "@/lib/report.functions";
+import { useAuth } from "@/lib/auth-context";
+
 
 export const Route = createFileRoute("/revenue/matrix-map")({
   head: () => ({ meta: [{ title: "Matrix Map — Revenue Health Visualiser" }] }),
