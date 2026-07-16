@@ -79,10 +79,25 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
 
   const isStarter = payload.tier === "starter";
 
-  const handleNodeClick = (code: string) => {
-    if (activeNode === code) setZoomedSystem(code);
-    else setActiveNode(code);
-  };
+  const handleNodeClick = useCallback((code: string) => {
+    // Ignore clicks that arrive while we're already zoomed in — the SVG
+    // is unmounting and further state churn can wedge the suspense boundary.
+    setZoomedSystem((currentZoom) => {
+      if (currentZoom) return currentZoom;
+      setActiveNode((currentActive) => {
+        if (currentActive === code) {
+          // Second click on the same node — promote to zoom.
+          // Defer to a microtask so we don't set two pieces of state that
+          // depend on each other inside the same updater.
+          queueMicrotask(() => setZoomedSystem(code));
+          return currentActive;
+        }
+        return code;
+      });
+      return currentZoom;
+    });
+  }, []);
+
 
   const counts = payload.summaryCounts;
   const defaultExpanded = payload.scenarios[0]?.code ?? null;
