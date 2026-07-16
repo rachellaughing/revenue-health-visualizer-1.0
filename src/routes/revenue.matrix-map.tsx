@@ -637,9 +637,32 @@ function MatrixMapSVG({
     return m;
   }, [parents]);
 
+  const [linkTooltip, setLinkTooltip] = useState<{
+    conn: MatrixConnection;
+    from: MatrixParentNode;
+    to: MatrixParentNode;
+    x: number;
+    y: number;
+    persistent: boolean;
+  } | null>(null);
+
+  const toSvgPoint = useCallback(
+    (e: { clientX: number; clientY: number }, target: SVGElement) => {
+      const svg = target.ownerSVGElement;
+      if (!svg) return { x: 0, y: 0 };
+      const ctm = svg.getScreenCTM();
+      if (!ctm) return { x: 0, y: 0 };
+      return {
+        x: (e.clientX - ctm.e) / ctm.a,
+        y: (e.clientY - ctm.f) / ctm.d,
+      };
+    },
+    []
+  );
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }}>
+
       <defs>
         {parents.map((sys) => (
           <radialGradient
