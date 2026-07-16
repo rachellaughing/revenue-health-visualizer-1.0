@@ -11,6 +11,8 @@ import {
   type MatrixSysConnItem,
   type MatrixScenario,
 } from "@/lib/report.functions";
+import { useAuth } from "@/lib/auth-context";
+
 
 export const Route = createFileRoute("/revenue/matrix-map")({
   head: () => ({ meta: [{ title: "Matrix Map — Revenue Health Visualiser" }] }),
@@ -52,13 +54,16 @@ function severityLabel(score: number) {
 }
 
 function Page() {
+  const { session, loading: authLoading } = useAuth();
   const fetchFn = useServerFn(getMatrixMap);
   const { data } = useQuery({
-    queryKey: ["matrix-map"],
+    queryKey: ["matrix-map", session?.user?.id ?? "anon"],
     queryFn: () => fetchFn({ data: {} }),
+    enabled: !authLoading && !!session,
   });
 
   if (!data) return <div style={{ minHeight: "100dvh", background: T.paper }} />;
+
   if ("error" in data) {
     return (
       <div style={{ minHeight: "100dvh", background: T.paper, padding: 40 }}>
