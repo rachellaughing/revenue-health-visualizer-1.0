@@ -1144,6 +1144,9 @@ export type MatrixChildNode = {
   code: string;
   name: string;
   healthScore: number;
+  trackingScore: number;
+  isSoftShadow: boolean;
+  isHardShadow: boolean;
   severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
   assessed: boolean;
   coreSymptom: string;
