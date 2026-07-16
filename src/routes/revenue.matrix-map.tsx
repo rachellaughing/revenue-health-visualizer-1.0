@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   getMatrixMap,
   type MatrixMapData,
@@ -79,10 +79,25 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
 
   const isStarter = payload.tier === "starter";
 
-  const handleNodeClick = (code: string) => {
-    if (activeNode === code) setZoomedSystem(code);
-    else setActiveNode(code);
-  };
+  const handleNodeClick = useCallback((code: string) => {
+    // Ignore clicks that arrive while we're already zoomed in — the SVG
+    // is unmounting and further state churn can wedge the suspense boundary.
+    setZoomedSystem((currentZoom) => {
+      if (currentZoom) return currentZoom;
+      setActiveNode((currentActive) => {
+        if (currentActive === code) {
+          // Second click on the same node — promote to zoom.
+          // Defer to a microtask so we don't set two pieces of state that
+          // depend on each other inside the same updater.
+          queueMicrotask(() => setZoomedSystem(code));
+          return currentActive;
+        }
+        return code;
+      });
+      return currentZoom;
+    });
+  }, []);
+
 
   const counts = payload.summaryCounts;
   const defaultExpanded = payload.scenarios[0]?.code ?? null;
@@ -538,7 +553,10 @@ function MatrixMapSVG({
         return (
           <g
             key={sys.code}
-            onClick={() => onNodeClick(sys.code)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onNodeClick(sys.code);
+            }}
             style={{ cursor: "pointer" }}
             filter={isActive ? "url(#glow)" : undefined}
           >
