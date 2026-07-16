@@ -375,7 +375,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                         lineHeight: 1.5,
                       }}
                     >
-                      Click a system to see what's affecting it and what it's driving downstream · click again to zoom into its subsystems
+                      Click a system to zoom in and see what's affecting it and what it's driving downstream
                     </div>
 
                     <MatrixMapSVG
