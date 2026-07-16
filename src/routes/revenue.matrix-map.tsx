@@ -768,36 +768,27 @@ function MatrixMapSVG({
             >
               {severityLabel(sys.healthScore).toUpperCase()}
             </text>
-            {isActive ? (
-              <text
-                x={sys.x}
-                y={sys.y + 42}
-                textAnchor="middle"
-                fontSize="8"
-                fontFamily="Inter"
-                fontWeight="700"
-                fill={T.teal}
-                opacity="0.9"
-                letterSpacing="0.5"
-              >
-                CLICK AGAIN TO DRILL IN →
-              </text>
-            ) : (
-              <g opacity="0.7">
-                <text
-                  x={sys.x}
-                  y={sys.y + 42}
-                  textAnchor="middle"
-                  fontSize="8"
-                  fontFamily="Inter"
-                  fontWeight="600"
-                  fill={T.mid}
-                  letterSpacing="0.3"
-                >
-                  ⇄ SEE WHAT'S CONNECTED
-                </text>
-              </g>
-            )}
+            {/* Subtle expand affordance in the bottom-right corner of the node. */}
+            <g
+              transform={`translate(${sys.x + r * 0.62}, ${sys.y + r * 0.62})`}
+              pointerEvents="none"
+            >
+              <circle
+                r={10}
+                fill={T.paper}
+                stroke={sysColor}
+                strokeWidth={1.5}
+                strokeOpacity={0.9}
+              />
+              <path
+                d="M -3 -3 L 3 0 L -3 3"
+                fill="none"
+                stroke={sysColor}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </g>
 
           </g>
         );
