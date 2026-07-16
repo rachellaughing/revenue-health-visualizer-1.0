@@ -697,6 +697,10 @@ function MatrixMapSVG({
         const opacity = from.healthScore < 60 ? 0.7 : 0.35;
         const mx = (from.x + to.x) / 2;
         const my = (from.y + to.y) / 2 - 30;
+        const showTooltip = (e: React.MouseEvent<SVGPathElement>, persistent: boolean) => {
+          const p = toSvgPoint(e, e.currentTarget);
+          setLinkTooltip({ conn, from, to, x: p.x, y: p.y, persistent });
+        };
         return (
           <g key={i}>
             <path
@@ -708,20 +712,38 @@ function MatrixMapSVG({
               strokeDasharray={from.healthScore < 60 ? "6,4" : "none"}
               markerEnd="url(#arrow)"
             />
-            <text
-              x={mx}
-              y={my - 8}
-              textAnchor="middle"
-              fontSize="9"
-              fontFamily="Inter"
-              fill={color}
-              opacity="0.6"
-            >
-              {conn.strength} {conn.strength === 1 ? "link" : "links"}
-            </text>
+            {/* Wide transparent hit-area shows detail on hover/tap instead of permanently cluttering the diagram. */}
+            <path
+              d={`M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}`}
+              fill="none"
+              stroke="transparent"
+              strokeWidth={Math.max(18, strokeWidth + 14)}
+              style={{ cursor: "pointer" }}
+              onMouseEnter={(e) => showTooltip(e, false)}
+              onMouseMove={(e) => {
+                const p = toSvgPoint(e, e.currentTarget);
+                setLinkTooltip((t) =>
+                  t && t.conn === conn ? { ...t, x: p.x, y: p.y } : t
+                );
+              }}
+              onMouseLeave={() =>
+                setLinkTooltip((t) =>
+                  t && t.conn === conn && !t.persistent ? null : t
+                )
+              }
+              onClick={(e) => {
+                e.stopPropagation();
+                setLinkTooltip((t) =>
+                  t && t.conn === conn && t.persistent
+                    ? null
+                    : { conn, from, to, x: t?.x ?? mx, y: t?.y ?? my, persistent: true }
+                );
+              }}
+            />
           </g>
         );
       })}
+
 
       {parents.map((sys) => {
         const isActive = activeNode === sys.code;
