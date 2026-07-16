@@ -763,7 +763,7 @@ function ZoomedSystem({
   payload: MatrixMapData;
   systemCode: string;
   isStarter: boolean;
-  onBack: () => void;
+  onBack: (e: React.MouseEvent) => void;
 }) {
   const sys = payload.parents.find((p) => p.code === systemCode)!;
   const children = payload.childrenByParent[systemCode] ?? [];
@@ -773,27 +773,77 @@ function ZoomedSystem({
   const child = children.find((c) => c.code === selectedChildCode);
   const unassessedCount = children.filter((c) => !c.assessed).length;
   const assessedCount = children.filter((c) => c.assessed).length;
+  const displayName = /\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`;
 
   return (
     <div>
-      <button
-        onClick={onBack}
-        style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          fontFamily: "Inter",
-          fontSize: 13,
-          color: T.teal,
-          padding: 0,
-          marginBottom: 16,
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-        }}
-      >
-        ← Back to full map
-      </button>
+      {/* Big center system node — doubles as the zoom-out control. */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+        <button
+          onClick={onBack}
+          aria-label={`Zoom out from ${displayName}`}
+          title="Click to zoom out"
+          style={{
+            width: 168,
+            height: 168,
+            borderRadius: "50%",
+            border: `3px solid ${sysColor}`,
+            background: `radial-gradient(circle at 50% 40%, ${sysColor}22, ${sysColor}08)`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16,
+            cursor: "pointer",
+            fontFamily: "Inter",
+            textAlign: "center",
+            boxShadow: `0 6px 24px ${sysColor}22`,
+            transition: "transform 0.15s ease, box-shadow 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.03)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+          }}
+        >
+          <div
+            style={{
+              fontSize: 32,
+              fontFamily: "Inter",
+              fontWeight: 700,
+              color: sysColor,
+              lineHeight: 1,
+            }}
+          >
+            {sys.healthScore}
+          </div>
+          <div
+            style={{
+              fontFamily: "'Instrument Serif', Georgia, serif",
+              fontSize: 20,
+              fontWeight: 400,
+              color: T.ink,
+              marginTop: 6,
+              lineHeight: 1.15,
+            }}
+          >
+            {displayName}
+          </div>
+          <div
+            style={{
+              fontSize: 9,
+              fontFamily: "Inter",
+              fontWeight: 700,
+              color: T.mid,
+              letterSpacing: "0.08em",
+              marginTop: 8,
+            }}
+          >
+            ← CLICK TO ZOOM OUT
+          </div>
+        </button>
+      </div>
 
       <div
         style={{
@@ -804,49 +854,15 @@ function ZoomedSystem({
         }}
       >
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: "50%",
-                border: `3px solid ${sysColor}`,
-                background: sysColor + "15",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 18,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: sysColor,
-                }}
-              >
-                {sys.healthScore}
-              </span>
-            </div>
-            <div>
-              <h3
-                style={{
-                  fontFamily: "'Instrument Serif', Georgia, serif",
-                  fontSize: 22,
-                  fontWeight: 400,
-                  color: sysColor,
-                  margin: "0 0 2px",
-                }}
-              >
-                {/\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`}
-              </h3>
-              <span style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
-                {isStarter && unassessedCount > 0
-                  ? `Click any subsystem to explore · ${unassessedCount} locked, assessed ${assessedCount} of ${children.length}`
-                  : "Click any subsystem to explore"}
-              </span>
-            </div>
+          <div style={{ marginBottom: 14 }}>
+            <span style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
+              {isStarter && unassessedCount > 0
+                ? `Click any subsystem to explore · ${unassessedCount} locked, assessed ${assessedCount} of ${children.length}`
+                : "Click any subsystem to explore"}
+            </span>
           </div>
+
+
 
           <div
             style={{
