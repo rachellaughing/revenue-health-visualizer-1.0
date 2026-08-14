@@ -37,7 +37,13 @@ const T = {
   white: "#FFFFFF",
 };
 
-const HEALTH_LABELS = ["Strongly Disagree", "Disagree", "Agree", "Strongly Agree"];
+const HEALTH_LABELS = [
+  "Strongly Disagree",
+  "Disagree",
+  "Inconsistent",
+  "Agree",
+  "Strongly Agree",
+];
 const TRACKING_LABELS = [
   "Not documented — runs on instinct",
   "Someone knows but nothing is written down",
