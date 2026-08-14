@@ -386,7 +386,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 const saveSchema = z.object({
   assessment_id: z.string().uuid(),
   question_id: z.string().uuid(),
-  health_response: z.number().int().min(-1).max(4).nullable(),
+  health_response: z.number().int().min(1).max(5).nullable(),
   tracking_response: z.number().int().min(1).max(5).nullable(),
 });
 
@@ -821,7 +821,7 @@ export const startNewAssessment = createServerFn({ method: "POST" })
 const editSchema = z.object({
   assessment_id: z.string().uuid(),
   question_id: z.string().uuid(),
-  health_response: z.number().int().min(-1).max(4).nullable(),
+  health_response: z.number().int().min(1).max(5).nullable(),
   tracking_response: z.number().int().min(1).max(5).nullable(),
 });
 
