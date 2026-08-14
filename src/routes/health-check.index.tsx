@@ -1424,12 +1424,14 @@ function HealthCheckShell({
       if (saveTimers.current[questionId]) clearTimeout(saveTimers.current[questionId]);
       saveTimers.current[questionId] = setTimeout(async () => {
         try {
+          // -1 is the client-side "skipped" sentinel; the DB stores NULL.
+          const isSkipped = health === -1;
           const res = await saveFn({
             data: {
               assessment_id: assessment.id,
               question_id: questionId,
-              health_response: health,
-              tracking_response: tracking,
+              health_response: isSkipped ? null : health,
+              tracking_response: isSkipped ? null : tracking,
             },
           });
           setSaveState("saved");
