@@ -760,6 +760,10 @@ async function _calculateAssessmentScoresImpl(
     .update({
       overall_health_score,
       overall_tracking_score,
+      inconsistency_count: totalInconsistent,
+      inconsistency_pct: totalAnsweredHealth
+        ? round1((totalInconsistent / totalAnsweredHealth) * 100)
+        : 0,
       calculated_at: new Date().toISOString(),
     })
     .eq("id", assessmentId);
