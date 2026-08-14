@@ -805,7 +805,11 @@ function CompletedLanding({
   const [responses, setResponses] = useState<Record<string, LocalResponse>>(() => {
     const m: Record<string, LocalResponse> = {};
     for (const r of data.responses) {
-      m[r.question_id] = { health: r.health_response, tracking: r.tracking_response };
+      // A saved row with no health answer is a skip; -1 is the client sentinel.
+      m[r.question_id] = {
+        health: r.health_response === null ? -1 : r.health_response,
+        tracking: r.tracking_response,
+      };
     }
     return m;
   });
@@ -813,7 +817,10 @@ function CompletedLanding({
   useEffect(() => {
     const m: Record<string, LocalResponse> = {};
     for (const r of data.responses) {
-      m[r.question_id] = { health: r.health_response, tracking: r.tracking_response };
+      m[r.question_id] = {
+        health: r.health_response === null ? -1 : r.health_response,
+        tracking: r.tracking_response,
+      };
     }
     setResponses(m);
   }, [data.responses]);
