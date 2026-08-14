@@ -28,7 +28,8 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { tab: initialTab } = Route.useSearch();
+  const { tab: rawTab } = Route.useSearch();
+  const initialTab: AuthTab = rawTab ?? "signin";
   const [tab, setTab] = useState<AuthTab>(initialTab);
 
   useEffect(() => {
