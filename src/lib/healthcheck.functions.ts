@@ -633,14 +633,15 @@ async function _calculateAssessmentScoresImpl(
     cById.set(c.id, { code: c.code });
   }
 
-  // Tunable thresholds live in public.scoring_config so they can change
+  // Tunable thresholds live in revhealth2.scoring_config so they can change
   // without a deploy. Fall back to the documented defaults.
-  const { data: cfgRows } = await supabaseAdmin
+  const { data: cfgRows } = await (supabaseAdmin as any)
+    .schema("revhealth2")
     .from("scoring_config")
-    .select("key,value")
-    .in("key", ["inconsistency.child_system", "inconsistency.assessment"]);
+    .select("config_key,config_value")
+    .in("config_key", ["inconsistency.child_system", "inconsistency.assessment"]);
   const cfgByKey = new Map<string, any>(
-    (cfgRows ?? []).map((row: any) => [row.key, row.value]),
+    (cfgRows ?? []).map((row: any) => [row.config_key, row.config_value]),
   );
   const childCfg = cfgByKey.get("inconsistency.child_system") ?? {};
   const INCONSISTENT_VALUE: number = Number(childCfg.answer_value ?? 3);
