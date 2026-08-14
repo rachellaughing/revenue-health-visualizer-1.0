@@ -116,7 +116,9 @@ export type Database = {
           child_system_id: string
           health_score: number | null
           id: string
+          inconsistency_count: number
           is_hard_shadow: boolean | null
+          is_inconsistent: boolean
           is_soft_shadow: boolean | null
           severity: string | null
           tracking_score: number | null
@@ -129,7 +131,9 @@ export type Database = {
           child_system_id: string
           health_score?: number | null
           id?: string
+          inconsistency_count?: number
           is_hard_shadow?: boolean | null
+          is_inconsistent?: boolean
           is_soft_shadow?: boolean | null
           severity?: string | null
           tracking_score?: number | null
@@ -142,7 +146,9 @@ export type Database = {
           child_system_id?: string
           health_score?: number | null
           id?: string
+          inconsistency_count?: number
           is_hard_shadow?: boolean | null
+          is_inconsistent?: boolean
           is_soft_shadow?: boolean | null
           severity?: string | null
           tracking_score?: number | null
@@ -175,6 +181,8 @@ export type Database = {
           completion_pct: number
           created_at: string | null
           id: string
+          inconsistency_count: number
+          inconsistency_pct: number
           overall_health_score: number | null
           overall_tracking_score: number | null
           parent_assessment_id: string | null
@@ -195,6 +203,8 @@ export type Database = {
           completion_pct?: number
           created_at?: string | null
           id?: string
+          inconsistency_count?: number
+          inconsistency_pct?: number
           overall_health_score?: number | null
           overall_tracking_score?: number | null
           parent_assessment_id?: string | null
@@ -215,6 +225,8 @@ export type Database = {
           completion_pct?: number
           created_at?: string | null
           id?: string
+          inconsistency_count?: number
+          inconsistency_pct?: number
           overall_health_score?: number | null
           overall_tracking_score?: number | null
           parent_assessment_id?: string | null
@@ -1005,6 +1017,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scoring_config: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
       }
       session_attendees: {
         Row: {
