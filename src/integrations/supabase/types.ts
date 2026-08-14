@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.15"
   }
   public: {
     Tables: {
@@ -100,6 +100,13 @@ export type Database = {
             referencedRelation: "assessments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "assessment_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions_ref"
+            referencedColumns: ["id"]
+          },
         ]
       }
       assessment_scores: {
@@ -148,6 +155,13 @@ export type Database = {
             columns: ["assessment_id"]
             isOneToOne: false
             referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_scores_child_system_id_fkey"
+            columns: ["child_system_id"]
+            isOneToOne: false
+            referencedRelation: "child_systems_ref"
             referencedColumns: ["id"]
           },
         ]
@@ -227,6 +241,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_unlocks"
+            referencedColumns: ["profile_id"]
           },
         ]
       }
@@ -320,6 +341,21 @@ export type Database = {
         }
         Relationships: []
       }
+      consultant_allowlist: {
+        Row: {
+          created_at: string
+          email: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+        }
+        Relationships: []
+      }
       consultant_observations: {
         Row: {
           assessment_id: string
@@ -333,6 +369,7 @@ export type Database = {
           owner_id: string
           parent_system_id: string | null
           raw_notes: string | null
+          recording_url: string | null
           session_date: string | null
           session_type: string
           severity_flag: string | null
@@ -350,6 +387,7 @@ export type Database = {
           owner_id: string
           parent_system_id?: string | null
           raw_notes?: string | null
+          recording_url?: string | null
           session_date?: string | null
           session_type?: string
           severity_flag?: string | null
@@ -367,6 +405,7 @@ export type Database = {
           owner_id?: string
           parent_system_id?: string | null
           raw_notes?: string | null
+          recording_url?: string | null
           session_date?: string | null
           session_type?: string
           severity_flag?: string | null
@@ -421,6 +460,60 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_engagements: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          created_at: string
+          diagnostic_completed_at: string | null
+          diagnostic_completed_by: string | null
+          id: string
+          notes: string | null
+          profile_id: string
+          status: Database["public"]["Enums"]["diagnostic_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          created_at?: string
+          diagnostic_completed_at?: string | null
+          diagnostic_completed_by?: string | null
+          id?: string
+          notes?: string | null
+          profile_id: string
+          status?: Database["public"]["Enums"]["diagnostic_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          created_at?: string
+          diagnostic_completed_at?: string | null
+          diagnostic_completed_by?: string | null
+          id?: string
+          notes?: string | null
+          profile_id?: string
+          status?: Database["public"]["Enums"]["diagnostic_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_engagements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_engagements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_unlocks"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       diagnostic_recommendations: {
         Row: {
           assessment_id: string
@@ -474,10 +567,12 @@ export type Database = {
       founder_dependency_processes: {
         Row: {
           assessment_id: string
+          backup_person: string | null
           blast_radius_window: string | null
           created_at: string | null
           delegation_difficulty: string | null
           dependency_type: string
+          documentation_status: string | null
           id: string
           is_shadow_system: boolean
           owner_id: string
@@ -490,10 +585,12 @@ export type Database = {
         }
         Insert: {
           assessment_id: string
+          backup_person?: string | null
           blast_radius_window?: string | null
           created_at?: string | null
           delegation_difficulty?: string | null
           dependency_type?: string
+          documentation_status?: string | null
           id?: string
           is_shadow_system?: boolean
           owner_id: string
@@ -506,10 +603,12 @@ export type Database = {
         }
         Update: {
           assessment_id?: string
+          backup_person?: string | null
           blast_radius_window?: string | null
           created_at?: string | null
           delegation_difficulty?: string | null
           dependency_type?: string
+          documentation_status?: string | null
           id?: string
           is_shadow_system?: boolean
           owner_id?: string
@@ -907,6 +1006,105 @@ export type Database = {
           },
         ]
       }
+      session_attendees: {
+        Row: {
+          created_at: string
+          department: string | null
+          id: string
+          name: string
+          observation_id: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          name: string
+          observation_id: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          id?: string
+          name?: string
+          observation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_attendees_observation_id_fkey"
+            columns: ["observation_id"]
+            isOneToOne: false
+            referencedRelation: "consultant_observations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shadow_systems: {
+        Row: {
+          assessment_id: string
+          child_system_id: string | null
+          consultant_id: string
+          created_at: string
+          departments_affected: string[]
+          description: string
+          downstream_impact: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          updated_at: string
+          upstream_impact: string | null
+        }
+        Insert: {
+          assessment_id: string
+          child_system_id?: string | null
+          consultant_id: string
+          created_at?: string
+          departments_affected?: string[]
+          description: string
+          downstream_impact?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          updated_at?: string
+          upstream_impact?: string | null
+        }
+        Update: {
+          assessment_id?: string
+          child_system_id?: string | null
+          consultant_id?: string
+          created_at?: string
+          departments_affected?: string[]
+          description?: string
+          downstream_impact?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          updated_at?: string
+          upstream_impact?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shadow_systems_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shadow_systems_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shadow_systems_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_unlocks"
+            referencedColumns: ["profile_id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           cluster_label: string | null
@@ -1004,9 +1202,201 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      child_systems_ref: {
+        Row: {
+          code: string | null
+          id: string | null
+          name: string | null
+          parent_system_id: string | null
+          slug: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          code?: string | null
+          id?: string | null
+          name?: string | null
+          parent_system_id?: string | null
+          slug?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string | null
+          id?: string | null
+          name?: string | null
+          parent_system_id?: string | null
+          slug?: string | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      dependency_map_ref: {
+        Row: {
+          child_system_id: string | null
+          direct_dependencies: string | null
+          downstream_systems_influenced: string | null
+          id: string | null
+          if_these_are_weak: string | null
+          why_these_matter: string | null
+        }
+        Insert: {
+          child_system_id?: string | null
+          direct_dependencies?: string | null
+          downstream_systems_influenced?: string | null
+          id?: string | null
+          if_these_are_weak?: string | null
+          why_these_matter?: string | null
+        }
+        Update: {
+          child_system_id?: string | null
+          direct_dependencies?: string | null
+          downstream_systems_influenced?: string | null
+          id?: string | null
+          if_these_are_weak?: string | null
+          why_these_matter?: string | null
+        }
+        Relationships: []
+      }
+      parent_systems_ref: {
+        Row: {
+          code: string | null
+          id: string | null
+          name: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          code?: string | null
+          id?: string | null
+          name?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string | null
+          id?: string | null
+          name?: string | null
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      questions_ref: {
+        Row: {
+          child_system_id: string | null
+          id: string | null
+        }
+        Insert: {
+          child_system_id?: string | null
+          id?: string | null
+        }
+        Update: {
+          child_system_id?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
+      v_client_unlocks: {
+        Row: {
+          diagnostic_active: boolean | null
+          profile_id: string | null
+          session_complete: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          diagnostic_active?: never
+          profile_id?: string | null
+          session_complete?: never
+          user_id?: string | null
+        }
+        Update: {
+          diagnostic_active?: never
+          profile_id?: string | null
+          session_complete?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      assign_diagnostic_tier: {
+        Args: { _notes?: string; _profile_id: string }
+        Returns: {
+          assigned_at: string
+          assigned_by: string
+          created_at: string
+          diagnostic_completed_at: string | null
+          diagnostic_completed_by: string | null
+          id: string
+          notes: string | null
+          profile_id: string
+          status: Database["public"]["Enums"]["diagnostic_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "diagnostic_engagements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      evaluate_contradiction_flags: {
+        Args: { _assessment_id: string }
+        Returns: number
+      }
+      get_assessment_evaluation_areas: {
+        Args: { _assessment_id: string }
+        Returns: {
+          area_name: string
+          child_system_id: string
+          evaluation_area_id: string
+          health_response: number
+          sort_order: number
+          tracking_response: number
+        }[]
+      }
+      get_contradiction_flags: {
+        Args: { _assessment_id: string }
+        Returns: {
+          answered_at: string
+          answered_by: string
+          consultant_finding: string
+          flagged_at: string
+          id: string
+          probe_question: string
+          risk_level: string
+          rule_id: string
+          rule_name: string
+          system_a_health_score: number
+          system_a_name: string
+          system_b_health_score: number
+          system_b_name: string
+          what_it_reveals: string
+        }[]
+      }
+      get_not_documented_responses: {
+        Args: { _assessment_id: string }
+        Returns: {
+          area_name: string
+          area_sort_order: number
+          child_sort_order: number
+          child_system_id: string
+          child_system_name: string
+          evaluation_area_id: string
+          health_response: number
+          parent_sort_order: number
+          parent_system_id: string
+          parent_system_name: string
+          question_id: string
+          response_id: string
+          tracking_response: number
+        }[]
+      }
+      get_symptom_map: {
+        Args: never
+        Returns: {
+          category: string
+          symptom: string
+          symptom_code: string
+        }[]
+      }
+      get_team_owner_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
@@ -1030,6 +1420,34 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      save_contradiction_finding: {
+        Args: { _finding: string; _flag_id: string }
+        Returns: undefined
+      }
+      set_diagnostic_status: {
+        Args: {
+          _engagement_id: string
+          _status: Database["public"]["Enums"]["diagnostic_status"]
+        }
+        Returns: {
+          assigned_at: string
+          assigned_by: string
+          created_at: string
+          diagnostic_completed_at: string | null
+          diagnostic_completed_by: string | null
+          id: string
+          notes: string | null
+          profile_id: string
+          status: Database["public"]["Enums"]["diagnostic_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "diagnostic_engagements"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
     }
     Enums: {
       app_role:
@@ -1040,6 +1458,14 @@ export type Database = {
         | "member"
         | "pro"
         | "team_owner"
+      diagnostic_status:
+        | "assigned"
+        | "leadership_discovery"
+        | "pbj_sessions"
+        | "system_analysis"
+        | "roadmap_build"
+        | "strategy_session"
+        | "complete"
       growth_stage: "seed" | "early" | "growth" | "scale"
       user_tier: "starter" | "pro" | "diagnostic"
     }
@@ -1177,6 +1603,15 @@ export const Constants = {
         "member",
         "pro",
         "team_owner",
+      ],
+      diagnostic_status: [
+        "assigned",
+        "leadership_discovery",
+        "pbj_sessions",
+        "system_analysis",
+        "roadmap_build",
+        "strategy_session",
+        "complete",
       ],
       growth_stage: ["seed", "early", "growth", "scale"],
       user_tier: ["starter", "pro", "diagnostic"],
