@@ -635,7 +635,7 @@ async function _calculateAssessmentScoresImpl(
 
   // Tunable thresholds live in revhealth2.scoring_config so they can change
   // without a deploy. Fall back to the documented defaults.
-  const { data: cfgRows } = await supabaseAdmin
+  const { data: cfgRows } = await (supabaseAdmin as any)
     .schema("revhealth2")
     .from("scoring_config")
     .select("config_key,config_value")
