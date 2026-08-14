@@ -1220,7 +1220,8 @@ function HealthCheckShell({
     const m: ResponseMap = {};
     for (const r of data.responses) {
       m[r.question_id] = {
-        health: r.health_response,
+        // A saved row with no health answer is a skip; -1 is the client sentinel.
+        health: r.health_response === null ? -1 : r.health_response,
         tracking: r.tracking_response,
       };
     }
