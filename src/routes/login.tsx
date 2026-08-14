@@ -18,7 +18,9 @@ import {
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { verified?: true; tab?: "signin" | "signup" } => ({
     verified: search.verified === "1" || search.verified === 1 ? true : undefined,
     tab: search.tab === "signup" ? ("signup" as const) : ("signin" as const),
   }),
@@ -26,7 +28,8 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const { tab: initialTab } = Route.useSearch();
+  const { tab: rawTab } = Route.useSearch();
+  const initialTab: AuthTab = rawTab ?? "signin";
   const [tab, setTab] = useState<AuthTab>(initialTab);
 
   useEffect(() => {

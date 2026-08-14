@@ -10,7 +10,9 @@ type TabKey = "account" | "billing" | "team";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings" }] }),
-  validateSearch: (s: Record<string, unknown>) => {
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { tab?: TabKey; success?: true } => {
     const raw = String(s.tab ?? "account");
     const tab: TabKey =
       raw === "billing" || raw === "team" ? raw : "account";
@@ -40,7 +42,8 @@ function SettingsPage() {
   const TABS = isMember
     ? ALL_TABS.filter((t) => t.key !== "team")
     : ALL_TABS;
-  const activeTab: TabKey = isMember && tab === "team" ? "account" : tab;
+  const activeTab: TabKey =
+    isMember && tab === "team" ? "account" : (tab ?? "account");
 
   return (
     <div
