@@ -37,7 +37,13 @@ const T = {
   white: "#FFFFFF",
 };
 
-const HEALTH_LABELS = ["Strongly Disagree", "Disagree", "Agree", "Strongly Agree"];
+const HEALTH_LABELS = [
+  "Strongly Disagree",
+  "Disagree",
+  "Inconsistent",
+  "Agree",
+  "Strongly Agree",
+];
 const TRACKING_LABELS = [
   "Not documented — runs on instinct",
   "Someone knows but nothing is written down",
@@ -799,7 +805,11 @@ function CompletedLanding({
   const [responses, setResponses] = useState<Record<string, LocalResponse>>(() => {
     const m: Record<string, LocalResponse> = {};
     for (const r of data.responses) {
-      m[r.question_id] = { health: r.health_response, tracking: r.tracking_response };
+      // A saved row with no health answer is a skip; -1 is the client sentinel.
+      m[r.question_id] = {
+        health: r.health_response === null ? -1 : r.health_response,
+        tracking: r.tracking_response,
+      };
     }
     return m;
   });
@@ -807,7 +817,10 @@ function CompletedLanding({
   useEffect(() => {
     const m: Record<string, LocalResponse> = {};
     for (const r of data.responses) {
-      m[r.question_id] = { health: r.health_response, tracking: r.tracking_response };
+      m[r.question_id] = {
+        health: r.health_response === null ? -1 : r.health_response,
+        tracking: r.tracking_response,
+      };
     }
     setResponses(m);
   }, [data.responses]);
@@ -1207,7 +1220,8 @@ function HealthCheckShell({
     const m: ResponseMap = {};
     for (const r of data.responses) {
       m[r.question_id] = {
-        health: r.health_response,
+        // A saved row with no health answer is a skip; -1 is the client sentinel.
+        health: r.health_response === null ? -1 : r.health_response,
         tracking: r.tracking_response,
       };
     }
@@ -1410,12 +1424,14 @@ function HealthCheckShell({
       if (saveTimers.current[questionId]) clearTimeout(saveTimers.current[questionId]);
       saveTimers.current[questionId] = setTimeout(async () => {
         try {
+          // -1 is the client-side "skipped" sentinel; the DB stores NULL.
+          const isSkipped = health === -1;
           const res = await saveFn({
             data: {
               assessment_id: assessment.id,
               question_id: questionId,
-              health_response: health,
-              tracking_response: tracking,
+              health_response: isSkipped ? null : health,
+              tracking_response: isSkipped ? null : tracking,
             },
           });
           setSaveState("saved");

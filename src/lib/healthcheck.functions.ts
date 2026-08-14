@@ -386,7 +386,7 @@ export const getHealthCheckData = createServerFn({ method: "GET" })
 const saveSchema = z.object({
   assessment_id: z.string().uuid(),
   question_id: z.string().uuid(),
-  health_response: z.number().int().min(-1).max(4).nullable(),
+  health_response: z.number().int().min(1).max(5).nullable(),
   tracking_response: z.number().int().min(1).max(5).nullable(),
 });
 
@@ -633,11 +633,29 @@ async function _calculateAssessmentScoresImpl(
     cById.set(c.id, { code: c.code });
   }
 
+  // Tunable thresholds live in public.scoring_config so they can change
+  // without a deploy. Fall back to the documented defaults.
+  const { data: cfgRows } = await supabaseAdmin
+    .from("scoring_config")
+    .select("key,value")
+    .in("key", ["inconsistency.child_system", "inconsistency.assessment"]);
+  const cfgByKey = new Map<string, any>(
+    (cfgRows ?? []).map((row: any) => [row.key, row.value]),
+  );
+  const childCfg = cfgByKey.get("inconsistency.child_system") ?? {};
+  const INCONSISTENT_VALUE: number = Number(childCfg.answer_value ?? 3);
+  const INCONSISTENCY_FLAG_AT: number = Number(childCfg.flag_at ?? 2);
+
+  const HEALTH_MAX = 5;
+  const TRACKING_MAX = 5;
+
   // Group responses by child_system_id, filter out skipped (health <= 0)
   const byChild = new Map<
     string,
-    { health: number[]; tracking: number[] }
+    { health: number[]; tracking: number[]; inconsistent: number }
   >();
+  let totalAnsweredHealth = 0;
+  let totalInconsistent = 0;
   for (const r of (respRes.data ?? []) as ScoreRow[]) {
     const q = qById.get(r.question_id);
     if (!q) continue;
@@ -645,10 +663,20 @@ async function _calculateAssessmentScoresImpl(
     const bucket = byChild.get(q.child_system_id) ?? {
       health: [],
       tracking: [],
+      inconsistent: 0,
     };
-    bucket.health.push((r.health_response / 4) * 100);
+    bucket.health.push(
+      ((r.health_response - 1) / (HEALTH_MAX - 1)) * 100,
+    );
     if (r.tracking_response !== null) {
-      bucket.tracking.push((r.tracking_response / 5) * 100);
+      bucket.tracking.push(
+        ((r.tracking_response - 1) / (TRACKING_MAX - 1)) * 100,
+      );
+    }
+    totalAnsweredHealth++;
+    if (r.health_response === INCONSISTENT_VALUE) {
+      bucket.inconsistent++;
+      totalInconsistent++;
     }
     byChild.set(q.child_system_id, bucket);
   }
@@ -705,6 +733,8 @@ async function _calculateAssessmentScoresImpl(
           is_soft_shadow: isSoftShadow,
           is_hard_shadow: isHardShadow,
           severity,
+          inconsistency_count: vals.inconsistent,
+          is_inconsistent: vals.inconsistent >= INCONSISTENCY_FLAG_AT,
           calculated_at: new Date().toISOString(),
         },
         { onConflict: "assessment_id,child_system_id" },
@@ -730,6 +760,10 @@ async function _calculateAssessmentScoresImpl(
     .update({
       overall_health_score,
       overall_tracking_score,
+      inconsistency_count: totalInconsistent,
+      inconsistency_pct: totalAnsweredHealth
+        ? round1((totalInconsistent / totalAnsweredHealth) * 100)
+        : 0,
       calculated_at: new Date().toISOString(),
     })
     .eq("id", assessmentId);
@@ -821,7 +855,7 @@ export const startNewAssessment = createServerFn({ method: "POST" })
 const editSchema = z.object({
   assessment_id: z.string().uuid(),
   question_id: z.string().uuid(),
-  health_response: z.number().int().min(-1).max(4).nullable(),
+  health_response: z.number().int().min(1).max(5).nullable(),
   tracking_response: z.number().int().min(1).max(5).nullable(),
 });
 
