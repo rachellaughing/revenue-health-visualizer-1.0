@@ -733,6 +733,8 @@ async function _calculateAssessmentScoresImpl(
           is_soft_shadow: isSoftShadow,
           is_hard_shadow: isHardShadow,
           severity,
+          inconsistency_count: vals.inconsistent,
+          is_inconsistent: vals.inconsistent >= INCONSISTENCY_FLAG_AT,
           calculated_at: new Date().toISOString(),
         },
         { onConflict: "assessment_id,child_system_id" },
