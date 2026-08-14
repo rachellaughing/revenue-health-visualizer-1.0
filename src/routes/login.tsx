@@ -18,7 +18,9 @@ import {
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { verified?: true; tab?: "signin" | "signup" } => ({
     verified: search.verified === "1" || search.verified === 1 ? true : undefined,
     tab: search.tab === "signup" ? ("signup" as const) : ("signin" as const),
   }),

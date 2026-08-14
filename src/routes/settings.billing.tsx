@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/settings/billing")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { success?: true } => ({
     success: s.success === "true" || s.success === true ? true : undefined,
   }),
   beforeLoad: ({ search }) => {
