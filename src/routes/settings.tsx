@@ -42,7 +42,8 @@ function SettingsPage() {
   const TABS = isMember
     ? ALL_TABS.filter((t) => t.key !== "team")
     : ALL_TABS;
-  const activeTab: TabKey = isMember && tab === "team" ? "account" : tab;
+  const activeTab: TabKey =
+    isMember && tab === "team" ? "account" : (tab ?? "account");
 
   return (
     <div
