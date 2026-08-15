@@ -805,9 +805,9 @@ function CompletedLanding({
   const [responses, setResponses] = useState<Record<string, LocalResponse>>(() => {
     const m: Record<string, LocalResponse> = {};
     for (const r of data.responses) {
-      // A saved row with no health answer is a skip; -1 is the client sentinel.
+      // A saved row with no health answer is a skip; null is the client sentinel.
       m[r.question_id] = {
-        health: r.health_response === null ? -1 : r.health_response,
+        health: r.health_response,
         tracking: r.tracking_response,
       };
     }
@@ -818,7 +818,7 @@ function CompletedLanding({
     const m: Record<string, LocalResponse> = {};
     for (const r of data.responses) {
       m[r.question_id] = {
-        health: r.health_response === null ? -1 : r.health_response,
+        health: r.health_response,
         tracking: r.tracking_response,
       };
     }
@@ -1220,8 +1220,8 @@ function HealthCheckShell({
     const m: ResponseMap = {};
     for (const r of data.responses) {
       m[r.question_id] = {
-        // A saved row with no health answer is a skip; -1 is the client sentinel.
-        health: r.health_response === null ? -1 : r.health_response,
+        // A saved row with no health answer is a skip; null is the client sentinel.
+        health: r.health_response,
         tracking: r.tracking_response,
       };
     }
@@ -1234,7 +1234,7 @@ function HealthCheckShell({
   const [autoCollapsed, setAutoCollapsed] = useState<Record<string, boolean>>(() => {
     const seed: Record<string, boolean> = {};
     for (const [qid, r] of Object.entries(initialResponses)) {
-      const isSkipped = r.health === -1;
+      const isSkipped = r.health === null;
       const isComplete = r.health !== null && r.health > 0 && r.tracking !== null;
       if (isSkipped || isComplete) seed[qid] = true;
     }
@@ -1386,7 +1386,7 @@ function HealthCheckShell({
   // Overall completion — mirror server's computeCompletionPct exactly:
   // - starter: only areas under children whose code ∈ selectedSet
   // - pro/diagnostic: all areas
-  // - exclude skipped (health === -1) and require tracking
+  // - exclude skipped (health === null) and require tracking
   // - dedupe by question_id (areas already 1:1 with question_id)
   const totalUnlocked = data.totalUnlockedAreas;
   const completedCount = useMemo(() => {
@@ -1402,12 +1402,7 @@ function HealthCheckShell({
       if (seen.has(a.question_id)) continue;
       seen.add(a.question_id);
       const r = responses[a.question_id];
-      if (
-        r &&
-        r.health !== null &&
-        r.health !== -1 &&
-        r.tracking !== null
-      ) {
+      if (r && r.health !== null && r.tracking !== null) {
         done++;
       }
     }
@@ -1424,8 +1419,8 @@ function HealthCheckShell({
       if (saveTimers.current[questionId]) clearTimeout(saveTimers.current[questionId]);
       saveTimers.current[questionId] = setTimeout(async () => {
         try {
-          // -1 is the client-side "skipped" sentinel; the DB stores NULL.
-          const isSkipped = health === -1;
+          // null is the client-side "skipped"/unanswered sentinel; stored as NULL in DB.
+          const isSkipped = health === null;
           const res = await saveFn({
             data: {
               assessment_id: assessment.id,
@@ -1448,7 +1443,7 @@ function HealthCheckShell({
     [assessment.id, saveFn, qc],
   );
 
-  function setHealth(area: Area, value: number) {
+  function setHealth(area: Area, value: number | null) {
     const qid = area.question_id;
     setResponses((prev) => {
       const cur = prev[qid] ?? { health: null, tracking: null };
@@ -1459,7 +1454,7 @@ function HealthCheckShell({
     // Changing health re-opens the card so the user can pick tracking again
     setAutoCollapsed((s) => ({ ...s, [qid]: false }));
     setManuallyExpanded((s) => ({ ...s, [qid]: false }));
-    if (value === -1) {
+    if (value === null) {
       setTimeout(() => {
         setAutoCollapsed((s) => ({ ...s, [qid]: true }));
       }, 600);
@@ -1493,7 +1488,7 @@ function HealthCheckShell({
       const el = cardRefs.current[next.question_id];
       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
     } else {
-      const skipped = list.filter((a) => responses[a.question_id]?.health === -1);
+      const skipped = list.filter((a) => responses[a.question_id]?.health === null);
       if (skipped.length > 0) setShowSkipWarning(true);
     }
   }
@@ -1526,7 +1521,7 @@ function HealthCheckShell({
       return r && r.health !== null && r.health > 0 && r.tracking !== null;
     });
   const childSkippedCount = activeAreas.filter(
-    (a) => responses[a.question_id]?.health === -1,
+    (a) => responses[a.question_id]?.health === null,
   ).length;
 
   function selectChild(c: ChildSystem) {
@@ -1845,7 +1840,7 @@ function HealthCheckShell({
                         );
                       });
                     const hasSkipped = arr.some(
-                      (a) => responses[a.question_id]?.health === -1,
+                      (a) => responses[a.question_id]?.health === null,
                     );
                     const isActive = c.id === activeChild?.id;
                     return (
@@ -2182,7 +2177,7 @@ function HealthCheckShell({
                   health: null,
                   tracking: null,
                 };
-                const isSkipped = r.health === -1;
+                const isSkipped = r.health === null;
                 const isComplete =
                   r.health !== null && r.health > 0 && r.tracking !== null;
                 const collapsed =
@@ -2368,11 +2363,11 @@ function HealthCheckShell({
                       </div>
                     )}
 
-                    {/* Health 4-button scale */}
+                    {/* Health 5-point scale */}
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "repeat(4, 1fr)",
+                        gridTemplateColumns: isMobile ? "1fr" : "repeat(5, 1fr)",
                         gap: 6,
                         marginBottom: 8,
                       }}
@@ -2397,6 +2392,11 @@ function HealthCheckShell({
                               cursor: "pointer",
                               textAlign: "center",
                               lineHeight: 1.3,
+                              transition: "border-color .12s, background .12s",
+                              boxShadow:
+                                val === 3 && !sel
+                                  ? "inset 0 -2px 0 rgba(0,0,0,0.10)"
+                                  : "none",
                             }}
                           >
                             {label}
@@ -2405,7 +2405,7 @@ function HealthCheckShell({
                       })}
                     </div>
                     <button
-                      onClick={() => setHealth(area, -1)}
+                      onClick={() => setHealth(area, null)}
                       style={{
                         background: "none",
                         border: "none",
