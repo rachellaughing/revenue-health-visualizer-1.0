@@ -171,7 +171,6 @@ function computeCompletionPct(
     (r) =>
       relevantQids.has(r.question_id) &&
       r.health_response !== null &&
-      r.health_response !== -1 &&
       r.tracking_response !== null,
   ).length;
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -639,7 +638,7 @@ async function _calculateAssessmentScoresImpl(
     .schema("revhealth2")
     .from("scoring_config")
     .select("config_key,config_value")
-    .in("config_key", ["inconsistency.child_system", "inconsistency.assessment"]);
+    .in("config_key", ["inconsistency.child_system"]);
   const cfgByKey = new Map<string, any>(
     (cfgRows ?? []).map((row: any) => [row.config_key, row.config_value]),
   );
