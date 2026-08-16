@@ -1251,8 +1251,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             .schema("revhealth2")
             .from("critical_paths")
             .select("id,name,tagline,definition,bottleneck_logic,sort_order")
-            .order("sort_order")
-            .limit(3),
+            .order("sort_order"),
           (supabaseAdmin as any)
             .schema("revhealth2")
             .from("critical_path_members")
