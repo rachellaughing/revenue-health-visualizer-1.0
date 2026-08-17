@@ -512,7 +512,8 @@ export type ChildSystemScore = {
   trackingScore: number;
   visibilityGap: number;
   severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
-  isShadow: boolean;
+  isSoftShadow: boolean;
+  isHardShadow: boolean;
   assessed: boolean;
 };
 
@@ -520,6 +521,8 @@ export type SystemHealthSystem = ParentScore & {
   children: ChildSystemScore[];
   narrative: string | null;
 };
+
+export type ShadowThreshold = { healthGte: number; trackingLt: number };
 
 export type RevenueSystemHealth = {
   tier: Tier;
@@ -530,7 +533,14 @@ export type RevenueSystemHealth = {
     selected_child_ids: string[] | null;
   };
   systems: SystemHealthSystem[];
+  keyFinding: {
+    headline: string;
+    body: string;
+    source: "cached" | "fallback";
+  } | null;
+  shadowThresholds: { soft: ShadowThreshold; hard: ShadowThreshold };
 };
+
 
 export const getRevenueSystemHealth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
