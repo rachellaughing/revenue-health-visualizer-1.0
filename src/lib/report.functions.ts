@@ -2047,6 +2047,176 @@ export const getMatrixMap = createServerFn({ method: "POST" })
   );
 
 // ============================================================================
+// Recommended actions for a single child system (Matrix Map drill-down)
+//
+// Second entry point into the SAME opportunity_actions cache used by Top
+// Opportunities. Top Opportunities only generates copy for the <=12 featured
+// systems; Matrix Map can be drilled into from any of the 50. Same lazy
+// check-cache / generate-once / upsert pattern, so a row generated here is
+// reused there and vice versa. Falls back to Roadmap Builder's static content
+// when generation is unavailable.
+// ============================================================================
+
+export type ChildSystemActions = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  source: "generated" | "fallback";
+  whatWeSee: string;
+  whyItMatters: string;
+  startHere: string[];
+};
+
+const childActionsSchema = z.object({
+  childSystemId: z.string().uuid(),
+  assessmentId: z.string().uuid().optional(),
+});
+
+export const getChildSystemActions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => childActionsSchema.parse(d))
+  .handler(async ({ data, context }): Promise<ChildSystemActions | null> => {
+    const userId = context.userId;
+
+    let assessmentId = data.assessmentId;
+    if (!assessmentId) {
+      const { data: latest } = await supabaseAdmin
+        .from("assessments")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!latest) return null;
+      assessmentId = latest.id;
+    }
+
+    const [childRes, cachedRes] = await Promise.all([
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("child_systems")
+        .select("id,code,name,parent_system_id")
+        .eq("id", data.childSystemId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("opportunity_actions")
+        .select("what_we_see,why_it_matters,start_here")
+        .eq("assessment_id", assessmentId)
+        .eq("user_id", userId)
+        .eq("child_system_id", data.childSystemId)
+        .maybeSingle(),
+    ]);
+
+    const child = (childRes as any)?.data;
+    if (!child) return null;
+
+    const cached = (cachedRes as any)?.data;
+    if (cached) {
+      return {
+        childSystemId: child.id,
+        code: child.code,
+        name: child.name,
+        source: "generated",
+        whatWeSee: cached.what_we_see,
+        whyItMatters: cached.why_it_matters,
+        startHere: (cached.start_here ?? []) as string[],
+      };
+    }
+
+    const [parentRes, failureRes, scoreRes, companyRes] = await Promise.all([
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("parent_systems")
+        .select("name")
+        .eq("id", child.parent_system_id)
+        .maybeSingle(),
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("failure_map")
+        .select(
+          "core_symptoms,likely_root_causes,impacted_system_1,impacted_system_2,impacted_system_3",
+        )
+        .eq("child_system_id", child.id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("assessment_scores")
+        .select("health_score")
+        .eq("assessment_id", assessmentId)
+        .eq("user_id", userId)
+        .eq("child_system_id", child.id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("company_profiles")
+        .select("company_name")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]);
+
+    const parentName = (parentRes as any)?.data?.name ?? "";
+    const failure = (failureRes as any)?.data ?? {};
+    const healthScore = Math.round(Number((scoreRes as any)?.data?.health_score ?? 0));
+
+    const generated = await generateOpportunityCopy(
+      assessmentId,
+      userId,
+      (companyRes as any)?.data?.company_name ?? "this company",
+      [
+        {
+          code: child.code,
+          name: child.name,
+          parentName,
+          healthScore,
+          coreSymptom: failure.core_symptoms ?? "",
+          likelyRootCause: failure.likely_root_causes ?? "",
+          impacts: [failure.impacted_system_1, failure.impacted_system_2, failure.impacted_system_3]
+            .filter((x: unknown): x is string => !!x),
+          quickWin: false,
+        },
+      ],
+    );
+
+    const copy = generated.get(child.code);
+    if (copy) {
+      const { error: upErr } = await supabaseAdmin.from("opportunity_actions").upsert(
+        [
+          {
+            assessment_id: assessmentId,
+            user_id: userId,
+            child_system_id: child.id,
+            what_we_see: copy.whatWeSee,
+            why_it_matters: copy.whyItMatters,
+            start_here: copy.startHere,
+            model_used: "claude-sonnet-4-5-20250929",
+            generated_at: new Date().toISOString(),
+          },
+        ],
+        { onConflict: "assessment_id,child_system_id" },
+      );
+      if (upErr) console.error("[child-actions] upsert failed:", upErr.message);
+      return {
+        childSystemId: child.id,
+        code: child.code,
+        name: child.name,
+        source: "generated",
+        ...copy,
+      };
+    }
+
+    // Fallback: Roadmap Builder's existing static content.
+    const fb = ROADMAP_CONTENT[child.code] ?? defaultContent(child.name, parentName, failure);
+    return {
+      childSystemId: child.id,
+      code: child.code,
+      name: child.name,
+      source: "fallback",
+      whatWeSee: failure.core_symptoms ?? `${child.name} is not yet operating at full strength.`,
+      whyItMatters: fb.why,
+      startHere: fb.tasks.slice(0, 3),
+    };
+  });
+
+// ============================================================================
 // Team Alignment Report
 // ============================================================================
 
