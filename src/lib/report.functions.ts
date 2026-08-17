@@ -1616,7 +1616,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         assessmentId = latest.id;
       }
 
-      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes] =
+      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes, depsRes] =
         await Promise.all([
           supabaseAdmin
             .from("assessments")
