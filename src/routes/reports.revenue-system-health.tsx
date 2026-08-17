@@ -1505,6 +1505,10 @@ function ReportBody({
           </div>
         </div>
 
+        <KeyFindingBanner keyFinding={data.keyFinding} />
+
+        <AttentionShortlist systems={ordered} shadowThresholds={data.shadowThresholds} />
+
         {/* System sections */}
         {ordered.map((s, i) => (
           <SystemSection
@@ -1514,8 +1518,10 @@ function ReportBody({
             selectedIds={selectedIds}
             assessmentId={assessment.id}
             defaultOpen={i === 0}
+            shadowThresholds={data.shadowThresholds}
           />
         ))}
+
 
         {/* Footer */}
         <div
