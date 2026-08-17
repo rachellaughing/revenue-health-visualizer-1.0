@@ -4,13 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getMatrixMap,
+  getChildSystemActions,
+  getTopOpportunities,
   type MatrixMapData,
   type MatrixParentNode,
   type MatrixConnection,
   type MatrixChildNode,
   type MatrixSysConnItem,
   type MatrixScenario,
+  type SystemRelationship,
 } from "@/lib/report.functions";
+import { getCurrentTier } from "@/lib/stripe-checkout.functions";
+import { topOpportunityLink } from "@/lib/report-links";
 import { useAuth } from "@/lib/auth-context";
 
 
@@ -89,6 +94,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
 
   const isStarter = payload.tier === "starter";
+  const [chainsOpen, setChainsOpen] = useState(false);
 
   const originFromEvent = useCallback((e: { clientX: number; clientY: number }) => {
     const stage = stageRef.current;
@@ -392,31 +398,80 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
 
             {!zoomedSystem && (
               <div style={{ marginBottom: 24 }}>
-                <div style={{ marginBottom: 16 }}>
-                  <div
+                <button
+                  type="button"
+                  onClick={() => setChainsOpen((v) => !v)}
+                  aria-expanded={chainsOpen}
+                  aria-controls="matrix-chains-panel"
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    background: T.white,
+                    border: "1px solid rgba(0,0,0,0.07)",
+                    borderRadius: 10,
+                    padding: "14px 18px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                  }}
+                >
+                  <span>
+                    <span
+                      style={{
+                        display: "block",
+                        fontFamily: "Inter",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: T.ink,
+                      }}
+                    >
+                      How the Revenue Health Matrix works
+                    </span>
+                    <span
+                      style={{
+                        display: "block",
+                        fontFamily: "Inter",
+                        fontSize: 12,
+                        color: T.mid,
+                        marginTop: 2,
+                      }}
+                    >
+                      See the cause-and-effect pathways behind the Matrix.
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
                     style={{
-                      fontSize: 10,
-                      fontFamily: "Inter",
-                      fontWeight: 700,
                       color: T.mid,
-                      letterSpacing: "0.1em",
-                      marginBottom: 6,
+                      fontSize: 14,
+                      transform: chainsOpen ? "rotate(180deg)" : "none",
+                      transition: "transform .15s",
                     }}
                   >
-                    KEY CAUSE & EFFECT CHAINS
-                  </div>
-                  <h2
-                    style={{
-                      fontFamily: "'Instrument Serif', Georgia, serif",
-                      fontSize: 22,
-                      fontWeight: 400,
-                      color: T.ink,
-                      margin: 0,
-                    }}
-                  >
-                    Where the constraint really lives.
-                  </h2>
-                </div>
+                    ⌄
+                  </span>
+                </button>
+                <div
+                  id="matrix-chains-panel"
+                  hidden={!chainsOpen}
+                  style={{ marginTop: chainsOpen ? 16 : 0 }}
+                >
+                <p
+                  style={{
+                    fontFamily: "Inter",
+                    fontSize: 12,
+                    color: T.mid,
+                    lineHeight: 1.6,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  These pathways explain the fixed logic behind the Revenue Health Matrix. They do
+                  not change with an individual assessment. Assessment scores determine which
+                  relationships and pathways are most relevant to the company.
+                </p>
+
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {payload.criticalChains.map((chain, i) => {
                     const color = T.sys[chain.parentCode] ?? T.teal;
@@ -491,6 +546,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                       </div>
                     );
                   })}
+                </div>
                 </div>
               </div>
             )}
@@ -915,6 +971,44 @@ function ZoomedSystem({
   const assessedCount = children.filter((c) => c.assessed).length;
   const displayName = /\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`;
 
+  const parentRels = payload.parentRelationships?.[systemCode] ?? [];
+  const childRels = child ? (payload.childRelationships?.[child.id] ?? []) : [];
+
+  // Recommended actions — same opportunity_actions cache Top Opportunities and
+  // Roadmap Builder read from; this is just a second entry point.
+  const fetchActions = useServerFn(getChildSystemActions);
+  const { data: actions, isLoading: actionsLoading } = useQuery({
+    queryKey: ["child-system-actions", child?.id],
+    queryFn: () => fetchActions({ data: { childSystemId: child!.id } }),
+    enabled: !!child,
+    staleTime: Infinity,
+  });
+
+  // Deep-link is only shown when this child is genuinely featured on Top
+  // Opportunities — never link to the top of the report as a fallback.
+  const fetchTopOpps = useServerFn(getTopOpportunities);
+  const { data: topOpps } = useQuery({
+    queryKey: ["top-opportunities-featured"],
+    queryFn: () => fetchTopOpps({ data: {} }),
+    enabled: !!child,
+    staleTime: 5 * 60_000,
+  });
+  const featuredIds = useMemo(() => {
+    const t = topOpps as any;
+    if (!t || t.error) return new Set<string>();
+    return new Set<string>(
+      [...(t.biggestImpact ?? []), ...(t.quickestWins ?? [])].map((c: any) => c.childSystemId),
+    );
+  }, [topOpps]);
+
+  const fetchTier = useServerFn(getCurrentTier);
+  const { data: tierData } = useQuery({
+    queryKey: ["current-tier"],
+    queryFn: () => fetchTier(),
+    staleTime: 60_000,
+  });
+  const roadmapUnlocked = tierData?.tier === "diagnostic";
+
   return (
     <div>
       {/* Big center system node — doubles as the zoom-out control. */}
@@ -1262,27 +1356,121 @@ function ZoomedSystem({
                 {child.assessed && (child.isHardShadow || child.isSoftShadow)
                   ? `Health looks ${severityLabel(child.healthScore).toLowerCase()} on the surface, but tracking is only ${child.trackingScore}/100 — a ${child.healthScore - child.trackingScore}-point visibility gap. You may be running on undocumented, founder-held knowledge that won't survive scale or turnover.`
                   : child.coreSymptom ||
-                    'Click "View in Top Opportunities" to see improvement potential and cascade impacts.'}
+                    "Review the recommended actions below to see where to start."}
               </div>
-              <Link
-                to="/reports/top-opportunities"
+
+              {/* Recommended actions */}
+              <div style={{ marginTop: 16, borderTop: `1px solid ${T.offWhite}`, paddingTop: 14 }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontFamily: "Inter",
+                    fontWeight: 700,
+                    color: T.mid,
+                    letterSpacing: "0.1em",
+                    marginBottom: 10,
+                  }}
+                >
+                  RECOMMENDED ACTIONS
+                </div>
+                {actionsLoading && (
+                  <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
+                    Preparing recommended actions…
+                  </div>
+                )}
+                {!actionsLoading && actions && (
+                  <>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "Inter",
+                        color: T.mid,
+                        lineHeight: 1.6,
+                        margin: "0 0 10px",
+                      }}
+                    >
+                      {actions.whyItMatters}
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {actions.startHere.map((a, i) => (
+                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          <span style={{ color: sysColor, fontSize: 12, flexShrink: 0 }}>→</span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontFamily: "Inter",
+                              color: T.ink,
+                              lineHeight: 1.55,
+                            }}
+                          >
+                            {a}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Roadmap — genuinely locked behind the Diagnostic entitlement. */}
+              <button
+                type="button"
+                disabled={!roadmapUnlocked}
+                aria-disabled={!roadmapUnlocked}
+                title={roadmapUnlocked ? "Add to Roadmap" : "Available with Diagnostic"}
                 style={{
                   marginTop: 14,
-                  display: "block",
-                  textAlign: "center",
-                  background: "transparent",
-                  border: `1px solid ${sysColor}`,
-                  color: sysColor,
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  background: roadmapUnlocked ? sysColor : T.offWhite,
+                  border: `1px solid ${roadmapUnlocked ? sysColor : "rgba(0,0,0,0.1)"}`,
+                  color: roadmapUnlocked ? T.white : T.mid,
                   borderRadius: 8,
                   padding: "9px",
                   fontFamily: "Inter",
                   fontSize: 12,
-                  fontWeight: 500,
-                  textDecoration: "none",
+                  fontWeight: 600,
+                  cursor: roadmapUnlocked ? "pointer" : "not-allowed",
                 }}
               >
-                View in Top Opportunities →
-              </Link>
+                {!roadmapUnlocked && <span aria-hidden="true">🔒</span>}
+                Add to Roadmap
+                {!roadmapUnlocked && (
+                  <span style={{ fontWeight: 400, fontSize: 11 }}>· Available with Diagnostic</span>
+                )}
+              </button>
+
+              {featuredIds.has(child.id) && (
+                <Link
+                  to={topOpportunityLink(child.code)}
+                  style={{
+                    marginTop: 10,
+                    display: "block",
+                    textAlign: "center",
+                    background: "transparent",
+                    border: `1px solid ${sysColor}`,
+                    color: sysColor,
+                    borderRadius: 8,
+                    padding: "9px",
+                    fontFamily: "Inter",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    textDecoration: "none",
+                  }}
+                >
+                  View in Top Opportunities →
+                </Link>
+              )}
+
+              {childRels.length > 0 && (
+                <RelationshipPanel
+                  title="How this child system affects other systems"
+                  relationships={childRels}
+                />
+              )}
             </>
           ) : (
             <div style={{ textAlign: "center", paddingTop: 40 }}>
@@ -1318,6 +1506,112 @@ function ZoomedSystem({
           accent={sysColor}
           variant="downstream"
         />
+      </div>
+
+      {parentRels.length > 0 && (
+        <RelationshipPanel
+          title="How these systems influence one another"
+          relationships={parentRels}
+        />
+      )}
+    </div>
+  );
+}
+
+const RELATION_LABEL: Record<SystemRelationship["direction"], string> = {
+  upstream: "Upstream",
+  downstream: "Downstream",
+  mutual: "Mutual",
+};
+
+function RelationshipPanel({
+  title,
+  relationships,
+}: {
+  title: string;
+  relationships: SystemRelationship[];
+}) {
+  return (
+    <div
+      style={{
+        marginTop: 20,
+        background: T.white,
+        border: "1px solid rgba(0,0,0,0.07)",
+        borderRadius: 12,
+        padding: 20,
+        boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 13,
+          fontFamily: "Inter",
+          fontWeight: 600,
+          color: T.ink,
+          marginBottom: 14,
+        }}
+      >
+        {title}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {relationships.map((r) => {
+          const color = T.sys[r.parentCode] ?? r.parentColorHex;
+          return (
+            <div
+              key={r.parentCode}
+              style={{
+                padding: "12px 14px",
+                background: color + "08",
+                border: `1px solid ${color}30`,
+                borderRadius: 8,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  flexWrap: "wrap",
+                  marginBottom: 6,
+                }}
+              >
+                <span
+                  style={{ fontSize: 12, fontFamily: "Inter", fontWeight: 600, color: T.ink }}
+                >
+                  {r.parentName}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontFamily: "Inter",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    color,
+                    background: color + "18",
+                    borderRadius: 20,
+                    padding: "2px 8px",
+                  }}
+                >
+                  {RELATION_LABEL[r.direction].toUpperCase()}
+                </span>
+              </div>
+              {r.viaUpstream.length > 0 && (
+                <div
+                  style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, lineHeight: 1.55 }}
+                >
+                  Feeds in via: {r.viaUpstream.join(", ")}
+                </div>
+              )}
+              {r.viaDownstream.length > 0 && (
+                <div
+                  style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, lineHeight: 1.55 }}
+                >
+                  Affects: {r.viaDownstream.join(", ")}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1502,6 +1502,53 @@ export type MatrixChain = {
   note: string;
 };
 
+/** Direction of a resolved relationship between the selected level and an external parent system. */
+export type RelationDirection = "upstream" | "downstream" | "mutual";
+
+export type SystemRelationship = {
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  direction: RelationDirection;
+  /** Child systems in the external parent that feed INTO the selected level. */
+  viaUpstream: string[];
+  /** Child systems in the external parent that the selected level feeds. */
+  viaDownstream: string[];
+};
+
+// --- revhealth2.dependency_map resolver ------------------------------------
+// Both dependency columns are pipe-delimited free text naming other child
+// systems. There is no canonical id for the targets, so resolution goes
+// through normalised name text — the same limitation failure_map's cascade
+// fields already have.
+//
+// Unresolved values are returned rather than dropped: some entries are real
+// business outcomes (e.g. "Executive Decision Making") rather than revenue
+// systems, and a future "Business outcomes influenced" section can read them
+// straight off this shape. They are never rendered as revenue systems and
+// never throw.
+export function splitDependencyField(raw: unknown): string[] {
+  return String(raw ?? "")
+    .split("|")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function resolveDependencyTargets<T>(
+  raw: unknown,
+  byNormalisedName: Map<string, T>,
+): { resolved: T[]; unresolved: string[] } {
+  const resolved: T[] = [];
+  const unresolved: string[] = [];
+  for (const value of splitDependencyField(raw)) {
+    const hit = byNormalisedName.get(value.toLowerCase());
+    if (hit) resolved.push(hit);
+    else unresolved.push(value);
+  }
+  return { resolved, unresolved };
+}
+
+
 export type MatrixScenario = {
   childSystemId: string;
   code: string;
@@ -1530,6 +1577,12 @@ export type MatrixMapData = {
   systemConnections: Record<string, { upstream: MatrixSysConnItem[]; downstream: MatrixSysConnItem[] }>;
   childrenByParent: Record<string, MatrixChildNode[]>;
   criticalChains: MatrixChain[];
+  /** Keyed by child system id. Child-level "Mutual" = this one child has resolved
+   *  relationships with that parent in BOTH directions. */
+  childRelationships: Record<string, SystemRelationship[]>;
+  /** Keyed by parent code. Parent-level "Mutual" = at least one relationship each
+   *  way, even via different child-system pairs. */
+  parentRelationships: Record<string, SystemRelationship[]>;
   scenarios: MatrixScenario[];
 };
 
@@ -1563,7 +1616,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         assessmentId = latest.id;
       }
 
-      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes] =
+      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes, depsRes] =
         await Promise.all([
           supabaseAdmin
             .from("assessments")
@@ -1604,6 +1657,10 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             .select("first_name,tier")
             .eq("user_id", userId)
             .maybeSingle(),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("dependency_map")
+            .select("child_system_id,direct_dependencies,downstream_systems_influenced"),
         ]);
 
       for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes]) {
@@ -1801,6 +1858,97 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         childrenByParent[code] = arr;
       }
 
+      // ---- Cross-system relationships from revhealth2.dependency_map ------
+      // Two intentionally different definitions of "Mutual", one per level.
+      const depsRaw = ((depsRes as any)?.data ?? []) as any[];
+      const unresolvedAll: string[] = [];
+
+      type Edge = { source: ChildInfo; target: ChildInfo; dir: "up" | "down" };
+      const edgesByChild = new Map<string, Edge[]>();
+
+      for (const row of depsRaw) {
+        const source = childInfoById.get(row.child_system_id);
+        if (!source) continue;
+        const up = resolveDependencyTargets(row.direct_dependencies, childInfoByName);
+        const down = resolveDependencyTargets(row.downstream_systems_influenced, childInfoByName);
+        unresolvedAll.push(...up.unresolved, ...down.unresolved);
+        const edges: Edge[] = [
+          ...up.resolved.map((target) => ({ source, target, dir: "up" as const })),
+          ...down.resolved.map((target) => ({ source, target, dir: "down" as const })),
+        ];
+        edgesByChild.set(source.id, edges);
+      }
+
+      if (unresolvedAll.length > 0) {
+        // Dev-only diagnostic. Some entries are deliberate business outcomes
+        // (e.g. "Executive Decision Making"), not naming mismatches — they are
+        // skipped, never rendered, never thrown.
+        console.warn(
+          "[matrix-map] dependency_map values not resolved to a child system:",
+          Array.from(new Set(unresolvedAll)).join(", "),
+        );
+      }
+
+      const parentMetaByCode = new Map<string, { name: string; color: string }>();
+      for (const p of parentsRaw) {
+        parentMetaByCode.set(p.code, { name: p.name, color: p.color_hex ?? "#888880" });
+      }
+
+      function buildRelationships(
+        edges: Edge[],
+        ownParentCode: string,
+      ): SystemRelationship[] {
+        const acc = new Map<string, { up: Set<string>; down: Set<string> }>();
+        for (const e of edges) {
+          const code = e.target.parent?.code;
+          if (!code || code === ownParentCode) continue;
+          const entry = acc.get(code) ?? { up: new Set<string>(), down: new Set<string>() };
+          (e.dir === "up" ? entry.up : entry.down).add(e.target.name);
+          acc.set(code, entry);
+        }
+        const out: SystemRelationship[] = [];
+        for (const [code, entry] of acc) {
+          const meta = parentMetaByCode.get(code);
+          const direction: RelationDirection =
+            entry.up.size > 0 && entry.down.size > 0
+              ? "mutual"
+              : entry.up.size > 0
+                ? "upstream"
+                : "downstream";
+          out.push({
+            parentCode: code,
+            parentName: meta?.name ?? code,
+            parentColorHex: meta?.color ?? "#888880",
+            direction,
+            viaUpstream: [...entry.up].sort(),
+            viaDownstream: [...entry.down].sort(),
+          });
+        }
+        return out.sort((a, b) => a.parentName.localeCompare(b.parentName));
+      }
+
+      // Child level: one child's own resolved relationships, own parent excluded.
+      const childRelationships: Record<string, SystemRelationship[]> = {};
+      for (const info of childInfoById.values()) {
+        childRelationships[info.id] = buildRelationships(
+          edgesByChild.get(info.id) ?? [],
+          info.parent?.code ?? "",
+        );
+      }
+
+      // Parent level: aggregate every child of the parent. Mutual can arise
+      // through different child-system pairs.
+      const parentRelationships: Record<string, SystemRelationship[]> = {};
+      for (const code of PARENT_CODES) {
+        const edges: Edge[] = [];
+        for (const info of childInfoById.values()) {
+          if (info.parent?.code !== code) continue;
+          edges.push(...(edgesByChild.get(info.id) ?? []));
+        }
+        parentRelationships[code] = buildRelationships(edges, code);
+      }
+
+
       const pathMembers = (pathMembersRes.data ?? []) as any[];
       const membersByPath = new Map<string, string[]>();
       for (const m of pathMembers) {
@@ -1891,10 +2039,182 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         systemConnections,
         childrenByParent,
         criticalChains,
+        childRelationships,
+        parentRelationships,
         scenarios,
       };
     },
   );
+
+// ============================================================================
+// Recommended actions for a single child system (Matrix Map drill-down)
+//
+// Second entry point into the SAME opportunity_actions cache used by Top
+// Opportunities. Top Opportunities only generates copy for the <=12 featured
+// systems; Matrix Map can be drilled into from any of the 50. Same lazy
+// check-cache / generate-once / upsert pattern, so a row generated here is
+// reused there and vice versa. Falls back to Roadmap Builder's static content
+// when generation is unavailable.
+// ============================================================================
+
+export type ChildSystemActions = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  source: "generated" | "fallback";
+  whatWeSee: string;
+  whyItMatters: string;
+  startHere: string[];
+};
+
+const childActionsSchema = z.object({
+  childSystemId: z.string().uuid(),
+  assessmentId: z.string().uuid().optional(),
+});
+
+export const getChildSystemActions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => childActionsSchema.parse(d))
+  .handler(async ({ data, context }): Promise<ChildSystemActions | null> => {
+    const userId = context.userId;
+
+    let assessmentId = data.assessmentId;
+    if (!assessmentId) {
+      const { data: latest } = await supabaseAdmin
+        .from("assessments")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("submitted_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!latest) return null;
+      assessmentId = latest.id;
+    }
+
+    const [childRes, cachedRes] = await Promise.all([
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("child_systems")
+        .select("id,code,name,parent_system_id")
+        .eq("id", data.childSystemId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("opportunity_actions")
+        .select("what_we_see,why_it_matters,start_here")
+        .eq("assessment_id", assessmentId)
+        .eq("user_id", userId)
+        .eq("child_system_id", data.childSystemId)
+        .maybeSingle(),
+    ]);
+
+    const child = (childRes as any)?.data;
+    if (!child) return null;
+
+    const cached = (cachedRes as any)?.data;
+    if (cached) {
+      return {
+        childSystemId: child.id,
+        code: child.code,
+        name: child.name,
+        source: "generated",
+        whatWeSee: cached.what_we_see,
+        whyItMatters: cached.why_it_matters,
+        startHere: (cached.start_here ?? []) as string[],
+      };
+    }
+
+    const [parentRes, failureRes, scoreRes, companyRes] = await Promise.all([
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("parent_systems")
+        .select("name")
+        .eq("id", child.parent_system_id)
+        .maybeSingle(),
+      (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("failure_map")
+        .select(
+          "core_symptoms,likely_root_causes,impacted_system_1,impacted_system_2,impacted_system_3",
+        )
+        .eq("child_system_id", child.id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("assessment_scores")
+        .select("health_score")
+        .eq("assessment_id", assessmentId)
+        .eq("user_id", userId)
+        .eq("child_system_id", child.id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("company_profiles")
+        .select("company_name")
+        .eq("user_id", userId)
+        .maybeSingle(),
+    ]);
+
+    const parentName = (parentRes as any)?.data?.name ?? "";
+    const failure = (failureRes as any)?.data ?? {};
+    const healthScore = Math.round(Number((scoreRes as any)?.data?.health_score ?? 0));
+
+    const generated = await generateOpportunityCopy(
+      assessmentId,
+      userId,
+      (companyRes as any)?.data?.company_name ?? "this company",
+      [
+        {
+          code: child.code,
+          name: child.name,
+          parentName,
+          healthScore,
+          coreSymptom: failure.core_symptoms ?? "",
+          likelyRootCause: failure.likely_root_causes ?? "",
+          impacts: [failure.impacted_system_1, failure.impacted_system_2, failure.impacted_system_3]
+            .filter((x: unknown): x is string => !!x),
+          quickWin: false,
+        },
+      ],
+    );
+
+    const copy = generated.get(child.code);
+    if (copy) {
+      const { error: upErr } = await supabaseAdmin.from("opportunity_actions").upsert(
+        [
+          {
+            assessment_id: assessmentId,
+            user_id: userId,
+            child_system_id: child.id,
+            what_we_see: copy.whatWeSee,
+            why_it_matters: copy.whyItMatters,
+            start_here: copy.startHere,
+            model_used: "claude-sonnet-4-5-20250929",
+            generated_at: new Date().toISOString(),
+          },
+        ],
+        { onConflict: "assessment_id,child_system_id" },
+      );
+      if (upErr) console.error("[child-actions] upsert failed:", upErr.message);
+      return {
+        childSystemId: child.id,
+        code: child.code,
+        name: child.name,
+        source: "generated",
+        ...copy,
+      };
+    }
+
+    // Fallback: Roadmap Builder's existing static content.
+    const fb = ROADMAP_CONTENT[child.code] ?? defaultContent(child.name, parentName, failure);
+    return {
+      childSystemId: child.id,
+      code: child.code,
+      name: child.name,
+      source: "fallback",
+      whatWeSee: failure.core_symptoms ?? `${child.name} is not yet operating at full strength.`,
+      whyItMatters: fb.why,
+      startHere: fb.tasks.slice(0, 3),
+    };
+  });
 
 // ============================================================================
 // Team Alignment Report
