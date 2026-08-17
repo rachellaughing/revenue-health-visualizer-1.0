@@ -4,13 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   getMatrixMap,
+  getChildSystemActions,
+  getTopOpportunities,
   type MatrixMapData,
   type MatrixParentNode,
   type MatrixConnection,
   type MatrixChildNode,
   type MatrixSysConnItem,
   type MatrixScenario,
+  type SystemRelationship,
 } from "@/lib/report.functions";
+import { getCurrentTier } from "@/lib/stripe-checkout.functions";
+import { topOpportunityLink } from "@/lib/report-links";
 import { useAuth } from "@/lib/auth-context";
 
 
