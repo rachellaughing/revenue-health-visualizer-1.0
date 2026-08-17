@@ -1476,12 +1476,10 @@ function ConnPanel({
 
 function SimulatorTab({
   scenarios,
-  selectedSet,
   expanded,
   onToggle,
 }: {
   scenarios: MatrixScenario[];
-  selectedSet: Set<string>;
   expanded: string | null;
   onToggle: (code: string) => void;
 }) {
