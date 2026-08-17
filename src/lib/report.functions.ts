@@ -1502,6 +1502,53 @@ export type MatrixChain = {
   note: string;
 };
 
+/** Direction of a resolved relationship between the selected level and an external parent system. */
+export type RelationDirection = "upstream" | "downstream" | "mutual";
+
+export type SystemRelationship = {
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  direction: RelationDirection;
+  /** Child systems in the external parent that feed INTO the selected level. */
+  viaUpstream: string[];
+  /** Child systems in the external parent that the selected level feeds. */
+  viaDownstream: string[];
+};
+
+// --- revhealth2.dependency_map resolver ------------------------------------
+// Both dependency columns are pipe-delimited free text naming other child
+// systems. There is no canonical id for the targets, so resolution goes
+// through normalised name text — the same limitation failure_map's cascade
+// fields already have.
+//
+// Unresolved values are returned rather than dropped: some entries are real
+// business outcomes (e.g. "Executive Decision Making") rather than revenue
+// systems, and a future "Business outcomes influenced" section can read them
+// straight off this shape. They are never rendered as revenue systems and
+// never throw.
+export function splitDependencyField(raw: unknown): string[] {
+  return String(raw ?? "")
+    .split("|")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+export function resolveDependencyTargets<T>(
+  raw: unknown,
+  byNormalisedName: Map<string, T>,
+): { resolved: T[]; unresolved: string[] } {
+  const resolved: T[] = [];
+  const unresolved: string[] = [];
+  for (const value of splitDependencyField(raw)) {
+    const hit = byNormalisedName.get(value.toLowerCase());
+    if (hit) resolved.push(hit);
+    else unresolved.push(value);
+  }
+  return { resolved, unresolved };
+}
+
+
 export type MatrixScenario = {
   childSystemId: string;
   code: string;
