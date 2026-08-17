@@ -801,6 +801,56 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunity_actions: {
+        Row: {
+          assessment_id: string
+          child_system_id: string
+          created_at: string
+          generated_at: string
+          id: string
+          model_used: string | null
+          start_here: Json
+          updated_at: string
+          user_id: string
+          what_we_see: string
+          why_it_matters: string
+        }
+        Insert: {
+          assessment_id: string
+          child_system_id: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          model_used?: string | null
+          start_here?: Json
+          updated_at?: string
+          user_id: string
+          what_we_see: string
+          why_it_matters: string
+        }
+        Update: {
+          assessment_id?: string
+          child_system_id?: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          model_used?: string | null
+          start_here?: Json
+          updated_at?: string
+          user_id?: string
+          what_we_see?: string
+          why_it_matters?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_actions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           assessment_completion_pct: number

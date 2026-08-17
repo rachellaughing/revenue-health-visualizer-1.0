@@ -1,16 +1,39 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   getTopOpportunities,
   type TopOpportunities,
-  type OpportunityItem,
+  type FeaturedCard,
+  type OtherOpportunityGroup,
+  type LockedSystem,
 } from "@/lib/report.functions";
+import {
+  BADGE_LABELS,
+  SEVERITY_LABELS,
+  SECTION_COPY,
+  QUESTION_LABELS,
+} from "@/components/reports/opportunity-labels";
 
 export const Route = createFileRoute("/reports/top-opportunities")({
   head: () => ({
-    meta: [{ title: "Top Opportunities — Revenue Health Visualiser" }],
+    meta: [
+      { title: "Top Opportunities — Revenue Health Visualiser™" },
+      {
+        name: "description",
+        content:
+          "See where to focus next across your revenue systems: the weaknesses with the widest knock-on effect and the improvements you can start now.",
+      },
+      { property: "og:title", content: "Top Opportunities — Revenue Health Visualiser™" },
+      {
+        property: "og:description",
+        content:
+          "Your prioritised revenue opportunities: widest impact first, practical improvements second.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
   }),
   component: Page,
 });
@@ -26,32 +49,16 @@ const T = {
   ink: "#111111",
   white: "#FFFFFF",
   danger: "#EF4444",
-  sys: {
-    POS: "#3B82F6",
-    AUTH: "#10B981",
-    CONV: "#F05223",
-    LFC: "#8B5CF6",
-    VIS: "#F59E0B",
-  } as Record<string, string>,
 };
 
-function severityStyle(s: string) {
-  if (s === "critical") return { color: T.danger, bg: "rgba(239,68,68,0.1)" };
-  if (s === "fragile") return { color: T.sand, bg: "rgba(196,149,106,0.12)" };
-  if (s === "stable") return { color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
-  if (s === "not_assessed") return { color: T.mid, bg: "rgba(136,136,128,0.10)" };
-  return { color: T.mid, bg: T.offWhite };
-}
-function severityLabel(s: string) {
-  if (s === "not_assessed") return "Not assessed";
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-function effortStyle(e: string) {
-  if (e === "Low") return { color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
-  if (e === "Medium") return { color: T.sand, bg: "rgba(196,149,106,0.12)" };
-  if (e === "High") return { color: T.danger, bg: "rgba(239,68,68,0.1)" };
-  return { color: T.mid, bg: T.offWhite };
-}
+const SEVERITY_STYLE: Record<string, { color: string; bg: string }> = {
+  critical: { color: "#EF4444", bg: "rgba(239,68,68,0.1)" },
+  fragile: { color: "#C4956A", bg: "rgba(196,149,106,0.12)" },
+  stable: { color: "#2A6B6E", bg: "rgba(42,107,110,0.10)" },
+  strong: { color: "#2BB457", bg: "rgba(43,180,87,0.1)" },
+};
+
+const LOCKED_BATCH = 10;
 
 function Page() {
   const fetchFn = useServerFn(getTopOpportunities);
@@ -59,9 +66,6 @@ function Page() {
     queryKey: ["top-opportunities"],
     queryFn: () => fetchFn({ data: {} }),
   });
-
-  const [filterSystem, setFilterSystem] = useState<string>("all");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   if (!data) return <div style={{ minHeight: "100dvh", background: T.paper }} />;
   if ("error" in data) {
@@ -74,84 +78,26 @@ function Page() {
     );
   }
 
-  const payload = data as TopOpportunities;
-  const isStarter = payload.tier === "starter";
-  const selectedSet = new Set(payload.selectedChildIds);
-
-  return (
-    <PageBody
-      payload={payload}
-      isStarter={isStarter}
-      selectedSet={selectedSet}
-      filterSystem={filterSystem}
-      setFilterSystem={setFilterSystem}
-      expandedId={expandedId}
-      setExpandedId={setExpandedId}
-    />
-  );
+  return <PageBody payload={data as TopOpportunities} />;
 }
 
-function PageBody({
-  payload,
-  isStarter,
-  selectedSet,
-  filterSystem,
-  setFilterSystem,
-  expandedId,
-  setExpandedId,
-}: {
-  payload: TopOpportunities;
-  isStarter: boolean;
-  selectedSet: Set<string>;
-  filterSystem: string;
-  setFilterSystem: (s: string) => void;
-  expandedId: string | null;
-  setExpandedId: (s: string | null) => void;
-}) {
-  const systems = ["all", "POS", "AUTH", "CONV", "LFC", "VIS"];
-  const systemLabels: Record<string, string> = {
-    all: "All Systems",
-    POS: "Positioning",
-    AUTH: "Authority",
-    CONV: "Conversion",
-    LFC: "Lifecycle",
-    VIS: "Visibility",
-  };
+function PageBody({ payload }: { payload: TopOpportunities }) {
+  const isStarter = payload.tier === "starter";
+  const [tab, setTab] = useState<"impact" | "quick">("impact");
+  const [lockedShown, setLockedShown] = useState(LOCKED_BATCH);
 
-  const filtered = useMemo(() => {
-    const list = payload.opportunities.filter(
-      (o) => filterSystem === "all" || o.parentCode === filterSystem,
-    );
-    if (!isStarter) return list;
-    return [...list].sort((a, b) => {
-      const aA = selectedSet.has(a.childSystemId);
-      const bA = selectedSet.has(b.childSystemId);
-      if (aA && !bA) return -1;
-      if (!aA && bA) return 1;
-      return b.opportunityScore - a.opportunityScore;
-    });
-  }, [payload.opportunities, filterSystem, isStarter, selectedSet]);
-
-  // First assessed card open by default
-  const defaultOpen = useMemo(() => {
-    const first = filtered.find((o) =>
-      isStarter ? selectedSet.has(o.childSystemId) : true,
-    );
-    return first?.code ?? null;
-  }, [filtered, isStarter, selectedSet]);
-
-  const effectiveExpanded = expandedId === null ? defaultOpen : expandedId;
-
-  const assessedCount = payload.opportunities.filter((o) => o.assessed).length;
+  const cards = tab === "impact" ? payload.biggestImpact : payload.quickestWins;
+  const intro =
+    tab === "impact" ? SECTION_COPY.biggestImpactIntro : SECTION_COPY.quickestWinsIntro;
 
   return (
-    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
-      <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 40px 80px" }}>
-        {/* Breadcrumb */}
+    <div
+      style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}
+    >
+      <main style={{ maxWidth: 920, margin: "0 auto", padding: "36px 20px 80px" }}>
         <div
           style={{
             fontSize: 11,
-            fontFamily: "Inter",
             color: T.mid,
             marginBottom: 20,
             letterSpacing: "0.08em",
@@ -160,183 +106,160 @@ function PageBody({
           REVENUE HEALTH MATRIX™ &nbsp;›&nbsp; TOP OPPORTUNITIES
         </div>
 
-        {/* Header */}
-        <div style={{ marginBottom: 24 }}>
+        <header style={{ marginBottom: 24 }}>
           <h1
             style={{
               fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 28,
+              fontSize: 30,
               fontWeight: 400,
               color: T.ink,
               margin: "0 0 8px",
             }}
           >
-            Top Opportunities
+            {isStarter ? SECTION_COPY.starterHeadline : "Top Opportunities"}
           </h1>
           <p
             style={{
-              fontFamily: "Inter",
               fontSize: 14,
               color: T.mid,
               margin: 0,
               lineHeight: 1.6,
-              maxWidth: 620,
+              maxWidth: 640,
             }}
           >
-            Ranked by opportunity score — a combination of how weak the system is and how many
-            other systems break when it's left unaddressed. Fix the top items first for the
-            highest compounding return.
+            {isStarter
+              ? SECTION_COPY.starterLede
+              : `Based on all ${payload.evaluatedCount} evaluated Revenue Systems, here is where to focus next.`}
           </p>
-        </div>
+        </header>
 
-        {/* How opportunity score is calculated */}
-        <div
-          style={{
-            background: T.white,
-            border: "1px solid rgba(0,0,0,0.07)",
-            borderRadius: 10,
-            padding: "14px 18px",
-            marginBottom: 24,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 12,
-          }}
-        >
-          <span style={{ fontSize: 16, flexShrink: 0 }}>📐</span>
-          <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, lineHeight: 1.65 }}>
-            <span style={{ fontWeight: 600, color: T.ink }}>
-              How opportunity score is calculated:{" "}
-            </span>
-            Each subsystem is scored on improvement potential (100 − health score) multiplied by
-            a cascade weight based on how many downstream systems are also weak. A subsystem
-            that scores 40 AND breaks three other fragile systems ranks higher than one that
-            simply scores low in isolation.
-          </div>
-        </div>
-
-        {/* Self-assessment note */}
-        <div
-          style={{
-            background: "rgba(196,149,106,0.08)",
-            border: "1px solid rgba(196,149,106,0.25)",
-            borderRadius: 10,
-            padding: "12px 18px",
-            marginBottom: 24,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 10,
-          }}
-        >
-          <span style={{ fontSize: 16, flexShrink: 0 }}>🔍</span>
-          <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, lineHeight: 1.6 }}>
-            <span style={{ fontWeight: 600, color: T.ink }}>Self-assessment reminder: </span>
-            These rankings reflect your current perception. High-confidence, low-tracking
-            systems may be more fragile than they appear — their true opportunity score may be
-            higher than shown.{" "}
-            <a
-              href="https://marketplacemaven.com/core-concepts/founder-blindspots/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: T.teal, fontWeight: 500 }}
-            >
-              Read about founder blind spots →
-            </a>
-          </div>
-        </div>
-
-        {/* Filter bar */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-          {systems.map((sys) => {
-            const active = filterSystem === sys;
-            const color = sys === "all" ? T.abyss : T.sys[sys];
-            return (
-              <button
-                key={sys}
-                onClick={() => setFilterSystem(sys)}
+        {isStarter && (
+          <section
+            style={{
+              background: T.white,
+              border: "1px solid rgba(196,149,106,0.35)",
+              borderRadius: 12,
+              padding: "16px 18px",
+              marginBottom: 22,
+              display: "flex",
+              gap: 16,
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ maxWidth: 620 }}>
+              <div
                 style={{
-                  padding: "6px 14px",
-                  borderRadius: 20,
-                  border: `1.5px solid ${active ? color : "rgba(0,0,0,0.1)"}`,
-                  background: active ? (sys === "all" ? T.abyss : color + "15") : T.white,
-                  color: active ? (sys === "all" ? T.white : color) : T.mid,
-                  fontFamily: "Inter",
-                  fontSize: 12,
-                  fontWeight: active ? 600 : 400,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  color: T.sand,
+                  marginBottom: 6,
+                  textTransform: "uppercase",
                 }}
               >
-                {systemLabels[sys]}
+                {SECTION_COPY.scopeKicker}
+              </div>
+              <p style={{ margin: 0, fontSize: 13, color: T.ink, lineHeight: 1.6 }}>
+                {SECTION_COPY.scopeBody}
+              </p>
+            </div>
+            <div
+              style={{
+                background: T.offWhite,
+                borderRadius: 10,
+                padding: "10px 16px",
+                fontSize: 13,
+                fontWeight: 600,
+                color: T.abyss,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {payload.evaluatedCount} / {payload.totalCount} systems evaluated
+            </div>
+          </section>
+        )}
+
+        {/* Tabs. Filter chips could sit in this row later. */}
+        <div
+          style={{
+            display: "flex",
+            gap: 8,
+            marginBottom: 16,
+            borderBottom: `1px solid ${T.offWhite}`,
+          }}
+        >
+          {(
+            [
+              ["impact", "Biggest Impact", payload.biggestImpact.length],
+              ["quick", "Quickest Wins", payload.quickestWins.length],
+            ] as const
+          ).map(([key, label, count]) => {
+            const active = tab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setTab(key)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: `2px solid ${active ? T.ember : "transparent"}`,
+                  padding: "10px 4px",
+                  marginRight: 18,
+                  fontSize: 14,
+                  fontWeight: active ? 600 : 400,
+                  color: active ? T.ink : T.mid,
+                  cursor: "pointer",
+                }}
+              >
+                {label}{" "}
+                <span style={{ fontSize: 12, color: T.mid }}>({count})</span>
               </button>
             );
           })}
         </div>
 
-        {/* Cards */}
-        <div style={{ position: "relative" }}>
-          {filtered.map((opp, i) => {
-            const isLocked = isStarter && !selectedSet.has(opp.childSystemId);
-            return (
-              <OpportunityCard
-                key={opp.childSystemId}
-                opp={opp}
-                rank={i + 1}
-                expanded={effectiveExpanded === opp.code && !isLocked}
-                onToggle={() =>
-                  setExpandedId(effectiveExpanded === opp.code ? "__none__" : opp.code)
-                }
-                isLocked={isLocked}
-              />
-            );
-          })}
+        <p style={{ fontSize: 13, color: T.mid, lineHeight: 1.6, margin: "0 0 20px" }}>
+          {intro}
+        </p>
 
-          {isStarter && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: 180,
-                background: `linear-gradient(to bottom, transparent, ${T.paper}ee, ${T.paper})`,
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "center",
-                paddingBottom: 20,
-                pointerEvents: "none",
-              }}
-            >
-              <div style={{ pointerEvents: "all", textAlign: "center" }}>
-                <p
-                  style={{
-                    fontSize: 13,
-                    fontFamily: "Inter",
-                    color: T.mid,
-                    marginBottom: 10,
-                  }}
-                >
-                  Showing opportunities for {assessedCount} of {payload.opportunities.length}{" "}
-                  subsystems
-                </p>
-                <button
-                  style={{
-                    background: T.ember,
-                    color: T.white,
-                    border: "none",
-                    borderRadius: 8,
-                    padding: "10px 22px",
-                    fontFamily: "Inter",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  Upgrade to see all opportunities →
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        {cards.length === 0 ? (
+          <div
+            style={{
+              background: T.white,
+              border: "1px solid rgba(0,0,0,0.07)",
+              borderRadius: 12,
+              padding: "22px 20px",
+              fontSize: 13,
+              color: T.mid,
+              lineHeight: 1.6,
+              marginBottom: 32,
+            }}
+          >
+            Nothing in your evaluated systems currently qualifies here. That is a result, not a
+            gap in the report.
+          </div>
+        ) : (
+          <div style={{ marginBottom: 36 }}>
+            {cards.map((c) => (
+              <OpportunityCard key={c.childSystemId} card={c} isQuickWin={tab === "quick"} />
+            ))}
+          </div>
+        )}
+
+        {payload.otherGroups.length > 0 && (
+          <OtherOpportunities groups={payload.otherGroups} />
+        )}
+
+        {isStarter && payload.lockedSystems.length > 0 && (
+          <LockedSection
+            systems={payload.lockedSystems}
+            tiles={payload.lockedTiles}
+            shown={lockedShown}
+            onShowMore={() => setLockedShown((n) => n + LOCKED_BATCH)}
+          />
+        )}
 
         <div
           style={{
@@ -344,7 +267,6 @@ function PageBody({
             marginTop: 32,
             borderTop: `1px solid ${T.offWhite}`,
             fontSize: 11,
-            fontFamily: "Inter",
             color: T.mid,
           }}
         >
@@ -355,413 +277,435 @@ function PageBody({
   );
 }
 
-function OpportunityCard({
-  opp,
-  rank,
-  expanded,
-  onToggle,
-  isLocked,
-}: {
-  opp: OpportunityItem;
-  rank: number;
-  expanded: boolean;
-  onToggle: () => void;
-  isLocked: boolean;
-}) {
-  const color = T.sys[opp.parentCode] ?? opp.parentColorHex;
-  const sev = severityStyle(opp.severity);
-  const eff = effortStyle(opp.effortLevel);
-
+function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        background: T.white,
-        border: `1px solid ${expanded ? color + "40" : "rgba(0,0,0,0.07)"}`,
-        borderRadius: 12,
-        marginBottom: 12,
-        overflow: "hidden",
-        boxShadow: expanded
-          ? `0 4px 16px ${color}12`
-          : "0 2px 6px rgba(24,40,41,0.04)",
-        transition: "all 0.2s",
-        filter: isLocked ? "blur(3px)" : "none",
-        userSelect: isLocked ? "none" : "auto",
-        opacity: isLocked ? 0.7 : 1,
-      }}
-    >
-      <button
-        onClick={!isLocked ? onToggle : undefined}
+    <div style={{ marginBottom: 16 }}>
+      <div
         style={{
-          width: "100%",
-          display: "grid",
-          gridTemplateColumns: "52px 1fr auto auto auto auto",
-          alignItems: "center",
-          gap: 16,
-          padding: "16px 20px",
-          background: expanded ? color + "06" : "transparent",
-          border: "none",
-          cursor: isLocked ? "not-allowed" : "pointer",
-          textAlign: "left",
-          borderBottom: expanded ? `1px solid ${T.offWhite}` : "none",
+          fontSize: 10,
+          fontWeight: 700,
+          color: T.mid,
+          letterSpacing: "0.1em",
+          marginBottom: 6,
+          textTransform: "uppercase",
         }}
       >
-        <div
+        {label}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function OpportunityCard({ card, isQuickWin }: { card: FeaturedCard; isQuickWin: boolean }) {
+  const color = card.parentColorHex || T.teal;
+  const affectingLabel = isQuickWin
+    ? QUESTION_LABELS.affectingQuickWin
+    : QUESTION_LABELS.affectingImpact;
+
+  return (
+    <article
+      style={{
+        background: T.white,
+        border: "1px solid rgba(0,0,0,0.07)",
+        borderLeft: `3px solid ${color}`,
+        borderRadius: 12,
+        padding: "20px 22px",
+        marginBottom: 14,
+        boxShadow: "0 2px 6px rgba(24,40,41,0.04)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          marginBottom: 14,
+        }}
+      >
+        <h2 style={{ fontSize: 16, fontWeight: 600, color: T.ink, margin: 0 }}>{card.name}</h2>
+        <span style={{ fontSize: 11, color: T.mid }}>{card.parentName}</span>
+        <span
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: expanded ? color : T.offWhite,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 16,
-              fontFamily: "Inter",
-              fontWeight: 700,
-              color: expanded ? T.white : T.mid,
-            }}
-          >
-            {rank}
-          </span>
-        </div>
-
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-            <div
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: color,
-              }}
-            />
-            <span
-              style={{
-                fontSize: 15,
-                fontFamily: "Inter",
-                fontWeight: 600,
-                color: T.ink,
-              }}
-            >
-              {opp.name}
-            </span>
-            <span style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
-              {opp.parentName}
-            </span>
-          </div>
-          {!expanded && opp.coreSymptom && (
-            <p
-              style={{
-                fontSize: 12,
-                fontFamily: "Inter",
-                color: T.mid,
-                margin: 0,
-                lineHeight: 1.4,
-              }}
-            >
-              {opp.coreSymptom.length > 70
-                ? opp.coreSymptom.substring(0, 70) + "…"
-                : opp.coreSymptom}
-            </p>
-          )}
-        </div>
-
-        <div style={{ textAlign: "center", minWidth: 48 }}>
-          <div style={{ fontSize: 20, fontFamily: "Inter", fontWeight: 700, color: T.ink }}>
-            {opp.healthScore}
-          </div>
-          <div
-            style={{
-              fontSize: 9,
-              fontFamily: "Inter",
-              color: T.mid,
-              letterSpacing: "0.08em",
-            }}
-          >
-            HEALTH
-          </div>
-        </div>
-
-        <div
-          style={{
+            marginLeft: "auto",
             padding: "3px 10px",
             borderRadius: 20,
-            background: sev.bg,
-            color: sev.color,
+            background: color + "18",
+            color,
             fontSize: 10,
-            fontFamily: "Inter",
-            fontWeight: 600,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
             whiteSpace: "nowrap",
           }}
         >
-          {severityLabel(opp.severity)}
-        </div>
+          {BADGE_LABELS[card.badgeKey]}
+        </span>
+      </div>
 
-        <div style={{ textAlign: "center", minWidth: 56 }}>
-          <div
-            style={{
-              fontSize: 16,
-              fontFamily: "Inter",
-              fontWeight: 700,
-              color: color,
-            }}
-          >
-            {opp.opportunityScore}
-          </div>
-          <div
-            style={{
-              fontSize: 9,
-              fontFamily: "Inter",
-              color: T.mid,
-              letterSpacing: "0.06em",
-            }}
-          >
-            OPP. SCORE
-          </div>
-        </div>
+      <Block label={QUESTION_LABELS.whatWeSee}>
+        <p style={{ fontSize: 14, color: T.ink, lineHeight: 1.6, margin: 0 }}>
+          {card.whatWeSee}
+        </p>
+      </Block>
 
-        <span
+      <Block label={QUESTION_LABELS.whyItMatters}>
+        <p style={{ fontSize: 13, color: T.ink, lineHeight: 1.7, margin: 0 }}>
+          {card.whyItMatters}
+        </p>
+      </Block>
+
+      {card.affecting.length > 0 && (
+        <Block label={affectingLabel}>
+          <p style={{ fontSize: 13, color: T.ink, lineHeight: 1.6, margin: 0 }}>
+            {card.affecting.join(", ")}
+          </p>
+          {card.criticalPath && (
+            <p style={{ fontSize: 12, color: T.mid, margin: "6px 0 0" }}>
+              Critical Path: {card.criticalPath}
+            </p>
+          )}
+        </Block>
+      )}
+
+      {card.startHere.length > 0 && (
+        <div
           style={{
-            fontSize: 12,
-            color: T.mid,
-            transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s",
-            display: "inline-block",
+            background: T.offWhite,
+            borderRadius: 10,
+            padding: "14px 16px",
+            marginTop: 4,
           }}
         >
-          ▾
-        </span>
-      </button>
-
-      {expanded && (
-        <div style={{ padding: "20px 24px" }}>
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 20,
-              marginBottom: 24,
+              fontSize: 10,
+              fontWeight: 700,
+              color: T.mid,
+              letterSpacing: "0.1em",
+              marginBottom: 8,
+              textTransform: "uppercase",
             }}
           >
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: T.mid,
-                  letterSpacing: "0.1em",
-                  marginBottom: 8,
-                }}
-              >
-                WHAT'S HAPPENING
-              </div>
-              <p
-                style={{
-                  fontSize: 13,
-                  fontFamily: "Inter",
-                  color: T.ink,
-                  lineHeight: 1.65,
-                  margin: 0,
-                }}
-              >
-                {opp.coreSymptom}
-              </p>
-            </div>
-
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: T.mid,
-                  letterSpacing: "0.1em",
-                  marginBottom: 8,
-                }}
-              >
-                LIKELY ROOT CAUSE
-              </div>
-              <p
-                style={{
-                  fontSize: 13,
-                  fontFamily: "Inter",
-                  color: T.ink,
-                  lineHeight: 1.65,
-                  margin: 0,
-                }}
-              >
-                {opp.likelyRootCause}
-              </p>
-            </div>
-
-            <div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: T.mid,
-                  letterSpacing: "0.1em",
-                  marginBottom: 8,
-                }}
-              >
-                EFFORT & TIMEFRAME
-              </div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-                <div
-                  style={{
-                    padding: "3px 10px",
-                    borderRadius: 20,
-                    background: eff.bg,
-                    color: eff.color,
-                    fontSize: 11,
-                    fontFamily: "Inter",
-                    fontWeight: 600,
-                  }}
-                >
-                  {opp.effortLevel} effort
-                </div>
-                <div
-                  style={{
-                    padding: "3px 10px",
-                    borderRadius: 20,
-                    background: T.offWhite,
-                    color: T.mid,
-                    fontSize: 11,
-                    fontFamily: "Inter",
-                    fontWeight: 500,
-                  }}
-                >
-                  {opp.timeframe}
-                </div>
-              </div>
-            </div>
+            {QUESTION_LABELS.startHere}
           </div>
-
-          {opp.cascadeImpacts.length > 0 && (
-            <div
-              style={{
-                background: T.offWhite,
-                borderRadius: 10,
-                padding: "16px 18px",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 10,
-                  fontFamily: "Inter",
-                  fontWeight: 700,
-                  color: T.mid,
-                  letterSpacing: "0.1em",
-                  marginBottom: 12,
-                }}
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {card.startHere.map((a, i) => (
+              <li
+                key={i}
+                style={{ fontSize: 13, color: T.ink, lineHeight: 1.6, marginBottom: 4 }}
               >
-                IF LEFT UNADDRESSED — CASCADE IMPACTS
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {opp.cascadeImpacts.map((impact, i) => (
-                  <div
-                    key={i}
-                    style={{ display: "flex", alignItems: "flex-start", gap: 12 }}
-                  >
-                    <div
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: T.white,
-                        border: `1.5px solid ${color}40`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 10,
-                        fontFamily: "Inter",
-                        fontWeight: 700,
-                        color: color,
-                      }}
-                    >
-                      {i + 1}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 8,
-                          marginBottom: 2,
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: 12,
-                            fontFamily: "Inter",
-                            fontWeight: 600,
-                            color: T.ink,
-                          }}
-                        >
-                          {impact.system}
-                        </span>
-                        {impact.score !== null && impact.score < 60 && (
-                          <span
-                            style={{
-                              fontSize: 10,
-                              fontFamily: "Inter",
-                              fontWeight: 600,
-                              color: T.danger,
-                              background: "rgba(239,68,68,0.1)",
-                              padding: "1px 6px",
-                              borderRadius: 8,
-                            }}
-                          >
-                            Also weak ({impact.score})
-                          </span>
-                        )}
-                      </div>
-                      <p
-                        style={{
-                          fontSize: 12,
-                          fontFamily: "Inter",
-                          color: T.mid,
-                          lineHeight: 1.5,
-                          margin: 0,
-                        }}
-                      >
-                        {impact.reason}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
-            <Link
-              to="/reports/revenue-system-health"
-              style={{
-                background: "transparent",
-                border: `1px solid ${color}`,
-                color: color,
-                borderRadius: 8,
-                padding: "8px 16px",
-                fontFamily: "Inter",
-                fontSize: 12,
-                fontWeight: 500,
-                cursor: "pointer",
-                textDecoration: "none",
-              }}
-            >
-              View in Revenue System Health →
-            </Link>
-          </div>
+                {a}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
-    </div>
+    </article>
+  );
+}
+
+function OtherOpportunities({ groups }: { groups: OtherOpportunityGroup[] }) {
+  const [open, setOpen] = useState<string | null>(null);
+
+  return (
+    <section style={{ marginBottom: 40 }}>
+      <h2
+        style={{
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 22,
+          fontWeight: 400,
+          color: T.ink,
+          margin: "0 0 4px",
+        }}
+      >
+        Other opportunities
+      </h2>
+      <p style={{ fontSize: 13, color: T.mid, margin: "0 0 14px", lineHeight: 1.6 }}>
+        The rest of your evaluated systems, grouped by Revenue System.
+      </p>
+
+      {groups.map((g) => {
+        const isOpen = open === g.parentCode;
+        return (
+          <div
+            key={g.parentCode}
+            style={{
+              background: T.white,
+              border: "1px solid rgba(0,0,0,0.07)",
+              borderRadius: 10,
+              marginBottom: 8,
+              overflow: "hidden",
+            }}
+          >
+            <button
+              onClick={() => setOpen(isOpen ? null : g.parentCode)}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "13px 16px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: g.parentColorHex,
+                }}
+              />
+              <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>
+                {g.parentName}
+              </span>
+              <span style={{ fontSize: 12, color: T.mid }}>({g.items.length})</span>
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: 12,
+                  color: T.mid,
+                  transform: isOpen ? "rotate(180deg)" : "none",
+                }}
+              >
+                ▾
+              </span>
+            </button>
+
+            {isOpen && (
+              <div style={{ borderTop: `1px solid ${T.offWhite}` }}>
+                {g.items.map((it) => {
+                  const s = SEVERITY_STYLE[it.severity];
+                  return (
+                    <div
+                      key={it.childSystemId}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        padding: "11px 16px",
+                        borderBottom: `1px solid ${T.offWhite}`,
+                      }}
+                    >
+                      <span style={{ fontSize: 13, color: T.ink }}>{it.name}</span>
+                      <span
+                        style={{
+                          marginLeft: "auto",
+                          padding: "3px 10px",
+                          borderRadius: 20,
+                          background: s.bg,
+                          color: s.color,
+                          fontSize: 10,
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {SEVERITY_LABELS[it.severity]}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
+function LockedSection({
+  systems,
+  tiles,
+  shown,
+  onShowMore,
+}: {
+  systems: LockedSystem[];
+  tiles: { parentCode: string; parentName: string; parentColorHex: string; count: number }[];
+  shown: number;
+  onShowMore: () => void;
+}) {
+  const visible = systems.slice(0, shown);
+
+  return (
+    <section
+      style={{
+        background: T.offWhite,
+        border: "1px solid rgba(0,0,0,0.06)",
+        borderRadius: 14,
+        padding: "24px 22px",
+        marginBottom: 32,
+      }}
+    >
+      <h2
+        style={{
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 22,
+          fontWeight: 400,
+          color: T.ink,
+          margin: "0 0 6px",
+        }}
+      >
+        {SECTION_COPY.lockedHeading}
+      </h2>
+      <p style={{ fontSize: 13, color: T.mid, margin: "0 0 14px", lineHeight: 1.6 }}>
+        {SECTION_COPY.lockedSubhead}
+      </p>
+
+      <div
+        style={{
+          background: T.white,
+          border: "1px dashed rgba(0,0,0,0.18)",
+          borderRadius: 10,
+          padding: "12px 16px",
+          fontSize: 12,
+          color: T.ink,
+          lineHeight: 1.6,
+          marginBottom: 18,
+        }}
+      >
+        {SECTION_COPY.lockedBanner}
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 10,
+          marginBottom: 20,
+        }}
+      >
+        {tiles.map((t) => (
+          <div
+            key={t.parentCode}
+            style={{
+              background: T.white,
+              border: "1px solid rgba(0,0,0,0.06)",
+              borderRadius: 10,
+              padding: "12px 14px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                color: T.mid,
+                marginBottom: 4,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: t.parentColorHex,
+                }}
+              />
+              {t.parentName}
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: T.abyss }}>{t.count}</div>
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: 10,
+        }}
+      >
+        {visible.map((s) => (
+          <div
+            key={s.childSystemId}
+            style={{
+              background: T.white,
+              border: "1px solid rgba(0,0,0,0.06)",
+              borderRadius: 10,
+              padding: "14px 16px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 10,
+                letterSpacing: "0.08em",
+                color: T.mid,
+                marginBottom: 6,
+                textTransform: "uppercase",
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: "50%",
+                  background: s.parentColorHex,
+                }}
+              />
+              {s.parentName}
+              <span style={{ marginLeft: "auto" }} aria-hidden="true">
+                🔒
+              </span>
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: T.ink, marginBottom: 6 }}>
+              {s.name}
+            </div>
+            <p style={{ fontSize: 12, color: T.mid, lineHeight: 1.6, margin: "0 0 8px" }}>
+              {s.governs}
+            </p>
+            {/* Slot: optional "what can happen when this is weak" line goes here. */}
+            <div style={{ fontSize: 11, color: T.mid, fontStyle: "italic" }}>
+              {SECTION_COPY.lockedNotIncluded}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {visible.length < systems.length && (
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <button
+            onClick={onShowMore}
+            style={{
+              background: "transparent",
+              border: `1px solid ${T.mid}`,
+              color: T.abyss,
+              borderRadius: 8,
+              padding: "8px 18px",
+              fontSize: 13,
+              cursor: "pointer",
+            }}
+          >
+            Show more ({systems.length - visible.length} remaining)
+          </button>
+        </div>
+      )}
+
+      <div style={{ textAlign: "center", marginTop: 20 }}>
+        <Link
+          to="/settings/billing"
+          style={{
+            display: "inline-block",
+            background: T.ember,
+            color: T.white,
+            borderRadius: 8,
+            padding: "11px 24px",
+            fontSize: 13,
+            fontWeight: 600,
+            textDecoration: "none",
+          }}
+        >
+          {SECTION_COPY.lockedCta}
+        </Link>
+      </div>
+    </section>
   );
 }
