@@ -392,31 +392,80 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
 
             {!zoomedSystem && (
               <div style={{ marginBottom: 24 }}>
-                <div style={{ marginBottom: 16 }}>
-                  <div
+                <button
+                  type="button"
+                  onClick={() => setChainsOpen((v) => !v)}
+                  aria-expanded={chainsOpen}
+                  aria-controls="matrix-chains-panel"
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    background: T.white,
+                    border: "1px solid rgba(0,0,0,0.07)",
+                    borderRadius: 10,
+                    padding: "14px 18px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                  }}
+                >
+                  <span>
+                    <span
+                      style={{
+                        display: "block",
+                        fontFamily: "Inter",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: T.ink,
+                      }}
+                    >
+                      How the Revenue Health Matrix works
+                    </span>
+                    <span
+                      style={{
+                        display: "block",
+                        fontFamily: "Inter",
+                        fontSize: 12,
+                        color: T.mid,
+                        marginTop: 2,
+                      }}
+                    >
+                      See the cause-and-effect pathways behind the Matrix.
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
                     style={{
-                      fontSize: 10,
-                      fontFamily: "Inter",
-                      fontWeight: 700,
                       color: T.mid,
-                      letterSpacing: "0.1em",
-                      marginBottom: 6,
+                      fontSize: 14,
+                      transform: chainsOpen ? "rotate(180deg)" : "none",
+                      transition: "transform .15s",
                     }}
                   >
-                    KEY CAUSE & EFFECT CHAINS
-                  </div>
-                  <h2
-                    style={{
-                      fontFamily: "'Instrument Serif', Georgia, serif",
-                      fontSize: 22,
-                      fontWeight: 400,
-                      color: T.ink,
-                      margin: 0,
-                    }}
-                  >
-                    Where the constraint really lives.
-                  </h2>
-                </div>
+                    ⌄
+                  </span>
+                </button>
+                <div
+                  id="matrix-chains-panel"
+                  hidden={!chainsOpen}
+                  style={{ marginTop: chainsOpen ? 16 : 0 }}
+                >
+                <p
+                  style={{
+                    fontFamily: "Inter",
+                    fontSize: 12,
+                    color: T.mid,
+                    lineHeight: 1.6,
+                    margin: "0 0 16px",
+                  }}
+                >
+                  These pathways explain the fixed logic behind the Revenue Health Matrix. They do
+                  not change with an individual assessment. Assessment scores determine which
+                  relationships and pathways are most relevant to the company.
+                </p>
+
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {payload.criticalChains.map((chain, i) => {
                     const color = T.sys[chain.parentCode] ?? T.teal;
