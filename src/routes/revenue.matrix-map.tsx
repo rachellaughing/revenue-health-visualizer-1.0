@@ -1356,27 +1356,121 @@ function ZoomedSystem({
                 {child.assessed && (child.isHardShadow || child.isSoftShadow)
                   ? `Health looks ${severityLabel(child.healthScore).toLowerCase()} on the surface, but tracking is only ${child.trackingScore}/100 — a ${child.healthScore - child.trackingScore}-point visibility gap. You may be running on undocumented, founder-held knowledge that won't survive scale or turnover.`
                   : child.coreSymptom ||
-                    'Click "View in Top Opportunities" to see improvement potential and cascade impacts.'}
+                    "Review the recommended actions below to see where to start."}
               </div>
-              <Link
-                to="/reports/top-opportunities"
+
+              {/* Recommended actions */}
+              <div style={{ marginTop: 16, borderTop: `1px solid ${T.offWhite}`, paddingTop: 14 }}>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontFamily: "Inter",
+                    fontWeight: 700,
+                    color: T.mid,
+                    letterSpacing: "0.1em",
+                    marginBottom: 10,
+                  }}
+                >
+                  RECOMMENDED ACTIONS
+                </div>
+                {actionsLoading && (
+                  <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
+                    Preparing recommended actions…
+                  </div>
+                )}
+                {!actionsLoading && actions && (
+                  <>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "Inter",
+                        color: T.mid,
+                        lineHeight: 1.6,
+                        margin: "0 0 10px",
+                      }}
+                    >
+                      {actions.whyItMatters}
+                    </p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {actions.startHere.map((a, i) => (
+                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          <span style={{ color: sysColor, fontSize: 12, flexShrink: 0 }}>→</span>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontFamily: "Inter",
+                              color: T.ink,
+                              lineHeight: 1.55,
+                            }}
+                          >
+                            {a}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Roadmap — genuinely locked behind the Diagnostic entitlement. */}
+              <button
+                type="button"
+                disabled={!roadmapUnlocked}
+                aria-disabled={!roadmapUnlocked}
+                title={roadmapUnlocked ? "Add to Roadmap" : "Available with Diagnostic"}
                 style={{
                   marginTop: 14,
-                  display: "block",
-                  textAlign: "center",
-                  background: "transparent",
-                  border: `1px solid ${sysColor}`,
-                  color: sysColor,
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  background: roadmapUnlocked ? sysColor : T.offWhite,
+                  border: `1px solid ${roadmapUnlocked ? sysColor : "rgba(0,0,0,0.1)"}`,
+                  color: roadmapUnlocked ? T.white : T.mid,
                   borderRadius: 8,
                   padding: "9px",
                   fontFamily: "Inter",
                   fontSize: 12,
-                  fontWeight: 500,
-                  textDecoration: "none",
+                  fontWeight: 600,
+                  cursor: roadmapUnlocked ? "pointer" : "not-allowed",
                 }}
               >
-                View in Top Opportunities →
-              </Link>
+                {!roadmapUnlocked && <span aria-hidden="true">🔒</span>}
+                Add to Roadmap
+                {!roadmapUnlocked && (
+                  <span style={{ fontWeight: 400, fontSize: 11 }}>· Available with Diagnostic</span>
+                )}
+              </button>
+
+              {featuredIds.has(child.id) && (
+                <Link
+                  to={topOpportunityLink(child.code)}
+                  style={{
+                    marginTop: 10,
+                    display: "block",
+                    textAlign: "center",
+                    background: "transparent",
+                    border: `1px solid ${sysColor}`,
+                    color: sysColor,
+                    borderRadius: 8,
+                    padding: "9px",
+                    fontFamily: "Inter",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    textDecoration: "none",
+                  }}
+                >
+                  View in Top Opportunities →
+                </Link>
+              )}
+
+              {childRels.length > 0 && (
+                <RelationshipPanel
+                  title="How this child system affects other systems"
+                  relationships={childRels}
+                />
+              )}
             </>
           ) : (
             <div style={{ textAlign: "center", paddingTop: 40 }}>
