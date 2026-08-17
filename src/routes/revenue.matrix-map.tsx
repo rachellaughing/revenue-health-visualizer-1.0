@@ -1491,7 +1491,7 @@ function SimulatorTab({
       <div style={{ marginBottom: 16 }}>
         {scenarios.map((sc, i) => {
           const isExpanded = expanded === sc.code;
-          const illustrative = !selectedSet.has(sc.childSystemId);
+          const illustrative = !sc.assessed;
           return (
             <ScenarioCard
               key={sc.childSystemId}
