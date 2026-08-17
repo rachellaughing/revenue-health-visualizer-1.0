@@ -1577,6 +1577,12 @@ export type MatrixMapData = {
   systemConnections: Record<string, { upstream: MatrixSysConnItem[]; downstream: MatrixSysConnItem[] }>;
   childrenByParent: Record<string, MatrixChildNode[]>;
   criticalChains: MatrixChain[];
+  /** Keyed by child system id. Child-level "Mutual" = this one child has resolved
+   *  relationships with that parent in BOTH directions. */
+  childRelationships: Record<string, SystemRelationship[]>;
+  /** Keyed by parent code. Parent-level "Mutual" = at least one relationship each
+   *  way, even via different child-system pairs. */
+  parentRelationships: Record<string, SystemRelationship[]>;
   scenarios: MatrixScenario[];
 };
 
