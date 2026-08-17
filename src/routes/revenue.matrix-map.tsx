@@ -971,6 +971,44 @@ function ZoomedSystem({
   const assessedCount = children.filter((c) => c.assessed).length;
   const displayName = /\bSystem$/i.test(sys.name) ? sys.name : `${sys.name} System`;
 
+  const parentRels = payload.parentRelationships?.[systemCode] ?? [];
+  const childRels = child ? (payload.childRelationships?.[child.id] ?? []) : [];
+
+  // Recommended actions — same opportunity_actions cache Top Opportunities and
+  // Roadmap Builder read from; this is just a second entry point.
+  const fetchActions = useServerFn(getChildSystemActions);
+  const { data: actions, isLoading: actionsLoading } = useQuery({
+    queryKey: ["child-system-actions", child?.id],
+    queryFn: () => fetchActions({ data: { childSystemId: child!.id } }),
+    enabled: !!child,
+    staleTime: Infinity,
+  });
+
+  // Deep-link is only shown when this child is genuinely featured on Top
+  // Opportunities — never link to the top of the report as a fallback.
+  const fetchTopOpps = useServerFn(getTopOpportunities);
+  const { data: topOpps } = useQuery({
+    queryKey: ["top-opportunities-featured"],
+    queryFn: () => fetchTopOpps({ data: {} }),
+    enabled: !!child,
+    staleTime: 5 * 60_000,
+  });
+  const featuredIds = useMemo(() => {
+    const t = topOpps as any;
+    if (!t || t.error) return new Set<string>();
+    return new Set<string>(
+      [...(t.biggestImpact ?? []), ...(t.quickestWins ?? [])].map((c: any) => c.childSystemId),
+    );
+  }, [topOpps]);
+
+  const fetchTier = useServerFn(getCurrentTier);
+  const { data: tierData } = useQuery({
+    queryKey: ["current-tier"],
+    queryFn: () => fetchTier(),
+    staleTime: 60_000,
+  });
+  const roadmapUnlocked = tierData?.tier === "diagnostic";
+
   return (
     <div>
       {/* Big center system node — doubles as the zoom-out control. */}
