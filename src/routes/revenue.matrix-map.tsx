@@ -1507,6 +1507,112 @@ function ZoomedSystem({
           variant="downstream"
         />
       </div>
+
+      {parentRels.length > 0 && (
+        <RelationshipPanel
+          title="How these systems influence one another"
+          relationships={parentRels}
+        />
+      )}
+    </div>
+  );
+}
+
+const RELATION_LABEL: Record<SystemRelationship["direction"], string> = {
+  upstream: "Upstream",
+  downstream: "Downstream",
+  mutual: "Mutual",
+};
+
+function RelationshipPanel({
+  title,
+  relationships,
+}: {
+  title: string;
+  relationships: SystemRelationship[];
+}) {
+  return (
+    <div
+      style={{
+        marginTop: 20,
+        background: T.white,
+        border: "1px solid rgba(0,0,0,0.07)",
+        borderRadius: 12,
+        padding: 20,
+        boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 13,
+          fontFamily: "Inter",
+          fontWeight: 600,
+          color: T.ink,
+          marginBottom: 14,
+        }}
+      >
+        {title}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {relationships.map((r) => {
+          const color = T.sys[r.parentCode] ?? r.parentColorHex;
+          return (
+            <div
+              key={r.parentCode}
+              style={{
+                padding: "12px 14px",
+                background: color + "08",
+                border: `1px solid ${color}30`,
+                borderRadius: 8,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  flexWrap: "wrap",
+                  marginBottom: 6,
+                }}
+              >
+                <span
+                  style={{ fontSize: 12, fontFamily: "Inter", fontWeight: 600, color: T.ink }}
+                >
+                  {r.parentName}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontFamily: "Inter",
+                    fontWeight: 700,
+                    letterSpacing: "0.06em",
+                    color,
+                    background: color + "18",
+                    borderRadius: 20,
+                    padding: "2px 8px",
+                  }}
+                >
+                  {RELATION_LABEL[r.direction].toUpperCase()}
+                </span>
+              </div>
+              {r.viaUpstream.length > 0 && (
+                <div
+                  style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, lineHeight: 1.55 }}
+                >
+                  Feeds in via: {r.viaUpstream.join(", ")}
+                </div>
+              )}
+              {r.viaDownstream.length > 0 && (
+                <div
+                  style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, lineHeight: 1.55 }}
+                >
+                  Affects: {r.viaDownstream.join(", ")}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
