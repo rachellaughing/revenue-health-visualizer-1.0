@@ -311,12 +311,14 @@ function SystemSection({
   selectedIds,
   assessmentId,
   defaultOpen,
+  shadowThresholds,
 }: {
   system: SystemHealthSystem;
   tier: "starter" | "pro" | "diagnostic";
   selectedIds: Set<string>;
   assessmentId: string;
   defaultOpen: boolean;
+  shadowThresholds: RevenueSystemHealth["shadowThresholds"];
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const isStarter = tier === "starter";
@@ -338,13 +340,15 @@ function SystemSection({
         healthScore: i.healthScore,
         trackingScore: i.trackingScore,
         visibilityGap: gap,
-        isShadow: i.healthScore >= 60 && i.trackingScore < 40,
+        isSoftShadow: shadowFlag(i.healthScore, i.trackingScore, shadowThresholds.soft),
+        isHardShadow: shadowFlag(i.healthScore, i.trackingScore, shadowThresholds.hard),
         severity: severity(i.healthScore).label.toLowerCase() as ChildSystemScore["severity"],
         illustrative: true,
       };
     }
     return { ...c, illustrative: false };
   });
+
 
   const realChildren = childRows.filter((c) => !c.illustrative && c.severity !== "not_assessed");
   const weakest = (realChildren.length ? realChildren : childRows.filter((c) => c.severity !== "not_assessed"))
