@@ -500,7 +500,6 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
         {activeTab === "simulator" && !isStarter && (
           <SimulatorTab
             scenarios={payload.scenarios}
-            selectedSet={new Set(payload.selectedChildIds)}
             expanded={effectiveExpanded}
             onToggle={(code) =>
               setExpandedScenario(effectiveExpanded === code ? "__none__" : code)
@@ -1477,12 +1476,10 @@ function ConnPanel({
 
 function SimulatorTab({
   scenarios,
-  selectedSet,
   expanded,
   onToggle,
 }: {
   scenarios: MatrixScenario[];
-  selectedSet: Set<string>;
   expanded: string | null;
   onToggle: (code: string) => void;
 }) {
@@ -1491,7 +1488,7 @@ function SimulatorTab({
       <div style={{ marginBottom: 16 }}>
         {scenarios.map((sc, i) => {
           const isExpanded = expanded === sc.code;
-          const illustrative = !selectedSet.has(sc.childSystemId);
+          const illustrative = !sc.assessed;
           return (
             <ScenarioCard
               key={sc.childSystemId}
