@@ -500,7 +500,6 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
         {activeTab === "simulator" && !isStarter && (
           <SimulatorTab
             scenarios={payload.scenarios}
-            selectedSet={new Set(payload.selectedChildIds)}
             expanded={effectiveExpanded}
             onToggle={(code) =>
               setExpandedScenario(effectiveExpanded === code ? "__none__" : code)
