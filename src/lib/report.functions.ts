@@ -624,6 +624,23 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
 // Top Opportunities
 // ---------------------------------------------------------------------------
 
+function hashStr(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function illustrativeScore(seed: string, code: string) {
+  const h = hashStr(`${seed}:${code}`);
+  const healthScore = 40 + (h % 45);
+  const trackingScore = Math.max(15, healthScore - 10 - ((h >> 8) % 25));
+  return { healthScore, trackingScore };
+}
+
+
 export type SeverityBand = "critical" | "fragile" | "stable" | "strong";
 
 /** Which badge a featured card shows. Wording lives client-side in
