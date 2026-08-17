@@ -89,6 +89,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
 
   const isStarter = payload.tier === "starter";
+  const [chainsOpen, setChainsOpen] = useState(false);
 
   const originFromEvent = useCallback((e: { clientX: number; clientY: number }) => {
     const stage = stageRef.current;
