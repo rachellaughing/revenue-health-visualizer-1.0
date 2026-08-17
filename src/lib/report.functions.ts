@@ -1858,6 +1858,97 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         childrenByParent[code] = arr;
       }
 
+      // ---- Cross-system relationships from revhealth2.dependency_map ------
+      // Two intentionally different definitions of "Mutual", one per level.
+      const depsRaw = ((depsRes as any)?.data ?? []) as any[];
+      const unresolvedAll: string[] = [];
+
+      type Edge = { source: ChildInfo; target: ChildInfo; dir: "up" | "down" };
+      const edgesByChild = new Map<string, Edge[]>();
+
+      for (const row of depsRaw) {
+        const source = childInfoById.get(row.child_system_id);
+        if (!source) continue;
+        const up = resolveDependencyTargets(row.direct_dependencies, childInfoByName);
+        const down = resolveDependencyTargets(row.downstream_systems_influenced, childInfoByName);
+        unresolvedAll.push(...up.unresolved, ...down.unresolved);
+        const edges: Edge[] = [
+          ...up.resolved.map((target) => ({ source, target, dir: "up" as const })),
+          ...down.resolved.map((target) => ({ source, target, dir: "down" as const })),
+        ];
+        edgesByChild.set(source.id, edges);
+      }
+
+      if (unresolvedAll.length > 0) {
+        // Dev-only diagnostic. Some entries are deliberate business outcomes
+        // (e.g. "Executive Decision Making"), not naming mismatches — they are
+        // skipped, never rendered, never thrown.
+        console.warn(
+          "[matrix-map] dependency_map values not resolved to a child system:",
+          Array.from(new Set(unresolvedAll)).join(", "),
+        );
+      }
+
+      const parentMetaByCode = new Map<string, { name: string; color: string }>();
+      for (const p of parentsRaw) {
+        parentMetaByCode.set(p.code, { name: p.name, color: p.color_hex ?? "#888880" });
+      }
+
+      function buildRelationships(
+        edges: Edge[],
+        ownParentCode: string,
+      ): SystemRelationship[] {
+        const acc = new Map<string, { up: Set<string>; down: Set<string> }>();
+        for (const e of edges) {
+          const code = e.target.parent?.code;
+          if (!code || code === ownParentCode) continue;
+          const entry = acc.get(code) ?? { up: new Set<string>(), down: new Set<string>() };
+          (e.dir === "up" ? entry.up : entry.down).add(e.target.name);
+          acc.set(code, entry);
+        }
+        const out: SystemRelationship[] = [];
+        for (const [code, entry] of acc) {
+          const meta = parentMetaByCode.get(code);
+          const direction: RelationDirection =
+            entry.up.size > 0 && entry.down.size > 0
+              ? "mutual"
+              : entry.up.size > 0
+                ? "upstream"
+                : "downstream";
+          out.push({
+            parentCode: code,
+            parentName: meta?.name ?? code,
+            parentColorHex: meta?.color ?? "#888880",
+            direction,
+            viaUpstream: [...entry.up].sort(),
+            viaDownstream: [...entry.down].sort(),
+          });
+        }
+        return out.sort((a, b) => a.parentName.localeCompare(b.parentName));
+      }
+
+      // Child level: one child's own resolved relationships, own parent excluded.
+      const childRelationships: Record<string, SystemRelationship[]> = {};
+      for (const info of childInfoById.values()) {
+        childRelationships[info.id] = buildRelationships(
+          edgesByChild.get(info.id) ?? [],
+          info.parent?.code ?? "",
+        );
+      }
+
+      // Parent level: aggregate every child of the parent. Mutual can arise
+      // through different child-system pairs.
+      const parentRelationships: Record<string, SystemRelationship[]> = {};
+      for (const code of PARENT_CODES) {
+        const edges: Edge[] = [];
+        for (const info of childInfoById.values()) {
+          if (info.parent?.code !== code) continue;
+          edges.push(...(edgesByChild.get(info.id) ?? []));
+        }
+        parentRelationships[code] = buildRelationships(edges, code);
+      }
+
+
       const pathMembers = (pathMembersRes.data ?? []) as any[];
       const membersByPath = new Map<string, string[]>();
       for (const m of pathMembers) {
