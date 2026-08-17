@@ -825,17 +825,16 @@ async function generateOpportunityCopy(
 
     const validated = opportunityCopySchema.parse(JSON.parse(stripCodeFences(text)));
 
-    const idByCode = new Map(items.map((i) => [i.code, i]));
-    const rows: any[] = [];
+    const knownCodes = new Set(items.map((i) => i.code));
     for (const c of validated.cards) {
-      if (!idByCode.has(c.code)) continue;
+      if (!knownCodes.has(c.code)) continue;
       out.set(c.code, {
         whatWeSee: c.what_we_see,
         whyItMatters: c.why_it_matters,
         startHere: c.start_here,
       });
     }
-    return { out, rows } && out;
+    return out;
   } catch (e) {
     console.error("[opportunity-copy] generation failed:", (e as Error).message);
     return out;
