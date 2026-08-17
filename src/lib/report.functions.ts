@@ -2039,6 +2039,8 @@ export const getMatrixMap = createServerFn({ method: "POST" })
         systemConnections,
         childrenByParent,
         criticalChains,
+        childRelationships,
+        parentRelationships,
         scenarios,
       };
     },
