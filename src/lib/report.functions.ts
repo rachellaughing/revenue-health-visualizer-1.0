@@ -512,7 +512,8 @@ export type ChildSystemScore = {
   trackingScore: number;
   visibilityGap: number;
   severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
-  isShadow: boolean;
+  isSoftShadow: boolean;
+  isHardShadow: boolean;
   assessed: boolean;
 };
 
@@ -520,6 +521,8 @@ export type SystemHealthSystem = ParentScore & {
   children: ChildSystemScore[];
   narrative: string | null;
 };
+
+export type ShadowThreshold = { healthGte: number; trackingLt: number };
 
 export type RevenueSystemHealth = {
   tier: Tier;
@@ -530,7 +533,14 @@ export type RevenueSystemHealth = {
     selected_child_ids: string[] | null;
   };
   systems: SystemHealthSystem[];
+  keyFinding: {
+    headline: string;
+    body: string;
+    source: "cached" | "fallback";
+  } | null;
+  shadowThresholds: { soft: ShadowThreshold; hard: ShadowThreshold };
 };
+
 
 export const getRevenueSystemHealth = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -559,6 +569,29 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
 
       const core = await loadCoreData(assessmentId!, userId);
       const parentAgg = aggregateByParent(core.scores, core.parents, core.children);
+
+      // Real shadow thresholds live in revhealth2.scoring_config so the UI can
+      // explain the classification without hardcoding numbers.
+      const { data: shadowCfgRows } = await (supabaseAdmin as any)
+        .schema("revhealth2")
+        .from("scoring_config")
+        .select("config_key,config_value")
+        .in("config_key", ["shadow.soft", "shadow.hard"]);
+      const shadowCfg = new Map<string, any>(
+        (shadowCfgRows ?? []).map((r: any) => [r.config_key, r.config_value]),
+      );
+      const softCfg = shadowCfg.get("shadow.soft") ?? {};
+      const hardCfg = shadowCfg.get("shadow.hard") ?? {};
+      const shadowThresholds = {
+        soft: {
+          healthGte: Number(softCfg.health_gte ?? 60),
+          trackingLt: Number(softCfg.tracking_lt ?? 40),
+        },
+        hard: {
+          healthGte: Number(hardCfg.health_gte ?? 60),
+          trackingLt: Number(hardCfg.tracking_lt ?? 20),
+        },
+      };
 
       // Map child_system_id -> score row
       const scoreByChild = new Map<string, any>();
@@ -594,7 +627,8 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
             trackingScore: Math.round(tracking),
             visibilityGap: Math.round(visibilityGap),
             severity: assessed ? severityFor(health) : "not_assessed",
-            isShadow: assessed && health >= 60 && tracking < 40,
+            isSoftShadow: assessed && !!s.is_soft_shadow,
+            isHardShadow: assessed && !!s.is_hard_shadow,
             assessed,
           };
         });
@@ -607,6 +641,38 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
 
       const tier = (core.profile?.tier ?? "starter") as Tier;
 
+      // Key finding: reuse the cached executive narrative; never generate.
+      let keyFinding: RevenueSystemHealth["keyFinding"] = null;
+      if (narr?.exec_headline && narr?.exec_body) {
+        keyFinding = {
+          headline: narr.exec_headline as string,
+          body: narr.exec_body as string,
+          source: "cached",
+        };
+      } else {
+        const assessedParents = parentAgg
+          .filter((p) => p.assessed > 0)
+          .sort((a, b) => b.healthScore - a.healthScore);
+        if (assessedParents.length) {
+          const strongest = assessedParents[0]!;
+          const weakest = assessedParents[assessedParents.length - 1]!;
+          const allChildren = systems.flatMap((s) => s.children);
+          const criticalCount = allChildren.filter((c) => c.severity === "critical").length;
+          const shadowCount = allChildren.filter(
+            (c) => c.isSoftShadow || c.isHardShadow,
+          ).length;
+          const countClause =
+            criticalCount > 0 || shadowCount > 0
+              ? `, with ${criticalCount} systems critical and ${shadowCount} systems showing unconfirmed strength`
+              : "";
+          keyFinding = {
+            headline: `${strongest.name} is your strongest system. ${weakest.name} needs the most attention.`,
+            body: `${weakest.name} is the clear constraint at ${Math.round(weakest.healthScore)}${countClause}.`,
+            source: "fallback",
+          };
+        }
+      }
+
       return {
         tier,
         firstName: core.profile?.first_name ?? null,
@@ -616,7 +682,10 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
           selected_child_ids: (core.assessment as any).selected_child_ids ?? null,
         },
         systems,
+        keyFinding,
+        shadowThresholds,
       };
+
     },
   );
 

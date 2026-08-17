@@ -1,19 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getRevenueSystemHealth,
   generateReportNarrative,
   type RevenueSystemHealth,
   type SystemHealthSystem,
   type ChildSystemScore,
+  type ShadowThreshold,
 } from "@/lib/report.functions";
+import {
+  DRIVERS_COPY,
+  PARENT_IMPACT,
+  SHORTLIST_COPY,
+} from "@/components/reports/system-health-copy";
+import { matrixMapLink, resolveTopOpportunityLink } from "@/lib/report-links";
 
 export const Route = createFileRoute("/reports/revenue-system-health")({
   head: () => ({ meta: [{ title: "Revenue System Health — Revenue Health Visualiser" }] }),
   component: Page,
 });
+
+function shadowFlag(health: number, tracking: number, t: ShadowThreshold): boolean {
+  return health >= t.healthGte && tracking < t.trackingLt;
+}
+
 
 // ── Tokens (prototype-verbatim) ─────────────────────────────────────────────
 const T = {
@@ -197,7 +209,7 @@ function ChildRow({
             HIGH GAP
           </span>
         )}
-        {child.isShadow && isDiagnostic && (
+        {(child.isSoftShadow || child.isHardShadow) && isDiagnostic && (
           <span
             style={{
               fontSize: 9,
@@ -210,9 +222,10 @@ function ChildRow({
               letterSpacing: "0.06em",
             }}
           >
-            SHADOW
+            SHADOW RISK
           </span>
         )}
+
       </div>
 
       <div style={{ fontSize: 15, fontFamily: "Inter", fontWeight: 700, color: notAssessed ? T.mid : T.ink }}>
@@ -310,12 +323,14 @@ function SystemSection({
   selectedIds,
   assessmentId,
   defaultOpen,
+  shadowThresholds,
 }: {
   system: SystemHealthSystem;
   tier: "starter" | "pro" | "diagnostic";
   selectedIds: Set<string>;
   assessmentId: string;
   defaultOpen: boolean;
+  shadowThresholds: RevenueSystemHealth["shadowThresholds"];
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const isStarter = tier === "starter";
@@ -337,13 +352,15 @@ function SystemSection({
         healthScore: i.healthScore,
         trackingScore: i.trackingScore,
         visibilityGap: gap,
-        isShadow: i.healthScore >= 60 && i.trackingScore < 40,
+        isSoftShadow: shadowFlag(i.healthScore, i.trackingScore, shadowThresholds.soft),
+        isHardShadow: shadowFlag(i.healthScore, i.trackingScore, shadowThresholds.hard),
         severity: severity(i.healthScore).label.toLowerCase() as ChildSystemScore["severity"],
         illustrative: true,
       };
     }
     return { ...c, illustrative: false };
   });
+
 
   const realChildren = childRows.filter((c) => !c.illustrative && c.severity !== "not_assessed");
   const weakest = (realChildren.length ? realChildren : childRows.filter((c) => c.severity !== "not_assessed"))
@@ -961,6 +978,421 @@ function Page() {
   return <ReportBody data={data as RevenueSystemHealth} onNarrativeReady={() => refetch()} />;
 }
 
+// ─── Key finding banner ─────────────────────────────────────────────────────
+function KeyFindingBanner({ keyFinding }: { keyFinding: RevenueSystemHealth["keyFinding"] }) {
+  if (!keyFinding) return null;
+  return (
+    <div
+      style={{
+        background: T.white,
+        border: `1px solid rgba(42,107,110,0.25)`,
+        borderLeft: `4px solid ${T.teal}`,
+        borderRadius: 12,
+        padding: "18px 22px",
+        marginBottom: 24,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontFamily: "Inter",
+          fontWeight: 700,
+          color: T.teal,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          marginBottom: 8,
+        }}
+      >
+        {SHORTLIST_COPY.eyebrow}
+      </div>
+      <h2
+        style={{
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontSize: 21,
+          fontWeight: 400,
+          color: T.ink,
+          margin: "0 0 8px",
+          lineHeight: 1.35,
+        }}
+      >
+        {keyFinding.headline}
+      </h2>
+      <p style={{ fontSize: 13, fontFamily: "Inter", color: T.mid, margin: 0, lineHeight: 1.7 }}>
+        {keyFinding.body}
+      </p>
+    </div>
+  );
+}
+
+// ─── Attention shortlist ────────────────────────────────────────────────────
+type ShortlistChild = ChildSystemScore & { systemName: string; systemColor: string };
+
+function StatTile({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <div
+      style={{
+        background: T.offWhite,
+        borderRadius: 10,
+        padding: "12px 14px",
+        flex: 1,
+        minWidth: 120,
+      }}
+    >
+      <div style={{ fontSize: 22, fontFamily: "Inter", fontWeight: 700, color }}>{value}</div>
+      <div style={{ fontSize: 10, fontFamily: "Inter", color: T.mid, letterSpacing: "0.06em" }}>
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function ShortlistRow({
+  child,
+  shadowThresholds,
+}: {
+  child: ShortlistChild;
+  shadowThresholds: RevenueSystemHealth["shadowThresholds"];
+}) {
+  const [open, setOpen] = useState(false);
+  const sev = severity(child.healthScore);
+  const impact = PARENT_IMPACT[child.parentCode];
+  const isShadow = child.isSoftShadow || child.isHardShadow;
+  const rule = child.isHardShadow ? shadowThresholds.hard : shadowThresholds.soft;
+  const opportunityHref = resolveTopOpportunityLink(child.id);
+
+  return (
+    <div style={{ borderBottom: `1px solid ${T.offWhite}` }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "12px 18px",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <div
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: child.systemColor,
+            flexShrink: 0,
+          }}
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontFamily: "Inter", fontWeight: 500, color: T.ink }}>
+            {child.name}
+          </div>
+          <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>{child.systemName}</div>
+        </div>
+        {isShadow && (
+          <span
+            style={{
+              fontSize: 9,
+              fontFamily: "Inter",
+              fontWeight: 700,
+              color: T.sand,
+              background: "rgba(196,149,106,0.15)",
+              padding: "2px 7px",
+              borderRadius: 10,
+              letterSpacing: "0.06em",
+            }}
+          >
+            SHADOW RISK
+          </span>
+        )}
+        <span
+          style={{
+            fontSize: 10,
+            fontFamily: "Inter",
+            fontWeight: 600,
+            padding: "2px 8px",
+            borderRadius: 20,
+            background: sev.bg,
+            color: sev.color,
+          }}
+        >
+          {sev.label}
+        </span>
+        <span
+          style={{
+            fontSize: 12,
+            color: T.mid,
+            transform: open ? "rotate(180deg)" : "none",
+            transition: "transform 0.2s",
+          }}
+        >
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div style={{ padding: "0 18px 16px 38px" }}>
+          {impact && (
+            <div style={{ marginBottom: 12 }}>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontFamily: "Inter",
+                  fontWeight: 700,
+                  color: T.mid,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
+                }}
+              >
+                {SHORTLIST_COPY.whenWeak}
+              </div>
+              <p style={{ fontSize: 12.5, fontFamily: "Inter", color: T.ink, margin: "0 0 10px", lineHeight: 1.6 }}>
+                {impact.weak}
+              </p>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontFamily: "Inter",
+                  fontWeight: 700,
+                  color: T.mid,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
+                }}
+              >
+                {SHORTLIST_COPY.whatToConsider}
+              </div>
+              <p style={{ fontSize: 12.5, fontFamily: "Inter", color: T.ink, margin: 0, lineHeight: 1.6 }}>
+                {impact.consider}
+              </p>
+            </div>
+          )}
+
+          {isShadow && (
+            <div
+              style={{
+                background: "rgba(196,149,106,0.08)",
+                border: "1px solid rgba(196,149,106,0.22)",
+                borderRadius: 8,
+                padding: "10px 12px",
+                marginBottom: 12,
+                fontSize: 12,
+                fontFamily: "Inter",
+                color: T.mid,
+                lineHeight: 1.6,
+              }}
+            >
+              <span style={{ fontWeight: 600, color: T.ink }}>
+                {child.isHardShadow ? "Hard shadow rule" : "Soft shadow rule"} triggered:{" "}
+              </span>
+              health {child.healthScore} (threshold {rule.healthGte} or above) with tracking{" "}
+              {child.trackingScore} (threshold below {rule.trackingLt}). Evidence gap{" "}
+              {child.visibilityGap > 0 ? `+${child.visibilityGap}` : child.visibilityGap}.
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+            <Link to={matrixMapLink(child.id)} style={{ fontSize: 12, fontFamily: "Inter", color: T.teal, fontWeight: 500 }}>
+              See this on the Matrix Map →
+            </Link>
+            {opportunityHref && (
+              <Link to={opportunityHref} style={{ fontSize: 12, fontFamily: "Inter", color: T.teal, fontWeight: 500 }}>
+                View in Top Opportunities →
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AttentionShortlist({
+  systems,
+  shadowThresholds,
+}: {
+  systems: SystemHealthSystem[];
+  shadowThresholds: RevenueSystemHealth["shadowThresholds"];
+}) {
+  const [showWeak, setShowWeak] = useState(true);
+  const [showShadow, setShowShadow] = useState(true);
+  const [driversOpen, setDriversOpen] = useState(false);
+
+  const all = useMemo<ShortlistChild[]>(
+    () =>
+      systems.flatMap((s) =>
+        s.children
+          .filter((c) => c.assessed && c.severity !== "not_assessed")
+          .map((c) => ({
+            ...c,
+            systemName: s.name,
+            systemColor: T.sys[s.code] ?? s.color_hex,
+          })),
+      ),
+    [systems],
+  );
+
+  const stats = useMemo(() => {
+    const weak = all.filter((c) => c.severity === "critical" || c.severity === "fragile").length;
+    return {
+      assessed: all.length,
+      strong: all.filter((c) => c.severity === "strong").length,
+      weak,
+      shadow: all.filter((c) => c.isSoftShadow || c.isHardShadow).length,
+    };
+  }, [all]);
+
+  const rows = all
+    .filter((c) => {
+      const weak = c.severity === "critical" || c.severity === "fragile";
+      const shadow = c.isSoftShadow || c.isHardShadow;
+      return (showWeak && weak) || (showShadow && shadow);
+    })
+    .sort((a, b) => a.healthScore - b.healthScore);
+
+  if (!all.length) return null;
+
+  const toggleStyle = (active: boolean): React.CSSProperties => ({
+    fontSize: 12,
+    fontFamily: "Inter",
+    fontWeight: 600,
+    padding: "6px 14px",
+    borderRadius: 20,
+    border: `1px solid ${active ? T.teal : "rgba(0,0,0,0.12)"}`,
+    background: active ? "rgba(42,107,110,0.10)" : "transparent",
+    color: active ? T.teal : T.mid,
+    cursor: "pointer",
+  });
+
+  return (
+    <div
+      style={{
+        background: T.white,
+        border: "1px solid rgba(0,0,0,0.07)",
+        borderRadius: 14,
+        marginBottom: 28,
+        overflow: "hidden",
+        boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+      }}
+    >
+      <div style={{ padding: "20px 22px 14px" }}>
+        <h2
+          style={{
+            fontFamily: "'Instrument Serif', Georgia, serif",
+            fontSize: 20,
+            fontWeight: 400,
+            color: T.ink,
+            margin: "0 0 6px",
+          }}
+        >
+          {SHORTLIST_COPY.heading}
+        </h2>
+        <p style={{ fontSize: 12.5, fontFamily: "Inter", color: T.mid, margin: "0 0 16px", lineHeight: 1.6 }}>
+          {SHORTLIST_COPY.lede}
+        </p>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+          <StatTile label="ASSESSED" value={stats.assessed} color={T.ink} />
+          <StatTile label="OPERATING STRONGLY" value={stats.strong} color={T.sys.AUTH} />
+          <StatTile label="NEEDING ATTENTION" value={stats.weak} color={T.danger} />
+          <StatTile label="SHADOW RISKS" value={stats.shadow} color={T.sand} />
+        </div>
+
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button onClick={() => setShowWeak((v) => !v)} style={toggleStyle(showWeak)}>
+            {SHORTLIST_COPY.weakFilter}
+          </button>
+          <button onClick={() => setShowShadow((v) => !v)} style={toggleStyle(showShadow)}>
+            {SHORTLIST_COPY.shadowFilter}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ borderTop: `1px solid ${T.offWhite}` }}>
+        {rows.length ? (
+          rows.map((c) => (
+            <ShortlistRow key={c.id} child={c} shadowThresholds={shadowThresholds} />
+          ))
+        ) : (
+          <div style={{ padding: "16px 20px", fontSize: 12.5, fontFamily: "Inter", color: T.mid }}>
+            {SHORTLIST_COPY.empty}
+          </div>
+        )}
+      </div>
+
+      {(showWeak || showShadow) && (
+        <div style={{ borderTop: `1px solid ${T.offWhite}`, background: T.offWhite + "80" }}>
+          <button
+            onClick={() => setDriversOpen((o) => !o)}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "14px 20px",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontFamily: "Inter",
+              fontWeight: 600,
+              color: T.ink,
+              textAlign: "left",
+            }}
+          >
+            {DRIVERS_COPY.heading}
+            <span
+              style={{
+                fontSize: 12,
+                color: T.mid,
+                transform: driversOpen ? "rotate(180deg)" : "none",
+                transition: "transform 0.2s",
+              }}
+            >
+              ▾
+            </span>
+          </button>
+          {driversOpen && (
+            <div style={{ padding: "0 20px 18px" }}>
+              <p style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, margin: "0 0 12px", lineHeight: 1.6 }}>
+                {DRIVERS_COPY.qualifier}
+              </p>
+              {showWeak && (
+                <ul style={{ margin: "0 0 12px", paddingLeft: 18 }}>
+                  {DRIVERS_COPY.weak.map((b) => (
+                    <li
+                      key={b}
+                      style={{ fontSize: 12.5, fontFamily: "Inter", color: T.ink, lineHeight: 1.7 }}
+                    >
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {showShadow && (
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  {DRIVERS_COPY.shadow.map((b) => (
+                    <li
+                      key={b}
+                      style={{ fontSize: 12.5, fontFamily: "Inter", color: T.ink, lineHeight: 1.7 }}
+                    >
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function ReportBody({
   data,
   onNarrativeReady,
@@ -1073,6 +1505,10 @@ function ReportBody({
           </div>
         </div>
 
+        <KeyFindingBanner keyFinding={data.keyFinding} />
+
+        <AttentionShortlist systems={ordered} shadowThresholds={data.shadowThresholds} />
+
         {/* System sections */}
         {ordered.map((s, i) => (
           <SystemSection
@@ -1082,8 +1518,10 @@ function ReportBody({
             selectedIds={selectedIds}
             assessmentId={assessment.id}
             defaultOpen={i === 0}
+            shadowThresholds={data.shadowThresholds}
           />
         ))}
+
 
         {/* Footer */}
         <div
