@@ -541,6 +541,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                     );
                   })}
                 </div>
+                </div>
               </div>
             )}
           </>
