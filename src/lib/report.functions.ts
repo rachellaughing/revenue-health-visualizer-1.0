@@ -1657,6 +1657,10 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             .select("first_name,tier")
             .eq("user_id", userId)
             .maybeSingle(),
+          (supabaseAdmin as any)
+            .schema("revhealth2")
+            .from("dependency_map")
+            .select("child_system_id,direct_dependencies,downstream_systems_influenced"),
         ]);
 
       for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, pathsRes, pathMembersRes, profileRes]) {
