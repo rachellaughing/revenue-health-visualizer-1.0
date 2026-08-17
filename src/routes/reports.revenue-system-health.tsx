@@ -197,7 +197,7 @@ function ChildRow({
             HIGH GAP
           </span>
         )}
-        {child.isShadow && isDiagnostic && (
+        {(child.isSoftShadow || child.isHardShadow) && isDiagnostic && (
           <span
             style={{
               fontSize: 9,
@@ -210,9 +210,10 @@ function ChildRow({
               letterSpacing: "0.06em",
             }}
           >
-            SHADOW
+            SHADOW RISK
           </span>
         )}
+
       </div>
 
       <div style={{ fontSize: 15, fontFamily: "Inter", fontWeight: 700, color: notAssessed ? T.mid : T.ink }}>
