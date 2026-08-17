@@ -624,53 +624,222 @@ export const getRevenueSystemHealth = createServerFn({ method: "POST" })
 // Top Opportunities
 // ---------------------------------------------------------------------------
 
-export type CascadeImpact = {
-  system: string;
-  reason: string;
-  score: number | null;
-};
+export type SeverityBand = "critical" | "fragile" | "stable" | "strong";
 
-export type OpportunityItem = {
+/** Which badge a featured card shows. Wording lives client-side in
+ *  src/components/reports/opportunity-labels.ts */
+export type BadgeKey = "widest_impact" | "high_impact" | "quick_win";
+
+export type FeaturedCard = {
   childSystemId: string;
   code: string;
   name: string;
   parentCode: string;
   parentName: string;
   parentColorHex: string;
-  healthScore: number;
-  trackingScore: number;
-  severity: "critical" | "fragile" | "stable" | "strong" | "not_assessed";
-  opportunityScore: number;
-  coreSymptom: string;
-  likelyRootCause: string;
-  cascadeImpacts: CascadeImpact[];
-  effortLevel: "Low" | "Medium" | "High";
-  timeframe: string;
-  assessed: boolean;
+  badgeKey: BadgeKey;
+  /** "What are we seeing?" — plain language */
+  whatWeSee: string;
+  /** "Why does it matter?" */
+  whyItMatters: string;
+  /** "What else is it affecting?" — impacted system names */
+  affecting: string[];
+  /** Context only. Never affects ranking or selection. */
+  criticalPath: string | null;
+  /** "What could you do next?" — 2-3 concrete actions */
+  startHere: string[];
+};
+
+export type OtherOpportunityItem = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  severity: SeverityBand;
+};
+
+export type OtherOpportunityGroup = {
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  items: OtherOpportunityItem[];
+};
+
+export type LockedSystem = {
+  childSystemId: string;
+  code: string;
+  name: string;
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  /** child_systems.customer_facing_description */
+  governs: string;
+};
+
+export type LockedParentTile = {
+  parentCode: string;
+  parentName: string;
+  parentColorHex: string;
+  count: number;
 };
 
 export type TopOpportunities = {
   tier: Tier;
   firstName: string | null;
   assessment: { id: string; submitted_at: string | null };
-  selectedChildIds: string[];
-  opportunities: OpportunityItem[];
+  evaluatedCount: number;
+  totalCount: number;
+  biggestImpact: FeaturedCard[];
+  quickestWins: FeaturedCard[];
+  otherGroups: OtherOpportunityGroup[];
+  /** Starter tier only — never scored, never ranked. */
+  lockedSystems: LockedSystem[];
+  lockedTiles: LockedParentTile[];
 };
 
-function hashStr(s: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
+const MAX_FEATURED = 6;
+/** A system must be at least this weak to be a "real" gap. */
+const WEAK_THRESHOLD = 60;
+const QUICK_WIN_GAP_THRESHOLD = 75;
+/** Documented framework influence required to qualify as Biggest Impact (1-5 scales). */
+const MIN_INFLUENCE = 3;
+const MIN_MAGNITUDE = 3;
+
+const HORIZON_ORDER: Record<string, number> = {
+  Immediate: 0,
+  "Short-Term": 1,
+  "Medium-Term": 2,
+  "Long-Term": 3,
+};
+
+function severityBand(health: number): SeverityBand {
+  return health < 40
+    ? "critical"
+    : health < 60
+      ? "fragile"
+      : health < 75
+        ? "stable"
+        : "strong";
 }
 
-function illustrativeScore(seed: string, code: string) {
-  const h = hashStr(`${seed}:${code}`);
-  const healthScore = 40 + (h % 45);
-  const trackingScore = Math.max(15, healthScore - 10 - ((h >> 8) % 25));
-  return { healthScore, trackingScore };
+// --- AI card copy (same pattern as report_narratives) -----------------------
+
+const opportunityCopySchema = z.object({
+  cards: z.array(
+    z.object({
+      code: z.string().min(1),
+      what_we_see: z.string().min(1).max(400),
+      why_it_matters: z.string().min(1).max(900),
+      start_here: z.array(z.string().min(1).max(240)).min(2).max(3),
+    }),
+  ),
+});
+
+type CardCopy = { whatWeSee: string; whyItMatters: string; startHere: string[] };
+
+type CopyInput = {
+  code: string;
+  name: string;
+  parentName: string;
+  healthScore: number;
+  coreSymptom: string;
+  likelyRootCause: string;
+  impacts: string[];
+  quickWin: boolean;
+};
+
+function buildOpportunityCopyPrompt(companyName: string, items: CopyInput[]): string {
+  const blocks = items
+    .map(
+      (i) => `---
+CODE: ${i.code}
+System: ${i.name} (${i.parentName})
+Health score: ${i.healthScore}/100
+Framing: ${i.quickWin ? "a practical improvement that can begin without a large rebuild" : "a weakness with wide knock-on effect"}
+Documented symptoms: ${i.coreSymptom || "none recorded"}
+Documented likely root causes: ${i.likelyRootCause || "none recorded"}
+Other systems it affects: ${i.impacts.length ? i.impacts.join(", ") : "none recorded"}`,
+    )
+    .join("\n");
+
+  return `You are writing the opportunity cards for a Revenue Health report for ${companyName}.
+Use ONLY the data provided below. Do not invent facts. Be direct and specific. No generic filler,
+no framework jargon, no consulting cliches. Write so a founder could bring it to a meeting without
+translating it first.
+
+Never describe anything as "low effort", "easy", "quick to implement" or imply an effort/complexity
+estimate — we do not measure effort.
+
+For EACH system below, write:
+- what_we_see: ONE plain-language sentence describing the observable symptom.
+- why_it_matters: ONE short paragraph (2-3 sentences) on the business consequence, grounded in the root causes.
+- start_here: 2-3 concrete, specific, discussable actions. Each one short and imperative
+  (e.g. "Agree on the five warning signs leadership needs to see every week."). Not abstract advice.
+
+Systems:
+${blocks}
+
+Respond with JSON only, no prose or code fences:
+{"cards":[{"code":"...","what_we_see":"...","why_it_matters":"...","start_here":["...","..."]}]}`;
+}
+
+async function generateOpportunityCopy(
+  assessmentId: string,
+  userId: string,
+  companyName: string,
+  items: CopyInput[],
+): Promise<Map<string, CardCopy>> {
+  const out = new Map<string, CardCopy>();
+  if (items.length === 0) return out;
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    console.error("[opportunity-copy] ANTHROPIC_API_KEY is not configured");
+    return out;
+  }
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-5-20250929",
+        max_tokens: 4000,
+        messages: [
+          { role: "user", content: buildOpportunityCopyPrompt(companyName, items) },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("[opportunity-copy] anthropic error", response.status, await response.text());
+      return out;
+    }
+
+    const json = (await response.json()) as any;
+    const text: string = json?.content?.[0]?.text ?? "";
+    if (!text) return out;
+
+    const validated = opportunityCopySchema.parse(JSON.parse(stripCodeFences(text)));
+
+    const idByCode = new Map(items.map((i) => [i.code, i]));
+    const rows: any[] = [];
+    for (const c of validated.cards) {
+      if (!idByCode.has(c.code)) continue;
+      out.set(c.code, {
+        whatWeSee: c.what_we_see,
+        whyItMatters: c.why_it_matters,
+        startHere: c.start_here,
+      });
+    }
+    return { out, rows } && out;
+  } catch (e) {
+    console.error("[opportunity-copy] generation failed:", (e as Error).message);
+    return out;
+  }
 }
 
 export const getTopOpportunities = createServerFn({ method: "POST" })
@@ -698,38 +867,65 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
         assessmentId = latest.id;
       }
 
-      const [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, profileRes] =
-        await Promise.all([
-          supabaseAdmin
-            .from("assessments")
-            .select("id,user_id,submitted_at,selected_child_ids")
-            .eq("id", assessmentId)
-            .maybeSingle(),
-          supabaseAdmin
-            .from("assessment_scores")
-            .select("child_system_id,health_score,tracking_score,severity")
-            .eq("assessment_id", assessmentId)
-            .eq("user_id", userId),
-          (supabaseAdmin as any)
-            .schema("revhealth2")
-            .from("parent_systems")
-            .select("id,code,name,color_hex,sort_order"),
-          (supabaseAdmin as any)
-            .schema("revhealth2")
-            .from("child_systems")
-            .select("id,parent_system_id,code,name,sort_order"),
-          (supabaseAdmin as any)
-            .schema("revhealth2")
-            .from("failure_map")
-            .select(
-              "child_system_id,core_symptoms,likely_root_causes,impacted_system_1,impact_reason_1,impacted_system_2,impact_reason_2,impacted_system_3,impact_reason_3",
-            ),
-          supabaseAdmin
-            .from("profiles")
-            .select("first_name,tier")
-            .eq("user_id", userId)
-            .maybeSingle(),
-        ]);
+      const [
+        asmtRes,
+        scoresRes,
+        parentsRes,
+        childrenRes,
+        failureRes,
+        profileRes,
+        companyRes,
+        pathsRes,
+        pathMembersRes,
+        cachedRes,
+      ] = await Promise.all([
+        supabaseAdmin
+          .from("assessments")
+          .select("id,user_id,submitted_at,selected_child_ids")
+          .eq("id", assessmentId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("assessment_scores")
+          .select("child_system_id,health_score,tracking_score,severity")
+          .eq("assessment_id", assessmentId)
+          .eq("user_id", userId),
+        (supabaseAdmin as any)
+          .schema("revhealth2")
+          .from("parent_systems")
+          .select("id,code,name,color_hex,sort_order"),
+        (supabaseAdmin as any)
+          .schema("revhealth2")
+          .from("child_systems")
+          .select(
+            "id,parent_system_id,code,name,sort_order,opportunity_class,impact_horizon,influence_score,impact_magnitude,customer_facing_description",
+          ),
+        (supabaseAdmin as any)
+          .schema("revhealth2")
+          .from("failure_map")
+          .select(
+            "child_system_id,core_symptoms,likely_root_causes,impacted_system_1,impact_reason_1,impacted_system_2,impact_reason_2,impacted_system_3,impact_reason_3",
+          ),
+        supabaseAdmin
+          .from("profiles")
+          .select("first_name,tier")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        supabaseAdmin
+          .from("company_profiles")
+          .select("company_name")
+          .eq("user_id", userId)
+          .maybeSingle(),
+        (supabaseAdmin as any).schema("revhealth2").from("critical_paths").select("id,name"),
+        (supabaseAdmin as any)
+          .schema("revhealth2")
+          .from("critical_path_members")
+          .select("critical_path_id,child_system_id,sort_order"),
+        supabaseAdmin
+          .from("opportunity_actions")
+          .select("child_system_id,what_we_see,why_it_matters,start_here")
+          .eq("assessment_id", assessmentId)
+          .eq("user_id", userId),
+      ]);
 
       for (const r of [asmtRes, scoresRes, parentsRes, childrenRes, failureRes, profileRes]) {
         if ((r as any).error) throw new Error((r as any).error.message);
@@ -751,114 +947,238 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
       const failureByChild = new Map<string, any>();
       for (const f of failures) failureByChild.set(f.child_system_id, f);
 
-      // First pass: compute health for every child (real or illustrative)
-      const seed = assessmentId!;
-      type ChildInfo = {
-        id: string;
-        code: string;
-        name: string;
-        parent: any;
-        healthScore: number;
-        trackingScore: number;
-        assessed: boolean;
-      };
-      const childInfoById = new Map<string, ChildInfo>();
-      const childInfoByName = new Map<string, ChildInfo>();
-      for (const c of children) {
-        const s = scoreByChild.get(c.id);
-        const assessed = !!s;
-        const healthScore = assessed
-          ? Math.round(Number(s.health_score ?? 0))
-          : illustrativeScore(seed, c.code).healthScore;
-        const trackingScore = assessed
-          ? Math.round(Number(s.tracking_score ?? 0))
-          : illustrativeScore(seed, c.code).trackingScore;
-        const info: ChildInfo = {
-          id: c.id,
-          code: c.code,
-          name: c.name,
-          parent: parentById.get(c.parent_system_id),
-          healthScore,
-          trackingScore,
-          assessed,
-        };
-        childInfoById.set(c.id, info);
-        childInfoByName.set(c.name.trim().toLowerCase(), info);
+      const pathNameById = new Map<string, string>();
+      for (const p of ((pathsRes as any)?.data ?? []) as any[]) pathNameById.set(p.id, p.name);
+      const pathByChild = new Map<string, string>();
+      for (const m of ((pathMembersRes as any)?.data ?? []) as any[]) {
+        const nm = pathNameById.get(m.critical_path_id);
+        if (nm && !pathByChild.has(m.child_system_id)) pathByChild.set(m.child_system_id, nm);
       }
 
-      const opportunities: OpportunityItem[] = [];
+      const tier = (profileRes.data?.tier ?? "starter") as Tier;
+      const isStarter = tier === "starter";
+      const selectedChildIds = ((asmtRes.data as any).selected_child_ids ?? []) as string[];
+      const selectedSet = new Set(selectedChildIds);
+
+      // ---- Build evaluated pool (assessed only; Starter restricted to selection)
+      type Row = {
+        child: any;
+        parent: any;
+        healthScore: number;
+        severity: SeverityBand;
+        opportunityScore: number;
+        weakCascadeCount: number;
+        impacts: string[];
+        coreSymptom: string;
+        likelyRootCause: string;
+      };
+
+      const healthByChildId = new Map<string, number>();
+      const healthByName = new Map<string, number>();
       for (const c of children) {
-        const info = childInfoById.get(c.id)!;
+        const s = scoreByChild.get(c.id);
+        if (!s) continue;
+        const h = Math.round(Number(s.health_score ?? 0));
+        healthByChildId.set(c.id, h);
+        healthByName.set(String(c.name).trim().toLowerCase(), h);
+      }
+
+      const evaluated: Row[] = [];
+      for (const c of children) {
+        const assessed = scoreByChild.has(c.id) && (!isStarter || selectedSet.has(c.id));
+        if (!assessed) continue;
+        const healthScore = healthByChildId.get(c.id) ?? 0;
         const f = failureByChild.get(c.id);
+        const impacts = [f?.impacted_system_1, f?.impacted_system_2, f?.impacted_system_3]
+          .filter(Boolean)
+          .map((x: any) => String(x));
 
-        const rawImpacts = [
-          { sys: f?.impacted_system_1, reason: f?.impact_reason_1 },
-          { sys: f?.impacted_system_2, reason: f?.impact_reason_2 },
-          { sys: f?.impacted_system_3, reason: f?.impact_reason_3 },
-        ];
-        const cascadeImpacts: CascadeImpact[] = rawImpacts
-          .filter((x) => x.sys && x.reason)
-          .map((x) => {
-            const match = childInfoByName.get(String(x.sys).trim().toLowerCase());
-            return {
-              system: String(x.sys),
-              reason: String(x.reason),
-              score: match ? match.healthScore : null,
-            };
-          });
+        // UNCHANGED ranking formula
+        const weakCascadeCount = impacts.filter((nm) => {
+          const h = healthByName.get(nm.trim().toLowerCase());
+          return h !== undefined && h < WEAK_THRESHOLD;
+        }).length;
+        const baseScore = 100 - healthScore;
+        const opportunityScore = Math.round(baseScore * (1 + 0.15 * weakCascadeCount));
 
-        const weakCascadeCount = cascadeImpacts.filter(
-          (i) => i.score !== null && i.score < 60,
-        ).length;
-        const baseScore = 100 - info.healthScore;
-        const multiplier = 1 + 0.15 * weakCascadeCount;
-        const opportunityScore = Math.round(baseScore * multiplier);
-
-        const severity: OpportunityItem["severity"] = !info.assessed
-          ? "not_assessed"
-          : info.healthScore < 40
-            ? "critical"
-            : info.healthScore < 60
-              ? "fragile"
-              : info.healthScore < 75
-                ? "stable"
-                : "strong";
-
-        const effortLevel: OpportunityItem["effortLevel"] =
-          info.healthScore < 40 ? "High" : info.healthScore < 60 ? "Medium" : "Low";
-        const timeframe =
-          effortLevel === "High"
-            ? "90–180 days"
-            : effortLevel === "Medium"
-              ? "60–120 days"
-              : "14–60 days";
-
-        opportunities.push({
-          childSystemId: info.id,
-          code: info.code,
-          name: info.name,
-          parentCode: info.parent?.code ?? "",
-          parentName: info.parent?.name ?? "",
-          parentColorHex: info.parent?.color_hex ?? "#888880",
-          healthScore: info.healthScore,
-          trackingScore: info.trackingScore,
-          severity,
+        evaluated.push({
+          child: c,
+          parent: parentById.get(c.parent_system_id),
+          healthScore,
+          severity: severityBand(healthScore),
           opportunityScore,
+          weakCascadeCount,
+          impacts,
           coreSymptom: f?.core_symptoms ?? "",
           likelyRootCause: f?.likely_root_causes ?? "",
-          cascadeImpacts,
-          effortLevel,
-          timeframe,
-          assessed: info.assessed,
         });
       }
 
-      opportunities.sort((a, b) => {
-        if (a.assessed !== b.assessed) return a.assessed ? -1 : 1;
-        return b.opportunityScore - a.opportunityScore;
-      });
+      // ---- Biggest Impact: no backfill
+      const biggestRows = evaluated
+        .filter(
+          (r) =>
+            r.healthScore < WEAK_THRESHOLD &&
+            r.weakCascadeCount >= 1 &&
+            Number(r.child.influence_score ?? 0) >= MIN_INFLUENCE &&
+            Number(r.child.impact_magnitude ?? 0) >= MIN_MAGNITUDE,
+        )
+        .sort((a, b) => b.opportunityScore - a.opportunityScore)
+        .slice(0, MAX_FEATURED);
 
-      const tier = ((profileRes.data?.tier ?? "starter") as Tier);
+      const biggestIds = new Set(biggestRows.map((r) => r.child.id));
+
+      // ---- Quickest Wins: no backfill
+      const quickRows = evaluated
+        .filter(
+          (r) =>
+            r.child.opportunity_class === "Quick Win" &&
+            r.healthScore < QUICK_WIN_GAP_THRESHOLD &&
+            !biggestIds.has(r.child.id),
+        )
+        .sort((a, b) => {
+          const ha = HORIZON_ORDER[a.child.impact_horizon ?? ""] ?? 9;
+          const hb = HORIZON_ORDER[b.child.impact_horizon ?? ""] ?? 9;
+          if (ha !== hb) return ha - hb;
+          return b.opportunityScore - a.opportunityScore;
+        })
+        .slice(0, MAX_FEATURED);
+
+      const featured = [...biggestRows, ...quickRows];
+      const featuredIds = new Set(featured.map((r) => r.child.id));
+
+      // ---- AI copy: cached per (assessment, child); generate only what's missing
+      const copyByCode = new Map<string, CardCopy>();
+      const codeById = new Map<string, string>(children.map((c) => [c.id, c.code]));
+      for (const row of ((cachedRes as any)?.data ?? []) as any[]) {
+        const code = codeById.get(row.child_system_id);
+        if (!code) continue;
+        copyByCode.set(code, {
+          whatWeSee: row.what_we_see,
+          whyItMatters: row.why_it_matters,
+          startHere: Array.isArray(row.start_here) ? (row.start_here as string[]) : [],
+        });
+      }
+
+      const missing = featured.filter((r) => !copyByCode.has(r.child.code));
+      if (missing.length > 0) {
+        const generated = await generateOpportunityCopy(
+          assessmentId!,
+          userId,
+          companyRes?.data?.company_name ?? "this company",
+          missing.map((r) => ({
+            code: r.child.code,
+            name: r.child.name,
+            parentName: r.parent?.name ?? "",
+            healthScore: r.healthScore,
+            coreSymptom: r.coreSymptom,
+            likelyRootCause: r.likelyRootCause,
+            impacts: r.impacts,
+            quickWin: !biggestIds.has(r.child.id),
+          })),
+        );
+        if (generated.size > 0) {
+          const rows = missing
+            .filter((r) => generated.has(r.child.code))
+            .map((r) => {
+              const c = generated.get(r.child.code)!;
+              copyByCode.set(r.child.code, c);
+              return {
+                assessment_id: assessmentId!,
+                user_id: userId,
+                child_system_id: r.child.id,
+                what_we_see: c.whatWeSee,
+                why_it_matters: c.whyItMatters,
+                start_here: c.startHere,
+                model_used: "claude-sonnet-4-5-20250929",
+                generated_at: new Date().toISOString(),
+              };
+            });
+          const { error: upErr } = await supabaseAdmin
+            .from("opportunity_actions")
+            .upsert(rows, { onConflict: "assessment_id,child_system_id" });
+          if (upErr) console.error("[opportunity-copy] upsert failed:", upErr.message);
+        }
+      }
+
+      const toCard = (r: Row, badgeKey: BadgeKey): FeaturedCard => {
+        const copy = copyByCode.get(r.child.code);
+        return {
+          childSystemId: r.child.id,
+          code: r.child.code,
+          name: r.child.name,
+          parentCode: r.parent?.code ?? "",
+          parentName: r.parent?.name ?? "",
+          parentColorHex: r.parent?.color_hex ?? "#888880",
+          badgeKey,
+          whatWeSee: copy?.whatWeSee ?? r.coreSymptom,
+          whyItMatters: copy?.whyItMatters ?? r.likelyRootCause,
+          affecting: r.impacts,
+          criticalPath: pathByChild.get(r.child.id) ?? null,
+          startHere: copy?.startHere ?? [],
+        };
+      };
+
+      const biggestImpact = biggestRows.map((r, i) =>
+        toCard(r, i === 0 ? "widest_impact" : "high_impact"),
+      );
+      const quickestWins = quickRows.map((r) => toCard(r, "quick_win"));
+
+      // ---- Other opportunities: remaining evaluated systems, grouped by parent
+      const groupMap = new Map<string, OtherOpportunityGroup>();
+      for (const p of [...parents].sort((a, b) => a.sort_order - b.sort_order)) {
+        groupMap.set(p.id, {
+          parentCode: p.code,
+          parentName: p.name,
+          parentColorHex: p.color_hex ?? "#888880",
+          items: [],
+        });
+      }
+      for (const r of evaluated) {
+        if (featuredIds.has(r.child.id)) continue;
+        const g = groupMap.get(r.child.parent_system_id);
+        if (!g) continue;
+        g.items.push({
+          childSystemId: r.child.id,
+          code: r.child.code,
+          name: r.child.name,
+          severity: r.severity,
+        });
+      }
+      const otherGroups = [...groupMap.values()].filter((g) => g.items.length > 0);
+      for (const g of otherGroups) {
+        g.items.sort((a, b) => a.name.localeCompare(b.name));
+      }
+
+      // ---- Locked systems (Starter only): never scored, never ranked
+      const lockedSystems: LockedSystem[] = [];
+      const lockedCounts = new Map<string, number>();
+      if (isStarter) {
+        for (const c of [...children].sort((a, b) => a.sort_order - b.sort_order)) {
+          if (selectedSet.has(c.id)) continue;
+          const p = parentById.get(c.parent_system_id);
+          lockedSystems.push({
+            childSystemId: c.id,
+            code: c.code,
+            name: c.name,
+            parentCode: p?.code ?? "",
+            parentName: p?.name ?? "",
+            parentColorHex: p?.color_hex ?? "#888880",
+            governs: c.customer_facing_description ?? "",
+          });
+          lockedCounts.set(c.parent_system_id, (lockedCounts.get(c.parent_system_id) ?? 0) + 1);
+        }
+      }
+      const lockedTiles: LockedParentTile[] = isStarter
+        ? [...parents]
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((p) => ({
+              parentCode: p.code,
+              parentName: p.name,
+              parentColorHex: p.color_hex ?? "#888880",
+              count: lockedCounts.get(p.id) ?? 0,
+            }))
+        : [];
 
       return {
         tier,
@@ -867,11 +1187,17 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
           id: asmtRes.data.id,
           submitted_at: asmtRes.data.submitted_at,
         },
-        selectedChildIds: ((asmtRes.data as any).selected_child_ids ?? []) as string[],
-        opportunities,
+        evaluatedCount: evaluated.length,
+        totalCount: children.length,
+        biggestImpact,
+        quickestWins,
+        otherGroups,
+        lockedSystems,
+        lockedTiles,
       };
     },
   );
+
 
 // ---------------------------------------------------------------------------
 // Revenue at Risk
