@@ -1,19 +1,31 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getRevenueSystemHealth,
   generateReportNarrative,
   type RevenueSystemHealth,
   type SystemHealthSystem,
   type ChildSystemScore,
+  type ShadowThreshold,
 } from "@/lib/report.functions";
+import {
+  DRIVERS_COPY,
+  PARENT_IMPACT,
+  SHORTLIST_COPY,
+} from "@/components/reports/system-health-copy";
+import { matrixMapLink, resolveTopOpportunityLink } from "@/lib/report-links";
 
 export const Route = createFileRoute("/reports/revenue-system-health")({
   head: () => ({ meta: [{ title: "Revenue System Health — Revenue Health Visualiser" }] }),
   component: Page,
 });
+
+function shadowFlag(health: number, tracking: number, t: ShadowThreshold): boolean {
+  return health >= t.healthGte && tracking < t.trackingLt;
+}
+
 
 // ── Tokens (prototype-verbatim) ─────────────────────────────────────────────
 const T = {
