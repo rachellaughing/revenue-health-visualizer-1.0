@@ -2983,6 +2983,7 @@ export const getShadowSystems = createServerFn({ method: "POST" })
 // Roadmap Builder
 // ---------------------------------------------------------------------------
 
+
 export type RoadmapHorizon = "quick_win" | "30_days" | "90_days" | "120_days";
 
 export type RoadmapItem = {
@@ -3000,122 +3001,19 @@ export type RoadmapItem = {
   tasks: string[];
   outcomes: string[];
   kpis: string[];
+  warnings: string[];
+  included: boolean;
+  selectedTaskIndices: number[];
 };
-
-export type RoadmapSelection = { code: string; horizon: RoadmapHorizon };
 
 export type RoadmapData = {
   tier: Tier;
   assessmentId: string | null;     // null => no persistence (illustrative)
   items: RoadmapItem[];
-  selections: RoadmapSelection[];
 };
 
 const PARENT_COLOR_BY_CODE: Record<string, string> = {
   POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B",
-};
-
-// Authoritative pre-written content (from prototype) keyed by child system code.
-const ROADMAP_CONTENT: Record<string, Pick<RoadmapItem, "title" | "why" | "tasks" | "outcomes" | "kpis">> = {
-  ICP: {
-    title: "Write a one-page ICP definition",
-    why: "Your ICP score is fragile and your tracking score shows it is not operationalised. A written ICP document stops the drift.",
-    tasks: [
-      "List the 10 best customers you have ever had and identify 3 things they have in common",
-      "Define 3 firmographic must-haves and 2 hard disqualifiers",
-      "Write a one-page ICP brief — company, role, trigger, and outcome they need",
-      "Share with the sales team and test: can they use it to qualify the next 5 inbound leads?",
-    ],
-    outcomes: ["Consistent qualification across the team", "Fewer poor-fit customers entering the funnel", "Shorter sales cycles on average"],
-    kpis: ["% of new deals matching ICP criteria", "Close rate on ICP-matched vs non-matched leads", "Time to qualify inbound leads"],
-  },
-  TST: {
-    title: "Collect 3 outcome-specific testimonials",
-    why: "You have happy customers but limited documented proof. Three specific outcome testimonials would materially improve conversion.",
-    tasks: [
-      "Identify 3 customers with measurable outcomes (revenue impact, time saved, retention improvement)",
-      "Send a structured request: ask for the specific before/after result, not general satisfaction",
-      "Format each as a one-paragraph case study with the outcome in the first sentence",
-      "Add to website, sales deck, and email sequences",
-    ],
-    outcomes: ["Stronger social proof in sales conversations", "Reduced buyer uncertainty at evaluation stage", "More referrals from case study customers"],
-    kpis: ["Number of case studies on website", "Sales deck usage rate", "Referral rate from featured customers"],
-  },
-  FC: {
-    title: "Build a basic revenue forecast model",
-    why: "You cannot make confident growth decisions without a forecast. Even a simple model beats running on instinct.",
-    tasks: [
-      "Define your 3 leading indicators (pipeline stage, ACV, close rate by stage)",
-      "Build a simple weighted pipeline model in a spreadsheet or your CRM",
-      "Run a monthly forecast meeting — 30 mins, same format each time",
-      "Track forecast accuracy vs actuals for 2 months before declaring it reliable",
-    ],
-    outcomes: ["Confident revenue projections for board and planning", "Early warning when pipeline is thin", "Reduced end-of-quarter scramble"],
-    kpis: ["Forecast vs actual variance (target: within 15%)", "Pipeline coverage ratio", "Time spent on manual reporting"],
-  },
-  SP: {
-    title: "Document the sales process in one page",
-    why: "Your sales process works when the right person runs it. It needs to work when any qualified person runs it.",
-    tasks: [
-      "Map the 5-7 stages of your current sales process as it actually happens (not how it should)",
-      "Define the entry criteria for each stage — what has to be true to advance?",
-      "Identify the 2-3 actions the founder takes that no one else does — these are handoff risks",
-      "Write it up. One page. Test it: have an AE walk a new deal through it without asking you",
-    ],
-    outcomes: ["Consistent close rates across reps", "Deals advance without founder involvement", "Reliable stage-based forecasting"],
-    kpis: ["Close rate by rep (should converge)", "Average days per stage", "Deals closed without founder involvement"],
-  },
-  RET: {
-    title: "Define 3 early warning signals for churn",
-    why: "Retention is your most critical gap. You cannot fix churn you cannot see coming.",
-    tasks: [
-      "Look at your last 5 churned customers — what did they have in common 60 days before they left?",
-      "Define 3 measurable signals (login frequency drop, support tickets, NPS decline, etc.)",
-      "Assign a CS owner to monitor these weekly per account",
-      "Create a simple escalation protocol: what happens when a signal fires?",
-    ],
-    outcomes: ["Earlier intervention before customers decide to leave", "Reduced reactive firefighting", "Improved retention rate over 2 quarters"],
-    kpis: ["Early warning signal hit rate", "Save rate on at-risk accounts", "Net revenue retention"],
-  },
-  COB: {
-    title: "Build a documented onboarding playbook",
-    why: "Inconsistent onboarding creates inconsistent outcomes which creates unpredictable retention.",
-    tasks: [
-      "Map your current onboarding steps for your top 3 customer types",
-      "Identify the moments where onboarding currently varies by rep or by customer",
-      "Define a standard 30-day success milestone for each customer type",
-      "Document the playbook and pilot with the next 3 new customers",
-      "Measure: time to first value, completion rate, 90-day retention of pilot cohort",
-    ],
-    outcomes: ["Consistent time-to-value across customers", "Reduced CS time per onboarding", "Higher 90-day retention"],
-    kpis: ["Average time to first value", "Onboarding completion rate", "90-day retention by cohort"],
-  },
-  KPI: {
-    title: "Define and distribute a revenue KPI framework",
-    why: "Your tracking score shows KPIs exist but are not embedded operationally. The team needs to own specific numbers.",
-    tasks: [
-      "Define 8-12 revenue KPIs across the 5 systems — no more",
-      "Assign an owner to each KPI (not the founder)",
-      "Build or identify the data source for each KPI",
-      "Run a weekly 30-min revenue review — each owner reports their number",
-      "After 60 days: which KPIs are being ignored? Fix or remove them",
-    ],
-    outcomes: ["Revenue visibility distributed across the team", "Earlier detection of performance gaps", "Reduced founder reporting burden"],
-    kpis: ["Number of KPIs with assigned non-founder owners", "Review meeting attendance", "Time founder spends on reporting"],
-  },
-  DG: {
-    title: "Build a demand generation engine that runs without the founder",
-    why: "Current demand generation relies too heavily on founder relationships and network. You need a repeatable system.",
-    tasks: [
-      "Audit current pipeline sources — what % comes from founder relationships vs scalable channels?",
-      "Pick 2 channels to invest in that do not require founder involvement",
-      "Define 90-day targets for each channel",
-      "Assign a non-founder owner to each channel with a budget and measurement framework",
-      "After 90 days: cut what is not working, double down on what is",
-    ],
-    outcomes: ["Pipeline that grows without founder activity", "Diversified lead sources", "Predictable inbound volume"],
-    kpis: ["% of pipeline from non-founder sources", "Cost per qualified lead by channel", "Channel conversion rates"],
-  },
 };
 
 // Illustrative items shown when no real assessment data exists
@@ -3143,28 +3041,35 @@ function effortFor(health: number): "low" | "medium" | "high" {
   return "high";
 }
 
-function defaultContent(name: string, parent: string, failure?: { core_symptoms?: string | null; likely_root_causes?: string | null }) {
-  const symptoms = failure?.core_symptoms ?? `${name} is not yet operating at full strength.`;
-  const causes = failure?.likely_root_causes ?? `Your ${name} score indicates structural gaps that need attention.`;
+type RecommendedActionRow = {
+  child_system_id: string;
+  title: string | null;
+  why: string | null;
+  task_1: string | null; task_2: string | null; task_3: string | null;
+  task_4: string | null; task_5: string | null;
+  outcome_1: string | null; outcome_2: string | null; outcome_3: string | null;
+  kpi_1: string | null; kpi_2: string | null; kpi_3: string | null;
+  warning_1: string | null; warning_2: string | null;
+  warning_3: string | null; warning_4: string | null;
+};
+
+const REC_COLUMNS =
+  "child_system_id,title,why,task_1,task_2,task_3,task_4,task_5," +
+  "outcome_1,outcome_2,outcome_3,kpi_1,kpi_2,kpi_3," +
+  "warning_1,warning_2,warning_3,warning_4";
+
+function compact(values: (string | null | undefined)[]): string[] {
+  return values.map((v) => (v ?? "").trim()).filter(Boolean);
+}
+
+function contentFromRow(row: RecommendedActionRow) {
   return {
-    title: `Improve ${name}`,
-    why: causes,
-    tasks: [
-      `Audit your current ${name.toLowerCase()} approach end to end`,
-      `Identify the 2–3 highest-impact gaps and assign owners`,
-      `Define what good looks like — written, one page, sharable`,
-      `Set a 30-day checkpoint to measure progress`,
-    ],
-    outcomes: [
-      `A clear, documented ${name.toLowerCase()} approach`,
-      `Reduced founder involvement in day-to-day execution`,
-      `Measurable progress against ${parent} system goals`,
-    ],
-    kpis: [
-      `${name} health score (target: +15 points in 90 days)`,
-      `Owner accountability rate`,
-      `Cycle time for ${name.toLowerCase()} decisions`,
-    ],
+    title: (row.title ?? "").trim(),
+    why: (row.why ?? "").trim(),
+    tasks: compact([row.task_1, row.task_2, row.task_3, row.task_4, row.task_5]),
+    outcomes: compact([row.outcome_1, row.outcome_2, row.outcome_3]),
+    kpis: compact([row.kpi_1, row.kpi_2, row.kpi_3]),
+    warnings: compact([row.warning_1, row.warning_2, row.warning_3, row.warning_4]),
   };
 }
 
@@ -3191,38 +3096,39 @@ export const getRoadmap = createServerFn({ method: "POST" })
       .maybeSingle();
 
     // Always load child_systems so we can map illustrative codes -> uuids
-    const [childRes, parentRes] = await Promise.all([
+    const [childRes, parentRes, recRes] = await Promise.all([
       (supabaseAdmin as any).schema("revhealth2").from("child_systems").select("id,code,name,parent_system_id"),
       (supabaseAdmin as any).schema("revhealth2").from("parent_systems").select("id,code,name,color_hex"),
+      (supabaseAdmin as any).schema("revhealth2").from("recommended_actions").select(REC_COLUMNS),
     ]);
     const parents: any[] = parentRes.data ?? [];
     const parentById = new Map<string, any>(parents.map((p: any) => [p.id, p]));
     const children: any[] = childRes.data ?? [];
+    const childById = new Map<string, any>(children.map((c: any) => [c.id, c]));
     const childByCode = new Map<string, any>(children.map((c: any) => [c.code, c]));
+    const recByChildId = new Map<string, RecommendedActionRow>(
+      ((recRes.data ?? []) as RecommendedActionRow[]).map((r) => [r.child_system_id, r]),
+    );
 
     let items: RoadmapItem[] = [];
     let assessmentId: string | null = null;
 
     if (latest) {
       assessmentId = latest.id;
-      const [scoresRes, failureRes] = await Promise.all([
-        supabaseAdmin
-          .from("assessment_scores")
-          .select("child_system_id,health_score,tracking_score,severity")
-          .eq("assessment_id", latest.id),
-        (supabaseAdmin as any).schema("revhealth2").from("failure_map").select("child_system_id,core_symptoms,likely_root_causes"),
-      ]);
-      const failureByChild = new Map<string, any>();
-      for (const f of (failureRes.data ?? [])) failureByChild.set(f.child_system_id, f);
+      const { data: scores } = await supabaseAdmin
+        .from("assessment_scores")
+        .select("child_system_id,health_score,tracking_score,severity")
+        .eq("assessment_id", latest.id);
 
-      for (const s of (scoresRes.data ?? [])) {
-        const child = children.find((c: any) => c.id === s.child_system_id);
+      for (const s of (scores ?? [])) {
+        const child = childById.get(s.child_system_id);
         if (!child) continue;
         const parent = parentById.get(child.parent_system_id);
         if (!parent) continue;
+        const rec = recByChildId.get(child.id);
+        if (!rec) continue; // no authored content => not shown
         const health = Number(s.health_score ?? 0);
         const tracking = Number(s.tracking_score ?? 0);
-        const content = ROADMAP_CONTENT[child.code] ?? defaultContent(child.name, parent.name, failureByChild.get(child.id));
         items.push({
           code: child.code,
           childSystemId: child.id,
@@ -3233,7 +3139,9 @@ export const getRoadmap = createServerFn({ method: "POST" })
           healthScore: Math.round(health),
           effort: effortFor(health),
           horizon: horizonFor(health, tracking),
-          ...content,
+          included: true,
+          selectedTaskIndices: [],
+          ...contentFromRow(rec),
         });
       }
     }
@@ -3248,8 +3156,8 @@ export const getRoadmap = createServerFn({ method: "POST" })
       };
       for (const ill of ILLUSTRATIVE_CODES) {
         const child = childByCode.get(ill.code);
-        const content = ROADMAP_CONTENT[ill.code];
-        if (!content) continue;
+        const rec = child ? recByChildId.get(child.id) : undefined;
+        if (!rec) continue;
         items.push({
           code: ill.code,
           childSystemId: child?.id ?? "",
@@ -3260,82 +3168,97 @@ export const getRoadmap = createServerFn({ method: "POST" })
           healthScore: ill.healthScore,
           effort: effortFor(ill.healthScore),
           horizon: fallbackHorizon[ill.code] ?? "30_days",
-          ...content,
+          included: true,
+          selectedTaskIndices: [],
+          ...contentFromRow(rec),
         });
       }
     }
 
-    // Saved selections (only if we have an assessment)
-    let selections: RoadmapSelection[] = [];
+    // Saved inclusion / task selections (only if we have an assessment)
     if (assessmentId) {
       const { data: saved } = await supabaseAdmin
-        .from("roadmap_selections")
-        .select("child_system_id,horizon")
+        .from("roadmap_task_selections")
+        .select("child_system_id,included,selected_task_indices")
         .eq("assessment_id", assessmentId)
         .eq("user_id", userId);
-      const codeByChildId = new Map<string, string>(children.map((c: any) => [c.id, c.code]));
-      selections = (saved ?? [])
-        .map((r: any) => {
-          const code = codeByChildId.get(r.child_system_id);
-          if (!code) return null;
-          return { code, horizon: r.horizon as RoadmapHorizon };
-        })
-        .filter(Boolean) as RoadmapSelection[];
+      const savedByChild = new Map<string, any>((saved ?? []).map((r: any) => [r.child_system_id, r]));
+      items = items.map((it) => {
+        const row = savedByChild.get(it.childSystemId);
+        if (!row) return it;
+        return {
+          ...it,
+          included: row.included !== false,
+          selectedTaskIndices: ((row.selected_task_indices ?? []) as number[])
+            .filter((i) => Number.isInteger(i) && i >= 0 && i < it.tasks.length),
+        };
+      });
     }
 
-    return { tier, assessmentId, items, selections };
+    return { tier, assessmentId, items };
   });
 
-const saveSchema = z.object({
+async function assertAssessmentOwner(assessmentId: string, userId: string) {
+  const { data: asmt, error } = await supabaseAdmin
+    .from("assessments")
+    .select("user_id")
+    .eq("id", assessmentId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!asmt || asmt.user_id !== userId) throw new Error("Forbidden");
+}
+
+const inclusionSchema = z.object({
   assessmentId: z.string().uuid(),
   childSystemId: z.string().uuid(),
-  horizon: z.enum(["quick_win", "30_days", "90_days", "120_days"]),
+  included: z.boolean(),
 });
 
-export const saveRoadmapSelection = createServerFn({ method: "POST" })
+export const setRoadmapInclusion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => saveSchema.parse(d))
+  .inputValidator((d: unknown) => inclusionSchema.parse(d))
   .handler(async ({ data, context }) => {
-    // Ownership check: the assessment must belong to the caller.
-    const { data: asmt, error: asmtErr } = await supabaseAdmin
-      .from("assessments")
-      .select("user_id")
-      .eq("id", data.assessmentId)
-      .maybeSingle();
-    if (asmtErr) throw new Error(asmtErr.message);
-    if (!asmt || asmt.user_id !== context.userId) throw new Error("Forbidden");
-
-    const now = new Date().toISOString();
+    await assertAssessmentOwner(data.assessmentId, context.userId);
     const { error } = await supabaseAdmin
-      .from("roadmap_selections")
+      .from("roadmap_task_selections")
       .upsert(
         {
           assessment_id: data.assessmentId,
           user_id: context.userId,
           child_system_id: data.childSystemId,
-          horizon: data.horizon,
-          selected_at: now,
-          updated_at: now,
+          included: data.included,
+          updated_at: new Date().toISOString(),
         },
-        { onConflict: "assessment_id,child_system_id,horizon" },
+        { onConflict: "assessment_id,child_system_id" },
       );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
 
-export const deleteRoadmapSelection = createServerFn({ method: "POST" })
+const tasksSchema = z.object({
+  assessmentId: z.string().uuid(),
+  childSystemId: z.string().uuid(),
+  taskIndices: z.array(z.number().int().min(0).max(4)).max(3),
+});
+
+export const setRoadmapTasks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => saveSchema.parse(d))
+  .inputValidator((d: unknown) => tasksSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await assertAssessmentOwner(data.assessmentId, context.userId);
+    const unique = Array.from(new Set(data.taskIndices)).sort((a, b) => a - b);
     const { error } = await supabaseAdmin
-      .from("roadmap_selections")
-      .delete()
-      .match({
-        assessment_id: data.assessmentId,
-        user_id: context.userId,
-        child_system_id: data.childSystemId,
-        horizon: data.horizon,
-      });
+      .from("roadmap_task_selections")
+      .upsert(
+        {
+          assessment_id: data.assessmentId,
+          user_id: context.userId,
+          child_system_id: data.childSystemId,
+          selected_task_indices: unique,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "assessment_id,child_system_id" },
+      );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
