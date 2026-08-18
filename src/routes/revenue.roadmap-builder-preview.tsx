@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import type { RoadmapItem, RoadmapSelection, RoadmapHorizon } from "@/lib/report.functions";
+import type { RoadmapItem } from "@/lib/report.functions";
 import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
-import { T, HORIZONS, HorizonSection } from "./revenue.roadmap-builder";
+import { T, HORIZONS, HorizonSection, MAX_TASKS } from "./revenue.roadmap-builder";
 
 export const Route = createFileRoute("/revenue/roadmap-builder-preview")({
   head: () => ({ meta: [{ title: "Roadmap Builder (Sample) — Revenue Health Visualiser™" }] }),
@@ -10,7 +10,9 @@ export const Route = createFileRoute("/revenue/roadmap-builder-preview")({
 });
 
 // Hardcoded illustrative sample — not any real user's data.
-const ILLUSTRATIVE_ITEMS: RoadmapItem[] = [
+type SampleItem = Omit<RoadmapItem, "warnings" | "included" | "selectedTaskIndices">;
+
+const SAMPLE_ITEMS: SampleItem[] = [
   {
     code: "CONV-01", childSystemId: "ill-conv-01", name: "Pricing Authority", parent: "Conversion", parentCode: "CONV",
     color: T.sys.CONV, healthScore: 38, effort: "low", horizon: "quick_win",
@@ -110,21 +112,40 @@ function NinetyDayFocusCard({ item, rank }: { item: RoadmapItem; rank: number })
   );
 }
 
-function Page() {
-  const [selections, setSelections] = useState<RoadmapSelection[]>(
-    ILLUSTRATIVE_ITEMS.slice(0, 5).map((i) => ({ code: i.code, horizon: i.horizon })),
-  );
+const ILLUSTRATIVE_ITEMS: RoadmapItem[] = SAMPLE_ITEMS.map((i, idx) => ({
+  ...i,
+  warnings: [
+    "Teams often stop at documenting the process and never change how the work actually runs.",
+    "The first version usually reflects how leadership thinks it works, not how it works.",
+    "Progress stalls when no single owner is accountable for the change.",
+  ],
+  included: true,
+  selectedTaskIndices: idx < 5 ? [0, 1] : [],
+}));
 
-  function toggleSelection(item: RoadmapItem, horizonId: RoadmapHorizon) {
-    const exists = selections.find((s) => s.code === item.code && s.horizon === horizonId);
-    if (exists) {
-      setSelections(selections.filter((s) => !(s.code === item.code && s.horizon === horizonId)));
-    } else {
-      const horizon = HORIZONS.find((h) => h.id === horizonId)!;
-      const currentCount = selections.filter((s) => s.horizon === horizonId).length;
-      if (currentCount >= horizon.max) return;
-      setSelections([...selections, { code: item.code, horizon: horizonId }]);
-    }
+function Page() {
+  const [items, setItems] = useState<RoadmapItem[]>(ILLUSTRATIVE_ITEMS);
+
+  function toggleInclusion(item: RoadmapItem) {
+    setItems((prev) =>
+      prev.map((i) => (i.code === item.code ? { ...i, included: !i.included } : i)),
+    );
+  }
+
+  function toggleTask(item: RoadmapItem, index: number) {
+    setItems((prev) =>
+      prev.map((i) => {
+        if (i.code !== item.code) return i;
+        const has = i.selectedTaskIndices.includes(index);
+        if (!has && i.selectedTaskIndices.length >= MAX_TASKS) return i;
+        return {
+          ...i,
+          selectedTaskIndices: has
+            ? i.selectedTaskIndices.filter((n) => n !== index)
+            : [...i.selectedTaskIndices, index].sort((a, b) => a - b),
+        };
+      }),
+    );
   }
 
   return (
@@ -161,9 +182,9 @@ function Page() {
           <HorizonSection
             key={horizon.id}
             horizon={horizon}
-            items={ILLUSTRATIVE_ITEMS}
-            selections={selections}
-            onToggle={toggleSelection}
+            items={items}
+            onToggleInclusion={toggleInclusion}
+            onToggleTask={toggleTask}
           />
         ))}
 
