@@ -2272,17 +2272,35 @@ export const getChildSystemActions = createServerFn({ method: "POST" })
       };
     }
 
-    // Fallback: Roadmap Builder's existing static content.
-    const fb = ROADMAP_CONTENT[child.code] ?? defaultContent(child.name, parentName, failure);
+    // Fallback: the authored recommended-actions library.
+    const { data: recRow } = await (supabaseAdmin as any)
+      .schema("revhealth2")
+      .from("recommended_actions")
+      .select("why,task_1,task_2,task_3")
+      .eq("child_system_id", child.id)
+      .maybeSingle();
+    const fbTasks = [recRow?.task_1, recRow?.task_2, recRow?.task_3]
+      .map((t: string | null | undefined) => (t ?? "").trim())
+      .filter(Boolean);
     return {
       childSystemId: child.id,
       code: child.code,
       name: child.name,
       source: "fallback",
       whatWeSee: failure.core_symptoms ?? `${child.name} is not yet operating at full strength.`,
-      whyItMatters: fb.why,
-      startHere: fb.tasks.slice(0, 3),
+      whyItMatters:
+        (recRow?.why ?? "").trim() ||
+        failure.likely_root_causes ||
+        `Your ${child.name} score indicates structural gaps that need attention.`,
+      startHere: fbTasks.length
+        ? fbTasks
+        : [
+            `Audit your current ${child.name.toLowerCase()} approach end to end`,
+            `Identify the 2–3 highest-impact gaps and assign owners`,
+            `Set a 30-day checkpoint to measure progress`,
+          ],
     };
+
   });
 
 // ============================================================================
