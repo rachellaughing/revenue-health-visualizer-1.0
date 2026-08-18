@@ -87,7 +87,7 @@ const SAMPLE_ITEMS: SampleItem[] = [
   },
 ];
 
-const NINETY_DAY_FOCUS = ILLUSTRATIVE_ITEMS.filter((i) =>
+const NINETY_DAY_FOCUS = SAMPLE_ITEMS.filter((i) =>
   ["CONV-01", "VIS-02", "LFC-03"].includes(i.code),
 );
 
