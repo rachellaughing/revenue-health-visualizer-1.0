@@ -1068,6 +1068,47 @@ export type Database = {
           },
         ]
       }
+      roadmap_task_selections: {
+        Row: {
+          assessment_id: string
+          child_system_id: string
+          created_at: string
+          id: string
+          included: boolean
+          selected_task_indices: number[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assessment_id: string
+          child_system_id: string
+          created_at?: string
+          id?: string
+          included?: boolean
+          selected_task_indices?: number[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assessment_id?: string
+          child_system_id?: string
+          created_at?: string
+          id?: string
+          included?: boolean
+          selected_task_indices?: number[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_task_selections_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scoring_config: {
         Row: {
           created_at: string
