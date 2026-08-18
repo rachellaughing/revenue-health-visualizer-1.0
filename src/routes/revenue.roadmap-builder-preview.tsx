@@ -91,7 +91,7 @@ const NINETY_DAY_FOCUS = SAMPLE_ITEMS.filter((i) =>
   ["CONV-01", "VIS-02", "LFC-03"].includes(i.code),
 );
 
-function NinetyDayFocusCard({ item, rank }: { item: RoadmapItem; rank: number }) {
+function NinetyDayFocusCard({ item, rank }: { item: SampleItem; rank: number }) {
   return (
     <div style={{
       background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderLeft: `3px solid ${item.color}`,
