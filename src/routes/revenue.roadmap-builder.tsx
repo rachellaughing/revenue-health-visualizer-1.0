@@ -1,14 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getRoadmap,
-  saveRoadmapSelection,
-  deleteRoadmapSelection,
+  setRoadmapInclusion,
+  setRoadmapTasks,
   type RoadmapItem,
   type RoadmapHorizon,
-  type RoadmapSelection,
 } from "@/lib/report.functions";
 import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 
@@ -24,28 +23,35 @@ export const T = {
   sys: { POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B" },
 };
 
-export const HORIZONS: { id: RoadmapHorizon; label: string; sub: string; color: string; max: number }[] = [
-  { id: "quick_win", label: "Quick Wins", sub: "Under 30 days, low effort", color: T.sys.AUTH, max: 3 },
-  { id: "30_days", label: "Next 30 Days", sub: "Foundational fixes", color: T.sys.VIS, max: 3 },
-  { id: "90_days", label: "30-90 Days", sub: "Structural improvements", color: T.sys.LFC, max: 2 },
-  { id: "120_days", label: "90-120 Days", sub: "Strategic capability building", color: T.sys.CONV, max: 2 },
+export const MAX_TASKS = 3;
+
+export const WATCH_OUT_CLOSING_LINE =
+  "Which of these apply to your business? That's what a Diagnostic finds out.";
+
+export const HORIZONS: { id: RoadmapHorizon; label: string; sub: string; color: string }[] = [
+  { id: "quick_win", label: "Quick Wins", sub: "Under 30 days, low effort", color: T.sys.AUTH },
+  { id: "30_days", label: "Next 30 Days", sub: "Foundational fixes", color: T.sys.VIS },
+  { id: "90_days", label: "30-90 Days", sub: "Structural improvements", color: T.sys.LFC },
+  { id: "120_days", label: "90-120 Days", sub: "Strategic capability building", color: T.sys.CONV },
 ];
 
-export function exportToCSV(selections: RoadmapSelection[], items: RoadmapItem[]) {
+export function exportToCSV(items: RoadmapItem[]) {
   const rows: string[][] = [
     ["Time Horizon", "System", "Parent System", "Initiative", "Task", "Expected Outcome", "KPI to Track"],
   ];
-  selections.forEach((sel) => {
-    const item = items.find((i) => i.code === sel.code && i.horizon === sel.horizon);
-    if (!item) return;
-    const horizonLabel = HORIZONS.find((h) => h.id === sel.horizon)?.label || sel.horizon;
-    item.tasks.forEach((task, ti) => {
-      rows.push([
-        horizonLabel, item.name, item.parent, item.title, task,
-        item.outcomes[0] || "", item.kpis[ti] || item.kpis[0] || "",
-      ]);
+  items
+    .filter((item) => item.included && item.selectedTaskIndices.length > 0)
+    .forEach((item) => {
+      const horizonLabel = HORIZONS.find((h) => h.id === item.horizon)?.label || item.horizon;
+      [...item.selectedTaskIndices].sort((a, b) => a - b).forEach((ti) => {
+        const task = item.tasks[ti];
+        if (!task) return;
+        rows.push([
+          horizonLabel, item.name, item.parent, item.title, task,
+          item.outcomes[0] || "", item.kpis[ti] || item.kpis[0] || "",
+        ]);
+      });
     });
-  });
   const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
@@ -54,32 +60,87 @@ export function exportToCSV(selections: RoadmapSelection[], items: RoadmapItem[]
   URL.revokeObjectURL(url);
 }
 
-export function ItemChip({ item, selected, onToggle, disabled }: { item: RoadmapItem; selected: boolean; onToggle: () => void; disabled: boolean }) {
+export function FramingBanner() {
   return (
-    <button
-      onClick={() => !(disabled && !selected) && onToggle()}
-      style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "8px 14px", borderRadius: 20,
-        border: `1.5px solid ${selected ? item.color : "rgba(0,0,0,0.1)"}`,
-        background: selected ? item.color + "15" : T.white,
-        color: selected ? item.color : T.ink,
-        fontFamily: "Inter", fontSize: 12,
-        fontWeight: selected ? 600 : 400,
-        cursor: disabled && !selected ? "not-allowed" : "pointer",
-        opacity: disabled && !selected ? 0.4 : 1,
-        transition: "all 0.15s", whiteSpace: "nowrap",
-      }}
-    >
-      <div style={{ width: 6, height: 6, borderRadius: "50%", background: item.color, flexShrink: 0 }} />
-      {item.name}
-      {selected && <span style={{ fontSize: 10, marginLeft: 2 }}>×</span>}
-    </button>
+    <div style={{
+      background: T.offWhite, border: "1px solid rgba(0,0,0,0.07)",
+      borderRadius: 14, padding: "20px 24px", marginBottom: 28,
+    }}>
+      <p style={{ fontFamily: "Inter", fontSize: 13, color: T.ink, margin: "0 0 6px", lineHeight: 1.65 }}>
+        This roadmap is built from the standard playbook for each system — the same starting point every business in your position gets.
+      </p>
+      <p style={{ fontFamily: "Inter", fontSize: 13, color: T.mid, margin: "0 0 12px", lineHeight: 1.65 }}>
+        A Revenue Health Diagnostic™ roadmap is built from your actual data, your team, and your constraints, not a template.
+      </p>
+      <a href="/diagnostic" style={{
+        fontFamily: "Inter", fontSize: 12, fontWeight: 700, color: T.teal, textDecoration: "none",
+      }}>
+        See what a Diagnostic roadmap includes →
+      </a>
+    </div>
   );
 }
 
-export function SelectedItemDetail({ item }: { item: RoadmapItem }) {
+export function WatchOutFor({ warnings, color }: { warnings: string[]; color: string }) {
+  if (warnings.length === 0) return null;
+  return (
+    <div style={{
+      marginTop: 16, padding: "14px 16px",
+      background: T.offWhite, borderLeft: `2px solid ${color}40`, borderRadius: 6,
+    }}>
+      <div style={{
+        fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid,
+        letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10,
+      }}>
+        Watch out for
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+        {warnings.map((w, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+            <span style={{ color: T.mid, fontSize: 12, lineHeight: 1.6, flexShrink: 0 }}>—</span>
+            <p style={{ fontSize: 12, fontFamily: "Inter", color: T.ink, lineHeight: 1.6, margin: 0 }}>{w}</p>
+          </div>
+        ))}
+      </div>
+      <p style={{
+        fontSize: 12, fontFamily: "Inter", color: T.mid, lineHeight: 1.6,
+        margin: "12px 0 0", fontStyle: "italic",
+      }}>
+        {WATCH_OUT_CLOSING_LINE}
+      </p>
+    </div>
+  );
+}
+
+export function SystemCard({
+  item, onToggleInclusion, onToggleTask,
+}: {
+  item: RoadmapItem;
+  onToggleInclusion: (item: RoadmapItem) => void;
+  onToggleTask: (item: RoadmapItem, index: number) => void;
+}) {
   const [tab, setTab] = useState<"tasks" | "outcomes" | "kpis">("tasks");
+  const atMax = item.selectedTaskIndices.length >= MAX_TASKS;
+
+  if (!item.included) {
+    return (
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+        padding: "12px 18px", marginBottom: 12, borderRadius: 10,
+        background: T.offWhite, border: "1px dashed rgba(0,0,0,0.1)",
+      }}>
+        <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
+          <span style={{ fontWeight: 600 }}>{item.name}</span> — removed from your roadmap
+        </div>
+        <button onClick={() => onToggleInclusion(item)} style={{
+          background: "transparent", border: `1px solid ${T.mid}40`, borderRadius: 8,
+          padding: "5px 12px", fontFamily: "Inter", fontSize: 11, fontWeight: 600,
+          color: T.ink, cursor: "pointer",
+        }}>Add back</button>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       background: T.white, border: `1px solid ${item.color}30`,
@@ -89,19 +150,30 @@ export function SelectedItemDetail({ item }: { item: RoadmapItem }) {
       <div style={{
         padding: "14px 18px", background: item.color + "08",
         borderBottom: `1px solid ${item.color}20`,
-        display: "flex", alignItems: "center", gap: 10,
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
       }}>
-        <div style={{ width: 8, height: 8, borderRadius: "50%", background: item.color }} />
-        <div>
-          <div style={{ fontSize: 13, fontFamily: "Inter", fontWeight: 600, color: T.ink }}>{item.title}</div>
-          <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, marginTop: 1 }}>{item.parent} System</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 13, fontFamily: "Inter", fontWeight: 600, color: T.ink }}>{item.title}</div>
+            <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, marginTop: 1 }}>
+              {item.name} · {item.parent} System
+            </div>
+          </div>
         </div>
+        <button onClick={() => onToggleInclusion(item)} style={{
+          background: "transparent", border: "none", cursor: "pointer",
+          fontFamily: "Inter", fontSize: 11, fontWeight: 600, color: T.mid,
+          textDecoration: "underline", whiteSpace: "nowrap",
+        }}>Remove from roadmap</button>
       </div>
+
       <div style={{ padding: "12px 18px", borderBottom: `1px solid ${T.offWhite}` }}>
         <p style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>
           {item.why}
         </p>
       </div>
+
       <div style={{ display: "flex", borderBottom: `1px solid ${T.offWhite}` }}>
         {(["tasks", "outcomes", "kpis"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} style={{
@@ -116,21 +188,51 @@ export function SelectedItemDetail({ item }: { item: RoadmapItem }) {
           </button>
         ))}
       </div>
+
       <div style={{ padding: "14px 18px" }}>
         {tab === "tasks" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {item.tasks.map((task, i) => (
-              <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: "50%", flexShrink: 0,
-                  background: item.color + "18", border: `1.5px solid ${item.color}40`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: item.color,
-                }}>{i + 1}</div>
-                <p style={{ fontSize: 12, fontFamily: "Inter", color: T.ink, lineHeight: 1.6, margin: 0 }}>{task}</p>
+          <>
+            <div style={{
+              fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid,
+              letterSpacing: "0.1em", marginBottom: 10,
+            }}>
+              COMMIT TO 2–3 TASKS ({item.selectedTaskIndices.length}/{MAX_TASKS} SELECTED)
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {item.tasks.map((task, i) => {
+                const checked = item.selectedTaskIndices.includes(i);
+                const disabled = atMax && !checked;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => !disabled && onToggleTask(item, i)}
+                    style={{
+                      display: "flex", gap: 10, alignItems: "flex-start", textAlign: "left",
+                      background: checked ? item.color + "0D" : "transparent",
+                      border: `1px solid ${checked ? item.color + "40" : "transparent"}`,
+                      borderRadius: 8, padding: "8px 10px",
+                      cursor: disabled ? "not-allowed" : "pointer",
+                      opacity: disabled ? 0.45 : 1,
+                    }}
+                  >
+                    <div style={{
+                      width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                      background: checked ? item.color : "transparent",
+                      border: `1.5px solid ${checked ? item.color : "rgba(0,0,0,0.2)"}`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: T.white, fontSize: 11, fontWeight: 700,
+                    }}>{checked ? "✓" : ""}</div>
+                    <p style={{ fontSize: 12, fontFamily: "Inter", color: T.ink, lineHeight: 1.6, margin: 0 }}>{task}</p>
+                  </button>
+                );
+              })}
+            </div>
+            {atMax && (
+              <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, marginTop: 8, fontStyle: "italic" }}>
+                Maximum {MAX_TASKS} tasks selected. Deselect one to choose another.
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
         {tab === "outcomes" && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -152,23 +254,23 @@ export function SelectedItemDetail({ item }: { item: RoadmapItem }) {
             ))}
           </div>
         )}
+
+        <WatchOutFor warnings={item.warnings} color={item.color} />
       </div>
     </div>
   );
 }
 
 export function HorizonSection({
-  horizon, items, selections, onToggle,
+  horizon, items, onToggleInclusion, onToggleTask,
 }: {
   horizon: typeof HORIZONS[number];
   items: RoadmapItem[];
-  selections: RoadmapSelection[];
-  onToggle: (item: RoadmapItem, h: RoadmapHorizon) => void;
+  onToggleInclusion: (item: RoadmapItem) => void;
+  onToggleTask: (item: RoadmapItem, index: number) => void;
 }) {
   const horizonItems = items.filter((i) => i.horizon === horizon.id);
-  const selected = selections.filter((s) => s.horizon === horizon.id);
-  const selectedItems = horizonItems.filter((i) => selected.some((s) => s.code === i.code));
-  const atMax = selected.length >= horizon.max;
+  const includedCount = horizonItems.filter((i) => i.included).length;
 
   return (
     <div style={{
@@ -179,64 +281,32 @@ export function HorizonSection({
       <div style={{
         padding: "16px 22px", background: horizon.color + "08",
         borderBottom: `1px solid ${horizon.color}20`,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: horizon.color }} />
           <span style={{ fontSize: 14, fontFamily: "Inter", fontWeight: 700, color: T.ink }}>{horizon.label}</span>
           <span style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>— {horizon.sub}</span>
         </div>
-        <div style={{
-          fontSize: 11, fontFamily: "Inter", fontWeight: 600,
-          color: selected.length === horizon.max ? horizon.color : T.mid,
-        }}>
-          {selected.length}/{horizon.max} selected
+        <div style={{ fontSize: 11, fontFamily: "Inter", fontWeight: 600, color: T.mid, whiteSpace: "nowrap" }}>
+          {includedCount} {includedCount === 1 ? "system" : "systems"}
         </div>
       </div>
 
       <div style={{ padding: "18px 22px" }}>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 10 }}>
-            SELECT UP TO {horizon.max}
-          </div>
-          {horizonItems.length === 0 ? (
-            <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, fontStyle: "italic" }}>
-              No initiatives mapped to this horizon yet.
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {horizonItems.map((item) => (
-                <ItemChip
-                  key={item.code}
-                  item={item}
-                  selected={selected.some((s) => s.code === item.code)}
-                  onToggle={() => onToggle(item, horizon.id)}
-                  disabled={atMax && !selected.some((s) => s.code === item.code)}
-                />
-              ))}
-            </div>
-          )}
-          {atMax && (
-            <div style={{ fontSize: 11, fontFamily: "Inter", color: horizon.color, marginTop: 8, fontStyle: "italic" }}>
-              Maximum {horizon.max} selected for this horizon. Deselect one to choose another.
-            </div>
-          )}
-        </div>
-
-        {selectedItems.length > 0 ? (
-          <div style={{ borderTop: `1px solid ${T.offWhite}`, paddingTop: 16 }}>
-            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 12 }}>
-              YOUR SELECTED INITIATIVES
-            </div>
-            {selectedItems.map((item) => <SelectedItemDetail key={item.code} item={item} />)}
+        {horizonItems.length === 0 ? (
+          <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, fontStyle: "italic" }}>
+            Nothing in your Health Check placed a system in this horizon.
           </div>
         ) : (
-          <div style={{
-            borderTop: `1px solid ${T.offWhite}`, paddingTop: 14,
-            fontSize: 12, fontFamily: "Inter", color: T.mid, fontStyle: "italic",
-          }}>
-            Select initiatives above to see action items, expected outcomes, and KPIs.
-          </div>
+          horizonItems.map((item) => (
+            <SystemCard
+              key={item.childSystemId || item.code}
+              item={item}
+              onToggleInclusion={onToggleInclusion}
+              onToggleTask={onToggleTask}
+            />
+          ))
         )}
       </div>
     </div>
@@ -246,8 +316,8 @@ export function HorizonSection({
 function Page() {
   const gate = useDiagnosticTierGate("/revenue/roadmap-builder-preview");
   const fetchRoadmap = useServerFn(getRoadmap);
-  const saveSel = useServerFn(saveRoadmapSelection);
-  const deleteSel = useServerFn(deleteRoadmapSelection);
+  const saveInclusion = useServerFn(setRoadmapInclusion);
+  const saveTasks = useServerFn(setRoadmapTasks);
 
   const { data, isLoading } = useQuery({
     queryKey: ["roadmap"],
@@ -255,36 +325,46 @@ function Page() {
     enabled: gate.ready,
   });
 
-  const [selections, setSelections] = useState<RoadmapSelection[]>([]);
+  const [items, setItems] = useState<RoadmapItem[]>([]);
 
   useEffect(() => {
-    if (data?.selections) setSelections(data.selections);
-  }, [data?.selections]);
+    if (data?.items) setItems(data.items);
+  }, [data?.items]);
 
-  const items = data?.items ?? [];
   const assessmentId = data?.assessmentId ?? null;
-  const totalSelected = selections.length;
+  const totalTasks = items.reduce(
+    (n, i) => n + (i.included ? i.selectedTaskIndices.length : 0),
+    0,
+  );
 
-  function toggleSelection(item: RoadmapItem, horizonId: RoadmapHorizon) {
-    const exists = selections.find((s) => s.code === item.code && s.horizon === horizonId);
-    if (exists) {
-      setSelections(selections.filter((s) => !(s.code === item.code && s.horizon === horizonId)));
-      if (assessmentId && item.childSystemId) {
-        deleteSel({ data: { assessmentId, childSystemId: item.childSystemId, horizon: horizonId } }).catch(() => {});
-      }
-    } else {
-      const horizon = HORIZONS.find((h) => h.id === horizonId)!;
-      const currentCount = selections.filter((s) => s.horizon === horizonId).length;
-      if (currentCount >= horizon.max) return;
-      setSelections([...selections, { code: item.code, horizon: horizonId }]);
-      if (assessmentId && item.childSystemId) {
-        saveSel({ data: { assessmentId, childSystemId: item.childSystemId, horizon: horizonId } }).catch(() => {});
-      }
+  function toggleInclusion(item: RoadmapItem) {
+    const next = !item.included;
+    setItems((prev) =>
+      prev.map((i) => (i.childSystemId === item.childSystemId ? { ...i, included: next } : i)),
+    );
+    if (assessmentId && item.childSystemId) {
+      saveInclusion({ data: { assessmentId, childSystemId: item.childSystemId, included: next } })
+        .catch(() => {});
     }
   }
 
-  function handleExport() {
-    exportToCSV(selections, items);
+  function toggleTask(item: RoadmapItem, index: number) {
+    const current = item.selectedTaskIndices;
+    const nextIndices = current.includes(index)
+      ? current.filter((i) => i !== index)
+      : current.length >= MAX_TASKS
+        ? current
+        : [...current, index].sort((a, b) => a - b);
+    if (nextIndices === current) return;
+    setItems((prev) =>
+      prev.map((i) =>
+        i.childSystemId === item.childSystemId ? { ...i, selectedTaskIndices: nextIndices } : i,
+      ),
+    );
+    if (assessmentId && item.childSystemId) {
+      saveTasks({ data: { assessmentId, childSystemId: item.childSystemId, taskIndices: nextIndices } })
+        .catch(() => {});
+    }
   }
 
   if (gate.checking || !gate.ready) {
@@ -308,8 +388,8 @@ function Page() {
           <span style={{ fontSize: 12, color: T.mid }}>›</span>
           <span style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>Roadmap Builder</span>
         </div>
-        {totalSelected > 0 && (
-          <button onClick={handleExport} style={{
+        {totalTasks > 0 && (
+          <button onClick={() => exportToCSV(items)} style={{
             background: T.teal, color: T.white, border: "none",
             borderRadius: 8, padding: "7px 16px",
             fontFamily: "Inter", fontSize: 12, fontWeight: 600, cursor: "pointer",
@@ -331,27 +411,29 @@ function Page() {
               Roadmap Builder
             </h1>
             <p style={{ fontFamily: "Inter", fontSize: 14, color: T.mid, margin: 0, lineHeight: 1.65, maxWidth: 520 }}>
-              Select the initiatives you want to work on across each time horizon. For each selection you get specific action items, expected outcomes, and KPIs to track progress.
+              Your Health Check placed each system into a time horizon. Choose the two or three tasks you're committing to for each one, and remove anything you're not taking on.
             </p>
           </div>
-          {totalSelected > 0 && (
+          {totalTasks > 0 && (
             <div style={{
               background: T.tealBright + "15", border: `1px solid ${T.tealBright}30`,
               borderRadius: 10, padding: "10px 16px", textAlign: "center", flexShrink: 0,
             }}>
-              <div style={{ fontSize: 22, fontFamily: "'Instrument Serif', Georgia, serif", color: T.teal, fontWeight: 400 }}>{totalSelected}</div>
-              <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.06em" }}>SELECTED</div>
+              <div style={{ fontSize: 22, fontFamily: "'Instrument Serif', Georgia, serif", color: T.teal, fontWeight: 400 }}>{totalTasks}</div>
+              <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.06em" }}>TASKS</div>
             </div>
           )}
         </div>
+
+        <FramingBanner />
 
         {HORIZONS.map((horizon) => (
           <HorizonSection
             key={horizon.id}
             horizon={horizon}
             items={items}
-            selections={selections}
-            onToggle={toggleSelection}
+            onToggleInclusion={toggleInclusion}
+            onToggleTask={toggleTask}
           />
         ))}
 
