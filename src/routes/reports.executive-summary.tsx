@@ -556,53 +556,29 @@ function ReportBody({
         <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24, marginBottom: 32 }}>
           <Card>
             <SectionLabel>Operational Intelligence</SectionLabel>
-            {narrative ? (
-              <>
-                <h1
-                  style={{
-                    fontFamily: "'Instrument Serif', Georgia, serif",
-                    fontSize: 28,
-                    fontWeight: 400,
-                    color: T.ink,
-                    lineHeight: 1.25,
-                    margin: "0 0 14px",
-                  }}
-                >
-                  {narrative.headline}
-                </h1>
-                <p
-                  style={{
-                    fontFamily: "Inter",
-                    fontSize: 14,
-                    color: T.mid,
-                    lineHeight: 1.75,
-                    margin: "0 0 20px",
-                  }}
-                >
-                  {narrative.body}
-                </p>
-              </>
-            ) : (
-              <div style={{ marginBottom: 20 }}>
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    marginBottom: 10,
-                    width: "92%",
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    width: "78%",
-                  }}
-                />
-              </div>
-            )}
+            <h1
+              style={{
+                fontFamily: "'Instrument Serif', Georgia, serif",
+                fontSize: 28,
+                fontWeight: 400,
+                color: T.ink,
+                lineHeight: 1.25,
+                margin: "0 0 14px",
+              }}
+            >
+              {displayNarrative.headline}
+            </h1>
+            <p
+              style={{
+                fontFamily: "Inter",
+                fontSize: 14,
+                color: T.mid,
+                lineHeight: 1.75,
+                margin: "0 0 20px",
+              }}
+            >
+              {displayNarrative.body}
+            </p>
 
             <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
               <span style={{ fontWeight: 600, color: T.ink }}>{companyMeta}</span>
