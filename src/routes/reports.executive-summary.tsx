@@ -510,6 +510,27 @@ function ReportBody({
     .filter(Boolean)
     .join(" · ");
 
+  // Last-resort deterministic copy so the page never shows infinite skeletons.
+  const rankedAssessed = systems
+    .filter((s) => s.assessed > 0)
+    .sort((a, b) => a.healthScore - b.healthScore);
+  const displayNarrative = narrative ?? {
+    headline: rankedAssessed.length
+      ? `${rankedAssessed[0].name} is the weakest link at ${rankedAssessed[0].healthScore}`
+      : `Revenue health scores ${overallScore}/100`,
+    body: rankedAssessed.length
+      ? `${companyName} scores ${overallScore}/100 overall. ${rankedAssessed[0].name} is the lowest-scoring system at ${rankedAssessed[0].healthScore}, and ${rankedAssessed[rankedAssessed.length - 1].name} is the strongest at ${rankedAssessed[rankedAssessed.length - 1].healthScore}.`
+      : `${companyName} does not yet have enough completed Health Check data to summarise.`,
+    risks: rankedAssessed.slice(0, 3).map((s, i) => ({
+      rank: i + 1,
+      system: s.name,
+      text: `${s.name} scores ${s.healthScore} with tracking at ${s.trackingScore}. A visibility gap of ${s.visibilityGap} means decisions here rest on incomplete signal.`,
+    })),
+    isFallback: true,
+  };
+
+
+
   return (
     <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <GlobalStyles />
