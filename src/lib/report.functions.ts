@@ -36,6 +36,8 @@ export type Narrative = {
   body: string;
   risks: RiskItem[];
   systems?: SystemNarratives;
+  /** true when the copy is deterministic fallback text, not AI-generated */
+  isFallback?: boolean;
 } | null;
 
 export type ExecutiveSummary = {
