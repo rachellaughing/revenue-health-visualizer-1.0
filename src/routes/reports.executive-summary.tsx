@@ -463,7 +463,9 @@ function ReportBody({
   const generate = useServerFn(generateReportNarrative);
   const triggered = useRef(false);
   useEffect(() => {
-    if (!narrative && !triggered.current) {
+    // Retry generation once per mount when there is no narrative at all, or when
+    // the server fell back to deterministic copy because generation failed.
+    if ((!narrative || narrative.isFallback) && !triggered.current) {
       triggered.current = true;
       generate({ data: { assessmentId: assessment.id } })
         .then(() => onNarrativeReady())
