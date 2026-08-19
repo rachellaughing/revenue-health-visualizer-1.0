@@ -341,7 +341,10 @@ async function _generateReportNarrativeImpl(
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-5-20250929",
-      max_tokens: 800,
+      // The prompt asks for a headline, body, 3 risks and 5 system paragraphs.
+      // 800 tokens truncated the response mid-JSON on every real assessment,
+      // which made JSON.parse fail and silently skipped the DB write.
+      max_tokens: 4000,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -354,8 +357,14 @@ async function _generateReportNarrativeImpl(
 
   const json = (await response.json()) as any;
 
+  if (json?.stop_reason === "max_tokens") {
+    console.error("[narrative] response truncated by max_tokens", json?.usage);
+    throw new Error("Narrative response was truncated (max_tokens)");
+  }
+
   const text: string = json?.content?.[0]?.text ?? "";
   if (!text) throw new Error("Empty response from Anthropic");
+
 
   let parsed: unknown;
   try {
