@@ -534,9 +534,14 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
         narrative = await _generateReportNarrativeImpl(assessmentId!, userId);
       } catch (err) {
         console.error("[exec-summary] narrative generation failed:", err);
-        narrative = null;
+        narrative = buildFallbackNarrative(
+          core.company?.company_name ?? core.profile?.business_name ?? "Your company",
+          overallScore,
+          systems,
+        );
       }
     }
+
 
     const tier = (core.profile?.tier ?? "starter") as Tier;
 
