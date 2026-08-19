@@ -36,6 +36,8 @@ export type Narrative = {
   body: string;
   risks: RiskItem[];
   systems?: SystemNarratives;
+  /** true when the copy is deterministic fallback text, not AI-generated */
+  isFallback?: boolean;
 } | null;
 
 export type ExecutiveSummary = {
@@ -339,7 +341,10 @@ async function _generateReportNarrativeImpl(
     },
     body: JSON.stringify({
       model: "claude-sonnet-4-5-20250929",
-      max_tokens: 800,
+      // The prompt asks for a headline, body, 3 risks and 5 system paragraphs.
+      // 800 tokens truncated the response mid-JSON on every real assessment,
+      // which made JSON.parse fail and silently skipped the DB write.
+      max_tokens: 4000,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -352,8 +357,14 @@ async function _generateReportNarrativeImpl(
 
   const json = (await response.json()) as any;
 
+  if (json?.stop_reason === "max_tokens") {
+    console.error("[narrative] response truncated by max_tokens", json?.usage);
+    throw new Error("Narrative response was truncated (max_tokens)");
+  }
+
   const text: string = json?.content?.[0]?.text ?? "";
   if (!text) throw new Error("Empty response from Anthropic");
+
 
   let parsed: unknown;
   try {
@@ -363,7 +374,12 @@ async function _generateReportNarrativeImpl(
     throw new Error("Narrative response was not valid JSON");
   }
 
-  const validated = narrativeJsonSchema.parse(parsed);
+  const validation = narrativeJsonSchema.safeParse(parsed);
+  if (!validation.success) {
+    console.error("[narrative] schema validation failed:", validation.error.message);
+    throw new Error("Narrative response did not match the expected shape");
+  }
+  const validated = validation.data;
 
   const { error: upErr } = await supabaseAdmin
     .from("report_narratives")
@@ -391,6 +407,57 @@ async function _generateReportNarrativeImpl(
 
   return validated;
 }
+
+/**
+ * Deterministic narrative derived purely from the scores already on the page.
+ * Used whenever the AI generation fails so the report never shows an
+ * indefinite loading state.
+ */
+function buildFallbackNarrative(
+  companyName: string,
+  overallScore: number,
+  systems: ParentScore[],
+): NonNullable<Narrative> {
+  const assessed = systems.filter((s) => s.assessed > 0);
+  const band =
+    overallScore >= 75
+      ? "strong"
+      : overallScore >= 60
+        ? "stable"
+        : overallScore >= 40
+          ? "fragile"
+          : "critical";
+  const ranked = [...assessed].sort((a, b) => a.healthScore - b.healthScore);
+  const weakest = ranked[0];
+  const strongest = ranked[ranked.length - 1];
+
+  const headline = weakest
+    ? `${weakest.name} is the weakest link at ${weakest.healthScore}`
+    : `Revenue health is ${band} at ${overallScore}/100`;
+
+  const body = assessed.length
+    ? `${companyName} scores ${overallScore}/100 overall, which reads as ${band}. ${weakest.name} is the lowest-scoring system at ${weakest.healthScore}${strongest && strongest.id !== weakest.id ? `, while ${strongest.name} is strongest at ${strongest.healthScore}` : ""}. ${
+        assessed.filter((s) => s.isHardShadow || s.isSoftShadow).length
+          ? `Shadow-system signals were detected in ${assessed.filter((s) => s.isHardShadow || s.isSoftShadow).map((s) => s.name).join(", ")}, meaning work is happening without the tracking to see it.`
+          : `Tracking coverage averages ${Math.round(assessed.reduce((a, b) => a + b.trackingScore, 0) / assessed.length)}, which shapes how much of this picture is visible day to day.`
+      }`
+    : `${companyName} does not yet have enough completed Health Check data to summarise. Complete a Health Check to see a full picture.`;
+
+  const risks: RiskItem[] = ranked.slice(0, 3).map((s, i) => ({
+    rank: i + 1,
+    system: s.name,
+    text: `${s.name} scores ${s.healthScore} with tracking at ${s.trackingScore}${
+      s.isHardShadow
+        ? ", and is flagged as a hard shadow system — activity is running without reliable measurement."
+        : s.isSoftShadow
+          ? ", and is flagged as a soft shadow system — measurement is thin relative to activity."
+          : "."
+    } A visibility gap of ${s.visibilityGap} means decisions here rest on incomplete signal.`,
+  }));
+
+  return { headline, body, risks, isFallback: true };
+}
+
 
 const generateSchema = z.object({ assessmentId: z.string().uuid() });
 
@@ -467,9 +534,14 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
         narrative = await _generateReportNarrativeImpl(assessmentId!, userId);
       } catch (err) {
         console.error("[exec-summary] narrative generation failed:", err);
-        narrative = null;
+        narrative = buildFallbackNarrative(
+          core.company?.company_name ?? core.profile?.business_name ?? "Your company",
+          overallScore,
+          systems,
+        );
       }
     }
+
 
     const tier = (core.profile?.tier ?? "starter") as Tier;
 

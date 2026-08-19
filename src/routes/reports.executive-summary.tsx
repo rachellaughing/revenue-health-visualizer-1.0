@@ -463,7 +463,9 @@ function ReportBody({
   const generate = useServerFn(generateReportNarrative);
   const triggered = useRef(false);
   useEffect(() => {
-    if (!narrative && !triggered.current) {
+    // Retry generation once per mount when there is no narrative at all, or when
+    // the server fell back to deterministic copy because generation failed.
+    if ((!narrative || narrative.isFallback) && !triggered.current) {
       triggered.current = true;
       generate({ data: { assessmentId: assessment.id } })
         .then(() => onNarrativeReady())
@@ -508,6 +510,27 @@ function ReportBody({
     .filter(Boolean)
     .join(" · ");
 
+  // Last-resort deterministic copy so the page never shows infinite skeletons.
+  const rankedAssessed = systems
+    .filter((s) => s.assessed > 0)
+    .sort((a, b) => a.healthScore - b.healthScore);
+  const displayNarrative = narrative ?? {
+    headline: rankedAssessed.length
+      ? `${rankedAssessed[0].name} is the weakest link at ${rankedAssessed[0].healthScore}`
+      : `Revenue health scores ${overallScore}/100`,
+    body: rankedAssessed.length
+      ? `${companyName} scores ${overallScore}/100 overall. ${rankedAssessed[0].name} is the lowest-scoring system at ${rankedAssessed[0].healthScore}, and ${rankedAssessed[rankedAssessed.length - 1].name} is the strongest at ${rankedAssessed[rankedAssessed.length - 1].healthScore}.`
+      : `${companyName} does not yet have enough completed Health Check data to summarise.`,
+    risks: rankedAssessed.slice(0, 3).map((s, i) => ({
+      rank: i + 1,
+      system: s.name,
+      text: `${s.name} scores ${s.healthScore} with tracking at ${s.trackingScore}. A visibility gap of ${s.visibilityGap} means decisions here rest on incomplete signal.`,
+    })),
+    isFallback: true,
+  };
+
+
+
   return (
     <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
       <GlobalStyles />
@@ -533,53 +556,29 @@ function ReportBody({
         <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24, marginBottom: 32 }}>
           <Card>
             <SectionLabel>Operational Intelligence</SectionLabel>
-            {narrative ? (
-              <>
-                <h1
-                  style={{
-                    fontFamily: "'Instrument Serif', Georgia, serif",
-                    fontSize: 28,
-                    fontWeight: 400,
-                    color: T.ink,
-                    lineHeight: 1.25,
-                    margin: "0 0 14px",
-                  }}
-                >
-                  {narrative.headline}
-                </h1>
-                <p
-                  style={{
-                    fontFamily: "Inter",
-                    fontSize: 14,
-                    color: T.mid,
-                    lineHeight: 1.75,
-                    margin: "0 0 20px",
-                  }}
-                >
-                  {narrative.body}
-                </p>
-              </>
-            ) : (
-              <div style={{ marginBottom: 20 }}>
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    marginBottom: 10,
-                    width: "92%",
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    background: "#EDEDE8",
-                    borderRadius: 4,
-                    width: "78%",
-                  }}
-                />
-              </div>
-            )}
+            <h1
+              style={{
+                fontFamily: "'Instrument Serif', Georgia, serif",
+                fontSize: 28,
+                fontWeight: 400,
+                color: T.ink,
+                lineHeight: 1.25,
+                margin: "0 0 14px",
+              }}
+            >
+              {displayNarrative.headline}
+            </h1>
+            <p
+              style={{
+                fontFamily: "Inter",
+                fontSize: 14,
+                color: T.mid,
+                lineHeight: 1.75,
+                margin: "0 0 20px",
+              }}
+            >
+              {displayNarrative.body}
+            </p>
 
             <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid }}>
               <span style={{ fontWeight: 600, color: T.ink }}>{companyMeta}</span>
@@ -953,75 +952,70 @@ function ReportBody({
             Where the architecture is straining.
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {narrative
-              ? narrative.risks.map((risk) => (
-                  <Card
-                    key={risk.rank}
+            {displayNarrative.risks.length ? (
+              displayNarrative.risks.map((risk) => (
+                <Card
+                  key={risk.rank}
+                  style={{
+                    padding: "16px 20px",
+                    display: "flex",
+                    gap: 16,
+                    alignItems: "flex-start",
+                    borderLeft: `3px solid ${T.ember}`,
+                  }}
+                >
+                  <div
                     style={{
-                      padding: "16px 20px",
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background: T.offWhite,
                       display: "flex",
-                      gap: 16,
-                      alignItems: "flex-start",
-                      borderLeft: `3px solid ${T.ember}`,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 11,
+                      fontFamily: "Inter",
+                      fontWeight: 700,
+                      color: T.mid,
                     }}
                   >
+                    {risk.rank}
+                  </div>
+                  <div>
                     <div
                       style={{
-                        width: 24,
-                        height: 24,
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: T.offWhite,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 11,
+                        fontSize: 10,
                         fontFamily: "Inter",
                         fontWeight: 700,
-                        color: T.mid,
+                        color: T.ember,
+                        letterSpacing: "0.1em",
+                        marginBottom: 4,
                       }}
                     >
-                      {risk.rank}
+                      {risk.system.toUpperCase()}
                     </div>
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontFamily: "Inter",
-                          fontWeight: 700,
-                          color: T.ember,
-                          letterSpacing: "0.1em",
-                          marginBottom: 4,
-                        }}
-                      >
-                        {risk.system.toUpperCase()}
-                      </div>
-                      <p
-                        style={{
-                          fontSize: 13,
-                          fontFamily: "Inter",
-                          color: T.ink,
-                          lineHeight: 1.65,
-                          margin: 0,
-                        }}
-                      >
-                        {risk.text}
-                      </p>
-                    </div>
-                  </Card>
-                ))
-              : [1, 2, 3].map((n) => (
-                  <Card
-                    key={n}
-                    style={{
-                      padding: "16px 20px",
-                      borderLeft: `3px solid ${T.ember}`,
-                    }}
-                  >
-                    <div style={{ height: 10, width: "92%", background: "#EDEDE8", borderRadius: 4, marginBottom: 8 }} />
-                    <div style={{ height: 10, width: "75%", background: "#EDEDE8", borderRadius: 4 }} />
-                  </Card>
-                ))}
+                    <p
+                      style={{
+                        fontSize: 13,
+                        fontFamily: "Inter",
+                        color: T.ink,
+                        lineHeight: 1.65,
+                        margin: 0,
+                      }}
+                    >
+                      {risk.text}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <Card style={{ padding: "16px 20px", borderLeft: `3px solid ${T.ember}` }}>
+                <p style={{ fontSize: 13, fontFamily: "Inter", color: T.mid, margin: 0 }}>
+                  Not enough completed Health Check data yet to rank system risks.
+                </p>
+              </Card>
+            )}
 
           </div>
         </div>
