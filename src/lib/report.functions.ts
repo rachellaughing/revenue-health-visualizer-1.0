@@ -408,6 +408,57 @@ async function _generateReportNarrativeImpl(
   return validated;
 }
 
+/**
+ * Deterministic narrative derived purely from the scores already on the page.
+ * Used whenever the AI generation fails so the report never shows an
+ * indefinite loading state.
+ */
+function buildFallbackNarrative(
+  companyName: string,
+  overallScore: number,
+  systems: ParentScore[],
+): NonNullable<Narrative> {
+  const assessed = systems.filter((s) => s.assessed > 0);
+  const band =
+    overallScore >= 75
+      ? "strong"
+      : overallScore >= 60
+        ? "stable"
+        : overallScore >= 40
+          ? "fragile"
+          : "critical";
+  const ranked = [...assessed].sort((a, b) => a.healthScore - b.healthScore);
+  const weakest = ranked[0];
+  const strongest = ranked[ranked.length - 1];
+
+  const headline = weakest
+    ? `${weakest.name} is the weakest link at ${weakest.healthScore}`
+    : `Revenue health is ${band} at ${overallScore}/100`;
+
+  const body = assessed.length
+    ? `${companyName} scores ${overallScore}/100 overall, which reads as ${band}. ${weakest.name} is the lowest-scoring system at ${weakest.healthScore}${strongest && strongest.id !== weakest.id ? `, while ${strongest.name} is strongest at ${strongest.healthScore}` : ""}. ${
+        assessed.filter((s) => s.isHardShadow || s.isSoftShadow).length
+          ? `Shadow-system signals were detected in ${assessed.filter((s) => s.isHardShadow || s.isSoftShadow).map((s) => s.name).join(", ")}, meaning work is happening without the tracking to see it.`
+          : `Tracking coverage averages ${Math.round(assessed.reduce((a, b) => a + b.trackingScore, 0) / assessed.length)}, which shapes how much of this picture is visible day to day.`
+      }`
+    : `${companyName} does not yet have enough completed Health Check data to summarise. Complete a Health Check to see a full picture.`;
+
+  const risks: RiskItem[] = ranked.slice(0, 3).map((s, i) => ({
+    rank: i + 1,
+    system: s.name,
+    text: `${s.name} scores ${s.healthScore} with tracking at ${s.trackingScore}${
+      s.isHardShadow
+        ? ", and is flagged as a hard shadow system — activity is running without reliable measurement."
+        : s.isSoftShadow
+          ? ", and is flagged as a soft shadow system — measurement is thin relative to activity."
+          : "."
+    } A visibility gap of ${s.visibilityGap} means decisions here rest on incomplete signal.`,
+  }));
+
+  return { headline, body, risks, isFallback: true };
+}
+
+
 const generateSchema = z.object({ assessmentId: z.string().uuid() });
 
 export const generateReportNarrative = createServerFn({ method: "POST" })
