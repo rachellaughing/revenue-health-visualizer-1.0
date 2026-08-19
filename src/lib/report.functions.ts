@@ -374,7 +374,12 @@ async function _generateReportNarrativeImpl(
     throw new Error("Narrative response was not valid JSON");
   }
 
-  const validated = narrativeJsonSchema.parse(parsed);
+  const validation = narrativeJsonSchema.safeParse(parsed);
+  if (!validation.success) {
+    console.error("[narrative] schema validation failed:", validation.error.message);
+    throw new Error("Narrative response did not match the expected shape");
+  }
+  const validated = validation.data;
 
   const { error: upErr } = await supabaseAdmin
     .from("report_narratives")
