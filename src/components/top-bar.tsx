@@ -20,6 +20,7 @@ type Props = {
 export function TopBar({ onToggleSidebar, firstName, email }: Props) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const displayName = firstName?.trim() || (email ? email.split("@")[0] : "Account");
   const initial = (displayName[0] || "U").toUpperCase();
