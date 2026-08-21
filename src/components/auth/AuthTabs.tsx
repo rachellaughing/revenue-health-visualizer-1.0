@@ -52,7 +52,7 @@ function TabButton({
       onClick={onClick}
       className="rounded-md px-4 py-2 text-sm font-semibold transition-colors"
       style={{
-        backgroundColor: active ? "var(--mm-ink)" : "transparent",
+        backgroundColor: active ? "var(--mm-abyss)" : "transparent",
         color: active ? "var(--mm-white)" : "var(--mm-ink)",
       }}
     >
