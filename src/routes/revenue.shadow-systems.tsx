@@ -11,17 +11,17 @@ export const Route = createFileRoute("/revenue/shadow-systems")({
 });
 
 export const T = {
-  abyss: "#182829", paper: "#FFFEFA", offWhite: "#F5F5F0",
-  ember: "#F05223", teal: "#2A6B6E", tealBright: "#4ABFC4",
-  sand: "#C4956A", mid: "#888880", ink: "#111111", white: "#FFFFFF",
-  sys: { POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B" },
+  abyss: "var(--mm-abyss)", paper: "var(--mm-paper)", offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)", teal: "var(--mm-teal)", tealBright: "var(--mm-teal-bright)",
+  sand: "var(--mm-sand)", mid: "var(--mm-mid)", ink: "var(--mm-ink)", white: "var(--mm-white)",
+  sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" },
 };
 
 export const ACTION_TYPES = {
-  document: { label: "Document It", color: "#10B981", bg: "rgba(16,185,129,0.08)" },
-  formalise: { label: "Formalise It", color: "#F59E0B", bg: "rgba(245,158,11,0.08)" },
-  rebuild: { label: "Rebuild It", color: "#8B5CF6", bg: "rgba(139,92,246,0.08)" },
-  eliminate: { label: "Eliminate It", color: "#EF4444", bg: "rgba(239,68,68,0.08)" },
+  document: { label: "Document It", color: "var(--mm-sys-authority)", bg: "rgba(16,185,129,0.08)" },
+  formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "rgba(245,158,11,0.08)" },
+  rebuild: { label: "Rebuild It", color: "var(--mm-sys-lifecycle)", bg: "rgba(139,92,246,0.08)" },
+  eliminate: { label: "Eliminate It", color: "var(--mm-danger)", bg: "rgba(239,68,68,0.08)" },
 } as const;
 
 export const TYPE_PILLS = {
@@ -29,7 +29,7 @@ export const TYPE_PILLS = {
   document: { label: "Document", color: T.sys.POS },
   tribal: { label: "Tribal Knowledge", color: T.sand },
   informal_process: { label: "Informal Process", color: T.sys.CONV },
-  workaround: { label: "Workaround", color: "#EF4444" },
+  workaround: { label: "Workaround", color: "var(--mm-danger)" },
   messaging: { label: "Messaging Thread", color: T.sys.LFC },
 } as const;
 
@@ -48,7 +48,7 @@ export function RiskDots({ level }: { level: number }) {
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} style={{
           width: 7, height: 7, borderRadius: "50%",
-          background: i < level ? "#EF4444" : T.offWhite,
+          background: i < level ? "var(--mm-danger)" : T.offWhite,
         }} />
       ))}
     </div>
@@ -62,7 +62,7 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
   return (
     <div style={{
       background: T.white,
-      border: `1px solid ${expanded ? T.sand + "60" : "rgba(0,0,0,0.07)"}`,
+      border: `1px solid ${expanded ? T.sand + "60" : "var(--mm-rule)"}`,
       borderRadius: 14, marginBottom: 14, overflow: "hidden",
       boxShadow: expanded ? "0 4px 20px rgba(196,149,106,0.15)" : "0 2px 6px rgba(24,40,41,0.04)",
       transition: "all 0.2s",
@@ -106,7 +106,7 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
             <div style={{ background: T.offWhite, borderRadius: 10, padding: "12px 14px" }}>
               <div style={{ fontSize: 9, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 4 }}>KEY PERSON DEPENDENCY</div>
-              <div style={{ fontSize: 13, fontFamily: "Inter", fontWeight: 600, color: "#EF4444" }}>{shadow.keyPerson}</div>
+              <div style={{ fontSize: 13, fontFamily: "Inter", fontWeight: 600, color: "var(--mm-danger)" }}>{shadow.keyPerson}</div>
               <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, marginTop: 2 }}>Only person who fully understands this system</div>
             </div>
             <div style={{ background: T.offWhite, borderRadius: 10, padding: "12px 14px" }}>

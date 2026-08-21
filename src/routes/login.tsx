@@ -259,7 +259,7 @@ function SignUpForm() {
             className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
             style={{
               backgroundColor: "var(--mm-off-white)",
-              borderColor: pwBlurInvalid ? "#E84F4F" : "#E5E5DF",
+              borderColor: pwBlurInvalid ? "#E84F4F" : "var(--mm-hairline)",
               color: "var(--mm-ink)",
               paddingRight: 40,
             }}
@@ -418,7 +418,7 @@ function Field({
           className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
           style={{
             backgroundColor: "var(--mm-off-white)",
-            borderColor: "#E5E5DF",
+            borderColor: "var(--mm-hairline)",
             color: "var(--mm-ink)",
             paddingRight: isPassword ? 40 : undefined,
           }}

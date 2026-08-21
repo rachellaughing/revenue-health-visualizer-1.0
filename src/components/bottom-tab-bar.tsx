@@ -2,10 +2,10 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, ClipboardCheck, FileBarChart, Settings } from "lucide-react";
 
 const T = {
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  mid: "#888880",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  mid: "var(--mm-mid)",
 };
 
 type Tab = {

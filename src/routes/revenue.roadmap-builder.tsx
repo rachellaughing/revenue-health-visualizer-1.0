@@ -17,10 +17,10 @@ export const Route = createFileRoute("/revenue/roadmap-builder")({
 });
 
 export const T = {
-  abyss: "#182829", paper: "#FFFEFA", offWhite: "#F5F5F0",
-  ember: "#F05223", teal: "#2A6B6E", tealBright: "#4ABFC4",
-  mid: "#888880", ink: "#111111", white: "#FFFFFF",
-  sys: { POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B" },
+  abyss: "var(--mm-abyss)", paper: "var(--mm-paper)", offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)", teal: "var(--mm-teal)", tealBright: "var(--mm-teal-bright)",
+  mid: "var(--mm-mid)", ink: "var(--mm-ink)", white: "var(--mm-white)",
+  sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" },
 };
 
 export const MAX_TASKS = 3;
@@ -63,7 +63,7 @@ export function exportToCSV(items: RoadmapItem[]) {
 export function FramingBanner() {
   return (
     <div style={{
-      background: T.offWhite, border: "1px solid rgba(0,0,0,0.07)",
+      background: T.offWhite, border: "1px solid var(--mm-rule)",
       borderRadius: 14, padding: "20px 24px", marginBottom: 28,
     }}>
       <p style={{ fontFamily: "Inter", fontSize: 13, color: T.ink, margin: "0 0 6px", lineHeight: 1.65 }}>
@@ -274,7 +274,7 @@ export function HorizonSection({
 
   return (
     <div style={{
-      background: T.white, border: "1px solid rgba(0,0,0,0.07)",
+      background: T.white, border: "1px solid var(--mm-rule)",
       borderRadius: 14, marginBottom: 20, overflow: "hidden",
       boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
     }}>

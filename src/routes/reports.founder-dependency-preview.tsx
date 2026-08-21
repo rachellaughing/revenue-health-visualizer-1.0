@@ -18,11 +18,11 @@ export const Route = createFileRoute("/reports/founder-dependency-preview")({
 
 // Hardcoded illustrative sample — not any real user's data.
 const ILLUSTRATIVE_SYSTEMS: FDSystem[] = [
-  { code: "CONV", name: "Conversion", color: "#F05223", type: "dangerous", level: 82, handoffReadiness: "Low", narrative: null },
-  { code: "LFC", name: "Lifecycle", color: "#8B5CF6", type: "dangerous", level: 64, handoffReadiness: "Low", narrative: null },
-  { code: "VIS", name: "Visibility", color: "#F59E0B", type: "mixed", level: 48, handoffReadiness: "Moderate", narrative: null },
-  { code: "POS", name: "Positioning", color: "#3B82F6", type: "healthy", level: 30, handoffReadiness: "High", narrative: null },
-  { code: "AUTH", name: "Authority", color: "#10B981", type: "healthy", level: 22, handoffReadiness: "High", narrative: null },
+  { code: "CONV", name: "Conversion", color: "var(--mm-ember)", type: "dangerous", level: 82, handoffReadiness: "Low", narrative: null },
+  { code: "LFC", name: "Lifecycle", color: "var(--mm-sys-lifecycle)", type: "dangerous", level: 64, handoffReadiness: "Low", narrative: null },
+  { code: "VIS", name: "Visibility", color: "var(--mm-sys-visibility)", type: "mixed", level: 48, handoffReadiness: "Moderate", narrative: null },
+  { code: "POS", name: "Positioning", color: "var(--mm-sys-positioning)", type: "healthy", level: 30, handoffReadiness: "High", narrative: null },
+  { code: "AUTH", name: "Authority", color: "var(--mm-sys-authority)", type: "healthy", level: 22, handoffReadiness: "High", narrative: null },
 ];
 
 const ILLUSTRATIVE_PROCESSES: FDProcess[] = [
@@ -96,7 +96,7 @@ function Page() {
               <DependencySplit processes={ILLUSTRATIVE_PROCESSES} systems={ILLUSTRATIVE_SYSTEMS} />
             </div>
 
-            <div style={{ background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+            <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
               <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 16 }}>
                 DEPENDENCY BY SYSTEM
               </div>
@@ -123,7 +123,7 @@ function Page() {
         )}
 
         {activeTab === "timeline" && (
-          <div style={{ background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
             <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
               BLAST RADIUS TIMELINE
             </div>
@@ -135,7 +135,7 @@ function Page() {
         )}
 
         {activeTab === "actions" && (
-          <div style={{ background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
             <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
               ACTION PLAN
             </div>

@@ -25,28 +25,28 @@ export const Route = createFileRoute("/revenue/matrix-map")({
 });
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  tealMid: "#3D8C8F",
-  tealBright: "#4ABFC4",
-  sand: "#C4956A",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  tealMid: "var(--mm-teal-mid)",
+  tealBright: "var(--mm-teal-bright)",
+  sand: "var(--mm-sand)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
   sys: {
-    POS: "#3B82F6",
-    AUTH: "#10B981",
-    CONV: "#F05223",
-    LFC: "#8B5CF6",
-    VIS: "#F59E0B",
+    POS: "var(--mm-sys-positioning)",
+    AUTH: "var(--mm-sys-authority)",
+    CONV: "var(--mm-ember)",
+    LFC: "var(--mm-sys-lifecycle)",
+    VIS: "var(--mm-sys-visibility)",
   } as Record<string, string>,
 };
 
 function healthColor(score: number) {
-  if (score < 40) return "#EF4444";
+  if (score < 40) return "var(--mm-danger)";
   if (score < 55) return T.sand;
   if (score < 70) return T.sys.VIS;
   return T.sys.AUTH;
@@ -255,7 +255,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                   {
                     label: "Critical",
                     count: counts.critical,
-                    color: "#EF4444",
+                    color: "var(--mm-danger)",
                     desc: "High-impact, immediate",
                   },
                   {
@@ -281,7 +281,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                     key={c.label}
                     style={{
                       background: T.white,
-                      border: "1px solid rgba(0,0,0,0.07)",
+                      border: "1px solid var(--mm-rule)",
                       borderTop: `3px solid ${c.color}`,
                       borderRadius: 10,
                       padding: "14px 16px",
@@ -339,7 +339,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
               style={{
                 position: "relative",
                 background: T.white,
-                border: "1px solid rgba(0,0,0,0.07)",
+                border: "1px solid var(--mm-rule)",
                 borderRadius: 14,
                 padding: 24,
                 boxShadow: "0 2px 12px rgba(24,40,41,0.06)",
@@ -407,7 +407,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                     width: "100%",
                     textAlign: "left",
                     background: T.white,
-                    border: "1px solid rgba(0,0,0,0.07)",
+                    border: "1px solid var(--mm-rule)",
                     borderRadius: 10,
                     padding: "14px 18px",
                     cursor: "pointer",
@@ -480,7 +480,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                         key={i}
                         style={{
                           background: T.white,
-                          border: "1px solid rgba(0,0,0,0.07)",
+                          border: "1px solid var(--mm-rule)",
                           borderLeft: `3px solid ${color}`,
                           borderRadius: 10,
                           padding: "16px 20px",
@@ -895,7 +895,7 @@ function MatrixMapSVG({
           { color: T.sys.AUTH, label: "Strong (70+)" },
           { color: T.sys.VIS, label: "Stable (55-70)" },
           { color: T.sand, label: "Fragile (40-55)" },
-          { color: "#EF4444", label: "Critical (<40)" },
+          { color: "var(--mm-danger)", label: "Critical (<40)" },
         ].map((l, i) => (
           <g key={i} transform={`translate(${i * 160}, 0)`}>
             <circle cx="6" cy="6" r="5" fill={l.color} opacity="0.7" />
@@ -1257,7 +1257,7 @@ function ZoomedSystem({
         <div
           style={{
             background: T.white,
-            border: "1px solid rgba(0,0,0,0.07)",
+            border: "1px solid var(--mm-rule)",
             borderRadius: 12,
             padding: 20,
             boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
@@ -1536,7 +1536,7 @@ function RelationshipPanel({
       style={{
         marginTop: 20,
         background: T.white,
-        border: "1px solid rgba(0,0,0,0.07)",
+        border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 20,
         boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
@@ -1634,7 +1634,7 @@ function ConnPanel({
     <div
       style={{
         background: T.white,
-        border: "1px solid rgba(0,0,0,0.07)",
+        border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 20,
         boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
@@ -1667,17 +1667,17 @@ function ConnPanel({
         const bg =
           item.type === "strong"
             ? variant === "downstream"
-              ? "#EF444408"
+              ? "var(--mm-danger)08"
               : accent + "08"
             : T.offWhite;
         const border =
           item.type === "strong"
             ? variant === "downstream"
-              ? "#EF444430"
+              ? "var(--mm-danger)30"
               : accent + "30"
             : item.type === "moderate"
               ? T.sand + "40"
-              : "rgba(0,0,0,0.06)";
+              : "var(--mm-rule)";
         return (
           <div
             key={i}
@@ -1740,8 +1740,8 @@ function ConnPanel({
                     fontSize: 9,
                     fontFamily: "Inter",
                     fontWeight: 700,
-                    color: "#EF4444",
-                    background: "#EF444415",
+                    color: "var(--mm-danger)",
+                    background: "var(--mm-danger)15",
                     padding: "1px 6px",
                     borderRadius: 8,
                   }}
@@ -1830,7 +1830,7 @@ function ScenarioCard({
   const color = T.sys[scenario.parentCode] ?? T.teal;
   const leverageColor =
     scenario.leverage === "critical"
-      ? "#EF4444"
+      ? "var(--mm-danger)"
       : scenario.leverage === "high"
         ? T.sand
         : T.mid;
@@ -1845,7 +1845,7 @@ function ScenarioCard({
     <div
       style={{
         background: T.white,
-        border: `1px solid ${expanded ? color + "40" : "rgba(0,0,0,0.07)"}`,
+        border: `1px solid ${expanded ? color + "40" : "var(--mm-rule)"}`,
         borderRadius: 12,
         marginBottom: 12,
         overflow: "hidden",

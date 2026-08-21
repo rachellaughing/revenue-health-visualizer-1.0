@@ -3,12 +3,12 @@ import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
 
 // Brand tokens (kept local to avoid coupling)
 const C = {
-  paper: "#FFFEFA",
+  paper: "var(--mm-paper)",
   sand: "#F6F2EA",
   sandDeep: "#ECE6D9",
   ink: "#1A2828",
   inkSoft: "#6B6560",
-  tealBright: "#22BDC1",
+  tealBright: "var(--mm-teal-bright)",
   tealLink: "#1F8A8A",
   abyss: "#16302E",
   abyssDeep: "#0F2321",
@@ -16,11 +16,11 @@ const C = {
 
 // Match the CSS variables set in styles.css.
 const SYSTEM_COLORS: Record<string, string> = {
-  Positioning: "#3B82F6",
-  Authority: "#10B981",
-  Conversion: "#E11D48",
-  Lifecycle: "#8B5CF6",
-  Visibility: "#F59E0B",
+  Positioning: "var(--mm-sys-positioning)",
+  Authority: "var(--mm-sys-authority)",
+  Conversion: "var(--mm-sys-conversion)",
+  Lifecycle: "var(--mm-sys-lifecycle)",
+  Visibility: "var(--mm-sys-visibility)",
 };
 
 const ORDERED_SYSTEM_NAMES = [

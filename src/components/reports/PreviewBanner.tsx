@@ -2,8 +2,8 @@
 // One implementation, reused by every "-preview" report route so the
 // "this isn't your data" treatment stays consistent across pages.
 const T = {
-  ember: "#F05223",
-  white: "#FFFFFF",
+  ember: "var(--mm-ember)",
+  white: "var(--mm-white)",
 };
 
 export function IllustrativeDataBanner({ note }: { note?: string }) {

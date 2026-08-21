@@ -39,23 +39,23 @@ export const Route = createFileRoute("/reports/top-opportunities")({
 });
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  sand: "#C4956A",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
-  danger: "#EF4444",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  sand: "var(--mm-sand)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
+  danger: "var(--mm-danger)",
 };
 
 const SEVERITY_STYLE: Record<string, { color: string; bg: string }> = {
-  critical: { color: "#EF4444", bg: "rgba(239,68,68,0.1)" },
-  fragile: { color: "#C4956A", bg: "rgba(196,149,106,0.12)" },
-  stable: { color: "#2A6B6E", bg: "rgba(42,107,110,0.10)" },
-  strong: { color: "#2BB457", bg: "rgba(43,180,87,0.1)" },
+  critical: { color: "var(--mm-danger)", bg: "rgba(239,68,68,0.1)" },
+  fragile: { color: "var(--mm-sand)", bg: "rgba(196,149,106,0.12)" },
+  stable: { color: "var(--mm-teal)", bg: "rgba(42,107,110,0.10)" },
+  strong: { color: "var(--mm-sys-authority)", bg: "rgba(43,180,87,0.1)" },
 };
 
 const LOCKED_BATCH = 10;
@@ -228,7 +228,7 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
           <div
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.07)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: "22px 20px",
               fontSize: 13,
@@ -307,7 +307,7 @@ function OpportunityCard({ card, isQuickWin }: { card: FeaturedCard; isQuickWin:
     <article
       style={{
         background: T.white,
-        border: "1px solid rgba(0,0,0,0.07)",
+        border: "1px solid var(--mm-rule)",
         borderLeft: `3px solid ${color}`,
         borderRadius: 12,
         padding: "20px 22px",
@@ -432,7 +432,7 @@ function OtherOpportunities({ groups }: { groups: OtherOpportunityGroup[] }) {
             key={g.parentCode}
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.07)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               marginBottom: 8,
               overflow: "hidden",
@@ -535,7 +535,7 @@ function LockedSection({
     <section
       style={{
         background: T.offWhite,
-        border: "1px solid rgba(0,0,0,0.06)",
+        border: "1px solid var(--mm-rule)",
         borderRadius: 14,
         padding: "24px 22px",
         marginBottom: 32,
@@ -584,7 +584,7 @@ function LockedSection({
             key={t.parentCode}
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.06)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               padding: "12px 14px",
             }}
@@ -626,7 +626,7 @@ function LockedSection({
             key={s.childSystemId}
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.06)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               padding: "14px 16px",
             }}

@@ -218,7 +218,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                             color: locked
                               ? "rgba(255,255,255,0.3)"
                               : active
-                                ? "#FFFFFF"
+                                ? "var(--mm-white)"
                                 : "rgba(255,255,255,0.7)",
                             backgroundColor: active && !locked ? "rgba(255,255,255,0.05)" : "transparent",
                             borderLeft:
