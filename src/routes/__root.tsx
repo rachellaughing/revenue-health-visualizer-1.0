@@ -19,6 +19,7 @@ import { TopBar } from "../components/top-bar";
 import { BottomTabBar } from "../components/bottom-tab-bar";
 
 import { AuthProvider, useAuth } from "../lib/auth-context";
+import { ThemeProvider, themeInitScript } from "../lib/theme";
 import { Toaster } from "../components/ui/sonner";
 import { useIsMobile } from "../hooks/use-mobile";
 import { useServerFn } from "@tanstack/react-start";
