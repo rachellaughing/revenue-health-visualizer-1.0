@@ -1,4 +1,4 @@
-import { Menu, ChevronDown, LogOut, Settings, CreditCard } from "lucide-react";
+import { Menu, ChevronDown, LogOut, Settings, CreditCard, Sun, Moon } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme";
 
 type Props = {
   onToggleSidebar: () => void;
