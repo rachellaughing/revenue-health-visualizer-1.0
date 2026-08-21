@@ -47,7 +47,21 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
         <Menu className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
       </button>
 
-      <DropdownMenu>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={toggleTheme}
+          className="rounded p-2 transition-colors hover:bg-[var(--mm-off-white)]"
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <Moon className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+          ) : (
+            <Sun className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+          )}
+        </button>
+
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
             className="flex items-center gap-2 rounded-full p-1 pr-2 transition-colors hover:bg-[var(--mm-off-white)]"
