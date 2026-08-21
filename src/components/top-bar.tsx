@@ -117,7 +117,8 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }
