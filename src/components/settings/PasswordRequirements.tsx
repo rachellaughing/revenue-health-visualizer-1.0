@@ -42,7 +42,7 @@ export function PasswordRequirements({ password }: { password: string }) {
               alignItems: "center",
               gap: 8,
               padding: "3px 0",
-              color: ok ? "#2BB457" : "var(--mm-mid)",
+              color: ok ? "var(--mm-sys-authority)" : "var(--mm-mid)",
             }}
           >
             {ok ? (

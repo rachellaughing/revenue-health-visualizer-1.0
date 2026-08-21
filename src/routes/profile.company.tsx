@@ -541,7 +541,7 @@ function SymptomSelector({
               className="text-left rounded-[10px] p-3.5 transition-all relative"
               style={{
                 background: isExpanded ? "var(--mm-abyss)" : "var(--mm-off-white)",
-                border: `1.5px solid ${isExpanded ? "var(--mm-abyss)" : "rgba(0,0,0,0.08)"}`,
+                border: `1.5px solid ${isExpanded ? "var(--mm-abyss)" : "var(--mm-rule)"}`,
                 cursor: "pointer",
               }}
             >
@@ -603,7 +603,7 @@ function SymptomSelector({
                         className="w-full flex items-center gap-3 px-3.5 py-2.5 mb-1.5 rounded-lg text-left transition-all"
                         style={{
                           background: isSelected ? "var(--mm-abyss)" : "var(--mm-off-white)",
-                          border: `1.5px solid ${isSelected ? "var(--mm-abyss)" : "rgba(0,0,0,0.06)"}`,
+                          border: `1.5px solid ${isSelected ? "var(--mm-abyss)" : "var(--mm-rule)"}`,
                           cursor: maxReached ? "not-allowed" : "pointer",
                           opacity: maxReached ? 0.45 : 1,
                         }}
@@ -611,7 +611,7 @@ function SymptomSelector({
                         <div
                           className="w-[22px] h-[22px] rounded-md flex items-center justify-center shrink-0"
                           style={{
-                            background: isSelected ? "var(--mm-ember)" : "rgba(0,0,0,0.08)",
+                            background: isSelected ? "var(--mm-ember)" : "var(--mm-rule)",
                           }}
                         >
                           {isSelected ? (
@@ -825,8 +825,8 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
       <div
         className="rounded-xl p-7 mb-6"
         style={{
-          background: "#fff",
-          border: "1px solid rgba(0,0,0,0.08)",
+          background: "var(--mm-paper)",
+          border: "1px solid var(--mm-rule)",
           boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
         }}
       >
@@ -835,7 +835,7 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
             className="text-[10px] font-bold mb-1 flex items-center gap-1.5"
             style={{ color: "var(--mm-mid)", letterSpacing: "0.12em" }}
           >
-            <Lock size={12} color="var(--mm-ink-soft, #888880)" />
+            <Lock size={12} color="var(--mm-ink-soft, var(--mm-mid))" />
             ORGANIZATION PROFILE
           </div>
           <h3
@@ -898,8 +898,8 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
       <div
         className="rounded-xl p-7 mb-6"
         style={{
-          background: "#fff",
-          border: "1px solid rgba(0,0,0,0.08)",
+          background: "var(--mm-paper)",
+          border: "1px solid var(--mm-rule)",
           boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
         }}
       >

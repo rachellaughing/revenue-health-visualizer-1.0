@@ -99,11 +99,11 @@ function DashboardPage() {
 /* ─────────────────────────  NEW USER  ───────────────────────── */
 
 const SYSTEM_COLORS: Record<string, string> = {
-  Positioning: "#3B82F6",
-  Authority: "#10B981",
-  Conversion: "#E11D48",
-  Lifecycle: "#8B5CF6",
-  Visibility: "#F59E0B",
+  Positioning: "var(--mm-sys-positioning)",
+  Authority: "var(--mm-sys-authority)",
+  Conversion: "var(--mm-sys-conversion)",
+  Lifecycle: "var(--mm-sys-lifecycle)",
+  Visibility: "var(--mm-sys-visibility)",
 };
 const ORDERED_SYSTEMS = [
   "Positioning",
@@ -196,7 +196,7 @@ function HeroCard({ isStarter }: { isStarter: boolean }) {
                 className="text-[30px] leading-none"
                 style={{
                   fontFamily: "'Instrument Serif', serif",
-                  color: s.muted ? "rgba(255,254,250,0.4)" : "#FFFEFA",
+                  color: s.muted ? "rgba(255,254,250,0.4)" : "var(--mm-paper)",
                 }}
               >
                 {s.num}
@@ -205,7 +205,7 @@ function HeroCard({ isStarter }: { isStarter: boolean }) {
                 {s.label}
               </div>
               {s.note && (
-                <div className="mt-1 text-[10.5px] text-[#22BDC1]">
+                <div className="mt-1 text-[10.5px] text-[var(--mm-teal-bright)]">
                   {s.note}
                 </div>
               )}
@@ -446,11 +446,11 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
                         borderColor: isChosen
                           ? color
                           : disabled
-                          ? "rgba(0,0,0,0.08)"
+                          ? "var(--mm-rule)"
                           : "rgba(0,0,0,0.12)",
                         background: isChosen ? color : "transparent",
                         color: isChosen
-                          ? "#FFFEFA"
+                          ? "var(--mm-paper)"
                           : disabled
                           ? "rgba(0,0,0,0.25)"
                           : "var(--mm-ink)",
@@ -480,8 +480,8 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
           disabled={!complete || continueMut.isPending}
           className="flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-[13px] font-semibold transition"
           style={{
-            background: complete ? "var(--mm-ember)" : "rgba(0,0,0,0.06)",
-            color: complete ? "#FFFEFA" : "var(--mm-mid)",
+            background: complete ? "var(--mm-ember)" : "var(--mm-rule)",
+            color: complete ? "var(--mm-paper)" : "var(--mm-mid)",
             cursor: complete && !continueMut.isPending ? "pointer" : "not-allowed",
           }}
         >
@@ -552,7 +552,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
                   <div
                     key={c.id}
                     className="rounded-full px-3 py-1.5 text-[11.5px] font-semibold"
-                    style={{ background: color, color: "#FFFEFA" }}
+                    style={{ background: color, color: "var(--mm-paper)" }}
                   >
                     {c.name}
                   </div>
@@ -949,7 +949,7 @@ function ScoreRing({ score, color, size = 56 }: { score: number; color: string; 
         y="50%"
         textAnchor="middle"
         dominantBaseline="central"
-        fill="#FFFFFF"
+        fill="var(--mm-white)"
         fontSize={size * 0.24}
         fontFamily="Inter"
         fontWeight={600}

@@ -2,15 +2,15 @@ import { Link } from "@tanstack/react-router";
 import type { ViewerContext } from "@/lib/viewer.functions";
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  tealBright: "#4ABFC4",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  tealBright: "var(--mm-teal-bright)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
 };
 
 export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {

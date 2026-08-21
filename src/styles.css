@@ -47,12 +47,13 @@
   --color-mm-off-white: var(--mm-off-white);
   --color-mm-ink: var(--mm-ink);
   --color-mm-mid: var(--mm-mid);
+  --color-mm-white: var(--mm-white);
 }
 
 :root {
   --radius: 0.5rem;
 
-  /* Marketplace Maven brand tokens */
+  /* Marketplace Maven brand tokens — LIGHT */
   --mm-abyss: #182829;
   --mm-paper: #FFFEFA;
   --mm-ember: #F05223;
@@ -63,33 +64,37 @@
   --mm-off-white: #F5F5F0;
   --mm-mid: #888880;
   --mm-ink: #111111;
+  --mm-white: #FFFFFF;
+  --mm-danger: #EF4444;
+  --mm-hairline: #E5E5DF;
+  --mm-rule: rgba(0, 0, 0, 0.08);
 
   /* System colors */
-  --mm-sys-positioning: #3B82F6;
-  --mm-sys-authority: #10B981;
-  --mm-sys-conversion: #E11D48;
-  --mm-sys-lifecycle: #8B5CF6;
-  --mm-sys-visibility: #F59E0B;
+  --mm-sys-positioning: #F9A11E;
+  --mm-sys-authority: #2BB457;
+  --mm-sys-conversion: #05A4A3;
+  --mm-sys-lifecycle: #223F99;
+  --mm-sys-visibility: #DE1A58;
 
-  --background: #FFFEFA;
-  --foreground: #111111;
-  --card: #FFFEFA;
-  --card-foreground: #111111;
-  --popover: #FFFEFA;
-  --popover-foreground: #111111;
-  --primary: #F05223;
+  --background: var(--mm-paper);
+  --foreground: var(--mm-ink);
+  --card: var(--mm-paper);
+  --card-foreground: var(--mm-ink);
+  --popover: var(--mm-paper);
+  --popover-foreground: var(--mm-ink);
+  --primary: var(--mm-ember);
   --primary-foreground: #FFFEFA;
-  --secondary: #F5F5F0;
-  --secondary-foreground: #111111;
-  --muted: #F5F5F0;
-  --muted-foreground: #888880;
-  --accent: #F5F5F0;
-  --accent-foreground: #111111;
+  --secondary: var(--mm-off-white);
+  --secondary-foreground: var(--mm-ink);
+  --muted: var(--mm-off-white);
+  --muted-foreground: var(--mm-mid);
+  --accent: var(--mm-off-white);
+  --accent-foreground: var(--mm-ink);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #FFFEFA;
-  --border: #F5F5F0;
-  --input: #F5F5F0;
-  --ring: #F05223;
+  --border: var(--mm-hairline);
+  --input: var(--mm-hairline);
+  --ring: var(--mm-ember);
 
   --sidebar: #182829;
   --sidebar-foreground: rgba(255, 255, 255, 0.7);
@@ -100,6 +105,30 @@
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #F05223;
 }
+
+/* DARK — token overrides only; structure/typography untouched */
+[data-theme="dark"] {
+  --mm-paper: #182829;
+  --mm-off-white: #223536;
+  --mm-ink: #F5F5F0;
+  --mm-mid: #8FA3A3;
+  --mm-abyss: #182829;
+  --mm-white: #FFFFFF;
+  --mm-ember: #F05223;
+  --mm-danger: #EF4444;
+  --mm-hairline: rgba(255, 255, 255, 0.10);
+  --mm-rule: rgba(255, 255, 255, 0.10);
+
+  --mm-sys-conversion: #2FCFCE;
+  --mm-sys-lifecycle: #5B7FE8;
+
+  --primary-foreground: #FFFFFF;
+  --destructive-foreground: #FFFFFF;
+  --background: var(--mm-paper);
+  --foreground: var(--mm-ink);
+  color-scheme: dark;
+}
+
 
 @layer base {
   * {

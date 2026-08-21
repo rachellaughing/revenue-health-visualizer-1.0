@@ -10,22 +10,22 @@ export const Route = createFileRoute("/diagnostic")({
 });
 
 const T = {
-  abyss: "#182829",
+  abyss: "var(--mm-abyss)",
   hero: "#1C2B2B",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  ink: "#111111",
-  mid: "#888880",
-  white: "#FFFFFF",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  ink: "var(--mm-ink)",
+  mid: "var(--mm-mid)",
+  white: "var(--mm-white)",
 };
 
 const REPORT_COLORS = {
-  history: "#F05223",
-  team: "#2BB457",
-  founder: "#223F99",
-  shadow: "#DE1A58",
-  roadmap: "#05A4A3",
+  history: "var(--mm-ember)",
+  team: "var(--mm-sys-authority)",
+  founder: "var(--mm-sys-lifecycle)",
+  shadow: "var(--mm-sys-visibility)",
+  roadmap: "var(--mm-sys-conversion)",
 };
 
 const WEBHOOK_URL =
@@ -184,7 +184,7 @@ function DiagnosticPage() {
           }}
         >
           <div>
-            <Eyebrow color="#4ABFC4">The mechanism</Eyebrow>
+            <Eyebrow color="var(--mm-teal-bright)">The mechanism</Eyebrow>
             <h2
               style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
@@ -204,7 +204,7 @@ function DiagnosticPage() {
               href="https://marketplacemaven.com/core-concepts/pbj-session/"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: "#4ABFC4", fontWeight: 600, fontSize: 14, textDecoration: "none" }}
+              style={{ color: "var(--mm-teal-bright)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}
             >
               Learn about PBJ Sessions™ →
             </a>
@@ -224,7 +224,7 @@ function DiagnosticPage() {
                     height: 32,
                     borderRadius: 999,
                     background: "rgba(74,191,196,0.15)",
-                    color: "#4ABFC4",
+                    color: "var(--mm-teal-bright)",
                     fontSize: 12,
                     fontWeight: 700,
                     display: "inline-flex",

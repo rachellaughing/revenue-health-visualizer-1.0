@@ -53,7 +53,7 @@ function LockedTeamPanel() {
       >
         <div
           style={{
-            background: "#FFFEFA",
+            background: "var(--mm-paper)",
             borderRadius: 14,
             padding: "32px 36px",
             maxWidth: 420,
@@ -66,7 +66,7 @@ function LockedTeamPanel() {
               width: 44,
               height: 44,
               borderRadius: "50%",
-              background: "#F5F5F0",
+              background: "var(--mm-off-white)",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -95,7 +95,7 @@ function LockedTeamPanel() {
             disabled={checkout.isPending}
             style={{
               background: "var(--mm-ember)",
-              color: "#FFFFFF",
+              color: "var(--mm-white)",
               border: "none",
               padding: "12px 24px",
               borderRadius: 10,
@@ -195,7 +195,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
               flex: 1,
               width: isMobile ? "100%" : undefined,
               borderRadius: 8,
-              border: "1px solid #E5E5DF",
+              border: "1px solid var(--mm-hairline)",
               padding: "10px 12px",
               fontSize: 14,
               background: "var(--mm-off-white)",
@@ -208,7 +208,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
             disabled={preview || invite.isPending || !email.trim()}
             style={{
               background: "var(--mm-ember)",
-              color: "#FFFFFF",
+              color: "var(--mm-white)",
               border: "none",
               padding: isMobile ? "12px 20px" : "10px 20px",
               borderRadius: 10,
@@ -243,7 +243,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                   alignItems: isMobile ? "stretch" : "center",
                   gap: isMobile ? 10 : 14,
                   padding: isMobile ? "14px 14px" : "12px 14px",
-                  border: "1px solid #F0EFEA",
+                  border: "1px solid var(--mm-hairline)",
                   borderRadius: 10,
                 }}
               >
@@ -254,7 +254,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                       height: 36,
                       borderRadius: "50%",
                       background: "var(--mm-teal)",
-                      color: "#FFFFFF",
+                      color: "var(--mm-white)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -335,7 +335,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                       disabled={preview || resend.isPending}
                       style={{
                         background: "transparent",
-                        border: "1px solid #E5E5DF",
+                        border: "1px solid var(--mm-hairline)",
                         color: "var(--mm-teal)",
                         padding: isMobile ? "10px 12px" : "6px 12px",
                         borderRadius: 8,
@@ -353,7 +353,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                     disabled={preview || remove.isPending}
                     style={{
                       background: "transparent",
-                      border: "1px solid #E5E5DF",
+                      border: "1px solid var(--mm-hairline)",
                       color: "var(--mm-mid)",
                       padding: isMobile ? "10px 12px" : "6px 12px",
                       borderRadius: 8,
@@ -390,8 +390,8 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
 }
 
 const card: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #F0EFEA",
+  background: "var(--mm-paper)",
+  border: "1px solid var(--mm-hairline)",
   borderRadius: 14,
   padding: "24px 28px",
 };

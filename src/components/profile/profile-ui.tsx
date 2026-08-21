@@ -69,8 +69,8 @@ export const SectionCard = ({
   <div
     className="rounded-xl p-7 mb-6"
     style={{
-      background: "#fff",
-      border: "1px solid rgba(0,0,0,0.08)",
+      background: "var(--mm-paper)",
+      border: "1px solid var(--mm-rule)",
       boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
     }}
   >

@@ -26,15 +26,15 @@ export const Route = createFileRoute("/health-check/")({
 });
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  tealBright: "#4ABFC4",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  tealBright: "var(--mm-teal-bright)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
 };
 
 const HEALTH_LABELS = [
@@ -2128,7 +2128,7 @@ function HealthCheckShell({
             <div
               style={{
                 background: T.white,
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--mm-rule)",
                 borderRadius: 12,
                 padding: 40,
                 textAlign: "center",
@@ -2297,7 +2297,7 @@ function HealthCheckShell({
                     style={{
                       background: T.white,
                       border: `1px solid ${
-                        isComplete ? `${T.tealBright}50` : "rgba(0,0,0,0.08)"
+                        isComplete ? `${T.tealBright}50` : "var(--mm-rule)"
                       }`,
                       borderRadius: 12,
                       padding: 20,
@@ -2458,7 +2458,7 @@ function HealthCheckShell({
                                   padding: "8px 10px",
                                   borderRadius: 6,
                                   border: `1px solid ${
-                                    sel ? systemColor : "rgba(0,0,0,0.08)"
+                                    sel ? systemColor : "var(--mm-rule)"
                                   }`,
                                   background: sel ? `${systemColor}10` : T.white,
                                   cursor: "pointer",

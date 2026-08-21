@@ -77,7 +77,7 @@ function SettingsPage() {
           style={{
             display: "flex",
             gap: 4,
-            borderBottom: "1px solid #E5E5DF",
+            borderBottom: "1px solid var(--mm-hairline)",
             marginBottom: 28,
           }}
         >

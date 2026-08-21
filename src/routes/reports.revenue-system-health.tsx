@@ -29,24 +29,24 @@ function shadowFlag(health: number, tracking: number, t: ShadowThreshold): boole
 
 // ── Tokens (prototype-verbatim) ─────────────────────────────────────────────
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  tealMid: "#3D8C8F",
-  tealBright: "#4ABFC4",
-  sand: "#C4956A",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
-  danger: "#EF4444",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  tealMid: "var(--mm-teal-mid)",
+  tealBright: "var(--mm-teal-bright)",
+  sand: "var(--mm-sand)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
+  danger: "var(--mm-danger)",
   sys: {
-    POS: "#3B82F6",
-    AUTH: "#10B981",
-    CONV: "#F05223",
-    LFC: "#8B5CF6",
-    VIS: "#F59E0B",
+    POS: "var(--mm-sys-positioning)",
+    AUTH: "var(--mm-sys-authority)",
+    CONV: "var(--mm-ember)",
+    LFC: "var(--mm-sys-lifecycle)",
+    VIS: "var(--mm-sys-visibility)",
   } as Record<string, string>,
 };
 
@@ -387,7 +387,7 @@ function SystemSection({
     <div
       style={{
         background: T.white,
-        border: `1px solid rgba(0,0,0,0.07)`,
+        border: `1px solid var(--mm-rule)`,
         borderRadius: 14,
         marginBottom: 20,
         overflow: "hidden",
@@ -683,7 +683,7 @@ function Legend() {
       style={{
         marginBottom: 28,
         background: T.white,
-        border: "1px solid rgba(0,0,0,0.07)",
+        border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         overflow: "hidden",
         boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
@@ -700,7 +700,7 @@ function Legend() {
           background: T.offWhite,
           border: "none",
           cursor: "pointer",
-          borderBottom: open ? `1px solid rgba(0,0,0,0.06)` : "none",
+          borderBottom: open ? `1px solid var(--mm-rule)` : "none",
         }}
       >
         <span
@@ -901,7 +901,7 @@ function Page() {
           <div
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.07)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: 24,
             }}
@@ -936,7 +936,7 @@ function Page() {
           <div
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.07)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: 24,
             }}
@@ -1271,7 +1271,7 @@ function AttentionShortlist({
     <div
       style={{
         background: T.white,
-        border: "1px solid rgba(0,0,0,0.07)",
+        border: "1px solid var(--mm-rule)",
         borderRadius: 14,
         marginBottom: 28,
         overflow: "hidden",

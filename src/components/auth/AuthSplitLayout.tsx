@@ -7,7 +7,7 @@ export function AuthSplitLayout({ children }: { children: ReactNode }) {
       <LeftPanel />
       <div
         className="flex min-h-screen items-center justify-center px-4 py-12 relative"
-        style={{ backgroundColor: "#F9F6F1" }}
+        style={{ backgroundColor: "var(--mm-paper)" }}
       >
         <div className="w-full max-w-md">
           {children}
@@ -65,7 +65,7 @@ function LeftPanel() {
             fontStyle: "italic",
             fontSize: 44,
             lineHeight: 1.08,
-            color: "#FFFFFF",
+            color: "var(--mm-white)",
             margin: 0,
             fontWeight: 400,
           }}
@@ -88,13 +88,13 @@ function LeftPanel() {
 
         <blockquote
           style={{
-            borderLeft: "2px solid #F05223",
+            borderLeft: "2px solid var(--mm-ember)",
             background: "rgba(255,255,255,0.04)",
             padding: "14px 18px",
             margin: "22px 0",
             fontFamily: "Georgia, serif",
             fontStyle: "italic",
-            color: "#FFFFFF",
+            color: "var(--mm-white)",
             fontSize: 15,
             lineHeight: 1.55,
           }}
@@ -144,7 +144,7 @@ function LeftPanel() {
                     fontFamily: "'Instrument Serif', Georgia, serif",
                     fontSize: 36,
                     lineHeight: 1,
-                    color: "#FFFFFF",
+                    color: "var(--mm-white)",
                   }}
                 >
                   {s.n}
@@ -214,14 +214,14 @@ function TreeBackground() {
         pointerEvents: "none",
       }}
     >
-      <g fill="none" stroke="#FFFFFF" strokeLinecap="round">
+      <g fill="none" stroke="var(--mm-white)" strokeLinecap="round">
         {/* Root node */}
         <rect x={rootX - 150} y={rootY - 22} width={300} height={44} rx={22} strokeWidth={1.4} />
         <text
           x={rootX}
           y={rootY + 5}
           textAnchor="middle"
-          fill="#FFFFFF"
+          fill="var(--mm-white)"
           fontFamily="Inter, sans-serif"
           fontSize={14}
           stroke="none"
@@ -241,7 +241,7 @@ function TreeBackground() {
                 x={sx}
                 y={sysY + 5}
                 textAnchor="middle"
-                fill="#FFFFFF"
+                fill="var(--mm-white)"
                 fontFamily="Inter, sans-serif"
                 fontSize={13}
                 stroke="none"

@@ -16,18 +16,18 @@ export const Route = createFileRoute("/reports/founder-dependency")({
 });
 
 export const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  tealBright: "#4ABFC4",
-  sand: "#C4956A",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
-  healthy: "#10B981",
-  danger: "#EF4444",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  tealBright: "var(--mm-teal-bright)",
+  sand: "var(--mm-sand)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
+  healthy: "var(--mm-sys-authority)",
+  danger: "var(--mm-danger)",
 };
 
 export const BLAST_WINDOWS: FDProcess["window"][] = ["immediate", "1-7 days", "7-30 days", "30-90 days"];
@@ -41,7 +41,7 @@ export const WINDOW_LABELS: Record<FDProcess["window"], string> = {
 export function depColor(label: string): string {
   if (label === "critical" || label === "dangerous") return T.danger;
   if (label === "high") return T.sand;
-  if (label === "moderate" || label === "mixed" || label === "low-moderate") return "#F59E0B";
+  if (label === "moderate" || label === "mixed" || label === "low-moderate") return "var(--mm-sys-visibility)";
   return T.healthy;
 }
 export function depBg(label: string): string {
@@ -60,7 +60,7 @@ export function ringLabel(score: number): string {
 export function ringColor(score: number): string {
   if (score > 70) return T.danger;
   if (score > 50) return T.sand;
-  if (score > 30) return "#F59E0B";
+  if (score > 30) return "var(--mm-sys-visibility)";
   return T.healthy;
 }
 
@@ -209,7 +209,7 @@ export function DependencySplit({ processes, systems }: { processes: FDProcess[]
 export function BlastRadiusTimeline({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
   const colorByCode = new Map(systems.map((s) => [s.code, s.color]));
   const dangerous = processes.filter((p) => p.type === "dangerous");
-  const dotColors = [T.danger, "#F97316", T.sand, "#F59E0B"];
+  const dotColors = [T.danger, "#F97316", T.sand, "var(--mm-sys-visibility)"];
   return (
     <div>
       <p
@@ -363,7 +363,7 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
             key={i}
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.07)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: "18px 20px",
               marginBottom: 12,
@@ -504,7 +504,7 @@ export function SystemsTab({
             key={dep.code}
             style={{
               background: T.white,
-              border: `1px solid ${isExpanded ? dep.color + "40" : "rgba(0,0,0,0.07)"}`,
+              border: `1px solid ${isExpanded ? dep.color + "40" : "var(--mm-rule)"}`,
               borderRadius: 12,
               marginBottom: 12,
               overflow: "hidden",
@@ -1004,7 +1004,7 @@ function Page() {
                     <div
                       style={{
                         background: T.white,
-                        border: "1px solid rgba(0,0,0,0.07)",
+                        border: "1px solid var(--mm-rule)",
                         borderRadius: 14,
                         padding: 28,
                         marginBottom: 24,
@@ -1056,7 +1056,7 @@ function Page() {
                   <div
                     style={{
                       background: T.white,
-                      border: "1px solid rgba(0,0,0,0.07)",
+                      border: "1px solid var(--mm-rule)",
                       borderRadius: 14,
                       padding: 24,
                       marginBottom: 24,
@@ -1178,7 +1178,7 @@ function Page() {
                 <div
                   style={{
                     background: T.white,
-                    border: "1px solid rgba(0,0,0,0.07)",
+                    border: "1px solid var(--mm-rule)",
                     borderRadius: 14,
                     padding: 28,
                     boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
@@ -1215,7 +1215,7 @@ function Page() {
                 <div
                   style={{
                     background: T.white,
-                    border: "1px solid rgba(0,0,0,0.07)",
+                    border: "1px solid var(--mm-rule)",
                     borderRadius: 14,
                     padding: 28,
                     boxShadow: "0 2px 8px rgba(24,40,41,0.05)",

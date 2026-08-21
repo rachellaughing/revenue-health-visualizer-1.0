@@ -19,6 +19,7 @@ import { TopBar } from "../components/top-bar";
 import { BottomTabBar } from "../components/bottom-tab-bar";
 
 import { AuthProvider, useAuth } from "../lib/auth-context";
+import { ThemeProvider, themeInitScript } from "../lib/theme";
 import { Toaster } from "../components/ui/sonner";
 import { useIsMobile } from "../hooks/use-mobile";
 import { useServerFn } from "@tanstack/react-start";
@@ -120,9 +121,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
         {children}
@@ -136,9 +138,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AuthGate />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

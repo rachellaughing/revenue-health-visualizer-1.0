@@ -10,14 +10,14 @@ import { validateCoupon, redeemCoupon } from "@/lib/coupon.functions";
 import { getViewerContext } from "@/lib/viewer.functions";
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  tealBright: "#4ABFC4",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  tealBright: "var(--mm-teal-bright)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
 };
 
 export function BillingTab({ success }: { success?: boolean }) {
@@ -117,7 +117,7 @@ export function BillingTab({ success }: { success?: boolean }) {
       <div
         style={{
           background: T.white,
-          border: `1px solid #F0EFEA`,
+          border: `1px solid var(--mm-hairline)`,
           borderRadius: 14,
           padding: "24px 28px",
         }}
@@ -338,7 +338,7 @@ export function BillingTab({ success }: { success?: boolean }) {
         style={{
           display: "block",
           background: T.offWhite,
-          border: "1px solid #E5E5DF",
+          border: "1px solid var(--mm-hairline)",
           borderRadius: 14,
           padding: "20px 24px",
           color: T.ink,
@@ -361,12 +361,12 @@ export function BillingTab({ success }: { success?: boolean }) {
 
 function TierBadge({ tier }: { tier: string }) {
   const label = tier === "diagnostic" ? "DIAGNOSTIC" : tier === "pro" ? "ASSESSMENT" : "SNAPSHOT";
-  const bg = tier === "diagnostic" ? "#223F99" : tier === "pro" ? "#2A6B6E" : "#888880";
+  const bg = tier === "diagnostic" ? "var(--mm-sys-lifecycle)" : tier === "pro" ? "var(--mm-teal)" : "var(--mm-mid)";
   return (
     <span
       style={{
         background: bg,
-        color: "#FFFFFF",
+        color: "var(--mm-white)",
         fontSize: 10,
         fontWeight: 700,
         letterSpacing: "0.1em",
@@ -408,7 +408,7 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
       <div
         style={{
           background: T.white,
-          border: `1px solid #F0EFEA`,
+          border: `1px solid var(--mm-hairline)`,
           borderRadius: 14,
           padding: "24px 28px",
         }}
@@ -445,7 +445,7 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
       <div
         style={{
           background: T.white,
-          border: `1px solid #F0EFEA`,
+          border: `1px solid var(--mm-hairline)`,
           borderRadius: 14,
           padding: "24px 28px",
         }}

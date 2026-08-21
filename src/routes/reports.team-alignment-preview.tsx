@@ -20,31 +20,31 @@ export const Route = createFileRoute("/reports/team-alignment-preview")({
 // real (Diagnostic) report uses, so the components below render identically.
 const ILLUSTRATIVE_SYSTEMS: AlignmentSystem[] = [
   {
-    code: "POS", name: "Positioning", color: "#3B82F6",
+    code: "POS", name: "Positioning", color: "var(--mm-sys-positioning)",
     founderScore: 78, teamAvg: 61, gap: 17, direction: "founder_high", status: "significant_gap",
     clusters: [{ label: "Leadership", score: 74 }, { label: "Sales", score: 58 }, { label: "Marketing", score: 51 }],
     narrative: null,
   },
   {
-    code: "AUTH", name: "Authority", color: "#10B981",
+    code: "AUTH", name: "Authority", color: "var(--mm-sys-authority)",
     founderScore: 82, teamAvg: 79, gap: 3, direction: "aligned", status: "strong_alignment",
     clusters: [{ label: "Leadership", score: 81 }, { label: "Sales", score: 77 }, { label: "Marketing", score: 80 }],
     narrative: null,
   },
   {
-    code: "CONV", name: "Conversion", color: "#F05223",
+    code: "CONV", name: "Conversion", color: "var(--mm-ember)",
     founderScore: 55, teamAvg: 74, gap: -19, direction: "team_high", status: "significant_gap",
     clusters: [{ label: "Leadership", score: 60 }, { label: "Sales", score: 79 }, { label: "Marketing", score: 68 }],
     narrative: null,
   },
   {
-    code: "LFC", name: "Lifecycle", color: "#8B5CF6",
+    code: "LFC", name: "Lifecycle", color: "var(--mm-sys-lifecycle)",
     founderScore: 71, teamAvg: 44, gap: 27, direction: "founder_high", status: "critical_gap",
     clusters: [{ label: "Leadership", score: 68 }, { label: "Sales", score: 41 }, { label: "Marketing", score: 39 }],
     narrative: null,
   },
   {
-    code: "VIS", name: "Visibility", color: "#F59E0B",
+    code: "VIS", name: "Visibility", color: "var(--mm-sys-visibility)",
     founderScore: 66, teamAvg: 62, gap: 4, direction: "aligned", status: "strong_alignment",
     clusters: [{ label: "Leadership", score: 64 }, { label: "Sales", score: 60 }, { label: "Marketing", score: 65 }],
     narrative: null,
@@ -120,12 +120,12 @@ function Page() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
           {[
-            { label: "Overall Alignment", value: `${overallAlignment}%`, color: overallAlignment > 80 ? "#10B981" : overallAlignment > 65 ? "#F59E0B" : T.sand, sub: "Across all systems" },
-            { label: "Critical Gaps", value: criticalGaps, color: criticalGaps > 0 ? "#EF4444" : "#10B981", sub: "Require immediate attention" },
+            { label: "Overall Alignment", value: `${overallAlignment}%`, color: overallAlignment > 80 ? "var(--mm-sys-authority)" : overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand, sub: "Across all systems" },
+            { label: "Critical Gaps", value: criticalGaps, color: criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-sys-authority)", sub: "Require immediate attention" },
             { label: "Leader Sees Stronger", value: leaderHigher, color: T.ember, sub: "Potential blind spots" },
             { label: "Team Sees Stronger", value: teamHigher, color: T.teal, sub: "Hidden organisational strength" },
           ].map((c, i) => (
-            <div key={i} style={{ background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderTop: `3px solid ${c.color}`, borderRadius: 10, padding: "16px 18px" }}>
+            <div key={i} style={{ background: T.white, border: "1px solid var(--mm-rule)", borderTop: `3px solid ${c.color}`, borderRadius: 10, padding: "16px 18px" }}>
               <div style={{ fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", color: c.color, marginBottom: 4 }}>{c.value}</div>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.mid, letterSpacing: "0.06em", marginBottom: 2 }}>{c.label.toUpperCase()}</div>
               <div style={{ fontSize: 10, color: T.mid }}>{c.sub}</div>
@@ -133,7 +133,7 @@ function Page() {
           ))}
         </div>
 
-        <div style={{ background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: 28, marginBottom: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+        <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, marginBottom: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 6 }}>SCORE COMPARISON</div>

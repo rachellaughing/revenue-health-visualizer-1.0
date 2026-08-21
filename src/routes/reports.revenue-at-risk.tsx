@@ -15,17 +15,17 @@ export const Route = createFileRoute("/reports/revenue-at-risk")({
 });
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  sand: "#C4956A",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
-  sys: { POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B" } as Record<string, string>,
-  risk: { critical: "#EF4444", high: "#F97316", moderate: "#C4956A", low: "#10B981" },
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  sand: "var(--mm-sand)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
+  sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" } as Record<string, string>,
+  risk: { critical: "var(--mm-danger)", high: "#F97316", moderate: "var(--mm-sand)", low: "var(--mm-sys-authority)" },
 };
 
 const ARR_MIDPOINTS: Record<string, number> = {
@@ -367,7 +367,7 @@ function RiskCard({
   return (
     <div style={{
       background: T.white,
-      border: `1px solid ${expanded ? color + "40" : "rgba(0,0,0,0.07)"}`,
+      border: `1px solid ${expanded ? color + "40" : "var(--mm-rule)"}`,
       borderRadius: 12, marginBottom: 12, overflow: "hidden",
       boxShadow: expanded ? `0 4px 16px ${color}12` : "0 2px 6px rgba(24,40,41,0.04)",
       filter: isLocked ? "blur(3px)" : "none",

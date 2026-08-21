@@ -4,12 +4,12 @@ import { useAuth } from "@/lib/auth-context";
 import rhIconDark from "@/assets/rh-icon-dark.svg.asset.json";
 
 const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  mid: "#888880",
-  white: "#FFFFFF",
-  ember: "#F05223",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  mid: "var(--mm-mid)",
+  white: "var(--mm-white)",
+  ember: "var(--mm-ember)",
 };
 
 const ALLOWED_PREFIXES = ["/dashboard", "/health-check"];

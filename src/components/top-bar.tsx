@@ -1,4 +1,4 @@
-import { Menu, ChevronDown, LogOut, Settings, CreditCard } from "lucide-react";
+import { Menu, ChevronDown, LogOut, Settings, CreditCard, Sun, Moon } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme";
 
 type Props = {
   onToggleSidebar: () => void;
@@ -19,6 +20,7 @@ type Props = {
 export function TopBar({ onToggleSidebar, firstName, email }: Props) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const displayName = firstName?.trim() || (email ? email.split("@")[0] : "Account");
   const initial = (displayName[0] || "U").toUpperCase();
@@ -45,7 +47,21 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
         <Menu className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
       </button>
 
-      <DropdownMenu>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={toggleTheme}
+          className="rounded p-2 transition-colors hover:bg-[var(--mm-off-white)]"
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {theme === "dark" ? (
+            <Moon className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+          ) : (
+            <Sun className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+          )}
+        </button>
+
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
             className="flex items-center gap-2 rounded-full p-1 pr-2 transition-colors hover:bg-[var(--mm-off-white)]"
@@ -101,7 +117,8 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
             Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }

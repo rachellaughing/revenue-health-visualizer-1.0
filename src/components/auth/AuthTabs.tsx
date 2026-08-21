@@ -22,7 +22,7 @@ export function AuthTabs({
         role="tablist"
         aria-label="Authentication"
         className="grid grid-cols-2 gap-2 p-1 rounded-md"
-        style={{ backgroundColor: "var(--mm-off-white)", border: "1px solid #E5E5DF" }}
+        style={{ backgroundColor: "var(--mm-off-white)", border: "1px solid var(--mm-hairline)" }}
       >
         <TabButton active={active === "signin"} onClick={() => onChange("signin")}>
           Sign in
@@ -52,8 +52,8 @@ function TabButton({
       onClick={onClick}
       className="rounded-md px-4 py-2 text-sm font-semibold transition-colors"
       style={{
-        backgroundColor: active ? "var(--mm-ink)" : "transparent",
-        color: active ? "#FFFFFF" : "var(--mm-ink)",
+        backgroundColor: active ? "var(--mm-abyss)" : "transparent",
+        color: active ? "var(--mm-white)" : "var(--mm-ink)",
       }}
     >
       {children}

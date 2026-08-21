@@ -11,24 +11,24 @@ export const Route = createFileRoute("/reports/team-alignment")({
 });
 
 export const T = {
-  abyss: "#182829",
-  paper: "#FFFEFA",
-  offWhite: "#F5F5F0",
-  ember: "#F05223",
-  teal: "#2A6B6E",
-  tealMid: "#3D8C8F",
-  tealBright: "#4ABFC4",
-  sand: "#C4956A",
-  mid: "#888880",
-  ink: "#111111",
-  white: "#FFFFFF",
+  abyss: "var(--mm-abyss)",
+  paper: "var(--mm-paper)",
+  offWhite: "var(--mm-off-white)",
+  ember: "var(--mm-ember)",
+  teal: "var(--mm-teal)",
+  tealMid: "var(--mm-teal-mid)",
+  tealBright: "var(--mm-teal-bright)",
+  sand: "var(--mm-sand)",
+  mid: "var(--mm-mid)",
+  ink: "var(--mm-ink)",
+  white: "var(--mm-white)",
 };
 
 export function gapColor(status: AlignmentSystem["status"]): string {
-  if (status === "critical_gap") return "#EF4444";
+  if (status === "critical_gap") return "var(--mm-danger)";
   if (status === "significant_gap") return T.sand;
-  if (status === "moderate_gap") return "#F59E0B";
-  return "#10B981";
+  if (status === "moderate_gap") return "var(--mm-sys-visibility)";
+  return "var(--mm-sys-authority)";
 }
 
 export function statusLabel(status: AlignmentSystem["status"]): string {
@@ -172,7 +172,7 @@ export function SystemCard({
     <div
       style={{
         background: T.white,
-        border: `1px solid ${expanded ? d.color + "40" : "rgba(0,0,0,0.07)"}`,
+        border: `1px solid ${expanded ? d.color + "40" : "var(--mm-rule)"}`,
         borderRadius: 12,
         marginBottom: 12,
         overflow: "hidden",
@@ -301,7 +301,7 @@ function Page() {
           <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
             REVENUE HEALTH MATRIX™ › TEAM ALIGNMENT
           </div>
-          <div style={{ background: T.white, border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: 40, textAlign: "center", boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 40, textAlign: "center", boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
             <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: T.ink, margin: "0 0 12px" }}>Waiting for your team</h1>
             <p style={{ color: T.mid, fontSize: 14, lineHeight: 1.65, margin: "0 0 24px" }}>
               Your team members haven&apos;t completed the Health Check yet ({d.completedCount}/{d.invitedCount} complete).
@@ -364,13 +364,13 @@ function Page() {
               {
                 label: "Overall Alignment",
                 value: `${d.summary.overallAlignment}%`,
-                color: d.summary.overallAlignment > 80 ? "#10B981" : d.summary.overallAlignment > 65 ? "#F59E0B" : T.sand,
+                color: d.summary.overallAlignment > 80 ? "var(--mm-sys-authority)" : d.summary.overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand,
                 sub: "Across all systems",
               },
               {
                 label: "Critical Gaps",
                 value: d.summary.criticalGaps,
-                color: d.summary.criticalGaps > 0 ? "#EF4444" : "#10B981",
+                color: d.summary.criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-sys-authority)",
                 sub: "Require immediate attention",
               },
               { label: "Leader Sees Stronger", value: d.summary.leaderHigher, color: T.ember, sub: "Potential blind spots" },
@@ -380,7 +380,7 @@ function Page() {
                 key={i}
                 style={{
                   background: T.white,
-                  border: "1px solid rgba(0,0,0,0.07)",
+                  border: "1px solid var(--mm-rule)",
                   borderTop: `3px solid ${c.color}`,
                   borderRadius: 10,
                   padding: "16px 18px",
@@ -399,7 +399,7 @@ function Page() {
           <div
             style={{
               background: T.white,
-              border: "1px solid rgba(0,0,0,0.07)",
+              border: "1px solid var(--mm-rule)",
               borderRadius: 14,
               padding: 28,
               marginBottom: 28,
@@ -499,7 +499,7 @@ function Page() {
                     key={rec.rank}
                     style={{
                       background: T.white,
-                      border: "1px solid rgba(0,0,0,0.07)",
+                      border: "1px solid var(--mm-rule)",
                       borderLeft: `3px solid ${rec.systemColor}`,
                       borderRadius: 10,
                       padding: "18px 20px",

@@ -120,10 +120,10 @@ function Field({
         style={{
           width: "100%",
           borderRadius: 8,
-          border: "1px solid #E5E5DF",
+          border: "1px solid var(--mm-hairline)",
           padding: "10px 12px",
           fontSize: 14,
-          background: disabled ? "#F5F5F0" : "var(--mm-off-white)",
+          background: disabled ? "var(--mm-off-white)" : "var(--mm-off-white)",
           color: disabled ? "var(--mm-mid)" : "var(--mm-ink)",
           outline: "none",
         }}
@@ -133,8 +133,8 @@ function Field({
 }
 
 const cardStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #F0EFEA",
+  background: "var(--mm-paper)",
+  border: "1px solid var(--mm-hairline)",
   borderRadius: 14,
   padding: "28px 32px",
 };
@@ -149,7 +149,7 @@ const h2Style: React.CSSProperties = {
 
 const emberBtn: React.CSSProperties = {
   background: "var(--mm-ember)",
-  color: "#FFFFFF",
+  color: "var(--mm-white)",
   border: "none",
   padding: "12px 24px",
   borderRadius: 10,

@@ -72,7 +72,7 @@ export function ChangePasswordCard() {
             disabled={!canSubmit}
             style={{
               background: "var(--mm-ember)",
-              color: "#FFFFFF",
+              color: "var(--mm-white)",
               border: "none",
               padding: "12px 24px",
               borderRadius: 10,
@@ -121,7 +121,7 @@ function PasswordField({
           style={{
             width: "100%",
             borderRadius: 8,
-            border: `1px solid ${invalid ? "#E84F4F" : "#E5E5DF"}`,
+            border: `1px solid ${invalid ? "#E84F4F" : "var(--mm-hairline)"}`,
             padding: "10px 40px 10px 12px",
             fontSize: 14,
             background: "var(--mm-off-white)",
@@ -156,8 +156,8 @@ function PasswordField({
 }
 
 const cardStyle: React.CSSProperties = {
-  background: "#FFFFFF",
-  border: "1px solid #F0EFEA",
+  background: "var(--mm-paper)",
+  border: "1px solid var(--mm-hairline)",
   borderRadius: 14,
   padding: "28px 32px",
   marginTop: 20,
