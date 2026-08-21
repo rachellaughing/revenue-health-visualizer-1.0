@@ -7,7 +7,7 @@ export function AuthSplitLayout({ children }: { children: ReactNode }) {
       <LeftPanel />
       <div
         className="flex min-h-screen items-center justify-center px-4 py-12 relative"
-        style={{ backgroundColor: "#F9F6F1" }}
+        style={{ backgroundColor: "var(--mm-paper)" }}
       >
         <div className="w-full max-w-md">
           {children}
