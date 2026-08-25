@@ -19,8 +19,8 @@ export const T = {
 
 export const ACTION_TYPES = {
   document: { label: "Document It", color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 8.0%, transparent)" },
-  formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "rgba(245,158,11,0.08)" },
-  rebuild: { label: "Rebuild It", color: "var(--mm-sys-lifecycle)", bg: "rgba(139,92,246,0.08)" },
+  formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)" },
+  rebuild: { label: "Rebuild It", color: "var(--mm-sys-lifecycle)", bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 8%, transparent)" },
   eliminate: { label: "Eliminate It", color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)" },
 } as const;
 

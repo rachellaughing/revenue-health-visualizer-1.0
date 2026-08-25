@@ -47,7 +47,7 @@ export function depColor(label: string): string {
 export function depBg(label: string): string {
   if (label === "critical" || label === "dangerous") return "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)";
   if (label === "high") return "color-mix(in srgb, var(--mm-sand) 10.0%, transparent)";
-  if (label === "moderate" || label === "mixed" || label === "low-moderate") return "rgba(245,158,11,0.08)";
+  if (label === "moderate" || label === "mixed" || label === "low-moderate") return "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)";
   return "color-mix(in srgb, var(--mm-sys-authority) 8.0%, transparent)";
 }
 
