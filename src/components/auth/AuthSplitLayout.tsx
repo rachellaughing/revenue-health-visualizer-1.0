@@ -42,7 +42,7 @@ function LeftPanel() {
   return (
     <div
       className="relative hidden lg:flex flex-col justify-between overflow-hidden px-12 py-10"
-      style={{ backgroundColor: "#1C2B2B", minHeight: "100vh" }}
+      style={{ backgroundColor: "var(--mm-abyss)", minHeight: "100vh" }}
     >
       <TreeBackground />
 
@@ -77,7 +77,7 @@ function LeftPanel() {
 
         <p
           style={{
-            color: "rgba(255,255,255,0.72)",
+            color: "color-mix(in srgb, var(--mm-white) 72.0%, transparent)",
             fontSize: 14,
             lineHeight: 1.6,
             marginTop: 22,
@@ -89,7 +89,7 @@ function LeftPanel() {
         <blockquote
           style={{
             borderLeft: "2px solid var(--mm-ember)",
-            background: "rgba(255,255,255,0.04)",
+            background: "color-mix(in srgb, var(--mm-white) 4.0%, transparent)",
             padding: "14px 18px",
             margin: "22px 0",
             fontFamily: "Georgia, serif",
@@ -104,7 +104,7 @@ function LeftPanel() {
 
         <p
           style={{
-            color: "rgba(255,255,255,0.6)",
+            color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)",
             fontSize: 13,
             fontStyle: "italic",
             margin: 0,
@@ -120,7 +120,7 @@ function LeftPanel() {
             gap: 18,
             marginTop: 28,
             paddingTop: 22,
-            borderTop: "1px solid rgba(255,255,255,0.1)",
+            borderTop: "1px solid color-mix(in srgb, var(--mm-white) 10.0%, transparent)",
           }}
         >
           {[
@@ -134,7 +134,7 @@ function LeftPanel() {
                   style={{
                     width: 1,
                     height: 36,
-                    backgroundColor: "rgba(255,255,255,0.15)",
+                    backgroundColor: "color-mix(in srgb, var(--mm-white) 15.0%, transparent)",
                   }}
                 />
               )}
@@ -154,7 +154,7 @@ function LeftPanel() {
                     fontSize: 10,
                     letterSpacing: "0.14em",
                     textTransform: "uppercase",
-                    color: "rgba(255,255,255,0.55)",
+                    color: "color-mix(in srgb, var(--mm-white) 55.0%, transparent)",
                     marginTop: 6,
                   }}
                 >
@@ -167,7 +167,7 @@ function LeftPanel() {
 
         <p
           style={{
-            color: "rgba(255,255,255,0.55)",
+            color: "color-mix(in srgb, var(--mm-white) 55.0%, transparent)",
             fontSize: 12,
             fontStyle: "italic",
             marginTop: 18,
@@ -180,7 +180,7 @@ function LeftPanel() {
       {/* Footer */}
       <div
         className="relative z-10"
-        style={{ color: "rgba(255,255,255,0.35)", fontSize: 11 }}
+        style={{ color: "color-mix(in srgb, var(--mm-white) 35.0%, transparent)", fontSize: 11 }}
       >
         © 2026 Marketplace Maven. All rights reserved.
       </div>

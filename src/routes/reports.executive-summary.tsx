@@ -62,11 +62,11 @@ function severityColor(s: string) {
   return T.mid;
 }
 function severityBg(s: string) {
-  if (s === "critical") return "rgba(239,68,68,0.1)";
-  if (s === "fragile") return "rgba(196,149,106,0.12)";
-  if (s === "stable") return "rgba(16,185,129,0.1)";
-  if (s === "strong") return "rgba(16,185,129,0.12)";
-  if (s === "not_assessed") return "rgba(136,136,128,0.10)";
+  if (s === "critical") return "color-mix(in srgb, var(--mm-danger) 10.0%, transparent)";
+  if (s === "fragile") return "color-mix(in srgb, var(--mm-sand) 12.0%, transparent)";
+  if (s === "stable") return "color-mix(in srgb, var(--mm-sys-authority) 10.0%, transparent)";
+  if (s === "strong") return "color-mix(in srgb, var(--mm-sys-authority) 12.0%, transparent)";
+  if (s === "not_assessed") return "color-mix(in srgb, var(--mm-mid) 10.0%, transparent)";
   return T.offWhite;
 }
 function severityLabelText(s: string) {
@@ -104,11 +104,11 @@ function Card({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 24,
-        boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
         ...style,
       }}
     >
@@ -174,7 +174,7 @@ function Skeleton({
         width,
         height,
         borderRadius: 6,
-        background: `linear-gradient(90deg, ${T.offWhite} 0%, #ECECE6 50%, ${T.offWhite} 100%)`,
+        background: `linear-gradient(90deg, ${T.offWhite} 0%, color-mix(in srgb, var(--mm-ink) 8%, var(--mm-off-white)) 50%, ${T.offWhite} 100%)`,
         backgroundSize: "200% 100%",
         animation: "rhvShimmer 1.4s ease-in-out infinite",
         ...style,
@@ -187,8 +187,8 @@ function BlindspotCallout() {
   return (
     <div
       style={{
-        background: `rgba(196,149,106,0.08)`,
-        border: `1px solid rgba(196,149,106,0.3)`,
+        background: `color-mix(in srgb, var(--mm-sand) 8.0%, transparent)`,
+        border: `1px solid color-mix(in srgb, var(--mm-sand) 30.0%, transparent)`,
         borderRadius: 10,
         padding: "14px 18px",
         display: "flex",
@@ -588,8 +588,8 @@ function ReportBody({
                 style={{
                   marginTop: 16,
                   padding: "10px 14px",
-                  background: "rgba(240,82,35,0.06)",
-                  border: "1px solid rgba(240,82,35,0.15)",
+                  background: "color-mix(in srgb, var(--mm-ember) 6.0%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--mm-ember) 15.0%, transparent)",
                   borderRadius: 8,
                   fontSize: 12,
                   fontFamily: "Inter",
@@ -645,9 +645,9 @@ function ReportBody({
                     fontWeight: 600,
                     padding: "3px 10px",
                     borderRadius: 20,
-                    background: b.color + "18",
+                    background: `color-mix(in srgb, ${b.color} 9.4%, transparent)`,
                     color: b.color,
-                    border: `1px solid ${b.color}30`,
+                    border: `1px solid color-mix(in srgb, ${b.color} 18.8%, transparent)`,
                   }}
                 >
                   {b.label}
@@ -791,7 +791,7 @@ function ReportBody({
                         inset: 0,
                         backdropFilter: "blur(4px)",
                         WebkitBackdropFilter: "blur(4px)",
-                        background: `${T.teal}05`,
+                        background: `color-mix(in srgb, ${T.teal} 2.0%, transparent)`,
                         display: "flex",
                         alignItems: "center",
                         padding: "0 24px",
@@ -1085,8 +1085,8 @@ function ReportBody({
                             width: 48,
                             height: 48,
                             borderRadius: 10,
-                            background: sysColor + "18",
-                            border: `1.5px solid ${sysColor}40`,
+                            background: `color-mix(in srgb, ${sysColor} 9.4%, transparent)`,
+                            border: `1.5px solid color-mix(in srgb, ${sysColor} 25.1%, transparent)`,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -1133,8 +1133,8 @@ function ReportBody({
           <div style={{ marginBottom: 32 }}>
             <Card
               style={{
-                background: "rgba(240,82,35,0.04)",
-                border: "1px solid rgba(240,82,35,0.2)",
+                background: "color-mix(in srgb, var(--mm-ember) 4.0%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)",
                 padding: "24px 28px",
                 display: "grid",
                 gridTemplateColumns: "1fr auto",
@@ -1240,7 +1240,7 @@ function ReportBody({
                   style={{
                     fontSize: 13,
                     fontFamily: "Inter",
-                    color: "rgba(255,255,255,0.6)",
+                    color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)",
                     lineHeight: 1.65,
                     margin: 0,
                     maxWidth: 480,
@@ -1311,7 +1311,7 @@ function ReportBody({
                   style={{
                     fontSize: 13,
                     fontFamily: "Inter",
-                    color: "rgba(255,255,255,0.6)",
+                    color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)",
                     lineHeight: 1.65,
                     margin: 0,
                     maxWidth: 480,

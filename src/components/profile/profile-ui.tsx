@@ -26,8 +26,8 @@ export const ProgressSteps = ({
                   : active
                     ? "var(--mm-abyss)"
                     : "var(--mm-off-white)",
-                border: `2px solid ${done ? "var(--mm-teal-bright)" : active ? "var(--mm-abyss)" : "rgba(0,0,0,0.12)"}`,
-                color: done || active ? "#fff" : "var(--mm-mid)",
+                border: `2px solid ${done ? "var(--mm-teal-bright)" : active ? "var(--mm-abyss)" : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)"}`,
+                color: done || active ? "var(--mm-white)" : "var(--mm-mid)",
               }}
             >
               {done ? "✓" : i + 1}
@@ -71,7 +71,7 @@ export const SectionCard = ({
     style={{
       background: "var(--mm-paper)",
       border: "1px solid var(--mm-rule)",
-      boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+      boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
     }}
   >
     <div
@@ -228,7 +228,7 @@ export function PrimaryButton({
       className="text-sm font-semibold rounded-lg transition-all"
       style={{
         background: enabled ? "var(--mm-ember)" : "var(--mm-off-white)",
-        color: enabled ? "#fff" : "var(--mm-mid)",
+        color: enabled ? "var(--mm-white)" : "var(--mm-mid)",
         padding: "13px 28px",
         border: "none",
         cursor: enabled ? "pointer" : "not-allowed",

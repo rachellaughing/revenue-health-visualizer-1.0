@@ -67,12 +67,12 @@ function illustrativeForChild(seed: string, code: string) {
 }
 
 function severity(score: number) {
-  if (score < 40) return { label: "Critical", color: T.danger, bg: "rgba(239,68,68,0.1)" };
-  if (score < 60) return { label: "Fragile", color: T.sand, bg: "rgba(196,149,106,0.12)" };
-  if (score < 75) return { label: "Stable", color: T.sys.AUTH, bg: "rgba(43,180,87,0.1)" };
-  return { label: "Strong", color: T.tealBright, bg: "rgba(74,191,196,0.12)" };
+  if (score < 40) return { label: "Critical", color: T.danger, bg: "color-mix(in srgb, var(--mm-danger) 10.0%, transparent)" };
+  if (score < 60) return { label: "Fragile", color: T.sand, bg: "color-mix(in srgb, var(--mm-sand) 12.0%, transparent)" };
+  if (score < 75) return { label: "Stable", color: T.sys.AUTH, bg: "color-mix(in srgb, var(--mm-sys-authority) 10.0%, transparent)" };
+  return { label: "Strong", color: T.tealBright, bg: "color-mix(in srgb, var(--mm-teal-bright) 12.0%, transparent)" };
 }
-const NOT_ASSESSED = { label: "Not assessed", color: T.mid, bg: "rgba(136,136,128,0.10)" };
+const NOT_ASSESSED = { label: "Not assessed", color: T.mid, bg: "color-mix(in srgb, var(--mm-mid) 10.0%, transparent)" };
 function sevFor(child: ChildSystemScore & { illustrative?: boolean }) {
   if (child.severity === "not_assessed" && !(child as any).illustrative) return NOT_ASSESSED;
   return severity(child.healthScore);
@@ -200,7 +200,7 @@ function ChildRow({
               fontFamily: "Inter",
               fontWeight: 700,
               color: T.sand,
-              background: "rgba(196,149,106,0.15)",
+              background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
               padding: "1px 6px",
               borderRadius: 10,
               letterSpacing: "0.06em",
@@ -216,7 +216,7 @@ function ChildRow({
               fontFamily: "Inter",
               fontWeight: 700,
               color: T.sand,
-              background: "rgba(196,149,106,0.15)",
+              background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
               padding: "1px 6px",
               borderRadius: 10,
               letterSpacing: "0.06em",
@@ -265,7 +265,7 @@ function ChildRow({
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ height: 3, flex: 1, background: T.offWhite, borderRadius: 2, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${child.trackingScore}%`, background: systemColor + "60", borderRadius: 2 }} />
+                <div style={{ height: "100%", width: `${child.trackingScore}%`, background: `color-mix(in srgb, ${systemColor} 37.6%, transparent)`, borderRadius: 2 }} />
               </div>
               <span style={{ fontSize: 10, color: T.mid, fontFamily: "Inter", width: 28, textAlign: "right" }}>
                 {child.trackingScore}
@@ -386,12 +386,12 @@ function SystemSection({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid var(--mm-rule)`,
         borderRadius: 14,
         marginBottom: 20,
         overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
       }}
     >
       <button
@@ -403,7 +403,7 @@ function SystemSection({
           alignItems: "center",
           gap: 20,
           padding: "20px 24px",
-          background: open ? systemColor + "06" : "transparent",
+          background: open ? `color-mix(in srgb, ${systemColor} 2.4%, transparent)` : "transparent",
           border: "none",
           cursor: "pointer",
           borderBottom: open ? `1px solid ${T.offWhite}` : "none",
@@ -462,7 +462,7 @@ function SystemSection({
               fontSize: 18,
               fontFamily: "Inter",
               fontWeight: 700,
-              color: parentNotAssessed ? T.mid : systemColor + "C0",
+              color: parentNotAssessed ? T.mid : `color-mix(in srgb, ${systemColor} 75.3%, transparent)`,
             }}
           >
             {parentNotAssessed ? "—" : Math.round(system.trackingScore)}
@@ -508,7 +508,7 @@ function SystemSection({
             style={{
               padding: "18px 24px",
               borderBottom: `1px solid ${T.offWhite}`,
-              background: systemColor + "08",
+              background: `color-mix(in srgb, ${systemColor} 3.1%, transparent)`,
             }}
           >
             <div
@@ -543,7 +543,7 @@ function SystemSection({
             <div
               style={{
                 padding: "12px 24px",
-                background: "rgba(196,149,106,0.06)",
+                background: "color-mix(in srgb, var(--mm-sand) 6.0%, transparent)",
                 borderBottom: `1px solid ${T.offWhite}`,
                 fontSize: 12,
                 fontFamily: "Inter",
@@ -602,7 +602,7 @@ function SystemSection({
                   left: 0,
                   right: 0,
                   height: "55%",
-                  background: `linear-gradient(to bottom, transparent, ${T.paper}dd, ${T.paper})`,
+                  background: `linear-gradient(to bottom, transparent, color-mix(in srgb, ${T.paper} 86.7%, transparent), ${T.paper})`,
                   display: "flex",
                   alignItems: "flex-end",
                   justifyContent: "center",
@@ -682,11 +682,11 @@ function Legend() {
     <div
       style={{
         marginBottom: 28,
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
       }}
     >
       <button
@@ -764,7 +764,7 @@ function Legend() {
                   fontFamily: "Inter",
                   fontWeight: 700,
                   color: T.sand,
-                  background: "rgba(196,149,106,0.15)",
+                  background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
                   padding: "2px 8px",
                   borderRadius: 8,
                 }}
@@ -900,7 +900,7 @@ function Page() {
         <main style={{ maxWidth: 980, margin: "0 auto", padding: "36px 40px 80px" }}>
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: 24,
@@ -935,7 +935,7 @@ function Page() {
         <main style={{ maxWidth: 980, margin: "0 auto", padding: "36px 40px 80px" }}>
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: 24,
@@ -984,8 +984,8 @@ function KeyFindingBanner({ keyFinding }: { keyFinding: RevenueSystemHealth["key
   return (
     <div
       style={{
-        background: T.white,
-        border: `1px solid rgba(42,107,110,0.25)`,
+        background: T.offWhite,
+        border: `1px solid color-mix(in srgb, var(--mm-teal) 25.0%, transparent)`,
         borderLeft: `4px solid ${T.teal}`,
         borderRadius: 12,
         padding: "18px 22px",
@@ -1098,7 +1098,7 @@ function ShortlistRow({
               fontFamily: "Inter",
               fontWeight: 700,
               color: T.sand,
-              background: "rgba(196,149,106,0.15)",
+              background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
               padding: "2px 7px",
               borderRadius: 10,
               letterSpacing: "0.06em",
@@ -1174,8 +1174,8 @@ function ShortlistRow({
           {isShadow && (
             <div
               style={{
-                background: "rgba(196,149,106,0.08)",
-                border: "1px solid rgba(196,149,106,0.22)",
+                background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--mm-sand) 22.0%, transparent)",
                 borderRadius: 8,
                 padding: "10px 12px",
                 marginBottom: 12,
@@ -1261,8 +1261,8 @@ function AttentionShortlist({
     fontWeight: 600,
     padding: "6px 14px",
     borderRadius: 20,
-    border: `1px solid ${active ? T.teal : "rgba(0,0,0,0.12)"}`,
-    background: active ? "rgba(42,107,110,0.10)" : "transparent",
+    border: `1px solid ${active ? T.teal : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)"}`,
+    background: active ? "color-mix(in srgb, var(--mm-teal) 10.0%, transparent)" : "transparent",
     color: active ? T.teal : T.mid,
     cursor: "pointer",
   });
@@ -1270,12 +1270,12 @@ function AttentionShortlist({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 14,
         marginBottom: 28,
         overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
       }}
     >
       <div style={{ padding: "20px 22px 14px" }}>
@@ -1324,7 +1324,7 @@ function AttentionShortlist({
       </div>
 
       {(showWeak || showShadow) && (
-        <div style={{ borderTop: `1px solid ${T.offWhite}`, background: T.offWhite + "80" }}>
+        <div style={{ borderTop: `1px solid ${T.offWhite}`, background: `color-mix(in srgb, ${T.offWhite} 50.2%, transparent)` }}>
           <button
             onClick={() => setDriversOpen((o) => !o)}
             style={{
@@ -1478,8 +1478,8 @@ function ReportBody({
         {/* Self-assessment callout */}
         <div
           style={{
-            background: "rgba(196,149,106,0.08)",
-            border: "1px solid rgba(196,149,106,0.25)",
+            background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--mm-sand) 25.0%, transparent)",
             borderRadius: 10,
             padding: "12px 18px",
             marginBottom: 28,

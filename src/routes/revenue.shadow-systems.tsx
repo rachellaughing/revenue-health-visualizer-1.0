@@ -18,10 +18,10 @@ export const T = {
 };
 
 export const ACTION_TYPES = {
-  document: { label: "Document It", color: "var(--mm-sys-authority)", bg: "rgba(16,185,129,0.08)" },
-  formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "rgba(245,158,11,0.08)" },
-  rebuild: { label: "Rebuild It", color: "var(--mm-sys-lifecycle)", bg: "rgba(139,92,246,0.08)" },
-  eliminate: { label: "Eliminate It", color: "var(--mm-danger)", bg: "rgba(239,68,68,0.08)" },
+  document: { label: "Document It", color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 8.0%, transparent)" },
+  formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)" },
+  rebuild: { label: "Rebuild It", color: "var(--mm-sys-lifecycle)", bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 8%, transparent)" },
+  eliminate: { label: "Eliminate It", color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)" },
 } as const;
 
 export const TYPE_PILLS = {
@@ -64,13 +64,13 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
       background: T.offWhite,
       border: `1px solid ${expanded ? `color-mix(in srgb, ${T.sand} 38%, transparent)` : "var(--mm-rule)"}`,
       borderRadius: 14, marginBottom: 14, overflow: "hidden",
-      boxShadow: expanded ? "0 4px 20px rgba(196,149,106,0.15)" : "0 2px 6px rgba(24,40,41,0.04)",
+      boxShadow: expanded ? "0 4px 20px color-mix(in srgb, var(--mm-sand) 15.0%, transparent)" : "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
       transition: "all 0.2s",
     }}>
       <button onClick={onToggle} style={{
         width: "100%", padding: "18px 22px",
         display: "flex", alignItems: "flex-start", gap: 16,
-        background: expanded ? "rgba(196,149,106,0.04)" : "transparent",
+        background: expanded ? "color-mix(in srgb, var(--mm-sand) 4.0%, transparent)" : "transparent",
         border: "none", cursor: "pointer", textAlign: "left",
         borderBottom: expanded ? `1px solid ${T.offWhite}` : "none",
       }}>

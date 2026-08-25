@@ -4,14 +4,14 @@ import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
 // Brand tokens (kept local to avoid coupling)
 const C = {
   paper: "var(--mm-paper)",
-  sand: "#F6F2EA",
-  sandDeep: "#ECE6D9",
-  ink: "#1A2828",
-  inkSoft: "#6B6560",
+  sand: "var(--mm-off-white)",
+  sandDeep: "var(--mm-rule)",
+  ink: "var(--mm-ink)",
+  inkSoft: "var(--mm-mid)",
   tealBright: "var(--mm-teal-bright)",
-  tealLink: "#1F8A8A",
-  abyss: "#16302E",
-  abyssDeep: "#0F2321",
+  tealLink: "var(--mm-teal)",
+  abyss: "var(--mm-abyss)",
+  abyssDeep: "var(--mm-abyss)",
 };
 
 // Match the CSS variables set in styles.css.
@@ -197,7 +197,7 @@ export function FrameworkExplainer({
           <p
             style={{
               fontSize: 13,
-              color: "rgba(255,254,250,0.65)",
+              color: "color-mix(in srgb, var(--mm-white) 65.0%, transparent)",
               lineHeight: 1.6,
               margin: "0 0 16px",
             }}
@@ -214,7 +214,7 @@ export function FrameworkExplainer({
               gap: 0,
               marginBottom: 20,
               paddingBottom: 18,
-              borderBottom: "1px solid rgba(255,254,250,0.12)",
+              borderBottom: "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)",
             }}
           >
             {[
@@ -238,7 +238,7 @@ export function FrameworkExplainer({
                 key={item.label}
                 style={{
                   flex: 1,
-                  borderLeft: i > 0 ? "1px solid rgba(255,254,250,0.12)" : "none",
+                  borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)" : "none",
                   paddingLeft: i > 0 ? 14 : 0,
                 }}
               >
@@ -247,7 +247,7 @@ export function FrameworkExplainer({
                     fontFamily: "'Instrument Serif', Georgia, serif",
                     fontSize: 30,
                     color: item.muted
-                      ? "rgba(255,254,250,0.5)"
+                      ? "color-mix(in srgb, var(--mm-white) 50.0%, transparent)"
                       : C.paper,
                     lineHeight: 1,
                   }}
@@ -258,7 +258,7 @@ export function FrameworkExplainer({
                   style={{
                     fontSize: 9.5,
                     letterSpacing: "0.08em",
-                    color: "rgba(255,254,250,0.5)",
+                    color: "color-mix(in srgb, var(--mm-white) 50.0%, transparent)",
                     marginTop: 4,
                   }}
                 >
@@ -332,7 +332,7 @@ export function FrameworkExplainer({
                   <span
                     style={{
                       fontSize: 11.5,
-                      color: "rgba(255,254,250,0.5)",
+                      color: "color-mix(in srgb, var(--mm-white) 50.0%, transparent)",
                     }}
                   >
                     {selectedInParent} of {list.length}
@@ -349,12 +349,12 @@ export function FrameworkExplainer({
                           borderRadius: 999,
                           fontSize: 11.5,
                           border: `1.3px solid ${
-                            chosen ? color : "rgba(255,254,250,0.25)"
+                            chosen ? color : "color-mix(in srgb, var(--mm-white) 25.0%, transparent)"
                           }`,
                           background: chosen ? color : "transparent",
                           color: chosen
                             ? C.abyssDeep
-                            : "rgba(255,254,250,0.75)",
+                            : "color-mix(in srgb, var(--mm-white) 75.0%, transparent)",
                           fontWeight: chosen ? 600 : 400,
                           userSelect: "none",
                         }}

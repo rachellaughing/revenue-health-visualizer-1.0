@@ -45,10 +45,10 @@ export function depColor(label: string): string {
   return T.healthy;
 }
 export function depBg(label: string): string {
-  if (label === "critical" || label === "dangerous") return "rgba(239,68,68,0.08)";
-  if (label === "high") return "rgba(196,149,106,0.1)";
-  if (label === "moderate" || label === "mixed" || label === "low-moderate") return "rgba(245,158,11,0.08)";
-  return "rgba(16,185,129,0.08)";
+  if (label === "critical" || label === "dangerous") return "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)";
+  if (label === "high") return "color-mix(in srgb, var(--mm-sand) 10.0%, transparent)";
+  if (label === "moderate" || label === "mixed" || label === "low-moderate") return "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)";
+  return "color-mix(in srgb, var(--mm-sys-authority) 8.0%, transparent)";
 }
 
 export function ringLabel(score: number): string {
@@ -190,16 +190,16 @@ export function DependencySplit({ processes, systems }: { processes: FDProcess[]
         dangerous,
         "DANGEROUS DEPENDENCY",
         T.danger,
-        "rgba(239,68,68,0.05)",
-        "rgba(239,68,68,0.2)",
+        "color-mix(in srgb, var(--mm-danger) 5.0%, transparent)",
+        "color-mix(in srgb, var(--mm-danger) 20.0%, transparent)",
         "Processes that will break or degrade without the founder. Creates a growth ceiling and key-person risk.",
       )}
       {renderCol(
         healthy,
         "HEALTHY DEPENDENCY",
         T.healthy,
-        "rgba(16,185,129,0.05)",
-        "rgba(16,185,129,0.2)",
+        "color-mix(in srgb, var(--mm-sys-authority) 5.0%, transparent)",
+        "color-mix(in srgb, var(--mm-sys-authority) 20.0%, transparent)",
         "Appropriate founder ownership at this stage. Strategy, culture, and vision-setting are founder work.",
       )}
     </div>
@@ -209,7 +209,7 @@ export function DependencySplit({ processes, systems }: { processes: FDProcess[]
 export function BlastRadiusTimeline({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
   const colorByCode = new Map(systems.map((s) => [s.code, s.color]));
   const dangerous = processes.filter((p) => p.type === "dangerous");
-  const dotColors = [T.danger, "#F97316", T.sand, "var(--mm-sys-visibility)"];
+  const dotColors = [T.danger, "var(--mm-sys-positioning)", T.sand, "var(--mm-sys-visibility)"];
   return (
     <div>
       <p
@@ -248,7 +248,7 @@ export function BlastRadiusTimeline({ processes, systems }: { processes: FDProce
                   height: 34,
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: dot + "20",
+                  background: `color-mix(in srgb, ${dot} 12.5%, transparent)`,
                   border: `2px solid ${dot}`,
                   display: "flex",
                   alignItems: "center",
@@ -277,8 +277,8 @@ export function BlastRadiusTimeline({ processes, systems }: { processes: FDProce
                     <div
                       key={i}
                       style={{
-                        background: T.white,
-                        border: `1px solid ${dot}25`,
+                        background: T.offWhite,
+                        border: `1px solid color-mix(in srgb, ${dot} 14.5%, transparent)`,
                         borderLeft: `3px solid ${dot}`,
                         borderRadius: 8,
                         padding: "12px 14px",
@@ -362,7 +362,7 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
           <div
             key={i}
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: "18px 20px",
@@ -371,7 +371,7 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
               gridTemplateColumns: "32px 1fr auto",
               gap: 16,
               alignItems: "flex-start",
-              boxShadow: "0 2px 6px rgba(24,40,41,0.04)",
+              boxShadow: "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
             }}
           >
             <div
@@ -379,8 +379,8 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
                 width: 32,
                 height: 32,
                 borderRadius: "50%",
-                background: sysColor + "18",
-                border: `1.5px solid ${sysColor}40`,
+                background: `color-mix(in srgb, ${sysColor} 9.4%, transparent)`,
+                border: `1.5px solid color-mix(in srgb, ${sysColor} 25.1%, transparent)`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -415,8 +415,8 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
               </div>
               <div
                 style={{
-                  background: T.teal + "08",
-                  border: `1px solid ${T.teal}20`,
+                  background: `color-mix(in srgb, ${T.teal} 3.1%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${T.teal} 12.5%, transparent)`,
                   borderRadius: 8,
                   padding: "10px 12px",
                 }}
@@ -460,7 +460,7 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
                 style={{
                   padding: "2px 10px",
                   borderRadius: 20,
-                  background: dc + "18",
+                  background: `color-mix(in srgb, ${dc} 9.4%, transparent)`,
                   color: dc,
                   fontSize: 10,
                   fontFamily: "Inter",
@@ -503,14 +503,14 @@ export function SystemsTab({
           <div
             key={dep.code}
             style={{
-              background: T.white,
-              border: `1px solid ${isExpanded ? dep.color + "40" : "var(--mm-rule)"}`,
+              background: T.offWhite,
+              border: `1px solid ${isExpanded ? `color-mix(in srgb, ${dep.color} 25.1%, transparent)` : "var(--mm-rule)"}`,
               borderRadius: 12,
               marginBottom: 12,
               overflow: "hidden",
               boxShadow: isExpanded
-                ? `0 4px 16px ${dep.color}10`
-                : "0 2px 6px rgba(24,40,41,0.04)",
+                ? `0 4px 16px color-mix(in srgb, ${dep.color} 6.3%, transparent)`
+                : "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
             }}
           >
             <button
@@ -522,7 +522,7 @@ export function SystemsTab({
                 alignItems: "center",
                 gap: 16,
                 padding: "16px 20px",
-                background: isExpanded ? dep.color + "06" : "transparent",
+                background: isExpanded ? `color-mix(in srgb, ${dep.color} 2.4%, transparent)` : "transparent",
                 border: "none",
                 cursor: "pointer",
                 textAlign: "left",
@@ -616,12 +616,12 @@ export function SystemsTab({
                           marginBottom: 8,
                           background:
                             p.type === "dangerous"
-                              ? "rgba(239,68,68,0.04)"
-                              : "rgba(16,185,129,0.04)",
+                              ? "color-mix(in srgb, var(--mm-danger) 4.0%, transparent)"
+                              : "color-mix(in srgb, var(--mm-sys-authority) 4.0%, transparent)",
                           border: `1px solid ${
                             p.type === "dangerous"
-                              ? "rgba(239,68,68,0.15)"
-                              : "rgba(16,185,129,0.15)"
+                              ? "color-mix(in srgb, var(--mm-danger) 15.0%, transparent)"
+                              : "color-mix(in srgb, var(--mm-sys-authority) 15.0%, transparent)"
                           }`,
                           borderRadius: 8,
                         }}
@@ -662,8 +662,8 @@ export function SystemsTab({
                 {dep.handoffReadiness && (
                   <div
                     style={{
-                      background: T.teal + "06",
-                      border: `1px solid ${T.teal}20`,
+                      background: `color-mix(in srgb, ${T.teal} 2.4%, transparent)`,
+                      border: `1px solid color-mix(in srgb, ${T.teal} 12.5%, transparent)`,
                       borderRadius: 10,
                       padding: "14px 16px",
                       marginBottom: isDiagnostic && dep.narrative ? 16 : 0,
@@ -697,8 +697,8 @@ export function SystemsTab({
                 {isDiagnostic && dep.narrative && (
                   <div
                     style={{
-                      background: T.abyss + "06",
-                      border: `1px solid ${T.teal}20`,
+                      background: `color-mix(in srgb, ${T.abyss} 2.4%, transparent)`,
+                      border: `1px solid color-mix(in srgb, ${T.teal} 12.5%, transparent)`,
                       borderRadius: 10,
                       padding: "16px 18px",
                     }}
@@ -893,8 +893,8 @@ function Page() {
         {d.state === "pending" ? (
           <div
             style={{
-              background: T.white,
-              border: `1px dashed ${T.teal}40`,
+              background: T.offWhite,
+              border: `1px dashed color-mix(in srgb, ${T.teal} 25.1%, transparent)`,
               borderRadius: 14,
               padding: "40px 32px",
               textAlign: "center",
@@ -962,13 +962,13 @@ function Page() {
                     borderRadius: 8,
                     border: "none",
                     cursor: "pointer",
-                    background: activeTab === tab.id ? T.white : "transparent",
+                    background: activeTab === tab.id ? T.paper : "transparent",
                     color: activeTab === tab.id ? T.ink : T.mid,
                     fontFamily: "Inter",
                     fontSize: 12,
                     fontWeight: activeTab === tab.id ? 600 : 400,
                     boxShadow:
-                      activeTab === tab.id ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                      activeTab === tab.id ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
                   }}
                 >
                   {tab.label}
@@ -1003,12 +1003,12 @@ function Page() {
                   {isDiagnostic && d.overall.executiveSummary && (
                     <div
                       style={{
-                        background: T.white,
+                        background: T.offWhite,
                         border: "1px solid var(--mm-rule)",
                         borderRadius: 14,
                         padding: 28,
                         marginBottom: 24,
-                        boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+                        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
                       }}
                     >
                       <div
@@ -1055,12 +1055,12 @@ function Page() {
 
                   <div
                     style={{
-                      background: T.white,
+                      background: T.offWhite,
                       border: "1px solid var(--mm-rule)",
                       borderRadius: 14,
                       padding: 24,
                       marginBottom: 24,
-                      boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+                      boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
                     }}
                   >
                     <div
@@ -1177,11 +1177,11 @@ function Page() {
               {activeTab === "timeline" && (
                 <div
                   style={{
-                    background: T.white,
+                    background: T.offWhite,
                     border: "1px solid var(--mm-rule)",
                     borderRadius: 14,
                     padding: 28,
-                    boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+                    boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
                   }}
                 >
                   <div
@@ -1214,11 +1214,11 @@ function Page() {
               {activeTab === "actions" && (
                 <div
                   style={{
-                    background: T.white,
+                    background: T.offWhite,
                     border: "1px solid var(--mm-rule)",
                     borderRadius: 14,
                     padding: 28,
-                    boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+                    boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
                   }}
                 >
                   <div

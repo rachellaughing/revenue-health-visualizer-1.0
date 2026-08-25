@@ -88,7 +88,7 @@ function Page() {
             <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
               This is what your Team Alignment report will look like.
             </h3>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", margin: 0, lineHeight: 1.6, maxWidth: 480 }}>
+            <p style={{ fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", margin: 0, lineHeight: 1.6, maxWidth: 480 }}>
               The Team Alignment Report compares how you see your revenue systems versus how your team sees them. Your team completes the Health Check independently, and consultant observations are added during a Revenue Health Diagnostic™ session.
             </p>
           </div>
@@ -107,7 +107,7 @@ function Page() {
 
         <div
           style={{
-            background: "rgba(196,149,106,0.08)", border: "1px solid rgba(196,149,106,0.25)", borderRadius: 10,
+            background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)", border: "1px solid color-mix(in srgb, var(--mm-sand) 25.0%, transparent)", borderRadius: 10,
             padding: "12px 18px", marginBottom: 28, display: "flex", alignItems: "flex-start", gap: 10,
           }}
         >
@@ -125,7 +125,7 @@ function Page() {
             { label: "Leader Sees Stronger", value: leaderHigher, color: T.ember, sub: "Potential blind spots" },
             { label: "Team Sees Stronger", value: teamHigher, color: T.teal, sub: "Hidden organisational strength" },
           ].map((c, i) => (
-            <div key={i} style={{ background: T.white, border: "1px solid var(--mm-rule)", borderTop: `3px solid ${c.color}`, borderRadius: 10, padding: "16px 18px" }}>
+            <div key={i} style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderTop: `3px solid ${c.color}`, borderRadius: 10, padding: "16px 18px" }}>
               <div style={{ fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", color: c.color, marginBottom: 4 }}>{c.value}</div>
               <div style={{ fontSize: 11, fontWeight: 700, color: T.mid, letterSpacing: "0.06em", marginBottom: 2 }}>{c.label.toUpperCase()}</div>
               <div style={{ fontSize: 10, color: T.mid }}>{c.sub}</div>
@@ -133,7 +133,7 @@ function Page() {
           ))}
         </div>
 
-        <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, marginBottom: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+        <div style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, marginBottom: 28, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 6 }}>SCORE COMPARISON</div>
@@ -148,10 +148,10 @@ function Page() {
                   onClick={() => setChartView(v)}
                   style={{
                     padding: "6px 14px", borderRadius: 6, border: "none", cursor: "pointer",
-                    background: chartView === v ? T.white : "transparent",
+                    background: chartView === v ? T.paper : "transparent",
                     color: chartView === v ? T.ink : T.mid,
                     fontSize: 11, fontWeight: chartView === v ? 600 : 400,
-                    boxShadow: chartView === v ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                    boxShadow: chartView === v ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
                   }}
                 >
                   {v === "radar" ? "Radar" : "Side by side"}
@@ -223,7 +223,7 @@ function Page() {
             <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 17, fontWeight: 400, color: T.white, margin: "0 0 4px" }}>
               Get your team's real scores and consultant observations.
             </h3>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", margin: 0 }}>
+            <p style={{ fontSize: 12, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", margin: 0 }}>
               The Diagnostic adds per-system consultant observations and sequenced recommendations, built from your team's actual Health Check results.
             </p>
           </div>

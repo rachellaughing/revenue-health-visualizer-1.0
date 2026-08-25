@@ -276,7 +276,7 @@ export function HorizonSection({
     <div style={{
       background: T.offWhite, border: "1px solid var(--mm-rule)",
       borderRadius: 14, marginBottom: 20, overflow: "hidden",
-      boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+      boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
     }}>
       <div style={{
         padding: "16px 22px", background: `color-mix(in srgb, ${horizon.color} 3%, transparent)`,

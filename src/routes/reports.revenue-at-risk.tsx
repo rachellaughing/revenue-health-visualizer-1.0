@@ -25,7 +25,7 @@ const T = {
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
   sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" } as Record<string, string>,
-  risk: { critical: "var(--mm-danger)", high: "#F97316", moderate: "var(--mm-sand)", low: "var(--mm-sys-authority)" },
+  risk: { critical: "var(--mm-danger)", high: "var(--mm-sys-positioning)", moderate: "var(--mm-sand)", low: "var(--mm-sys-authority)" },
 };
 
 const ARR_MIDPOINTS: Record<string, number> = {
@@ -79,10 +79,10 @@ function calcExposure(item: RiskItemFull, c: Company): { amount: number | null; 
 }
 
 function riskLevel(healthScore: number, visibilityGap: number) {
-  if (healthScore < 40) return { label: "Critical", color: T.risk.critical, bg: "rgba(239,68,68,0.1)" };
-  if (healthScore < 50 || visibilityGap > 25) return { label: "High", color: T.risk.high, bg: "rgba(249,115,22,0.1)" };
-  if (healthScore < 65) return { label: "Moderate", color: T.sand, bg: "rgba(196,149,106,0.12)" };
-  return { label: "Low", color: T.risk.low, bg: "rgba(16,185,129,0.1)" };
+  if (healthScore < 40) return { label: "Critical", color: T.risk.critical, bg: "color-mix(in srgb, var(--mm-danger) 10.0%, transparent)" };
+  if (healthScore < 50 || visibilityGap > 25) return { label: "High", color: T.risk.high, bg: "color-mix(in srgb, var(--mm-sys-positioning) 10.0%, transparent)" };
+  if (healthScore < 65) return { label: "Moderate", color: T.sand, bg: "color-mix(in srgb, var(--mm-sand) 12.0%, transparent)" };
+  return { label: "Low", color: T.risk.low, bg: "color-mix(in srgb, var(--mm-sys-authority) 10.0%, transparent)" };
 }
 
 function fmtMoney(n: number) {
@@ -161,7 +161,7 @@ function Body({ payload }: { payload: RevenueAtRisk }) {
         <MissingMetricsCard company={payload.company} />
 
         <div style={{
-          background: "rgba(196,149,106,0.08)", border: "1px solid rgba(196,149,106,0.25)",
+          background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)", border: "1px solid color-mix(in srgb, var(--mm-sand) 25.0%, transparent)",
           borderRadius: 10, padding: "12px 18px", marginBottom: 24,
           display: "flex", alignItems: "flex-start", gap: 10,
         }}>
@@ -177,7 +177,7 @@ function Body({ payload }: { payload: RevenueAtRisk }) {
         </div>
 
         <div style={{
-          background: "rgba(196,149,106,0.06)", border: "1px solid rgba(196,149,106,0.2)",
+          background: "color-mix(in srgb, var(--mm-sand) 6.0%, transparent)", border: "1px solid color-mix(in srgb, var(--mm-sand) 20.0%, transparent)",
           borderRadius: 10, padding: "10px 16px", marginBottom: 24,
           display: "flex", alignItems: "flex-start", gap: 10,
         }}>
@@ -210,7 +210,7 @@ function Body({ payload }: { payload: RevenueAtRisk }) {
           {isStarter && (
             <div style={{
               position: "absolute", bottom: 0, left: 0, right: 0, height: 180,
-              background: `linear-gradient(to bottom, transparent, ${T.paper}ee, ${T.paper})`,
+              background: `linear-gradient(to bottom, transparent, color-mix(in srgb, ${T.paper} 93.3%, transparent), ${T.paper})`,
               display: "flex", alignItems: "flex-end", justifyContent: "center",
               paddingBottom: 20, pointerEvents: "none",
             }}>
@@ -281,9 +281,9 @@ function MissingMetricsCard({ company }: { company: Company }) {
 
   return (
     <div style={{
-      background: T.white, border: `1px solid rgba(240,82,35,0.2)`,
+      background: T.offWhite, border: `1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)`,
       borderRadius: 12, padding: 24, marginBottom: 24,
-      boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+      boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
     }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 18 }}>
         <span style={{ fontSize: 20, flexShrink: 0 }}>📊</span>
@@ -366,10 +366,10 @@ function RiskCard({
 
   return (
     <div style={{
-      background: T.white,
-      border: `1px solid ${expanded ? color + "40" : "var(--mm-rule)"}`,
+      background: T.offWhite,
+      border: `1px solid ${expanded ? `color-mix(in srgb, ${color} 25.1%, transparent)` : "var(--mm-rule)"}`,
       borderRadius: 12, marginBottom: 12, overflow: "hidden",
-      boxShadow: expanded ? `0 4px 16px ${color}12` : "0 2px 6px rgba(24,40,41,0.04)",
+      boxShadow: expanded ? `0 4px 16px color-mix(in srgb, ${color} 7.1%, transparent)` : "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
       filter: isLocked ? "blur(3px)" : "none",
       userSelect: isLocked ? "none" : "auto",
       opacity: isLocked ? 0.7 : 1,
@@ -378,7 +378,7 @@ function RiskCard({
         width: "100%", display: "grid",
         gridTemplateColumns: "44px 1fr auto auto auto auto",
         alignItems: "center", gap: 16, padding: "16px 20px",
-        background: expanded ? color + "06" : "transparent",
+        background: expanded ? `color-mix(in srgb, ${color} 2.4%, transparent)` : "transparent",
         border: "none", cursor: isLocked ? "not-allowed" : "pointer",
         textAlign: "left", borderBottom: expanded ? `1px solid ${T.offWhite}` : "none",
         fontFamily: "Inter",
@@ -453,7 +453,7 @@ function RiskCard({
 
             <div style={{
               background: risk.bg,
-              border: `1px solid ${risk.color}25`,
+              border: `1px solid color-mix(in srgb, ${risk.color} 14.5%, transparent)`,
               borderRadius: 10, padding: "16px 18px",
             }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 8 }}>
@@ -469,7 +469,7 @@ function RiskCard({
                   </div>
                   <div style={{
                     fontSize: 10, color: T.mid,
-                    background: "rgba(255,255,255,0.6)", borderRadius: 6,
+                    background: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", borderRadius: 6,
                     padding: "5px 8px", display: "inline-block",
                   }}>
                     {exposure.basis}

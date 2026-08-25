@@ -70,7 +70,7 @@ function SignInForm() {
       {verified && (
         <div
           className="mb-6 rounded-md px-4 py-3 text-sm"
-          style={{ backgroundColor: "#E8F5E9", color: "#1B5E20", border: "1px solid #C8E6C9" }}
+          style={{ backgroundColor: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", color: "var(--mm-sys-authority)", border: "1px solid color-mix(in srgb, var(--mm-sys-authority) 30%, transparent)" }}
           role="status"
         >
           Email verified — sign in to continue.
@@ -259,7 +259,7 @@ function SignUpForm() {
             className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
             style={{
               backgroundColor: "var(--mm-off-white)",
-              borderColor: pwBlurInvalid ? "#E84F4F" : "var(--mm-hairline)",
+              borderColor: pwBlurInvalid ? "var(--mm-danger)" : "var(--mm-hairline)",
               color: "var(--mm-ink)",
               paddingRight: 40,
             }}

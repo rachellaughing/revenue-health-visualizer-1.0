@@ -94,13 +94,13 @@ const NINETY_DAY_FOCUS = SAMPLE_ITEMS.filter((i) =>
 function NinetyDayFocusCard({ item, rank }: { item: SampleItem; rank: number }) {
   return (
     <div style={{
-      background: T.white, border: "1px solid var(--mm-rule)", borderLeft: `3px solid ${item.color}`,
+      background: T.offWhite, border: "1px solid var(--mm-rule)", borderLeft: `3px solid ${item.color}`,
       borderRadius: 12, padding: "18px 20px", marginBottom: 12, display: "grid",
-      gridTemplateColumns: "32px 1fr", gap: 16, boxShadow: "0 2px 6px rgba(24,40,41,0.04)",
+      gridTemplateColumns: "32px 1fr", gap: 16, boxShadow: "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
     }}>
       <div style={{
-        width: 32, height: 32, borderRadius: "50%", background: item.color + "18",
-        border: `1.5px solid ${item.color}40`, display: "flex", alignItems: "center",
+        width: 32, height: 32, borderRadius: "50%", background: `color-mix(in srgb, ${item.color} 9.4%, transparent)`,
+        border: `1.5px solid color-mix(in srgb, ${item.color} 25.1%, transparent)`, display: "flex", alignItems: "center",
         justifyContent: "center", fontSize: 13, fontFamily: "Inter", fontWeight: 700, color: item.color,
       }}>{rank}</div>
       <div>
@@ -193,13 +193,13 @@ function Page() {
           display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "center",
         }}>
           <div>
-            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: "0.12em", marginBottom: 8 }}>
+            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)", letterSpacing: "0.12em", marginBottom: 8 }}>
               GET YOUR REAL ROADMAP
             </div>
             <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
               Turn this sample into a plan built from your own assessment.
             </h3>
-            <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.75)", margin: 0, lineHeight: 1.6 }}>
+            <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 75.0%, transparent)", margin: 0, lineHeight: 1.6 }}>
               The Revenue Health Diagnostic™ delivers a week-by-week 120-day roadmap with assigned owners, sequenced initiatives, and 90-day review checkpoints with Rachel.
             </p>
           </div>

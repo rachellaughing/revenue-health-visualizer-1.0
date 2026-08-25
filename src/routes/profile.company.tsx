@@ -548,13 +548,13 @@ function SymptomSelector({
               <div className="text-base mb-1">{meta.icon}</div>
               <div
                 className="text-xs font-semibold leading-tight"
-                style={{ color: isExpanded ? "#fff" : "var(--mm-ink)" }}
+                style={{ color: isExpanded ? "var(--mm-white)" : "var(--mm-ink)" }}
               >
                 {cat.category}
               </div>
               <div
                 className="text-[11px] mt-1 leading-snug"
-                style={{ color: isExpanded ? "rgba(255,255,255,0.55)" : "var(--mm-mid)" }}
+                style={{ color: isExpanded ? "color-mix(in srgb, var(--mm-white) 55.0%, transparent)" : "var(--mm-mid)" }}
               >
                 {meta.description}
               </div>
@@ -626,7 +626,7 @@ function SymptomSelector({
                           className="text-[13px]"
                           style={{
                             fontWeight: isSelected ? 500 : 400,
-                            color: isSelected ? "#fff" : "var(--mm-ink)",
+                            color: isSelected ? "var(--mm-white)" : "var(--mm-ink)",
                           }}
                         >
                           {sym.symptom}
@@ -644,8 +644,8 @@ function SymptomSelector({
         <div
           className="rounded-lg px-4 py-3 mt-3"
           style={{
-            background: "rgba(42,107,110,0.07)",
-            border: "1px solid rgba(42,107,110,0.2)",
+            background: "color-mix(in srgb, var(--mm-teal) 7.0%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--mm-teal) 20.0%, transparent)",
           }}
         >
           <div
@@ -827,7 +827,7 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
         style={{
           background: "var(--mm-paper)",
           border: "1px solid var(--mm-rule)",
-          boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+          boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
         }}
       >
         <div className="pb-4 mb-5" style={{ borderBottom: "1px solid var(--mm-off-white)" }}>
@@ -900,7 +900,7 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
         style={{
           background: "var(--mm-paper)",
           border: "1px solid var(--mm-rule)",
-          boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+          boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
         }}
       >
         <div className="pb-4 mb-5" style={{ borderBottom: "1px solid var(--mm-off-white)" }}>

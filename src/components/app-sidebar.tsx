@@ -172,7 +172,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
       >
         <div
           className="flex h-14 items-center px-4"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", justifyContent: collapsed ? "center" : "flex-start" }}
+          style={{ borderBottom: "1px solid color-mix(in srgb, var(--mm-white) 6.0%, transparent)", justifyContent: collapsed ? "center" : "flex-start" }}
         >
           <img
             src={rhIconLight.url}
@@ -191,7 +191,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                   <button
                     onClick={() => toggle(section.label)}
                     className="flex w-full items-center justify-between px-4 py-2 text-[11px] font-medium tracking-wider transition-colors hover:text-white/80"
-                    style={{ color: "rgba(255,255,255,0.5)" }}
+                    style={{ color: "color-mix(in srgb, var(--mm-white) 50.0%, transparent)" }}
                   >
                     <span>{section.label}</span>
                     <ChevronDown
@@ -216,11 +216,11 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                           className="relative flex items-center gap-3 px-4 py-2 text-sm transition-colors"
                           style={{
                             color: locked
-                              ? "rgba(255,255,255,0.3)"
+                              ? "color-mix(in srgb, var(--mm-white) 30.0%, transparent)"
                               : active
                                 ? "var(--mm-white)"
-                                : "rgba(255,255,255,0.7)",
-                            backgroundColor: active && !locked ? "rgba(255,255,255,0.05)" : "transparent",
+                                : "color-mix(in srgb, var(--mm-white) 70.0%, transparent)",
+                            backgroundColor: active && !locked ? "color-mix(in srgb, var(--mm-white) 5.0%, transparent)" : "transparent",
                             borderLeft:
                               active && !locked
                                 ? "3px solid var(--mm-ember)"

@@ -40,7 +40,7 @@ export function TeamMemberShell({ firstName }: { firstName: string | null }) {
         style={{
           height: 60,
           flexShrink: 0,
-          background: T.white,
+          background: T.offWhite,
           borderBottom: `1px solid ${T.offWhite}`,
           display: "flex",
           alignItems: "center",

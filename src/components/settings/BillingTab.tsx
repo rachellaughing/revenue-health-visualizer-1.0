@@ -102,11 +102,11 @@ export function BillingTab({ success }: { success?: boolean }) {
         <div
           style={{
             padding: "14px 18px",
-            background: "#E8F5E9",
-            border: "1px solid #A5D6A7",
+            background: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))",
+            border: "1px solid color-mix(in srgb, var(--mm-sys-authority) 35%, transparent)",
             borderRadius: 10,
             fontSize: 14,
-            color: "#1B5E20",
+            color: "var(--mm-sys-authority)",
           }}
         >
           You're now on Revenue Health Assessment™. All 10 subsystems and full reports are unlocked.
@@ -116,7 +116,7 @@ export function BillingTab({ success }: { success?: boolean }) {
       {/* Current plan card */}
       <div
         style={{
-          background: T.white,
+          background: T.offWhite,
           border: `1px solid var(--mm-hairline)`,
           borderRadius: 14,
           padding: "24px 28px",
@@ -194,7 +194,7 @@ export function BillingTab({ success }: { success?: boolean }) {
             style={{
               fontSize: 14,
               lineHeight: 1.7,
-              color: "rgba(255,255,255,0.78)",
+              color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)",
               margin: "0 0 20px",
             }}
           >
@@ -206,7 +206,7 @@ export function BillingTab({ success }: { success?: boolean }) {
               paddingLeft: 20,
               fontSize: 13,
               lineHeight: 1.9,
-              color: "rgba(255,255,255,0.85)",
+              color: "color-mix(in srgb, var(--mm-white) 85.0%, transparent)",
             }}
           >
             <li>All 50 child systems across 5 revenue systems</li>
@@ -251,7 +251,7 @@ export function BillingTab({ success }: { success?: boolean }) {
           )}
 
           {checkout.error && (
-            <div style={{ marginTop: 14, fontSize: 13, color: "#FFB4A0" }}>
+            <div style={{ marginTop: 14, fontSize: 13, color: "var(--mm-danger)" }}>
               {(checkout.error as Error).message}
             </div>
           )}
@@ -261,7 +261,7 @@ export function BillingTab({ success }: { success?: boolean }) {
             style={{
               marginTop: 22,
               paddingTop: 20,
-              borderTop: "1px solid rgba(255,255,255,0.12)",
+              borderTop: "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)",
             }}
           >
             <div
@@ -288,8 +288,8 @@ export function BillingTab({ success }: { success?: boolean }) {
                 autoCapitalize="characters"
                 style={{
                   flex: 1,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "color-mix(in srgb, var(--mm-white) 6.0%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--mm-white) 18.0%, transparent)",
                   color: T.white,
                   padding: "10px 12px",
                   borderRadius: 8,
@@ -304,7 +304,7 @@ export function BillingTab({ success }: { success?: boolean }) {
                 style={{
                   background: "transparent",
                   color: T.white,
-                  border: "1px solid rgba(255,255,255,0.35)",
+                  border: "1px solid color-mix(in srgb, var(--mm-white) 35.0%, transparent)",
                   padding: "10px 18px",
                   borderRadius: 8,
                   fontWeight: 600,
@@ -322,7 +322,7 @@ export function BillingTab({ success }: { success?: boolean }) {
                 style={{
                   marginTop: 10,
                   fontSize: 13,
-                  color: couponMsg.kind === "ok" ? "#9FE7B8" : "#FFB4A0",
+                  color: couponMsg.kind === "ok" ? "var(--mm-teal-bright)" : "var(--mm-danger)",
                 }}
               >
                 {couponMsg.text}
@@ -407,7 +407,7 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
       {/* Current plan card */}
       <div
         style={{
-          background: T.white,
+          background: T.offWhite,
           border: `1px solid var(--mm-hairline)`,
           borderRadius: 14,
           padding: "24px 28px",
@@ -444,7 +444,7 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
       {/* Want to go deeper card */}
       <div
         style={{
-          background: T.white,
+          background: T.offWhite,
           border: `1px solid var(--mm-hairline)`,
           borderRadius: 14,
           padding: "24px 28px",

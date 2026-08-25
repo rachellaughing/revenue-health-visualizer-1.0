@@ -225,7 +225,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                     fontFamily: "Inter",
                     fontSize: 12,
                     fontWeight: isActive ? 600 : 400,
-                    boxShadow: isActive ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                    boxShadow: isActive ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
                     opacity: tab.locked ? 0.5 : 1,
                     display: "flex",
                     alignItems: "center",
@@ -342,7 +342,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                 border: "1px solid var(--mm-rule)",
                 borderRadius: 14,
                 padding: 24,
-                boxShadow: "0 2px 12px rgba(24,40,41,0.06)",
+                boxShadow: "0 2px 12px color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)",
                 marginBottom: 24,
                 overflow: "hidden",
               }}
@@ -728,7 +728,7 @@ function MatrixMapSVG({
           </radialGradient>
         ))}
         <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-          <path d="M0,0 L0,6 L8,3 z" fill="rgba(136,136,128,0.4)" />
+          <path d="M0,0 L0,6 L8,3 z" fill="color-mix(in srgb, var(--mm-mid) 40.0%, transparent)" />
         </marker>
         <filter id="glow">
           <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -1189,7 +1189,7 @@ function ZoomedSystem({
                         fontFamily: "Inter",
                         fontWeight: 700,
                         color: T.sand,
-                        background: "rgba(196,149,106,0.15)",
+                        background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
                         padding: "1px 5px",
                         borderRadius: 8,
                         letterSpacing: "0.06em",
@@ -1222,8 +1222,8 @@ function ZoomedSystem({
               style={{
                 marginTop: 14,
                 padding: "12px 16px",
-                background: "rgba(240,82,35,0.05)",
-                border: "1px solid rgba(240,82,35,0.2)",
+                background: "color-mix(in srgb, var(--mm-ember) 5.0%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)",
                 borderRadius: 10,
                 display: "flex",
                 alignItems: "center",
@@ -1260,7 +1260,7 @@ function ZoomedSystem({
             border: "1px solid var(--mm-rule)",
             borderRadius: 12,
             padding: 20,
-            boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+            boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
           }}
         >
           {child ? (
@@ -1309,7 +1309,7 @@ function ZoomedSystem({
                       display: "inline-flex",
                       padding: "3px 10px",
                       borderRadius: 20,
-                      background: "rgba(196,149,106,0.15)",
+                      background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
                       color: T.sand,
                       fontSize: 10,
                       fontFamily: "Inter",
@@ -1329,8 +1329,8 @@ function ZoomedSystem({
               {!child.assessed && (
                 <div
                   style={{
-                    background: "rgba(240,82,35,0.06)",
-                    border: "1px solid rgba(240,82,35,0.2)",
+                    background: "color-mix(in srgb, var(--mm-ember) 6.0%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)",
                     borderRadius: 8,
                     padding: "10px 12px",
                     marginBottom: 14,
@@ -1539,7 +1539,7 @@ function RelationshipPanel({
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 20,
-        boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
       }}
     >
       <div
@@ -1637,7 +1637,7 @@ function ConnPanel({
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 20,
-        boxShadow: "0 2px 8px rgba(24,40,41,0.04)",
+        boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
       }}
     >
       <div
@@ -1851,7 +1851,7 @@ function ScenarioCard({
         overflow: "hidden",
         boxShadow: expanded
           ? `0 4px 16px ${`color-mix(in srgb, ${color} 6%, transparent)`}`
-          : "0 2px 6px rgba(24,40,41,0.04)",
+          : "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
         opacity: illustrative && !expanded ? 0.85 : 1,
       }}
     >
@@ -1932,7 +1932,7 @@ function ScenarioCard({
                   fontFamily: "Inter",
                   fontWeight: 700,
                   color: T.sand,
-                  background: "rgba(196,149,106,0.15)",
+                  background: "color-mix(in srgb, var(--mm-sand) 15.0%, transparent)",
                   padding: "1px 6px",
                   borderRadius: 8,
                   letterSpacing: "0.04em",
@@ -2030,8 +2030,8 @@ function ScenarioCard({
           {illustrative && (
             <div
               style={{
-                background: "rgba(196,149,106,0.08)",
-                border: "1px solid rgba(196,149,106,0.25)",
+                background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--mm-sand) 25.0%, transparent)",
                 borderRadius: 8,
                 padding: "10px 14px",
                 marginBottom: 16,
@@ -2160,8 +2160,8 @@ function ScenarioCard({
 
           <div
             style={{
-              background: "rgba(42,107,110,0.06)",
-              border: "1px solid rgba(42,107,110,0.18)",
+              background: "color-mix(in srgb, var(--mm-teal) 6.0%, transparent)",
+              border: "1px solid color-mix(in srgb, var(--mm-teal) 18.0%, transparent)",
               borderRadius: 8,
               padding: "10px 14px",
               fontSize: 11,
