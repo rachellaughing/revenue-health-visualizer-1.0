@@ -61,8 +61,8 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
 
   return (
     <div style={{
-      background: T.white,
-      border: `1px solid ${expanded ? T.sand + "60" : "var(--mm-rule)"}`,
+      background: T.offWhite,
+      border: `1px solid ${expanded ? `color-mix(in srgb, ${T.sand} 38%, transparent)` : "var(--mm-rule)"}`,
       borderRadius: 14, marginBottom: 14, overflow: "hidden",
       boxShadow: expanded ? "0 4px 20px rgba(196,149,106,0.15)" : "0 2px 6px rgba(24,40,41,0.04)",
       transition: "all 0.2s",
@@ -76,7 +76,7 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
       }}>
         <div style={{
           width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-          background: T.abyss + "08", border: "1px solid rgba(24,40,41,0.12)",
+          background: `color-mix(in srgb, ${T.abyss} 3%, transparent)`, border: "1px solid var(--mm-rule)",
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
         }}>{typeIcon(shadow.type)}</div>
 
@@ -85,8 +85,8 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
             {shadow.name}
           </div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <span style={{ padding: "2px 10px", borderRadius: 20, background: shadow.parentColor + "18", color: shadow.parentColor, fontSize: 10, fontFamily: "Inter", fontWeight: 700 }}>{shadow.parentSystem}</span>
-            <span style={{ padding: "2px 10px", borderRadius: 20, background: typeStyle.color + "15", color: typeStyle.color, fontSize: 10, fontFamily: "Inter", fontWeight: 600 }}>{typeStyle.label}</span>
+            <span style={{ padding: "2px 10px", borderRadius: 20, background: `color-mix(in srgb, ${shadow.parentColor} 9%, transparent)`, color: shadow.parentColor, fontSize: 10, fontFamily: "Inter", fontWeight: 700 }}>{shadow.parentSystem}</span>
+            <span style={{ padding: "2px 10px", borderRadius: 20, background: `color-mix(in srgb, ${typeStyle.color} 8%, transparent)`, color: typeStyle.color, fontSize: 10, fontFamily: "Inter", fontWeight: 600 }}>{typeStyle.label}</span>
             <span style={{ padding: "2px 10px", borderRadius: 20, background: action.bg, color: action.color, fontSize: 10, fontFamily: "Inter", fontWeight: 700 }}>{action.label}</span>
           </div>
         </div>
@@ -116,14 +116,14 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
             </div>
           </div>
 
-          <div style={{ background: T.abyss + "05", border: "1px solid rgba(24,40,41,0.1)", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
+          <div style={{ background: `color-mix(in srgb, ${T.abyss} 2%, transparent)`, border: "1px solid var(--mm-rule)", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
             <div style={{ fontSize: 9, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 8 }}>WHAT WE FOUND IN THE PBJ SESSION</div>
             <p style={{ fontSize: 13, fontFamily: "Inter", color: T.ink, lineHeight: 1.75, margin: 0 }}>{shadow.finding}</p>
           </div>
 
-          <div style={{ background: action.bg, border: `1px solid ${action.color}25`, borderRadius: 10, padding: "16px 18px" }}>
+          <div style={{ background: action.bg, border: `1px solid ${`color-mix(in srgb, ${action.color} 15%, transparent)`}`, borderRadius: 10, padding: "16px 18px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ padding: "2px 10px", borderRadius: 20, background: action.color + "20", color: action.color, fontSize: 10, fontFamily: "Inter", fontWeight: 700 }}>{action.label}</span>
+              <span style={{ padding: "2px 10px", borderRadius: 20, background: `color-mix(in srgb, ${action.color} 13%, transparent)`, color: action.color, fontSize: 10, fontFamily: "Inter", fontWeight: 700 }}>{action.label}</span>
               <span style={{ fontSize: 9, fontFamily: "Inter", color: T.mid, letterSpacing: "0.08em", fontWeight: 600 }}>RECOMMENDED ACTION</span>
             </div>
             <p style={{ fontSize: 13, fontFamily: "Inter", color: T.ink, lineHeight: 1.7, margin: 0 }}>{shadow.recommended}</p>
@@ -171,7 +171,7 @@ function Page() {
         {data.state === "ready" ? (
           <div>
             <div style={{
-              background: T.tealBright + "12", border: `1px solid ${T.tealBright}30`,
+              background: `color-mix(in srgb, ${T.tealBright} 7%, transparent)`, border: `1px solid ${`color-mix(in srgb, ${T.tealBright} 19%, transparent)`}`,
               borderRadius: 10, padding: "12px 18px", marginBottom: 24,
               display: "flex", alignItems: "center", gap: 10,
             }}>
@@ -189,7 +189,7 @@ function Page() {
           </div>
         ) : (
           <div style={{
-            background: T.sand + "18", border: `1px solid ${T.sand}40`,
+            background: `color-mix(in srgb, ${T.sand} 9%, transparent)`, border: `1px solid ${`color-mix(in srgb, ${T.sand} 25%, transparent)`}`,
             borderRadius: 10, padding: "12px 18px",
             fontSize: 13, fontFamily: "Inter", color: T.ink,
           }}>

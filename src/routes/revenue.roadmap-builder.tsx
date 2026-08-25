@@ -86,7 +86,7 @@ export function WatchOutFor({ warnings, color }: { warnings: string[]; color: st
   return (
     <div style={{
       marginTop: 16, padding: "14px 16px",
-      background: T.offWhite, borderLeft: `2px solid ${color}40`, borderRadius: 6,
+      background: T.offWhite, borderLeft: `2px solid ${`color-mix(in srgb, ${color} 25%, transparent)`}`, borderRadius: 6,
     }}>
       <div style={{
         fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid,
@@ -127,13 +127,13 @@ export function SystemCard({
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "12px 18px", marginBottom: 12, borderRadius: 10,
-        background: T.offWhite, border: "1px dashed rgba(0,0,0,0.1)",
+        background: T.offWhite, border: "1px dashed var(--mm-rule)",
       }}>
         <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
           <span style={{ fontWeight: 600 }}>{item.name}</span> — removed from your roadmap
         </div>
         <button onClick={() => onToggleInclusion(item)} style={{
-          background: "transparent", border: `1px solid ${T.mid}40`, borderRadius: 8,
+          background: "transparent", border: `1px solid ${`color-mix(in srgb, ${T.mid} 25%, transparent)`}`, borderRadius: 8,
           padding: "5px 12px", fontFamily: "Inter", fontSize: 11, fontWeight: 600,
           color: T.ink, cursor: "pointer",
         }}>Add back</button>
@@ -143,13 +143,13 @@ export function SystemCard({
 
   return (
     <div style={{
-      background: T.white, border: `1px solid ${item.color}30`,
+      background: T.offWhite, border: `1px solid ${`color-mix(in srgb, ${item.color} 19%, transparent)`}`,
       borderRadius: 12, overflow: "hidden", marginBottom: 12,
-      boxShadow: `0 2px 12px ${item.color}10`,
+      boxShadow: `0 2px 12px ${`color-mix(in srgb, ${item.color} 6%, transparent)`}`,
     }}>
       <div style={{
-        padding: "14px 18px", background: item.color + "08",
-        borderBottom: `1px solid ${item.color}20`,
+        padding: "14px 18px", background: `color-mix(in srgb, ${item.color} 3%, transparent)`,
+        borderBottom: `1px solid ${`color-mix(in srgb, ${item.color} 13%, transparent)`}`,
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -178,7 +178,7 @@ export function SystemCard({
         {(["tasks", "outcomes", "kpis"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)} style={{
             flex: 1, padding: "9px 0", border: "none", cursor: "pointer",
-            background: tab === t ? item.color + "10" : "transparent",
+            background: tab === t ? `color-mix(in srgb, ${item.color} 6%, transparent)` : "transparent",
             borderBottom: tab === t ? `2px solid ${item.color}` : "2px solid transparent",
             color: tab === t ? item.color : T.mid,
             fontFamily: "Inter", fontSize: 11, fontWeight: tab === t ? 700 : 400,
@@ -208,8 +208,8 @@ export function SystemCard({
                     onClick={() => !disabled && onToggleTask(item, i)}
                     style={{
                       display: "flex", gap: 10, alignItems: "flex-start", textAlign: "left",
-                      background: checked ? item.color + "0D" : "transparent",
-                      border: `1px solid ${checked ? item.color + "40" : "transparent"}`,
+                      background: checked ? `color-mix(in srgb, ${item.color} 5%, transparent)` : "transparent",
+                      border: `1px solid ${checked ? `color-mix(in srgb, ${item.color} 25%, transparent)` : "transparent"}`,
                       borderRadius: 8, padding: "8px 10px",
                       cursor: disabled ? "not-allowed" : "pointer",
                       opacity: disabled ? 0.45 : 1,
@@ -218,7 +218,7 @@ export function SystemCard({
                     <div style={{
                       width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
                       background: checked ? item.color : "transparent",
-                      border: `1.5px solid ${checked ? item.color : "rgba(0,0,0,0.2)"}`,
+                      border: `1.5px solid ${checked ? item.color : "var(--mm-rule)"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       color: T.white, fontSize: 11, fontWeight: 700,
                     }}>{checked ? "✓" : ""}</div>
@@ -274,13 +274,13 @@ export function HorizonSection({
 
   return (
     <div style={{
-      background: T.white, border: "1px solid var(--mm-rule)",
+      background: T.offWhite, border: "1px solid var(--mm-rule)",
       borderRadius: 14, marginBottom: 20, overflow: "hidden",
       boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
     }}>
       <div style={{
-        padding: "16px 22px", background: horizon.color + "08",
-        borderBottom: `1px solid ${horizon.color}20`,
+        padding: "16px 22px", background: `color-mix(in srgb, ${horizon.color} 3%, transparent)`,
+        borderBottom: `1px solid ${`color-mix(in srgb, ${horizon.color} 13%, transparent)`}`,
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -416,7 +416,7 @@ function Page() {
           </div>
           {totalTasks > 0 && (
             <div style={{
-              background: T.tealBright + "15", border: `1px solid ${T.tealBright}30`,
+              background: `color-mix(in srgb, ${T.tealBright} 8%, transparent)`, border: `1px solid ${`color-mix(in srgb, ${T.tealBright} 19%, transparent)`}`,
               borderRadius: 10, padding: "10px 16px", textAlign: "center", flexShrink: 0,
             }}>
               <div style={{ fontSize: 22, fontFamily: "'Instrument Serif', Georgia, serif", color: T.teal, fontWeight: 400 }}>{totalTasks}</div>
@@ -438,7 +438,7 @@ function Page() {
         ))}
 
         <div style={{
-          background: T.tealBright + "10", border: `1px solid ${T.tealBright}30`,
+          background: `color-mix(in srgb, ${T.tealBright} 6%, transparent)`, border: `1px solid ${`color-mix(in srgb, ${T.tealBright} 19%, transparent)`}`,
           borderRadius: 14, padding: "24px 28px", marginTop: 8,
         }}>
           <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.teal, letterSpacing: "0.12em", marginBottom: 8 }}>
