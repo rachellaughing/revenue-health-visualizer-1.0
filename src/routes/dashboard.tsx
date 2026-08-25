@@ -807,7 +807,7 @@ function ReturningView({ data }: { data: DashboardData }) {
                     {assessed ? val : "—"}
                   </span>
                 </div>
-                <div className="h-1 rounded-sm bg-white/[0.08]">
+                <div className="h-1 rounded-sm" style={{ background: "color-mix(in srgb, var(--mm-white) 8%, transparent)" }}>
                   <div
                     className="h-full rounded-sm"
                     style={{ width: `${val}%`, background: color }}

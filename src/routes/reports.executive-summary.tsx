@@ -174,7 +174,7 @@ function Skeleton({
         width,
         height,
         borderRadius: 6,
-        background: `linear-gradient(90deg, ${T.offWhite} 0%, #ECECE6 50%, ${T.offWhite} 100%)`,
+        background: `linear-gradient(90deg, ${T.offWhite} 0%, color-mix(in srgb, var(--mm-ink) 8%, var(--mm-off-white)) 50%, ${T.offWhite} 100%)`,
         backgroundSize: "200% 100%",
         animation: "rhvShimmer 1.4s ease-in-out infinite",
         ...style,

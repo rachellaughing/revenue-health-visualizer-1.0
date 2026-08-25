@@ -107,7 +107,7 @@ function LockedTeamPanel() {
             {checkout.isPending ? "Redirecting…" : "Upgrade to unlock team features"}
           </button>
           {checkout.error && (
-            <div style={{ marginTop: 12, fontSize: 12, color: "#C0392B" }}>
+            <div style={{ marginTop: 12, fontSize: 12, color: "var(--mm-danger)" }}>
               {(checkout.error as Error).message}
             </div>
           )}
@@ -275,10 +275,10 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                   </div>
                   {!isMobile && (() => {
                     const palette: Record<string, { bg: string; fg: string }> = {
-                      Completed: { bg: "#E8F5E9", fg: "#1B5E20" },
-                      "In progress": { bg: "#E0F2F1", fg: "#00695C" },
-                      Joined: { bg: "#E3F2FD", fg: "#0D47A1" },
-                      Invited: { bg: "#FFF4E5", fg: "#8A5A00" },
+                      Completed: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
+                      "In progress": { bg: "color-mix(in srgb, var(--mm-teal) 12%, var(--mm-off-white))", fg: "var(--mm-teal)" },
+                      Joined: { bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 12%, var(--mm-off-white))", fg: "var(--mm-sys-lifecycle)" },
+                      Invited: { bg: "color-mix(in srgb, var(--mm-sys-positioning) 12%, var(--mm-off-white))", fg: "var(--mm-sys-positioning)" },
                     };
                     const c = palette[m.status as string] ?? palette.Invited;
                     return (
@@ -302,10 +302,10 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
 
                 {isMobile && (() => {
                   const palette: Record<string, { bg: string; fg: string }> = {
-                    Completed: { bg: "#E8F5E9", fg: "#1B5E20" },
-                    "In progress": { bg: "#E0F2F1", fg: "#00695C" },
-                    Joined: { bg: "#E3F2FD", fg: "#0D47A1" },
-                    Invited: { bg: "#FFF4E5", fg: "#8A5A00" },
+                    Completed: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
+                    "In progress": { bg: "color-mix(in srgb, var(--mm-teal) 12%, var(--mm-off-white))", fg: "var(--mm-teal)" },
+                    Joined: { bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 12%, var(--mm-off-white))", fg: "var(--mm-sys-lifecycle)" },
+                    Invited: { bg: "color-mix(in srgb, var(--mm-sys-positioning) 12%, var(--mm-off-white))", fg: "var(--mm-sys-positioning)" },
                   };
                   const c = palette[m.status as string] ?? palette.Invited;
                   return (
@@ -373,12 +373,12 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
 
       <div
         style={{
-          background: "#FFF7E0",
-          border: "1px solid #F0D78C",
+          background: "color-mix(in srgb, var(--mm-sand) 12%, var(--mm-off-white))",
+          border: "1px solid color-mix(in srgb, var(--mm-sand) 35%, transparent)",
           borderRadius: 12,
           padding: "16px 20px",
           fontSize: 13,
-          color: "#6B4E00",
+          color: "var(--mm-sand)",
           lineHeight: 1.6,
         }}
       >

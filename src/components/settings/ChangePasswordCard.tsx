@@ -121,7 +121,7 @@ function PasswordField({
           style={{
             width: "100%",
             borderRadius: 8,
-            border: `1px solid ${invalid ? "#E84F4F" : "var(--mm-hairline)"}`,
+            border: `1px solid ${invalid ? "var(--mm-danger)" : "var(--mm-hairline)"}`,
             padding: "10px 40px 10px 12px",
             fontSize: 14,
             background: "var(--mm-off-white)",
@@ -149,7 +149,7 @@ function PasswordField({
         </button>
       </div>
       {helper && (
-        <p style={{ fontSize: 12, color: "#C0392B", marginTop: 6 }}>{helper}</p>
+        <p style={{ fontSize: 12, color: "var(--mm-danger)", marginTop: 6 }}>{helper}</p>
       )}
     </label>
   );

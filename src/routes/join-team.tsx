@@ -225,7 +225,7 @@ function JoinTeamPage() {
               className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
               style={{
                 backgroundColor: "var(--mm-off-white)",
-                borderColor: pwBlurInvalid ? "#E84F4F" : "var(--mm-hairline)",
+                borderColor: pwBlurInvalid ? "var(--mm-danger)" : "var(--mm-hairline)",
                 color: "var(--mm-ink)",
                 paddingRight: 40,
               }}
