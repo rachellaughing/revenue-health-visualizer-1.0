@@ -167,7 +167,7 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
             </div>
             <div
               style={{
-                background: T.offWhite,
+                background: T.paper,
                 borderRadius: 10,
                 padding: "10px 16px",
                 fontSize: 13,
@@ -187,7 +187,7 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
             display: "flex",
             gap: 8,
             marginBottom: 16,
-            borderBottom: `1px solid ${T.offWhite}`,
+            borderBottom: `1px solid var(--mm-rule)`,
           }}
         >
           {(
@@ -265,7 +265,7 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
           style={{
             paddingTop: 24,
             marginTop: 32,
-            borderTop: `1px solid ${T.offWhite}`,
+            borderTop: `1px solid var(--mm-rule)`,
             fontSize: 11,
             color: T.mid,
           }}
@@ -371,7 +371,7 @@ function OpportunityCard({ card, isQuickWin }: { card: FeaturedCard; isQuickWin:
       {card.startHere.length > 0 && (
         <div
           style={{
-            background: T.offWhite,
+            background: T.paper,
             borderRadius: 10,
             padding: "14px 16px",
             marginTop: 4,
@@ -477,7 +477,7 @@ function OtherOpportunities({ groups }: { groups: OtherOpportunityGroup[] }) {
             </button>
 
             {isOpen && (
-              <div style={{ borderTop: `1px solid ${T.offWhite}` }}>
+              <div style={{ borderTop: `1px solid var(--mm-rule)` }}>
                 {g.items.map((it) => {
                   const s = SEVERITY_STYLE[it.severity];
                   return (
@@ -488,7 +488,7 @@ function OtherOpportunities({ groups }: { groups: OtherOpportunityGroup[] }) {
                         alignItems: "center",
                         gap: 12,
                         padding: "11px 16px",
-                        borderBottom: `1px solid ${T.offWhite}`,
+                        borderBottom: `1px solid var(--mm-rule)`,
                       }}
                     >
                       <span style={{ fontSize: 13, color: T.ink }}>{it.name}</span>
@@ -558,7 +558,7 @@ function LockedSection({
 
       <div
         style={{
-          background: T.offWhite,
+          background: T.paper,
           border: "1px dashed color-mix(in srgb, var(--mm-mid) 55%, transparent)",
           borderRadius: 10,
           padding: "12px 16px",
@@ -583,7 +583,7 @@ function LockedSection({
           <div
             key={t.parentCode}
             style={{
-              background: T.offWhite,
+              background: T.paper,
               border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               padding: "12px 14px",
@@ -625,7 +625,7 @@ function LockedSection({
           <div
             key={s.childSystemId}
             style={{
-              background: T.offWhite,
+              background: T.paper,
               border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               padding: "14px 16px",
