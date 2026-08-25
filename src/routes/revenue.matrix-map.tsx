@@ -928,7 +928,7 @@ function MatrixMapSVG({
             width={150}
             height={26}
             rx={6}
-            fill={T.ink}
+            fill="var(--mm-abyss)"
             opacity={0.95}
           />
           <text
