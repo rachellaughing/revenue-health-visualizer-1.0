@@ -94,7 +94,7 @@ const NINETY_DAY_FOCUS = SAMPLE_ITEMS.filter((i) =>
 function NinetyDayFocusCard({ item, rank }: { item: SampleItem; rank: number }) {
   return (
     <div style={{
-      background: T.white, border: "1px solid var(--mm-rule)", borderLeft: `3px solid ${item.color}`,
+      background: T.offWhite, border: "1px solid var(--mm-rule)", borderLeft: `3px solid ${item.color}`,
       borderRadius: 12, padding: "18px 20px", marginBottom: 12, display: "grid",
       gridTemplateColumns: "32px 1fr", gap: 16, boxShadow: "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
     }}>

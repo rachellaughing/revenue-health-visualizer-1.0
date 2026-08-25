@@ -104,7 +104,7 @@ function Card({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 24,

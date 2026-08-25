@@ -209,7 +209,7 @@ export function DependencySplit({ processes, systems }: { processes: FDProcess[]
 export function BlastRadiusTimeline({ processes, systems }: { processes: FDProcess[]; systems: FDSystem[] }) {
   const colorByCode = new Map(systems.map((s) => [s.code, s.color]));
   const dangerous = processes.filter((p) => p.type === "dangerous");
-  const dotColors = [T.danger, "#F97316", T.sand, "var(--mm-sys-visibility)"];
+  const dotColors = [T.danger, "var(--mm-sys-positioning)", T.sand, "var(--mm-sys-visibility)"];
   return (
     <div>
       <p
@@ -277,7 +277,7 @@ export function BlastRadiusTimeline({ processes, systems }: { processes: FDProce
                     <div
                       key={i}
                       style={{
-                        background: T.white,
+                        background: T.offWhite,
                         border: `1px solid color-mix(in srgb, ${dot} 14.5%, transparent)`,
                         borderLeft: `3px solid ${dot}`,
                         borderRadius: 8,
@@ -362,7 +362,7 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
           <div
             key={i}
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: "18px 20px",
@@ -503,7 +503,7 @@ export function SystemsTab({
           <div
             key={dep.code}
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: `1px solid ${isExpanded ? `color-mix(in srgb, ${dep.color} 25.1%, transparent)` : "var(--mm-rule)"}`,
               borderRadius: 12,
               marginBottom: 12,
@@ -893,7 +893,7 @@ function Page() {
         {d.state === "pending" ? (
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: `1px dashed color-mix(in srgb, ${T.teal} 25.1%, transparent)`,
               borderRadius: 14,
               padding: "40px 32px",
@@ -962,7 +962,7 @@ function Page() {
                     borderRadius: 8,
                     border: "none",
                     cursor: "pointer",
-                    background: activeTab === tab.id ? T.white : "transparent",
+                    background: activeTab === tab.id ? T.paper : "transparent",
                     color: activeTab === tab.id ? T.ink : T.mid,
                     fontFamily: "Inter",
                     fontSize: 12,
@@ -1003,7 +1003,7 @@ function Page() {
                   {isDiagnostic && d.overall.executiveSummary && (
                     <div
                       style={{
-                        background: T.white,
+                        background: T.offWhite,
                         border: "1px solid var(--mm-rule)",
                         borderRadius: 14,
                         padding: 28,
@@ -1055,7 +1055,7 @@ function Page() {
 
                   <div
                     style={{
-                      background: T.white,
+                      background: T.offWhite,
                       border: "1px solid var(--mm-rule)",
                       borderRadius: 14,
                       padding: 24,
@@ -1177,7 +1177,7 @@ function Page() {
               {activeTab === "timeline" && (
                 <div
                   style={{
-                    background: T.white,
+                    background: T.offWhite,
                     border: "1px solid var(--mm-rule)",
                     borderRadius: 14,
                     padding: 28,
@@ -1214,7 +1214,7 @@ function Page() {
               {activeTab === "actions" && (
                 <div
                   style={{
-                    background: T.white,
+                    background: T.offWhite,
                     border: "1px solid var(--mm-rule)",
                     borderRadius: 14,
                     padding: 28,

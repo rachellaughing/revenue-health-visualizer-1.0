@@ -171,7 +171,7 @@ export function SystemCard({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid ${expanded ? `color-mix(in srgb, ${d.color} 25.1%, transparent)` : "var(--mm-rule)"}`,
         borderRadius: 12,
         marginBottom: 12,
@@ -301,7 +301,7 @@ function Page() {
           <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
             REVENUE HEALTH MATRIX™ › TEAM ALIGNMENT
           </div>
-          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 40, textAlign: "center", boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
+          <div style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 40, textAlign: "center", boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
             <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: T.ink, margin: "0 0 12px" }}>Waiting for your team</h1>
             <p style={{ color: T.mid, fontSize: 14, lineHeight: 1.65, margin: "0 0 24px" }}>
               Your team members haven&apos;t completed the Health Check yet ({d.completedCount}/{d.invitedCount} complete).
@@ -379,7 +379,7 @@ function Page() {
               <div
                 key={i}
                 style={{
-                  background: T.white,
+                  background: T.offWhite,
                   border: "1px solid var(--mm-rule)",
                   borderTop: `3px solid ${c.color}`,
                   borderRadius: 10,
@@ -398,7 +398,7 @@ function Page() {
           {/* Chart card */}
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 14,
               padding: 28,
@@ -423,7 +423,7 @@ function Page() {
                       borderRadius: 6,
                       border: "none",
                       cursor: "pointer",
-                      background: chartView === v ? T.white : "transparent",
+                      background: chartView === v ? T.paper : "transparent",
                       color: chartView === v ? T.ink : T.mid,
                       fontSize: 11,
                       fontWeight: chartView === v ? 600 : 400,
@@ -498,7 +498,7 @@ function Page() {
                   <div
                     key={rec.rank}
                     style={{
-                      background: T.white,
+                      background: T.offWhite,
                       border: "1px solid var(--mm-rule)",
                       borderLeft: `3px solid ${rec.systemColor}`,
                       borderRadius: 10,

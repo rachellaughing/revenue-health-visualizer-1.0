@@ -386,7 +386,7 @@ function SystemSection({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid var(--mm-rule)`,
         borderRadius: 14,
         marginBottom: 20,
@@ -682,7 +682,7 @@ function Legend() {
     <div
       style={{
         marginBottom: 28,
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         overflow: "hidden",
@@ -900,7 +900,7 @@ function Page() {
         <main style={{ maxWidth: 980, margin: "0 auto", padding: "36px 40px 80px" }}>
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: 24,
@@ -935,7 +935,7 @@ function Page() {
         <main style={{ maxWidth: 980, margin: "0 auto", padding: "36px 40px 80px" }}>
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: 24,
@@ -984,7 +984,7 @@ function KeyFindingBanner({ keyFinding }: { keyFinding: RevenueSystemHealth["key
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid color-mix(in srgb, var(--mm-teal) 25.0%, transparent)`,
         borderLeft: `4px solid ${T.teal}`,
         borderRadius: 12,
@@ -1270,7 +1270,7 @@ function AttentionShortlist({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 14,
         marginBottom: 28,

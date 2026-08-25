@@ -548,7 +548,7 @@ function SymptomSelector({
               <div className="text-base mb-1">{meta.icon}</div>
               <div
                 className="text-xs font-semibold leading-tight"
-                style={{ color: isExpanded ? "#fff" : "var(--mm-ink)" }}
+                style={{ color: isExpanded ? "var(--mm-white)" : "var(--mm-ink)" }}
               >
                 {cat.category}
               </div>
@@ -626,7 +626,7 @@ function SymptomSelector({
                           className="text-[13px]"
                           style={{
                             fontWeight: isSelected ? 500 : 400,
-                            color: isSelected ? "#fff" : "var(--mm-ink)",
+                            color: isSelected ? "var(--mm-white)" : "var(--mm-ink)",
                           }}
                         >
                           {sym.symptom}

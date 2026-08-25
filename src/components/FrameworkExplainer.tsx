@@ -4,14 +4,14 @@ import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
 // Brand tokens (kept local to avoid coupling)
 const C = {
   paper: "var(--mm-paper)",
-  sand: "#F6F2EA",
-  sandDeep: "#ECE6D9",
-  ink: "#1A2828",
-  inkSoft: "#6B6560",
+  sand: "var(--mm-off-white)",
+  sandDeep: "var(--mm-rule)",
+  ink: "var(--mm-ink)",
+  inkSoft: "var(--mm-mid)",
   tealBright: "var(--mm-teal-bright)",
-  tealLink: "#1F8A8A",
-  abyss: "#16302E",
-  abyssDeep: "#0F2321",
+  tealLink: "var(--mm-teal)",
+  abyss: "var(--mm-abyss)",
+  abyssDeep: "var(--mm-abyss)",
 };
 
 // Match the CSS variables set in styles.css.

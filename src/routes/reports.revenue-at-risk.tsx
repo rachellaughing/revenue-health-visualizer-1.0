@@ -25,7 +25,7 @@ const T = {
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
   sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" } as Record<string, string>,
-  risk: { critical: "var(--mm-danger)", high: "#F97316", moderate: "var(--mm-sand)", low: "var(--mm-sys-authority)" },
+  risk: { critical: "var(--mm-danger)", high: "var(--mm-sys-positioning)", moderate: "var(--mm-sand)", low: "var(--mm-sys-authority)" },
 };
 
 const ARR_MIDPOINTS: Record<string, number> = {
@@ -281,7 +281,7 @@ function MissingMetricsCard({ company }: { company: Company }) {
 
   return (
     <div style={{
-      background: T.white, border: `1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)`,
+      background: T.offWhite, border: `1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)`,
       borderRadius: 12, padding: 24, marginBottom: 24,
       boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
     }}>
@@ -366,7 +366,7 @@ function RiskCard({
 
   return (
     <div style={{
-      background: T.white,
+      background: T.offWhite,
       border: `1px solid ${expanded ? `color-mix(in srgb, ${color} 25.1%, transparent)` : "var(--mm-rule)"}`,
       borderRadius: 12, marginBottom: 12, overflow: "hidden",
       boxShadow: expanded ? `0 4px 16px color-mix(in srgb, ${color} 7.1%, transparent)` : "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",

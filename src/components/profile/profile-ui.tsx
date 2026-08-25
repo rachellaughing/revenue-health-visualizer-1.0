@@ -27,7 +27,7 @@ export const ProgressSteps = ({
                     ? "var(--mm-abyss)"
                     : "var(--mm-off-white)",
                 border: `2px solid ${done ? "var(--mm-teal-bright)" : active ? "var(--mm-abyss)" : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)"}`,
-                color: done || active ? "#fff" : "var(--mm-mid)",
+                color: done || active ? "var(--mm-white)" : "var(--mm-mid)",
               }}
             >
               {done ? "✓" : i + 1}
@@ -228,7 +228,7 @@ export function PrimaryButton({
       className="text-sm font-semibold rounded-lg transition-all"
       style={{
         background: enabled ? "var(--mm-ember)" : "var(--mm-off-white)",
-        color: enabled ? "#fff" : "var(--mm-mid)",
+        color: enabled ? "var(--mm-white)" : "var(--mm-mid)",
         padding: "13px 28px",
         border: "none",
         cursor: enabled ? "pointer" : "not-allowed",

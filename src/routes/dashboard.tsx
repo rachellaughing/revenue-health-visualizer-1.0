@@ -251,7 +251,7 @@ function SnapshotIncludesCard({ tier }: { tier: "starter" | "pro" | "diagnostic"
   };
   const c = content[tier] || content.starter;
   return (
-    <section className="rounded-[14px] border border-white/10 bg-[#1C2B2B] p-6 text-white">
+    <section className="rounded-[14px] border border-white/10 bg-[var(--mm-abyss)] p-6 text-white">
       <h3
         className="m-0 mb-4 text-[18px]"
         style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
@@ -383,7 +383,7 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
   const remaining = 15 - total;
 
   return (
-    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <section className="rounded-[14px] border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <div className="mb-1 flex items-baseline justify-between">
         <h3
           className="m-0 text-[20px] text-[var(--mm-ink)]"
@@ -521,7 +521,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
   }, [data.framework.children]);
 
   return (
-    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <section className="rounded-[14px] border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <h3
         className="m-0 mb-1 text-[20px] text-[var(--mm-ink)]"
         style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
@@ -578,7 +578,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
 
 function AboutMatrixCard() {
   return (
-    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <section className="rounded-[14px] border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-[720px]">
           <h3
@@ -662,7 +662,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
   const pct = (done / steps.length) * 100;
 
   return (
-    <div className="rounded-xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <div className="rounded-xl border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <div className="mb-3.5 flex items-center justify-between">
         <h3
           className="m-0 text-[17px] text-[var(--mm-ink)]"
@@ -701,7 +701,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
             {step.done ? (
               <Check className="h-3 w-3 text-white" strokeWidth={3} />
             ) : (
-              <span className="text-[10px] text-black/20">{i + 1}</span>
+              <span className="text-[10px] text-[var(--mm-mid)]">{i + 1}</span>
             )}
           </div>
           <span
@@ -722,7 +722,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
               {step.cta} →
             </Link>
           )}
-          {step.locked && <Lock className="h-3 w-3 text-black/40" />}
+          {step.locked && <Lock className="h-3 w-3 text-[var(--mm-mid)]" />}
         </div>
       ))}
     </div>
@@ -902,7 +902,7 @@ function InsightCard({
 }) {
   return (
     <div
-      className="rounded-xl border border-black/[0.08] bg-white p-[18px] shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]"
+      className="rounded-xl border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-[18px] shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]"
       style={{ borderTop: `3px solid ${color}` }}
     >
       <div className="mb-1.5 text-[9px] font-bold tracking-[0.1em] text-[var(--mm-mid)]">

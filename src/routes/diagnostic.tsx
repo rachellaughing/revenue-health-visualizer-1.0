@@ -11,7 +11,7 @@ export const Route = createFileRoute("/diagnostic")({
 
 const T = {
   abyss: "var(--mm-abyss)",
-  hero: "#1C2B2B",
+  hero: "var(--mm-abyss)",
   paper: "var(--mm-paper)",
   offWhite: "var(--mm-off-white)",
   ember: "var(--mm-ember)",
@@ -327,7 +327,7 @@ function DiagnosticPage() {
               <div
                 key={s.w}
                 style={{
-                  background: T.white,
+                  background: T.offWhite,
                   border: `1px solid ${T.offWhite}`,
                   borderRadius: 12,
                   padding: "24px 22px",
@@ -379,7 +379,7 @@ function ReportCard({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         borderRadius: 12,
         borderTop: `4px solid ${color}`,
         border: `1px solid ${T.offWhite}`,
@@ -486,7 +486,7 @@ function DiscoveryForm({
     return (
       <div
         style={{
-          background: T.white,
+          background: T.offWhite,
           border: `1px solid ${T.offWhite}`,
           borderRadius: 16,
           padding: "48px 40px",
@@ -515,7 +515,7 @@ function DiscoveryForm({
     <form
       onSubmit={onSubmit}
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid ${T.offWhite}`,
         borderRadius: 16,
         padding: "40px 40px",

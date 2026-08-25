@@ -121,7 +121,7 @@ function InfoTile({ title, body }: { title: string; body: string }) {
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid ${T.offWhite}`,
         borderRadius: 10,
         padding: "16px 14px",

@@ -42,7 +42,7 @@ function LeftPanel() {
   return (
     <div
       className="relative hidden lg:flex flex-col justify-between overflow-hidden px-12 py-10"
-      style={{ backgroundColor: "#1C2B2B", minHeight: "100vh" }}
+      style={{ backgroundColor: "var(--mm-abyss)", minHeight: "100vh" }}
     >
       <TreeBackground />
 

@@ -90,9 +90,9 @@ function SelectionBreadcrumb({
       ? "Revenue Health Assessment™"
       : "Revenue Health Snapshot™";
   const selectedSet = new Set(selectedCodes);
-  const sand = "#F6F2EA";
-  const sandDeep = "#ECE6D9";
-  const inkSoft = "#6B6560";
+  const sand = T.offWhite;
+  const sandDeep = "var(--mm-rule)";
+  const inkSoft = T.mid;
 
   const childrenByParent = new Map<string, ChildSystem[]>();
   for (const c of children) {
@@ -210,7 +210,7 @@ function SelectionBreadcrumb({
                         fontSize: 10.5,
                         fontWeight: 700,
                         background: color,
-                        color: "#fff",
+                        color: T.offWhite,
                       }}
                     >
                       {sub.name}
@@ -294,7 +294,7 @@ function CavitySearchCTA() {
               padding: "10px 18px",
               borderRadius: 8,
               background: T.ember,
-              color: "#fff",
+              color: T.offWhite,
               fontSize: 13,
               fontWeight: 700,
               textDecoration: "none",
@@ -499,7 +499,7 @@ function AnswerCard({
     return (
       <div
         style={{
-          background: T.white,
+          background: T.offWhite,
           border: `1.5px solid color-mix(in srgb, ${systemColor} 31.4%, transparent)`,
           borderRadius: 10,
           padding: "16px 18px",
@@ -585,7 +585,7 @@ function AnswerCard({
             disabled={saving || !health || !tracking}
             style={{
               background: systemColor,
-              color: T.white,
+              color: T.offWhite,
               border: "none",
               borderRadius: 8,
               padding: "8px 16px",
@@ -1043,7 +1043,7 @@ function CompletedLanding({
                 fontFamily: "'Instrument Serif', Georgia, serif",
                 fontSize: 32,
                 fontWeight: 400,
-                color: T.white,
+                color: T.offWhite,
                 margin: 0,
                 lineHeight: 1.2,
               }}
@@ -1081,7 +1081,7 @@ function CompletedLanding({
                 to="/reports/executive-summary"
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: T.offWhite,
                   borderRadius: 8,
                   padding: "11px 22px",
                   fontSize: 13,
@@ -1924,7 +1924,7 @@ function HealthCheckShell({
                 to="/reports/executive-summary"
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: T.offWhite,
                   borderRadius: 6,
                   padding: "8px 16px",
                   fontSize: 12,
@@ -2028,7 +2028,7 @@ function HealthCheckShell({
                           ? `color-mix(in srgb, ${systemColor} 8.2%, transparent)`
                           : complete
                           ? `color-mix(in srgb, ${T.tealBright} 6.3%, transparent)`
-                          : T.white,
+                          : T.offWhite,
                         color: active
                           ? systemColor
                           : complete
@@ -2127,7 +2127,7 @@ function HealthCheckShell({
           {activeChild && isChildLocked(activeChild) ? (
             <div
               style={{
-                background: T.white,
+                background: T.offWhite,
                 border: "1px solid var(--mm-rule)",
                 borderRadius: 12,
                 padding: 40,
@@ -2158,7 +2158,7 @@ function HealthCheckShell({
                   to="/settings/billing"
                   style={{
                     background: T.ember,
-                    color: T.white,
+                    color: T.offWhite,
                     borderRadius: 8,
                     padding: "10px 22px",
                     fontSize: 13,
@@ -2295,7 +2295,7 @@ function HealthCheckShell({
                       cardRefs.current[area.question_id] = el;
                     }}
                     style={{
-                      background: T.white,
+                      background: T.offWhite,
                       border: `1px solid color-mix(in srgb, ${
                         isComplete ? `${T.tealBright} 31.4%, transparent)` : "var(--mm-rule)"
                       }`,
@@ -2312,7 +2312,7 @@ function HealthCheckShell({
                           top: 12,
                           right: 12,
                           background: T.tealBright,
-                          color: T.white,
+                          color: T.offWhite,
                           borderRadius: "50%",
                           width: 22,
                           height: 22,
@@ -2384,7 +2384,7 @@ function HealthCheckShell({
                               border: `1px solid ${
                                 sel ? systemColor : "color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"
                               }`,
-                              background: sel ? `color-mix(in srgb, ${systemColor} 8.2%, transparent)` : T.white,
+                              background: sel ? `color-mix(in srgb, ${systemColor} 8.2%, transparent)` : T.offWhite,
                               color: sel ? systemColor : T.ink,
                               borderRadius: 8,
                               fontSize: 11,
@@ -2460,7 +2460,7 @@ function HealthCheckShell({
                                   border: `1px solid ${
                                     sel ? systemColor : "var(--mm-rule)"
                                   }`,
-                                  background: sel ? `color-mix(in srgb, ${systemColor} 6.3%, transparent)` : T.white,
+                                  background: sel ? `color-mix(in srgb, ${systemColor} 6.3%, transparent)` : T.offWhite,
                                   cursor: "pointer",
                                   fontSize: 12,
                                   color: sel ? systemColor : T.ink,
@@ -2544,7 +2544,7 @@ function HealthCheckShell({
                       style={{
                         background: T.ember,
                         border: "none",
-                        color: T.white,
+                        color: T.offWhite,
                         borderRadius: 6,
                         padding: "6px 14px",
                         fontSize: 12,
