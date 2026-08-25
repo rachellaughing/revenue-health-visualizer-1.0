@@ -220,7 +220,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                     borderRadius: 8,
                     border: "none",
                     cursor: tab.locked ? "not-allowed" : "pointer",
-                    background: isActive ? T.white : "transparent",
+                    background: isActive ? T.offWhite : "transparent",
                     color: isActive ? T.ink : T.mid,
                     fontFamily: "Inter",
                     fontSize: 12,
@@ -280,7 +280,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                   <div
                     key={c.label}
                     style={{
-                      background: T.white,
+                      background: T.offWhite,
                       border: "1px solid var(--mm-rule)",
                       borderTop: `3px solid ${c.color}`,
                       borderRadius: 10,
@@ -338,7 +338,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
               ref={stageRef}
               style={{
                 position: "relative",
-                background: T.white,
+                background: T.offWhite,
                 border: "1px solid var(--mm-rule)",
                 borderRadius: 14,
                 padding: 24,
@@ -406,7 +406,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                   style={{
                     width: "100%",
                     textAlign: "left",
-                    background: T.white,
+                    background: T.offWhite,
                     border: "1px solid var(--mm-rule)",
                     borderRadius: 10,
                     padding: "14px 18px",
@@ -479,7 +479,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                       <div
                         key={i}
                         style={{
-                          background: T.white,
+                          background: T.offWhite,
                           border: "1px solid var(--mm-rule)",
                           borderLeft: `3px solid ${color}`,
                           borderRadius: 10,
@@ -1122,7 +1122,7 @@ function ZoomedSystem({
                         ? sysColor
                         : c.assessed
                           ? hc + "60"
-                          : "rgba(0,0,0,0.1)"
+                          : "var(--mm-rule)"
                     }`,
                     background: isSelected
                       ? sysColor + "12"
@@ -1150,7 +1150,7 @@ function ZoomedSystem({
                         fontFamily: "Inter",
                         fontWeight: 700,
                         color: T.mid,
-                        background: T.white,
+                        background: T.offWhite,
                         padding: "1px 4px",
                         borderRadius: 4,
                       }}
@@ -1237,7 +1237,7 @@ function ZoomedSystem({
               <button
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: T.offWhite,
                   border: "none",
                   borderRadius: 8,
                   padding: "7px 16px",
@@ -1256,7 +1256,7 @@ function ZoomedSystem({
 
         <div
           style={{
-            background: T.white,
+            background: T.offWhite,
             border: "1px solid var(--mm-rule)",
             borderRadius: 12,
             padding: 20,
@@ -1426,7 +1426,7 @@ function ZoomedSystem({
                   justifyContent: "center",
                   gap: 8,
                   background: roadmapUnlocked ? sysColor : T.offWhite,
-                  border: `1px solid ${roadmapUnlocked ? sysColor : "rgba(0,0,0,0.1)"}`,
+                  border: `1px solid ${roadmapUnlocked ? sysColor : "var(--mm-rule)"}`,
                   color: roadmapUnlocked ? T.white : T.mid,
                   borderRadius: 8,
                   padding: "9px",
@@ -1535,7 +1535,7 @@ function RelationshipPanel({
     <div
       style={{
         marginTop: 20,
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 20,
@@ -1633,7 +1633,7 @@ function ConnPanel({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderRadius: 12,
         padding: 20,
@@ -1844,7 +1844,7 @@ function ScenarioCard({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid ${expanded ? color + "40" : "var(--mm-rule)"}`,
         borderRadius: 12,
         marginBottom: 12,
@@ -2100,8 +2100,8 @@ function ScenarioCard({
                         borderRadius: "50%",
                         flexShrink: 0,
                         background:
-                          imp.impact === "High" ? color + "25" : T.white,
-                        border: `1.5px solid ${imp.impact === "High" ? color : "rgba(0,0,0,0.1)"}`,
+                          imp.impact === "High" ? color + "25" : T.offWhite,
+                        border: `1.5px solid ${imp.impact === "High" ? color : "var(--mm-rule)"}`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -2191,7 +2191,7 @@ function MetaTile({
   return (
     <div
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: `1px solid ${T.offWhite}`,
         borderRadius: 8,
         padding: 12,

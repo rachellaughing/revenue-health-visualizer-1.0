@@ -61,7 +61,7 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
 
   return (
     <div style={{
-      background: T.white,
+      background: T.offWhite,
       border: `1px solid ${expanded ? T.sand + "60" : "var(--mm-rule)"}`,
       borderRadius: 14, marginBottom: 14, overflow: "hidden",
       boxShadow: expanded ? "0 4px 20px rgba(196,149,106,0.15)" : "0 2px 6px rgba(24,40,41,0.04)",
@@ -76,7 +76,7 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
       }}>
         <div style={{
           width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-          background: T.abyss + "08", border: "1px solid rgba(24,40,41,0.12)",
+          background: T.abyss + "08", border: "1px solid var(--mm-rule)",
           display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18,
         }}>{typeIcon(shadow.type)}</div>
 
@@ -116,7 +116,7 @@ export function ShadowCard({ shadow, expanded, onToggle }: { shadow: ShadowSyste
             </div>
           </div>
 
-          <div style={{ background: T.abyss + "05", border: "1px solid rgba(24,40,41,0.1)", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
+          <div style={{ background: T.abyss + "05", border: "1px solid var(--mm-rule)", borderRadius: 10, padding: "16px 18px", marginBottom: 16 }}>
             <div style={{ fontSize: 9, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 8 }}>WHAT WE FOUND IN THE PBJ SESSION</div>
             <p style={{ fontSize: 13, fontFamily: "Inter", color: T.ink, lineHeight: 1.75, margin: 0 }}>{shadow.finding}</p>
           </div>

@@ -127,7 +127,7 @@ export function SystemCard({
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
         padding: "12px 18px", marginBottom: 12, borderRadius: 10,
-        background: T.offWhite, border: "1px dashed rgba(0,0,0,0.1)",
+        background: T.offWhite, border: "1px dashed var(--mm-rule)",
       }}>
         <div style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>
           <span style={{ fontWeight: 600 }}>{item.name}</span> — removed from your roadmap
@@ -143,7 +143,7 @@ export function SystemCard({
 
   return (
     <div style={{
-      background: T.white, border: `1px solid ${item.color}30`,
+      background: T.offWhite, border: `1px solid ${item.color}30`,
       borderRadius: 12, overflow: "hidden", marginBottom: 12,
       boxShadow: `0 2px 12px ${item.color}10`,
     }}>
@@ -218,7 +218,7 @@ export function SystemCard({
                     <div style={{
                       width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
                       background: checked ? item.color : "transparent",
-                      border: `1.5px solid ${checked ? item.color : "rgba(0,0,0,0.2)"}`,
+                      border: `1.5px solid ${checked ? item.color : "var(--mm-rule)"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       color: T.white, fontSize: 11, fontWeight: 700,
                     }}>{checked ? "✓" : ""}</div>
@@ -274,7 +274,7 @@ export function HorizonSection({
 
   return (
     <div style={{
-      background: T.white, border: "1px solid var(--mm-rule)",
+      background: T.offWhite, border: "1px solid var(--mm-rule)",
       borderRadius: 14, marginBottom: 20, overflow: "hidden",
       boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
     }}>
