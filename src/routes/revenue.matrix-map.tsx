@@ -516,8 +516,8 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                                 style={{
                                   padding: "4px 10px",
                                   borderRadius: 20,
-                                  background: color + "15",
-                                  border: `1px solid ${color}40`,
+                                  background: `color-mix(in srgb, ${color} 8%, transparent)`,
+                                  border: `1px solid ${`color-mix(in srgb, ${color} 25%, transparent)`}`,
                                   fontSize: 12,
                                   fontFamily: "Inter",
                                   fontWeight: 500,
@@ -1022,7 +1022,7 @@ function ZoomedSystem({
             height: 168,
             borderRadius: "50%",
             border: `3px solid ${sysColor}`,
-            background: `radial-gradient(circle at 50% 40%, ${sysColor}22, ${sysColor}08)`,
+            background: `radial-gradient(circle at 50% 40%, ${`color-mix(in srgb, ${sysColor} 13%, transparent)`}, ${`color-mix(in srgb, ${sysColor} 3%, transparent)`})`,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -1031,7 +1031,7 @@ function ZoomedSystem({
             cursor: "pointer",
             fontFamily: "Inter",
             textAlign: "center",
-            boxShadow: `0 6px 24px ${sysColor}22`,
+            boxShadow: `0 6px 24px ${`color-mix(in srgb, ${sysColor} 13%, transparent)`}`,
             transition: "transform 0.15s ease, box-shadow 0.15s ease",
           }}
           onMouseEnter={(e) => {
@@ -1121,13 +1121,13 @@ function ZoomedSystem({
                       isSelected
                         ? sysColor
                         : c.assessed
-                          ? hc + "60"
+                          ? `color-mix(in srgb, ${hc} 38%, transparent)`
                           : "var(--mm-rule)"
                     }`,
                     background: isSelected
-                      ? sysColor + "12"
+                      ? `color-mix(in srgb, ${sysColor} 7%, transparent)`
                       : c.assessed
-                        ? hc + "08"
+                        ? `color-mix(in srgb, ${hc} 3%, transparent)`
                         : T.offWhite,
                     position: "relative",
                     transition: "all 0.15s",
@@ -1294,7 +1294,7 @@ function ZoomedSystem({
                     display: "inline-flex",
                     padding: "3px 10px",
                     borderRadius: 20,
-                    background: healthColor(child.healthScore) + "18",
+                    background: `color-mix(in srgb, ${healthColor(child.healthScore)} 9%, transparent)`,
                     color: healthColor(child.healthScore),
                     fontSize: 11,
                     fontFamily: "Inter",
@@ -1561,8 +1561,8 @@ function RelationshipPanel({
               key={r.parentCode}
               style={{
                 padding: "12px 14px",
-                background: color + "08",
-                border: `1px solid ${color}30`,
+                background: `color-mix(in srgb, ${color} 3%, transparent)`,
+                border: `1px solid ${`color-mix(in srgb, ${color} 19%, transparent)`}`,
                 borderRadius: 8,
               }}
             >
@@ -1587,7 +1587,7 @@ function RelationshipPanel({
                     fontWeight: 700,
                     letterSpacing: "0.06em",
                     color,
-                    background: color + "18",
+                    background: `color-mix(in srgb, ${color} 9%, transparent)`,
                     borderRadius: 20,
                     padding: "2px 8px",
                   }}
@@ -1668,15 +1668,15 @@ function ConnPanel({
           item.type === "strong"
             ? variant === "downstream"
               ? "var(--mm-danger)08"
-              : accent + "08"
+              : `color-mix(in srgb, ${accent} 3%, transparent)`
             : T.offWhite;
         const border =
           item.type === "strong"
             ? variant === "downstream"
               ? "var(--mm-danger)30"
-              : accent + "30"
+              : `color-mix(in srgb, ${accent} 19%, transparent)`
             : item.type === "moderate"
-              ? T.sand + "40"
+              ? `color-mix(in srgb, ${T.sand} 25%, transparent)`
               : "var(--mm-rule)";
         return (
           <div
@@ -1704,7 +1704,7 @@ function ConnPanel({
                     width: 28,
                     height: 28,
                     borderRadius: "50%",
-                    background: healthColor(item.score) + "20",
+                    background: `color-mix(in srgb, ${healthColor(item.score)} 13%, transparent)`,
                     border: `2px solid ${healthColor(item.score)}`,
                     display: "flex",
                     alignItems: "center",
@@ -1845,12 +1845,12 @@ function ScenarioCard({
     <div
       style={{
         background: T.offWhite,
-        border: `1px solid ${expanded ? color + "40" : "var(--mm-rule)"}`,
+        border: `1px solid ${expanded ? `color-mix(in srgb, ${color} 25%, transparent)` : "var(--mm-rule)"}`,
         borderRadius: 12,
         marginBottom: 12,
         overflow: "hidden",
         boxShadow: expanded
-          ? `0 4px 16px ${color}10`
+          ? `0 4px 16px ${`color-mix(in srgb, ${color} 6%, transparent)`}`
           : "0 2px 6px rgba(24,40,41,0.04)",
         opacity: illustrative && !expanded ? 0.85 : 1,
       }}
@@ -1864,7 +1864,7 @@ function ScenarioCard({
           alignItems: "center",
           gap: 16,
           padding: "16px 20px",
-          background: expanded ? color + "06" : "transparent",
+          background: expanded ? `color-mix(in srgb, ${color} 2%, transparent)` : "transparent",
           border: "none",
           cursor: "pointer",
           textAlign: "left",
@@ -1963,7 +1963,7 @@ function ScenarioCard({
           style={{
             padding: "3px 10px",
             borderRadius: 20,
-            background: leverageColor + "18",
+            background: `color-mix(in srgb, ${leverageColor} 9%, transparent)`,
             color: leverageColor,
             fontSize: 10,
             fontFamily: "Inter",
@@ -2100,7 +2100,7 @@ function ScenarioCard({
                         borderRadius: "50%",
                         flexShrink: 0,
                         background:
-                          imp.impact === "High" ? color + "25" : T.offWhite,
+                          imp.impact === "High" ? `color-mix(in srgb, ${color} 15%, transparent)` : T.offWhite,
                         border: `1.5px solid ${imp.impact === "High" ? color : "var(--mm-rule)"}`,
                         display: "flex",
                         alignItems: "center",
