@@ -1237,7 +1237,7 @@ function ZoomedSystem({
               <button
                 style={{
                   background: T.ember,
-                  color: T.offWhite,
+                  color: T.white,
                   border: "none",
                   borderRadius: 8,
                   padding: "7px 16px",
