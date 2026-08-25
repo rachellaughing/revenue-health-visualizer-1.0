@@ -52,10 +52,10 @@ const T = {
 };
 
 const SEVERITY_STYLE: Record<string, { color: string; bg: string }> = {
-  critical: { color: "var(--mm-danger)", bg: "rgba(239,68,68,0.1)" },
-  fragile: { color: "var(--mm-sand)", bg: "rgba(196,149,106,0.12)" },
-  stable: { color: "var(--mm-teal)", bg: "rgba(42,107,110,0.10)" },
-  strong: { color: "var(--mm-sys-authority)", bg: "rgba(43,180,87,0.1)" },
+  critical: { color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 12%, transparent)" },
+  fragile: { color: "var(--mm-sand)", bg: "color-mix(in srgb, var(--mm-sand) 14%, transparent)" },
+  stable: { color: "var(--mm-teal)", bg: "color-mix(in srgb, var(--mm-teal) 14%, transparent)" },
+  strong: { color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 14%, transparent)" },
 };
 
 const LOCKED_BATCH = 10;
@@ -136,8 +136,8 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
         {isStarter && (
           <section
             style={{
-              background: T.white,
-              border: "1px solid rgba(196,149,106,0.35)",
+              background: T.offWhite,
+              border: "1px solid color-mix(in srgb, var(--mm-sand) 40%, transparent)",
               borderRadius: 12,
               padding: "16px 18px",
               marginBottom: 22,
@@ -227,7 +227,7 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
         {cards.length === 0 ? (
           <div
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 12,
               padding: "22px 20px",
@@ -306,13 +306,13 @@ function OpportunityCard({ card, isQuickWin }: { card: FeaturedCard; isQuickWin:
   return (
     <article
       style={{
-        background: T.white,
+        background: T.offWhite,
         border: "1px solid var(--mm-rule)",
         borderLeft: `3px solid ${color}`,
         borderRadius: 12,
         padding: "20px 22px",
         marginBottom: 14,
-        boxShadow: "0 2px 6px rgba(24,40,41,0.04)",
+        boxShadow: "0 2px 6px color-mix(in srgb, var(--mm-abyss) 8%, transparent)",
       }}
     >
       <div
@@ -331,7 +331,7 @@ function OpportunityCard({ card, isQuickWin }: { card: FeaturedCard; isQuickWin:
             marginLeft: "auto",
             padding: "3px 10px",
             borderRadius: 20,
-            background: color + "18",
+            background: `color-mix(in srgb, ${color} 14%, transparent)`,
             color,
             fontSize: 10,
             fontWeight: 700,
@@ -431,7 +431,7 @@ function OtherOpportunities({ groups }: { groups: OtherOpportunityGroup[] }) {
           <div
             key={g.parentCode}
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               marginBottom: 8,
@@ -558,8 +558,8 @@ function LockedSection({
 
       <div
         style={{
-          background: T.white,
-          border: "1px dashed rgba(0,0,0,0.18)",
+          background: T.offWhite,
+          border: "1px dashed color-mix(in srgb, var(--mm-mid) 55%, transparent)",
           borderRadius: 10,
           padding: "12px 16px",
           fontSize: 12,
@@ -583,7 +583,7 @@ function LockedSection({
           <div
             key={t.parentCode}
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               padding: "12px 14px",
@@ -625,7 +625,7 @@ function LockedSection({
           <div
             key={s.childSystemId}
             style={{
-              background: T.white,
+              background: T.offWhite,
               border: "1px solid var(--mm-rule)",
               borderRadius: 10,
               padding: "14px 16px",
