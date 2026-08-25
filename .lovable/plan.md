@@ -1,4 +1,4 @@
-# Top Opportunities dark-mode token audit
+# Top Opportunities dark-mode token fix
 
 ## Changes
 - Audit `src/routes/reports.top-opportunities.tsx` for invalid CSS-variable alpha concatenation, fixed light surfaces, and literal rule colors.
