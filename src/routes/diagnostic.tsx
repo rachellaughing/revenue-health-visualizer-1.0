@@ -99,7 +99,7 @@ function DiagnosticPage() {
             style={{
               fontSize: 18,
               lineHeight: 1.6,
-              color: "rgba(255,255,255,0.72)",
+              color: "color-mix(in srgb, var(--mm-white) 72.0%, transparent)",
               maxWidth: 720,
               margin: "0 0 32px",
             }}
@@ -115,16 +115,16 @@ function DiagnosticPage() {
                 gap: 10,
                 padding: "8px 14px",
                 borderRadius: 999,
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.18)",
+                background: "color-mix(in srgb, var(--mm-white) 8.0%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--mm-white) 18.0%, transparent)",
                 fontSize: 13,
-                color: "rgba(255,255,255,0.9)",
+                color: "color-mix(in srgb, var(--mm-white) 90.0%, transparent)",
                 marginBottom: 32,
               }}
             >
               <span style={{ opacity: 0.65 }}>Your current score</span>
               <span style={{ fontWeight: 700, color: T.white }}>{overallScore}</span>
-              <span style={{ width: 1, height: 14, background: "rgba(255,255,255,0.2)" }} />
+              <span style={{ width: 1, height: 14, background: "color-mix(in srgb, var(--mm-white) 20.0%, transparent)" }} />
               <span style={{ color: T.ember, fontWeight: 700, letterSpacing: "0.04em" }}>{label}</span>
             </div>
           )}
@@ -197,7 +197,7 @@ function DiagnosticPage() {
             >
               PBJ Sessions™
             </h2>
-            <p style={{ fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.78)", margin: "0 0 24px" }}>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)", margin: "0 0 24px" }}>
               Named after a classroom exercise that exposes the gap between instructions given and instructions executed — PBJ Sessions are structured cross-functional working sessions that surface what leadership cannot see from above. We sit with your team. We ask the questions founders don't know to ask. What surfaces is almost always different from what leadership believes is true.
             </p>
             <a
@@ -223,7 +223,7 @@ function DiagnosticPage() {
                     width: 32,
                     height: 32,
                     borderRadius: 999,
-                    background: "rgba(74,191,196,0.15)",
+                    background: "color-mix(in srgb, var(--mm-teal-bright) 15.0%, transparent)",
                     color: "var(--mm-teal-bright)",
                     fontSize: 12,
                     fontWeight: 700,
@@ -236,7 +236,7 @@ function DiagnosticPage() {
                 </span>
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 600, color: T.white, marginBottom: 4 }}>{s.t}</div>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>{s.d}</div>
+                  <div style={{ fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", lineHeight: 1.5 }}>{s.d}</div>
                 </div>
               </li>
             ))}

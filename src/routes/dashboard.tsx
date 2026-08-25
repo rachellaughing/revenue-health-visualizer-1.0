@@ -189,14 +189,14 @@ function HeroCard({ isStarter }: { isStarter: boolean }) {
               key={s.label}
               className="flex-1 px-3"
               style={{
-                borderLeft: i > 0 ? "1px solid rgba(255,255,255,0.10)" : "none",
+                borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--mm-white) 10.0%, transparent)" : "none",
               }}
             >
               <div
                 className="text-[30px] leading-none"
                 style={{
                   fontFamily: "'Instrument Serif', serif",
-                  color: s.muted ? "rgba(255,254,250,0.4)" : "var(--mm-paper)",
+                  color: s.muted ? "color-mix(in srgb, var(--mm-white) 40.0%, transparent)" : "var(--mm-paper)",
                 }}
               >
                 {s.num}
@@ -261,7 +261,7 @@ function SnapshotIncludesCard({ tier }: { tier: "starter" | "pro" | "diagnostic"
       <ul className="m-0 mb-4 list-none space-y-3 p-0">
         {c.items.map((item, i) => (
           <li key={i} className="flex gap-2.5">
-            <div className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[rgba(74,191,196,0.18)]">
+            <div className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[color-mix(in srgb, var(--mm-teal-bright) 18.0%, transparent)]">
               <Check className="h-2.5 w-2.5 text-[var(--mm-teal-bright)]" strokeWidth={3} />
             </div>
             <span className="text-[12.5px] leading-[1.5] text-white/85">{item}</span>
@@ -383,7 +383,7 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
   const remaining = 15 - total;
 
   return (
-    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(24,40,41,0.06)]">
+    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <div className="mb-1 flex items-baseline justify-between">
         <h3
           className="m-0 text-[20px] text-[var(--mm-ink)]"
@@ -447,12 +447,12 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
                           ? color
                           : disabled
                           ? "var(--mm-rule)"
-                          : "rgba(0,0,0,0.12)",
+                          : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)",
                         background: isChosen ? color : "transparent",
                         color: isChosen
                           ? "var(--mm-paper)"
                           : disabled
-                          ? "rgba(0,0,0,0.25)"
+                          ? "color-mix(in srgb, var(--mm-ink) 25.0%, transparent)"
                           : "var(--mm-ink)",
                         fontWeight: isChosen ? 600 : 400,
                         cursor: disabled ? "not-allowed" : "pointer",
@@ -521,7 +521,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
   }, [data.framework.children]);
 
   return (
-    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(24,40,41,0.06)]">
+    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <h3
         className="m-0 mb-1 text-[20px] text-[var(--mm-ink)]"
         style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
@@ -578,7 +578,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
 
 function AboutMatrixCard() {
   return (
-    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(24,40,41,0.06)]">
+    <section className="rounded-[14px] border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-[720px]">
           <h3
@@ -604,7 +604,7 @@ function AboutMatrixCard() {
         </a>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[rgba(240,82,35,0.2)] bg-[rgba(240,82,35,0.05)] px-5 py-4">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[color-mix(in srgb, var(--mm-ember) 20.0%, transparent)] bg-[color-mix(in srgb, var(--mm-ember) 5.0%, transparent)] px-5 py-4">
         <div>
           <div className="text-[13px] font-semibold text-[var(--mm-ink)]">
             Want a guided Diagnostic with a consultant?
@@ -662,7 +662,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
   const pct = (done / steps.length) * 100;
 
   return (
-    <div className="rounded-xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(24,40,41,0.06)]">
+    <div className="rounded-xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
       <div className="mb-3.5 flex items-center justify-between">
         <h3
           className="m-0 text-[17px] text-[var(--mm-ink)]"
@@ -695,7 +695,7 @@ function GettingStarted({ data }: { data: DashboardData }) {
               background: step.done ? "var(--mm-teal-bright)" : "transparent",
               border: step.done
                 ? "2px solid var(--mm-teal-bright)"
-                : "2px solid rgba(0,0,0,0.15)",
+                : "2px solid color-mix(in srgb, var(--mm-ink) 15.0%, transparent)",
             }}
           >
             {step.done ? (
@@ -803,7 +803,7 @@ function ReturningView({ data }: { data: DashboardData }) {
               <div key={sys.id}>
                 <div className="mb-1 flex justify-between">
                   <span className="text-[11px] font-medium text-white/70">{sys.name}</span>
-                  <span className="text-[11px] font-bold" style={{ color: assessed ? color : "rgba(255,255,255,0.4)" }}>
+                  <span className="text-[11px] font-bold" style={{ color: assessed ? color : "color-mix(in srgb, var(--mm-white) 40.0%, transparent)" }}>
                     {assessed ? val : "—"}
                   </span>
                 </div>
@@ -863,7 +863,7 @@ function ReturningView({ data }: { data: DashboardData }) {
       </div>
 
       {/* Reassess nudge */}
-      <div className="flex items-center justify-between gap-4 rounded-[10px] border border-[rgba(42,107,110,0.18)] bg-[rgba(42,107,110,0.07)] px-[22px] py-3.5">
+      <div className="flex items-center justify-between gap-4 rounded-[10px] border border-[color-mix(in srgb, var(--mm-teal) 18.0%, transparent)] bg-[color-mix(in srgb, var(--mm-teal) 7.0%, transparent)] px-[22px] py-3.5">
         <div>
           <span className="text-[13px] font-medium text-[var(--mm-teal)]">
             Your last Health Check was completed in {lastQ.monthYear}.{" "}
@@ -902,7 +902,7 @@ function InsightCard({
 }) {
   return (
     <div
-      className="rounded-xl border border-black/[0.08] bg-white p-[18px] shadow-[0_2px_8px_rgba(24,40,41,0.06)]"
+      className="rounded-xl border border-black/[0.08] bg-white p-[18px] shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]"
       style={{ borderTop: `3px solid ${color}` }}
     >
       <div className="mb-1.5 text-[9px] font-bold tracking-[0.1em] text-[var(--mm-mid)]">
@@ -932,7 +932,7 @@ function ScoreRing({ score, color, size = 56 }: { score: number; color: string; 
   return (
     <svg width={size} height={size} className="inline-block">
       <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={4} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--mm-white) 10.0%, transparent)" strokeWidth={4} />
         <circle
           cx={size / 2}
           cy={size / 2}

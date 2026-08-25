@@ -215,7 +215,7 @@ function AuthGate() {
               style={{
                 position: "fixed",
                 inset: 0,
-                background: "rgba(0,0,0,0.5)",
+                background: "color-mix(in srgb, var(--mm-ink) 50.0%, transparent)",
                 zIndex: 50,
               }}
               aria-hidden
@@ -231,7 +231,7 @@ function AuthGate() {
               zIndex: 60,
               transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
               transition: "transform 220ms ease",
-              boxShadow: mobileOpen ? "0 0 30px rgba(0,0,0,0.3)" : "none",
+              boxShadow: mobileOpen ? "0 0 30px color-mix(in srgb, var(--mm-ink) 30.0%, transparent)" : "none",
             }}
           >
             <AppSidebar collapsed={false} />

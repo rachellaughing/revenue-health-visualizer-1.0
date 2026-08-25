@@ -54,7 +54,7 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
               top: -40,
               width: 240,
               height: 240,
-              background: `radial-gradient(circle, ${T.tealBright}18, transparent 70%)`,
+              background: `radial-gradient(circle, color-mix(in srgb, ${T.tealBright} 9.4%, transparent), transparent 70%)`,
             }}
           />
           <div style={{ position: "relative" }}>
@@ -192,7 +192,7 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
             style={{
               fontSize: 14,
               lineHeight: 1.65,
-              color: "rgba(255,255,255,0.78)",
+              color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)",
               margin: "0 0 24px",
             }}
           >
@@ -208,7 +208,7 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
                 fontSize: 13,
                 color: T.tealBright,
                 textDecoration: "none",
-                borderBottom: `1px solid ${T.tealBright}40`,
+                borderBottom: `1px solid color-mix(in srgb, ${T.tealBright} 25.1%, transparent)`,
               }}
             >
               Questions? Contact {tm.ownerEmail}

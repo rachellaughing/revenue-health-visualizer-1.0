@@ -79,7 +79,7 @@ function Page() {
                 background: activeTab === tab.id ? T.white : "transparent",
                 color: activeTab === tab.id ? T.ink : T.mid,
                 fontFamily: "Inter", fontSize: 12, fontWeight: activeTab === tab.id ? 600 : 400,
-                boxShadow: activeTab === tab.id ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                boxShadow: activeTab === tab.id ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
               }}
             >
               {tab.label}
@@ -96,7 +96,7 @@ function Page() {
               <DependencySplit processes={ILLUSTRATIVE_PROCESSES} systems={ILLUSTRATIVE_SYSTEMS} />
             </div>
 
-            <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+            <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
               <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 16 }}>
                 DEPENDENCY BY SYSTEM
               </div>
@@ -123,7 +123,7 @@ function Page() {
         )}
 
         {activeTab === "timeline" && (
-          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
             <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
               BLAST RADIUS TIMELINE
             </div>
@@ -135,7 +135,7 @@ function Page() {
         )}
 
         {activeTab === "actions" && (
-          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
             <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
               ACTION PLAN
             </div>

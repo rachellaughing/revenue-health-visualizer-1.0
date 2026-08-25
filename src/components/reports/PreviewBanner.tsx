@@ -23,14 +23,14 @@ export function IllustrativeDataBanner({ note }: { note?: string }) {
         justifyContent: "center",
         gap: 8,
         flexWrap: "wrap",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.15)",
+        boxShadow: "0 2px 10px color-mix(in srgb, var(--mm-ink) 15.0%, transparent)",
       }}
     >
       <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em" }}>
         ILLUSTRATIVE DATA — this is a sample, not your data
       </span>
       {note && (
-        <span style={{ fontSize: 12, fontWeight: 400, color: "rgba(255,255,255,0.9)" }}>
+        <span style={{ fontSize: 12, fontWeight: 400, color: "color-mix(in srgb, var(--mm-white) 90.0%, transparent)" }}>
           {note}
         </span>
       )}

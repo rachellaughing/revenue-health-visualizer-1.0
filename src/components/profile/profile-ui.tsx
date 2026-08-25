@@ -26,7 +26,7 @@ export const ProgressSteps = ({
                   : active
                     ? "var(--mm-abyss)"
                     : "var(--mm-off-white)",
-                border: `2px solid ${done ? "var(--mm-teal-bright)" : active ? "var(--mm-abyss)" : "rgba(0,0,0,0.12)"}`,
+                border: `2px solid ${done ? "var(--mm-teal-bright)" : active ? "var(--mm-abyss)" : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)"}`,
                 color: done || active ? "#fff" : "var(--mm-mid)",
               }}
             >
@@ -71,7 +71,7 @@ export const SectionCard = ({
     style={{
       background: "var(--mm-paper)",
       border: "1px solid var(--mm-rule)",
-      boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+      boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
     }}
   >
     <div

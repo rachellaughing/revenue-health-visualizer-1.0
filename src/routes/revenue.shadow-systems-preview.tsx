@@ -65,10 +65,10 @@ function PBJDivider() {
           <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 24, fontWeight: 400, color: T.white, margin: "0 0 14px", lineHeight: 1.3 }}>
             The 4 shadow systems above are illustrative. Your business has its own.
           </h3>
-          <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, margin: "0 0 16px" }}>
+          <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 65.0%, transparent)", lineHeight: 1.75, margin: "0 0 16px" }}>
             Shadow systems do not appear in any Health Check score. They exist in the gaps between what your org chart says and how work actually gets done. The only way to surface them is to go looking — deliberately, with the right questions and the right people in the room.
           </p>
-          <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.75, margin: "0 0 20px" }}>
+          <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 65.0%, transparent)", lineHeight: 1.75, margin: "0 0 20px" }}>
             We do this through a series of PBJ Sessions — a structured facilitation methodology that makes the invisible visible.
           </p>
           <a href="https://marketplacemaven.com/core-concepts/pbj-session/" target="_blank" rel="noopener noreferrer"
@@ -77,7 +77,7 @@ function PBJDivider() {
           </a>
         </div>
 
-        <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 12, padding: "22px 24px", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ background: "color-mix(in srgb, var(--mm-white) 5.0%, transparent)", borderRadius: 12, padding: "22px 24px", border: "1px solid color-mix(in srgb, var(--mm-white) 8.0%, transparent)" }}>
           <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 14 }}>WHAT HAPPENS IN A PBJ SESSION</div>
           {[
             "We sit with your team — not just leadership — and ask them to walk us through how things actually work, not how they should work.",
@@ -89,7 +89,7 @@ function PBJDivider() {
               <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.tealBright, width: 20, flexShrink: 0, paddingTop: 1 }}>
                 {String(i + 1).padStart(2, "0")}
               </div>
-              <p style={{ fontSize: 12, fontFamily: "Inter", color: "rgba(255,255,255,0.6)", lineHeight: 1.65, margin: 0 }}>{text}</p>
+              <p style={{ fontSize: 12, fontFamily: "Inter", color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", lineHeight: 1.65, margin: 0 }}>{text}</p>
             </div>
           ))}
         </div>
@@ -106,11 +106,11 @@ function DiagnosticCTA() {
       alignItems: "center", marginTop: 8,
     }}>
       <div>
-        <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: "0.12em", marginBottom: 8 }}>UNLOCK YOUR SHADOW SYSTEMS</div>
+        <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)", letterSpacing: "0.12em", marginBottom: 8 }}>UNLOCK YOUR SHADOW SYSTEMS</div>
         <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
           Find out what your business is running on that nobody knows about.
         </h3>
-        <p style={{ fontFamily: "Inter", fontSize: 13, color: "rgba(255,255,255,0.85)", margin: 0, lineHeight: 1.6 }}>
+        <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 85.0%, transparent)", margin: 0, lineHeight: 1.6 }}>
           The Revenue Health Diagnostic™ surfaces every shadow system in your business — with a named owner, risk assessment, and concrete action for each one.
         </p>
       </div>
@@ -122,7 +122,7 @@ function DiagnosticCTA() {
           textAlign: "center", whiteSpace: "nowrap",
         }}>Book a Diagnostic →</Link>
         <a href="https://marketplacemaven.com/diagnostic" target="_blank" rel="noopener noreferrer"
-          style={{ display: "inline-block", color: "rgba(255,255,255,0.9)", fontFamily: "Inter", fontSize: 12, textDecoration: "none", textAlign: "center" }}>
+          style={{ display: "inline-block", color: "color-mix(in srgb, var(--mm-white) 90.0%, transparent)", fontFamily: "Inter", fontSize: 12, textDecoration: "none", textAlign: "center" }}>
           Learn more first →
         </a>
       </div>
@@ -153,7 +153,7 @@ function Page() {
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
           <div style={{
             padding: "4px 12px", borderRadius: 20,
-            background: T.sand + "20", border: `1px solid ${T.sand}40`,
+            background: `color-mix(in srgb, ${T.sand} 12.5%, transparent)`, border: `1px solid color-mix(in srgb, ${T.sand} 25.1%, transparent)`,
             fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.sand, letterSpacing: "0.06em",
           }}>ILLUSTRATIVE EXAMPLES</div>
           <span style={{ fontSize: 12, fontFamily: "Inter", color: T.mid }}>

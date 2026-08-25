@@ -194,7 +194,7 @@ export function BillingTab({ success }: { success?: boolean }) {
             style={{
               fontSize: 14,
               lineHeight: 1.7,
-              color: "rgba(255,255,255,0.78)",
+              color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)",
               margin: "0 0 20px",
             }}
           >
@@ -206,7 +206,7 @@ export function BillingTab({ success }: { success?: boolean }) {
               paddingLeft: 20,
               fontSize: 13,
               lineHeight: 1.9,
-              color: "rgba(255,255,255,0.85)",
+              color: "color-mix(in srgb, var(--mm-white) 85.0%, transparent)",
             }}
           >
             <li>All 50 child systems across 5 revenue systems</li>
@@ -261,7 +261,7 @@ export function BillingTab({ success }: { success?: boolean }) {
             style={{
               marginTop: 22,
               paddingTop: 20,
-              borderTop: "1px solid rgba(255,255,255,0.12)",
+              borderTop: "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)",
             }}
           >
             <div
@@ -288,8 +288,8 @@ export function BillingTab({ success }: { success?: boolean }) {
                 autoCapitalize="characters"
                 style={{
                   flex: 1,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "color-mix(in srgb, var(--mm-white) 6.0%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--mm-white) 18.0%, transparent)",
                   color: T.white,
                   padding: "10px 12px",
                   borderRadius: 8,
@@ -304,7 +304,7 @@ export function BillingTab({ success }: { success?: boolean }) {
                 style={{
                   background: "transparent",
                   color: T.white,
-                  border: "1px solid rgba(255,255,255,0.35)",
+                  border: "1px solid color-mix(in srgb, var(--mm-white) 35.0%, transparent)",
                   padding: "10px 18px",
                   borderRadius: 8,
                   fontWeight: 600,

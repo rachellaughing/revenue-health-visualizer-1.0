@@ -44,7 +44,7 @@ function LockedTeamPanel() {
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(24,40,41,0.55)",
+          background: "color-mix(in srgb, var(--mm-abyss) 55.0%, transparent)",
           borderRadius: 14,
           display: "flex",
           alignItems: "center",
@@ -58,7 +58,7 @@ function LockedTeamPanel() {
             padding: "32px 36px",
             maxWidth: 420,
             textAlign: "center",
-            boxShadow: "0 24px 60px rgba(0,0,0,0.25)",
+            boxShadow: "0 24px 60px color-mix(in srgb, var(--mm-ink) 25.0%, transparent)",
           }}
         >
           <div

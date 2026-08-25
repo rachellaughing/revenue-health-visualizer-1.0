@@ -91,7 +91,7 @@ export function RadarChart({ data, size = 280 }: { data: AlignmentSystem[]; size
       {points.map((p, i) => (
         <line key={i} x1={cx} y1={cy} x2={cx + p.x * r} y2={cy + p.y * r} stroke={T.offWhite} strokeWidth={1} />
       ))}
-      <polygon points={teamPoly} fill={T.tealBright + "40"} stroke={T.tealBright} strokeWidth={2} strokeLinejoin="round" />
+      <polygon points={teamPoly} fill={`color-mix(in srgb, ${T.tealBright} 25.1%, transparent)`} stroke={T.tealBright} strokeWidth={2} strokeLinejoin="round" />
       <polygon points={founderPoly} fill="none" stroke={T.ember} strokeWidth={2} strokeLinejoin="round" strokeDasharray="5,3" />
       {data.map((d, i) => {
         const labelR = r + 22;
@@ -172,11 +172,11 @@ export function SystemCard({
     <div
       style={{
         background: T.white,
-        border: `1px solid ${expanded ? d.color + "40" : "var(--mm-rule)"}`,
+        border: `1px solid ${expanded ? `color-mix(in srgb, ${d.color} 25.1%, transparent)` : "var(--mm-rule)"}`,
         borderRadius: 12,
         marginBottom: 12,
         overflow: "hidden",
-        boxShadow: expanded ? `0 4px 16px ${d.color}12` : "0 2px 6px rgba(24,40,41,0.04)",
+        boxShadow: expanded ? `0 4px 16px color-mix(in srgb, ${d.color} 7.1%, transparent)` : "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
       }}
     >
       <button
@@ -188,7 +188,7 @@ export function SystemCard({
           alignItems: "center",
           gap: 16,
           padding: "16px 20px",
-          background: expanded ? d.color + "06" : "transparent",
+          background: expanded ? `color-mix(in srgb, ${d.color} 2.4%, transparent)` : "transparent",
           border: "none",
           cursor: "pointer",
           textAlign: "left",
@@ -197,7 +197,7 @@ export function SystemCard({
       >
         <div style={{ width: 8, height: 8, borderRadius: "50%", background: d.color }} />
         <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>{d.name}</span>
-        <div style={{ padding: "3px 10px", borderRadius: 20, background: gc + "18", color: gc, fontSize: 10, fontWeight: 700, whiteSpace: "nowrap" }}>
+        <div style={{ padding: "3px 10px", borderRadius: 20, background: `color-mix(in srgb, ${gc} 9.4%, transparent)`, color: gc, fontSize: 10, fontWeight: 700, whiteSpace: "nowrap" }}>
           {statusLabel(d.status)}
         </div>
         <div style={{ textAlign: "right", minWidth: 100 }}>
@@ -236,13 +236,13 @@ export function SystemCard({
             </div>
           </div>
 
-          <div style={{ background: gc + "0A", border: `1px solid ${gc}25`, borderRadius: 10, padding: "14px 16px", marginBottom: isDiagnostic && d.narrative ? 20 : 0 }}>
+          <div style={{ background: `color-mix(in srgb, ${gc} 3.9%, transparent)`, border: `1px solid color-mix(in srgb, ${gc} 14.5%, transparent)`, borderRadius: 10, padding: "14px 16px", marginBottom: isDiagnostic && d.narrative ? 20 : 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: gc, letterSpacing: "0.1em", marginBottom: 6 }}>WHAT THIS MEANS</div>
             <p style={{ fontSize: 13, color: T.ink, lineHeight: 1.65, margin: 0 }}>{gapInterpretation(d)}</p>
           </div>
 
           {isDiagnostic && d.narrative && (
-            <div style={{ borderLeft: `3px solid ${T.teal}`, background: T.abyss + "06", borderRadius: 10, padding: "16px 18px" }}>
+            <div style={{ borderLeft: `3px solid ${T.teal}`, background: `color-mix(in srgb, ${T.abyss} 2.4%, transparent)`, borderRadius: 10, padding: "16px 18px" }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: T.teal, letterSpacing: "0.1em", marginBottom: 8 }}>CONSULTANT OBSERVATION</div>
               <p style={{ fontSize: 13, color: T.ink, lineHeight: 1.75, margin: 0 }}>{d.narrative}</p>
             </div>
@@ -301,7 +301,7 @@ function Page() {
           <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
             REVENUE HEALTH MATRIX™ › TEAM ALIGNMENT
           </div>
-          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 40, textAlign: "center", boxShadow: "0 2px 8px rgba(24,40,41,0.05)" }}>
+          <div style={{ background: T.white, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 40, textAlign: "center", boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
             <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: T.ink, margin: "0 0 12px" }}>Waiting for your team</h1>
             <p style={{ color: T.mid, fontSize: 14, lineHeight: 1.65, margin: "0 0 24px" }}>
               Your team members haven&apos;t completed the Health Check yet ({d.completedCount}/{d.invitedCount} complete).
@@ -340,8 +340,8 @@ function Page() {
         {/* Anonymity callout */}
         <div
           style={{
-            background: "rgba(196,149,106,0.08)",
-            border: "1px solid rgba(196,149,106,0.25)",
+            background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--mm-sand) 25.0%, transparent)",
             borderRadius: 10,
             padding: "12px 18px",
             marginBottom: 28,
@@ -403,7 +403,7 @@ function Page() {
               borderRadius: 14,
               padding: 28,
               marginBottom: 28,
-              boxShadow: "0 2px 8px rgba(24,40,41,0.05)",
+              boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
@@ -427,7 +427,7 @@ function Page() {
                       color: chartView === v ? T.ink : T.mid,
                       fontSize: 11,
                       fontWeight: chartView === v ? 600 : 400,
-                      boxShadow: chartView === v ? "0 1px 4px rgba(0,0,0,0.1)" : "none",
+                      boxShadow: chartView === v ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
                     }}
                   >
                     {v === "radar" ? "Radar" : "Side by side"}
@@ -507,7 +507,7 @@ function Page() {
                       gridTemplateColumns: "32px 1fr auto",
                       gap: 16,
                       alignItems: "flex-start",
-                      boxShadow: "0 2px 6px rgba(24,40,41,0.04)",
+                      boxShadow: "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
                     }}
                   >
                     <div
@@ -515,8 +515,8 @@ function Page() {
                         width: 32,
                         height: 32,
                         borderRadius: "50%",
-                        background: rec.systemColor + "18",
-                        border: `1.5px solid ${rec.systemColor}40`,
+                        background: `color-mix(in srgb, ${rec.systemColor} 9.4%, transparent)`,
+                        border: `1.5px solid color-mix(in srgb, ${rec.systemColor} 25.1%, transparent)`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

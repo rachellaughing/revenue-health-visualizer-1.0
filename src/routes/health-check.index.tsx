@@ -261,7 +261,7 @@ function CavitySearchCTA() {
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 200ms ease",
             fontSize: 13,
-            color: "rgba(255,254,250,0.7)",
+            color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)",
           }}
         >
           ▾
@@ -272,7 +272,7 @@ function CavitySearchCTA() {
           <p
             style={{
               fontSize: 13,
-              color: "rgba(255,254,250,0.7)",
+              color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)",
               lineHeight: 1.6,
               margin: "14px 0 18px",
               maxWidth: 560,
@@ -380,13 +380,13 @@ function TeamMemberCompletionInline({
           <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 32, fontWeight: 400, lineHeight: 1.2, margin: "0 0 16px" }}>
             Your responses have been submitted.
           </h1>
-          <p style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.78)", margin: "0 0 24px" }}>
+          <p style={{ fontSize: 14, lineHeight: 1.65, color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)", margin: "0 0 24px" }}>
             Thank you for completing the Health Check for {company}. {ownerName} will see how team
             scores compare to their own in the Team Alignment report. Your individual responses are
             always kept anonymous.
           </p>
           {ownerEmail && (
-            <a href={`mailto:${ownerEmail}`} style={{ fontSize: 13, color: T.tealBright, textDecoration: "none", borderBottom: `1px solid ${T.tealBright}40` }}>
+            <a href={`mailto:${ownerEmail}`} style={{ fontSize: 13, color: T.tealBright, textDecoration: "none", borderBottom: `1px solid color-mix(in srgb, ${T.tealBright} 25.1%, transparent)` }}>
               Questions? Contact {ownerEmail}
             </a>
           )}
@@ -500,11 +500,11 @@ function AnswerCard({
       <div
         style={{
           background: T.white,
-          border: `1.5px solid ${systemColor}50`,
+          border: `1.5px solid color-mix(in srgb, ${systemColor} 31.4%, transparent)`,
           borderRadius: 10,
           padding: "16px 18px",
           marginBottom: 8,
-          boxShadow: `0 2px 12px ${systemColor}15`,
+          boxShadow: `0 2px 12px color-mix(in srgb, ${systemColor} 8.2%, transparent)`,
         }}
       >
         <div
@@ -532,7 +532,7 @@ function AnswerCard({
                 flex: "1 1 0",
                 padding: "8px 4px",
                 borderRadius: 8,
-                border: `1.5px solid ${health === v ? systemColor : "rgba(0,0,0,0.1)"}`,
+                border: `1.5px solid ${health === v ? systemColor : "color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"}`,
                 background: health === v ? systemColor : T.offWhite,
                 color: health === v ? T.white : T.mid,
                 fontSize: 11,
@@ -555,7 +555,7 @@ function AnswerCard({
                 flex: "1 1 0",
                 padding: "8px 4px",
                 borderRadius: 8,
-                border: `1.5px solid ${tracking === v ? systemColor : "rgba(0,0,0,0.1)"}`,
+                border: `1.5px solid ${tracking === v ? systemColor : "color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"}`,
                 background: tracking === v ? systemColor : T.offWhite,
                 color: tracking === v ? T.white : T.mid,
                 fontSize: 10,
@@ -615,8 +615,8 @@ function AnswerCard({
         gap: 10,
         padding: "9px 14px",
         marginBottom: 6,
-        background: hovered ? systemColor + "06" : T.paper,
-        border: `1px solid ${hovered ? systemColor + "30" : T.offWhite}`,
+        background: hovered ? `color-mix(in srgb, ${systemColor} 2.4%, transparent)` : T.paper,
+        border: `1px solid ${hovered ? `color-mix(in srgb, ${systemColor} 18.8%, transparent)` : T.offWhite}`,
         borderRadius: 8,
         transition: "all 0.15s",
       }}
@@ -701,8 +701,8 @@ function ChildBlock({
           gap: 10,
           padding: "10px 14px",
           borderRadius: 8,
-          background: open ? systemColor + "08" : T.offWhite,
-          border: `1px solid ${open ? systemColor + "30" : "transparent"}`,
+          background: open ? `color-mix(in srgb, ${systemColor} 3.1%, transparent)` : T.offWhite,
+          border: `1px solid ${open ? `color-mix(in srgb, ${systemColor} 18.8%, transparent)` : "transparent"}`,
           cursor: "pointer",
           textAlign: "left",
         }}
@@ -898,7 +898,7 @@ function CompletedLanding({
                 alignItems: "center",
                 gap: 10,
                 padding: "10px 16px",
-                background: active ? color + "10" : "none",
+                background: active ? `color-mix(in srgb, ${color} 6.3%, transparent)` : "none",
                 border: "none",
                 borderLeft: `3px solid ${active ? color : "transparent"}`,
                 cursor: "pointer",
@@ -1018,15 +1018,15 @@ function CompletedLanding({
               top: -20,
               bottom: -20,
               width: 240,
-              background: `radial-gradient(circle at 80% 50%, ${T.tealBright}12, transparent 70%)`,
+              background: `radial-gradient(circle at 80% 50%, color-mix(in srgb, ${T.tealBright} 7.1%, transparent), transparent 70%)`,
             }}
           />
           <div style={{ position: "relative", display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "inline-flex" }}>
               <div
                 style={{
-                  background: T.tealBright + "22",
-                  border: `1px solid ${T.tealBright}40`,
+                  background: `color-mix(in srgb, ${T.tealBright} 13.3%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${T.tealBright} 25.1%, transparent)`,
                   borderRadius: 20,
                   padding: "4px 14px",
                   fontSize: 11,
@@ -1054,7 +1054,7 @@ function CompletedLanding({
               <p
                 style={{
                   fontSize: 13,
-                  color: "rgba(255,255,255,0.55)",
+                  color: "color-mix(in srgb, var(--mm-white) 55.0%, transparent)",
                   margin: 0,
                   lineHeight: 1.6,
                 }}
@@ -1067,7 +1067,7 @@ function CompletedLanding({
               <p
                 style={{
                   fontSize: 13,
-                  color: "rgba(255,255,255,0.55)",
+                  color: "color-mix(in srgb, var(--mm-white) 55.0%, transparent)",
                   margin: 0,
                   lineHeight: 1.6,
                 }}
@@ -1096,8 +1096,8 @@ function CompletedLanding({
                 disabled={starting}
                 style={{
                   background: "transparent",
-                  color: "rgba(255,255,255,0.65)",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  color: "color-mix(in srgb, var(--mm-white) 65.0%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--mm-white) 20.0%, transparent)",
                   borderRadius: 8,
                   padding: "11px 22px",
                   fontSize: 13,
@@ -1781,7 +1781,7 @@ function HealthCheckShell({
                     gap: 10,
                     padding: leftRailCollapsed ? "10px 0" : "10px 16px",
                     justifyContent: leftRailCollapsed ? "center" : "flex-start",
-                    background: isActiveParent ? `${color}10` : "none",
+                    background: isActiveParent ? `color-mix(in srgb, ${color} 6.3%, transparent)` : "none",
                     border: "none",
                     borderLeft: `3px solid ${isActiveParent ? color : "transparent"}`,
                     cursor: "pointer",
@@ -1853,7 +1853,7 @@ function HealthCheckShell({
                           alignItems: "center",
                           gap: 8,
                           padding: "7px 16px 7px 34px",
-                          background: isActive ? `${color}08` : "none",
+                          background: isActive ? `color-mix(in srgb, ${color} 3.1%, transparent)` : "none",
                           border: "none",
                           borderLeft: `3px solid ${
                             isActive ? color : "transparent"
@@ -1905,8 +1905,8 @@ function HealthCheckShell({
           {completedBanner && (
             <div
               style={{
-                background: `${T.tealBright}15`,
-                border: `1px solid ${T.tealBright}40`,
+                background: `color-mix(in srgb, ${T.tealBright} 8.2%, transparent)`,
+                border: `1px solid color-mix(in srgb, ${T.tealBright} 25.1%, transparent)`,
                 borderRadius: 10,
                 padding: "14px 18px",
                 marginBottom: 18,
@@ -2015,19 +2015,19 @@ function HealthCheckShell({
                       style={{
                         padding: "6px 14px",
                         borderRadius: 20,
-                        border: `1.5px solid ${
+                        border: `1.5px solid color-mix(in srgb, ${
                           active
                             ? systemColor
                             : selectedInSelMode
                             ? systemColor
                             : complete
-                            ? `${T.tealBright}60`
-                            : "rgba(0,0,0,0.1)"
+                            ? `${T.tealBright} 37.6%, transparent)`
+                            : "color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"
                         }`,
                         background: active
-                          ? `${systemColor}15`
+                          ? `color-mix(in srgb, ${systemColor} 8.2%, transparent)`
                           : complete
-                          ? `${T.tealBright}10`
+                          ? `color-mix(in srgb, ${T.tealBright} 6.3%, transparent)`
                           : T.white,
                         color: active
                           ? systemColor
@@ -2106,8 +2106,8 @@ function HealthCheckShell({
                   {childComplete && (
                     <div
                       style={{
-                        background: `${T.tealBright}20`,
-                        border: `1px solid ${T.tealBright}40`,
+                        background: `color-mix(in srgb, ${T.tealBright} 12.5%, transparent)`,
+                        border: `1px solid color-mix(in srgb, ${T.tealBright} 25.1%, transparent)`,
                         borderRadius: 20,
                         padding: "4px 14px",
                         fontSize: 11,
@@ -2142,7 +2142,7 @@ function HealthCheckShell({
                   inset: 0,
                   borderRadius: 12,
                   backdropFilter: "blur(4px)",
-                  background: `${T.teal}08`,
+                  background: `color-mix(in srgb, ${T.teal} 3.1%, transparent)`,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -2209,8 +2209,8 @@ function HealthCheckShell({
                       }
                       style={{
                         background: T.paper,
-                        border: `1px solid ${
-                          isSkipped ? "rgba(136,136,128,0.3)" : `${systemColor}4D`
+                        border: `1px solid color-mix(in srgb, ${
+                          isSkipped ? "color-mix(in srgb, var(--mm-mid) 30.0%, transparent)" : `${systemColor} 30.2%, transparent)`
                         }`,
                         borderRadius: 12,
                         marginBottom: 14,
@@ -2296,8 +2296,8 @@ function HealthCheckShell({
                     }}
                     style={{
                       background: T.white,
-                      border: `1px solid ${
-                        isComplete ? `${T.tealBright}50` : "var(--mm-rule)"
+                      border: `1px solid color-mix(in srgb, ${
+                        isComplete ? `${T.tealBright} 31.4%, transparent)` : "var(--mm-rule)"
                       }`,
                       borderRadius: 12,
                       padding: 20,
@@ -2382,9 +2382,9 @@ function HealthCheckShell({
                             style={{
                               padding: "10px 8px",
                               border: `1px solid ${
-                                sel ? systemColor : "rgba(0,0,0,0.1)"
+                                sel ? systemColor : "color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"
                               }`,
-                              background: sel ? `${systemColor}15` : T.white,
+                              background: sel ? `color-mix(in srgb, ${systemColor} 8.2%, transparent)` : T.white,
                               color: sel ? systemColor : T.ink,
                               borderRadius: 8,
                               fontSize: 11,
@@ -2395,7 +2395,7 @@ function HealthCheckShell({
                               transition: "border-color .12s, background .12s",
                               boxShadow:
                                 val === 3 && !sel
-                                  ? "inset 0 -2px 0 rgba(0,0,0,0.10)"
+                                  ? "inset 0 -2px 0 color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"
                                   : "none",
                             }}
                           >
@@ -2460,7 +2460,7 @@ function HealthCheckShell({
                                   border: `1px solid ${
                                     sel ? systemColor : "var(--mm-rule)"
                                   }`,
-                                  background: sel ? `${systemColor}10` : T.white,
+                                  background: sel ? `color-mix(in srgb, ${systemColor} 6.3%, transparent)` : T.white,
                                   cursor: "pointer",
                                   fontSize: 12,
                                   color: sel ? systemColor : T.ink,
@@ -2492,8 +2492,8 @@ function HealthCheckShell({
 
                 <div
                   style={{
-                    background: "rgba(240,82,35,0.06)",
-                    border: "1px solid rgba(240,82,35,0.2)",
+                    background: "color-mix(in srgb, var(--mm-ember) 6.0%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--mm-ember) 20.0%, transparent)",
                     borderRadius: 10,
                     padding: "14px 18px",
                     display: "flex",
