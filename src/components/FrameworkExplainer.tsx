@@ -1,21 +1,6 @@
 import { useEffect, useState } from "react";
-import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
+import { getSystemClass } from "@/lib/system-colors";
 import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
-
-// Brand tokens (kept local to avoid coupling)
-const C = {
-  paper: "var(--mm-paper)",
-  sand: "var(--mm-off-white)",
-  sandDeep: "var(--mm-rule)",
-  ink: "var(--mm-ink)",
-  inkSoft: "var(--mm-mid)",
-  tealBright: "var(--mm-teal-bright)",
-  tealLink: "var(--mm-teal)",
-  abyss: "var(--mm-abyss)",
-  abyssDeep: "var(--mm-abyss)",
-};
-
-// Match the CSS variables set in styles.css.
 
 const ORDERED_SYSTEM_NAMES = [
   "Positioning",
@@ -27,24 +12,9 @@ const ORDERED_SYSTEM_NAMES = [
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 16 16"
-      fill="none"
-      style={{
-        transform: open ? "rotate(180deg)" : "rotate(0deg)",
-        transition: "transform 200ms ease",
-        flexShrink: 0,
-      }}
-    >
-      <path
-        d="M4 6L8 10L12 6"
-        stroke={C.inkSoft}
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden
+      className={`shrink-0 transition-transform duration-200 motion-reduce:transition-none ${open ? "rotate-180" : ""}`}>
+      <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--mm-text-muted)]" />
     </svg>
   );
 }
@@ -110,65 +80,24 @@ export function FrameworkExplainer({
   const totalSelected = effectiveSelected.size;
   const totalEvaluationAreas = totalSelected * 4;
 
-  const dotColors = sortedParents.map(
-    (p) => getSystemColor(p.code ?? p.name),
-  );
+  const dotClasses = sortedParents.map((p) => getSystemClass(p.code ?? p.name));
+  const faint = "text-[color-mix(in_srgb,var(--mm-on-dark)_50%,transparent)]";
 
   return (
-    <div
-      style={{
-        borderRadius: 12,
-        overflow: "hidden",
-        border: `1px solid ${C.sandDeep}`,
-        background: C.paper,
-      }}
-    >
+    <div className="overflow-hidden rounded-xl border border-[var(--mm-border-subtle)] bg-[var(--mm-surface)]">
       {/* Collapsed bar */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: "100%",
-          padding: "12px 16px",
-          background: C.sand,
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          textAlign: "left",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-          <div style={{ display: "flex", flexShrink: 0 }}>
-            {dotColors.map((c, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: c,
-                  marginLeft: i === 0 ? 0 : -2.5,
-                  border: `1.5px solid ${C.sand}`,
-                }}
-              />
+      <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open}
+        className="flex w-full cursor-pointer items-center justify-between gap-3 border-none bg-[var(--mm-surface-sunken)] px-4 py-3 text-left">
+        <div className="mm-row mm-gap-sm min-w-0">
+          <div className="flex shrink-0">
+            {dotClasses.map((c, i) => (
+              <div key={i} className={`${c} h-[7px] w-[7px] rounded-full border-[1.5px] border-[var(--mm-surface-sunken)] bg-[var(--sys-color)] ${i === 0 ? "" : "-ml-[2.5px]"}`} />
             ))}
           </div>
-          <span
-            style={{
-              fontSize: 13.5,
-              color: C.ink,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
+          <span className="overflow-hidden text-ellipsis text-[13.5px] text-[var(--mm-text)]">
             Revenue Health Snapshot™ · {totalSelected} of 50 subsystems ·{" "}
             {totalEvaluationAreas} evaluation areas{" "}
-            <span style={{ color: C.tealLink, fontWeight: 600, marginLeft: 6 }}>
-              How it works
-            </span>
+            <span className="ml-1.5 font-semibold text-[var(--mm-link)]">How it works</span>
           </span>
         </div>
         <Chevron open={open} />
@@ -176,105 +105,34 @@ export function FrameworkExplainer({
 
       {/* Expanded body */}
       {open && (
-        <div style={{ background: C.abyss, padding: "24px 20px 20px" }}>
-          <div
-            style={{
-              fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 22,
-              color: C.paper,
-              lineHeight: 1.25,
-              marginBottom: 10,
-            }}
-          >
-            A prompt didn't create the Revenue Health Matrix™.
-          </div>
-          <p
-            style={{
-              fontSize: 13,
-              color: "color-mix(in srgb, var(--mm-white) 65.0%, transparent)",
-              lineHeight: 1.6,
-              margin: "0 0 16px",
-            }}
-          >
+        <div className="bg-[var(--mm-abyss)] px-5 pt-6 pb-5 text-[var(--mm-on-dark)]">
+          <div className="mm-heading-md mb-2.5">A prompt didn't create the Revenue Health Matrix™.</div>
+          <p className="mm-on-dark-muted m-0 mb-4 text-[13px] leading-[1.6]">
             Five interconnected systems, built from years of pattern recognition
             inside founder-led companies — not generated. Here's the shape of it,
             and what you're evaluating right now.
           </p>
 
           {/* Stat row */}
-          <div
-            style={{
-              display: "flex",
-              gap: 0,
-              marginBottom: 20,
-              paddingBottom: 18,
-              borderBottom: "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)",
-            }}
-          >
+          <div className="mb-5 flex border-b border-[color-mix(in_srgb,var(--mm-on-dark)_12%,transparent)] pb-[18px]">
             {[
-              { num: "5", label: "SYSTEMS", muted: false },
-              {
-                num: "10",
-                label: "SUBSYSTEMS EACH",
-                muted: true,
-                annotation:
-                  tier === "starter" ? "3 in your Snapshot" : null,
-              },
-              {
-                num: "200",
-                label: "EVALUATION AREAS",
-                muted: true,
-                annotation:
-                  tier === "starter" ? "60 in your Snapshot" : null,
-              },
+              { num: "5", label: "SYSTEMS", muted: false, annotation: null as string | null },
+              { num: "10", label: "SUBSYSTEMS EACH", muted: true, annotation: tier === "starter" ? "3 in your Snapshot" : null },
+              { num: "200", label: "EVALUATION AREAS", muted: true, annotation: tier === "starter" ? "60 in your Snapshot" : null },
             ].map((item, i) => (
-              <div
-                key={item.label}
-                style={{
-                  flex: 1,
-                  borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)" : "none",
-                  paddingLeft: i > 0 ? 14 : 0,
-                }}
-              >
-                <div
-                  style={{
-                    fontFamily: "'Instrument Serif', Georgia, serif",
-                    fontSize: 30,
-                    color: item.muted
-                      ? "color-mix(in srgb, var(--mm-white) 50.0%, transparent)"
-                      : C.paper,
-                    lineHeight: 1,
-                  }}
-                >
-                  {item.num}
-                </div>
-                <div
-                  style={{
-                    fontSize: 9.5,
-                    letterSpacing: "0.08em",
-                    color: "color-mix(in srgb, var(--mm-white) 50.0%, transparent)",
-                    marginTop: 4,
-                  }}
-                >
-                  {item.label}
-                </div>
+              <div key={item.label}
+                className={`flex-1 ${i > 0 ? "border-l border-[color-mix(in_srgb,var(--mm-on-dark)_12%,transparent)] pl-3.5" : ""}`}>
+                <div className={`font-display text-[30px] leading-none ${item.muted ? faint : ""}`}>{item.num}</div>
+                <div className={`mt-1 text-[9.5px] tracking-[0.08em] ${faint}`}>{item.label}</div>
                 {item.annotation && (
-                  <div
-                    style={{
-                      fontSize: 9.5,
-                      color: C.tealBright,
-                      marginTop: 4,
-                    }}
-                  >
-                    {item.annotation}
-                  </div>
+                  <div className="mt-1 text-[9.5px] text-[var(--mm-teal-bright)]">{item.annotation}</div>
                 )}
               </div>
             ))}
           </div>
 
           {/* Snapshot summary */}
-          <div style={{ fontSize: 13, color: C.paper, marginBottom: 14 }}>
+          <div className="mb-3.5 text-[13px]">
             {tier === "starter" ? (
               <>
                 Your Snapshot™ covers <strong>{totalSelected} of 50</strong>{" "}
@@ -293,66 +151,27 @@ export function FrameworkExplainer({
 
           {/* Per-system read-only grid */}
           {sortedParents.map((p) => {
-            const color = getSystemColor(p.code ?? p.name);
             const list = childrenByParent.get(p.id) ?? [];
-            const selectedInParent = list.filter((c) =>
-              effectiveSelected.has(c.code),
-            ).length;
+            const selectedInParent = list.filter((c) => effectiveSelected.has(c.code)).length;
             return (
-              <div key={p.id} style={{ marginBottom: 14 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: 7,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: color,
-                      }}
-                    />
-                    <span
-                      style={{ fontSize: 12.5, fontWeight: 600, color: C.paper }}
-                    >
-                      {p.name}
-                    </span>
+              <div key={p.id} className={`${getSystemClass(p.code ?? p.name)} mb-3.5`}>
+                <div className="mm-row mm-row--between mb-[7px]">
+                  <div className="mm-row mm-gap-xs">
+                    <div className="mm-sys-dot" />
+                    <span className="text-[12.5px] font-semibold">{p.name}</span>
                   </div>
-                  <span
-                    style={{
-                      fontSize: 11.5,
-                      color: "color-mix(in srgb, var(--mm-white) 50.0%, transparent)",
-                    }}
-                  >
-                    {selectedInParent} of {list.length}
-                  </span>
+                  <span className={`text-[11.5px] ${faint}`}>{selectedInParent} of {list.length}</span>
                 </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                <div className="flex flex-wrap gap-1.5">
                   {list.map((c) => {
                     const chosen = effectiveSelected.has(c.code);
                     return (
-                      <div
-                        key={c.id}
-                        style={{
-                          padding: "6px 12px",
-                          borderRadius: 999,
-                          fontSize: 11.5,
-                          border: `1.3px solid ${
-                            chosen ? color : "color-mix(in srgb, var(--mm-white) 25.0%, transparent)"
-                          }`,
-                          background: chosen ? color : "transparent",
-                          color: chosen
-                            ? C.abyssDeep
-                            : "color-mix(in srgb, var(--mm-white) 75.0%, transparent)",
-                          fontWeight: chosen ? 600 : 400,
-                          userSelect: "none",
-                        }}
-                      >
+                      <div key={c.id}
+                        className={`select-none rounded-full border-[1.3px] px-3 py-1.5 text-[11.5px] ${
+                          chosen
+                            ? "border-[var(--sys-color)] bg-[var(--sys-color)] font-semibold text-[var(--mm-abyss)]"
+                            : "border-[color-mix(in_srgb,var(--mm-on-dark)_25%,transparent)] bg-transparent text-[color-mix(in_srgb,var(--mm-on-dark)_75%,transparent)]"
+                        }`}>
                         {c.name}
                       </div>
                     );

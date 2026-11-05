@@ -1,0 +1,166 @@
+/* Shared mm- class layer. Every rule uses theme tokens; no hardcoded #fff/#000.
+   Data-driven values come in through a single CSS custom property
+   (--pct, --size, --color, --sys-color). */
+
+/* ---------- System color classes ---------- */
+.mm-sys--pos  { --sys-color: var(--mm-sys-positioning); }
+.mm-sys--auth { --sys-color: var(--mm-sys-authority); }
+.mm-sys--conv { --sys-color: var(--mm-sys-conversion); }
+.mm-sys--lfc  { --sys-color: var(--mm-sys-lifecycle); }
+.mm-sys--vis  { --sys-color: var(--mm-sys-visibility); }
+.mm-sys--none { --sys-color: var(--mm-teal); }
+[class*="mm-sys--"] { --sys-color-bg: color-mix(in srgb, var(--sys-color) 12%, transparent); }
+.mm-sys-dot {
+  width: var(--size, 6px); height: var(--size, 6px);
+  border-radius: 50%; background: var(--sys-color, var(--mm-teal)); flex-shrink: 0;
+}
+
+/* ---------- Page shell ---------- */
+.mm-page {
+  max-width: 920px; margin: 0 auto; padding: 36px 40px 80px;
+  color: var(--mm-text); font-family: var(--font-sans);
+}
+.mm-page--narrow { max-width: 860px; }
+.mm-page-bg { min-height: 100dvh; background: var(--mm-paper); font-family: var(--font-sans); }
+.mm-breadcrumb { font-size: 11px; color: var(--mm-text-muted); margin-bottom: 20px; letter-spacing: 0.08em; }
+.mm-footer {
+  padding-top: 24px; margin-top: 32px; border-top: 1px solid var(--mm-divider);
+  font-size: 11px; color: var(--mm-text-muted);
+}
+
+.mm-topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 0 40px; min-height: 56px;
+  background: var(--mm-surface); border-bottom: 1px solid var(--mm-border-subtle);
+  color: var(--mm-text);
+}
+
+/* ---------- Cards ---------- */
+.mm-card {
+  background: var(--mm-surface); color: var(--mm-text-on-surface);
+  border: 1px solid var(--mm-border-subtle); border-radius: 12px; padding: 20px 24px;
+}
+.mm-card--raised { background: var(--mm-surface-raised); }
+.mm-card--sunken { background: var(--mm-surface-sunken); }
+.mm-card--dark {
+  background: var(--mm-abyss); color: var(--mm-on-dark);
+  border-color: color-mix(in srgb, var(--mm-on-dark) 8%, transparent);
+  border-radius: 16px; padding: 28px 32px;
+}
+.mm-card--ember {
+  background: var(--mm-ember); color: var(--mm-white); border: none;
+  border-radius: 16px; padding: 28px 32px;
+}
+.mm-card--glass {
+  background: color-mix(in srgb, var(--mm-on-dark) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mm-on-dark) 8%, transparent);
+  border-radius: 12px; padding: 22px 24px; color: inherit;
+}
+
+/* ---------- Typography ---------- */
+.mm-heading-xl, .mm-heading-lg, .mm-heading-md {
+  font-family: var(--font-display); font-weight: 400; color: inherit; margin: 0;
+}
+.mm-heading-xl { font-size: 32px; line-height: 1.2; }
+.mm-heading-lg { font-size: 24px; line-height: 1.3; }
+.mm-heading-md { font-size: 22px; line-height: 1.25; }
+.mm-body { font-family: var(--font-sans); font-size: 13px; line-height: 1.75; margin: 0; }
+.mm-body--lg { font-size: 14px; line-height: 1.7; }
+.mm-muted { color: var(--mm-text-muted); }
+.mm-on-dark-muted { color: color-mix(in srgb, var(--mm-on-dark) 65%, transparent); }
+.mm-on-dark-faint { color: color-mix(in srgb, var(--mm-on-dark) 50%, transparent); }
+.mm-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--mm-text-muted); margin-bottom: 10px;
+}
+.mm-card--dark .mm-section-label { color: var(--mm-teal-bright); }
+.mm-eyebrow {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--mm-eyebrow);
+}
+.mm-link-bright {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--mm-teal-bright); font-size: 13px; font-weight: 600; text-decoration: none;
+}
+
+/* ---------- Badges ---------- */
+.mm-badge {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+  --badge-color: var(--mm-text-muted);
+  color: var(--badge-color);
+  background: color-mix(in srgb, var(--badge-color) 12.5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--badge-color) 25%, transparent);
+}
+.mm-badge--neutral { --badge-color: var(--mm-text-muted); }
+.mm-badge--sand    { --badge-color: var(--mm-sand); }
+.mm-badge--success { --badge-color: var(--mm-status-success); }
+.mm-badge--warning { --badge-color: var(--mm-sys-positioning); }
+.mm-badge--error   { --badge-color: var(--mm-danger); }
+.mm-badge--info    { --badge-color: var(--mm-link); }
+.mm-badge--solid-dark {
+  background: var(--mm-abyss); color: var(--mm-on-dark); border-color: transparent;
+  padding: 6px 16px; font-size: 11px; letter-spacing: 0.08em;
+}
+
+/* ---------- Score ring (svg circles; size/color/pct via vars) ---------- */
+.mm-score-ring {
+  --size: 64px; --color: var(--mm-link); --pct: 0;
+  position: relative; width: var(--size); height: var(--size); flex-shrink: 0;
+}
+.mm-score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.mm-score-ring__track { stroke: var(--mm-track); fill: none; }
+.mm-score-ring__fill {
+  stroke: var(--color); fill: none; stroke-linecap: round;
+  stroke-dasharray: 100 100; stroke-dashoffset: calc(100 - var(--pct));
+  transition: stroke-dashoffset 400ms ease;
+}
+.mm-score-ring__label {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: calc(var(--size) * 0.34); color: var(--mm-text);
+}
+
+/* ---------- Bar ---------- */
+.mm-bar {
+  --pct: 0; --color: var(--sys-color, var(--mm-link));
+  height: 6px; border-radius: 999px; background: var(--mm-track); overflow: hidden;
+}
+.mm-bar__fill {
+  height: 100%; width: calc(var(--pct) * 1%); background: var(--color);
+  border-radius: inherit; transition: width 300ms ease;
+}
+
+/* ---------- Skeleton ---------- */
+@keyframes mmShimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+.mm-skeleton {
+  border-radius: 6px; min-height: 12px;
+  background: linear-gradient(90deg, var(--mm-surface-sunken) 0%, var(--mm-track) 50%, var(--mm-surface-sunken) 100%);
+  background-size: 800px 100%; animation: mmShimmer 1.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .mm-skeleton { animation: none; } }
+
+/* ---------- Layout helpers ---------- */
+.mm-stack { display: flex; flex-direction: column; gap: var(--gap, 12px); }
+.mm-row { display: flex; align-items: center; gap: var(--gap, 12px); }
+.mm-row--between { justify-content: space-between; }
+.mm-row--top { align-items: flex-start; }
+.mm-grid { display: grid; gap: var(--gap, 24px); }
+.mm-grid--2 { grid-template-columns: 1fr 1fr; }
+.mm-grid--3 { grid-template-columns: repeat(3, 1fr); }
+.mm-grid--4 { grid-template-columns: repeat(4, 1fr); }
+.mm-grid--main-aside { grid-template-columns: 1fr auto; align-items: center; }
+.mm-gap-0 { --gap: 0; } .mm-gap-xs { --gap: 6px; } .mm-gap-sm { --gap: 10px; }
+.mm-gap-md { --gap: 16px; } .mm-gap-lg { --gap: 24px; } .mm-gap-xl { --gap: 32px; }
+.mm-flex-1 { flex: 1; min-width: 0; }
+.mm-rule { flex: 1; height: 1px; background: var(--mm-divider); }
+
+/* ---------- Mobile (normal specificity, replaces attribute-substring hacks on converted files) ---------- */
+@media (max-width: 767px) {
+  .mm-page { padding: 20px 16px 64px; }
+  .mm-topbar { padding: 0 16px; }
+  .mm-grid--2, .mm-grid--3, .mm-grid--4, .mm-grid--main-aside { grid-template-columns: 1fr; }
+  .mm-card--dark, .mm-card--ember { padding: 22px 20px; }
+  .mm-row--between { flex-direction: column; align-items: stretch; }
+}

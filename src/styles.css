@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "./styles/components.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -86,6 +87,15 @@
   --mm-eyebrow: var(--mm-ember);
   --mm-on-dark: #EDF3F7;
 
+  /* Semantic surface tokens */
+  --mm-surface: var(--mm-paper);
+  --mm-surface-raised: var(--mm-white);
+  --mm-surface-sunken: var(--mm-off-white);
+  --mm-divider: var(--mm-off-white);
+  --mm-track: var(--mm-hairline);
+  --mm-border-subtle: var(--mm-rule);
+  --mm-text-on-surface: var(--mm-text);
+
   --background: var(--mm-paper);
   --foreground: var(--mm-ink);
   --card: var(--mm-paper);
@@ -137,6 +147,14 @@
   --mm-sys-authority: #8AA8FF;
   --mm-sys-visibility: #FF6B9A;
   --mm-status-success: #4ADE80;
+
+  --mm-surface: #182829;
+  --mm-surface-raised: #223536;
+  --mm-surface-sunken: #132122;
+  --mm-divider: rgba(237, 243, 247, 0.12);
+  --mm-track: rgba(237, 243, 247, 0.14);
+  --mm-border-subtle: rgba(237, 243, 247, 0.10);
+  --mm-text-on-surface: #EDF3F7;
 
   --primary-foreground: #FFFFFF;
   --destructive-foreground: #FFFFFF;
@@ -197,7 +215,10 @@
   .hc-completion-cta { text-align: center !important; }
 }
 
-/* Reports — mobile readability overrides.
+/* LEGACY reports mobile overrides — keyed to inline style strings.
+   Keep only until every targeted file is converted to mm- classes
+   (see src/styles/components.css for the replacement rules).
+   Reports — mobile readability overrides.
    Inline styles are targeted by attribute substring; React serializes
    camelCase to kebab-case in the rendered style attribute. */
 @media (max-width: 767px) {
@@ -222,15 +243,10 @@
   div[style*="grid-template-columns: 1fr 80px 100px 160px 100px"],
   div[style*="grid-template-columns: 1fr 52px 90px 180px 90px 80px"],
   div[style*="grid-template-columns: 44px 1fr auto auto auto auto"],
-  div[style*="grid-template-columns: 52px 1fr auto auto auto auto"],
   div[style*="grid-template-columns: auto 1fr auto auto auto"],
   div[style*="grid-template-columns: 32px 1fr auto"] {
     grid-template-columns: 1fr !important;
     gap: 8px !important;
-  }
-  /* Split-radar layout */
-  div[style*="grid-template-columns: auto 1fr"] {
-    grid-template-columns: 1fr !important;
   }
   /* 1fr auto grids collapse to single column */
   div[style*="grid-template-columns: 1fr auto"] {

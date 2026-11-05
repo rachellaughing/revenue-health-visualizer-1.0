@@ -30,3 +30,17 @@ export function getSystemColor(input: string | null | undefined): string {
   const code = NAME_TO_CODE[name];
   return code ? SYSTEM_COLOR[code] : FALLBACK;
 }
+
+const CLASS_BY_CODE: Record<SystemCode, string> = {
+  POS: "mm-sys--pos", AUTH: "mm-sys--auth", CONV: "mm-sys--conv", LFC: "mm-sys--lfc", VIS: "mm-sys--vis",
+};
+
+/** Class that sets --sys-color / --sys-color-bg for a system code or name. */
+export function getSystemClass(input: string | null | undefined): string {
+  if (!input) return "mm-sys--none";
+  const raw = String(input).trim();
+  const upper = raw.toUpperCase();
+  if (upper in CLASS_BY_CODE) return CLASS_BY_CODE[upper as SystemCode];
+  const code = NAME_TO_CODE[raw.replace(/\s+system$/i, "").trim().toLowerCase()];
+  return code ? CLASS_BY_CODE[code] : "mm-sys--none";
+}

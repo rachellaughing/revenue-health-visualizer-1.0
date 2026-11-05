@@ -117,7 +117,6 @@ function ScoreRing({ score, size = 60, color }: { score: number; size?: number; 
 function GlobalStyles() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap');
       a { text-decoration: none; }
       a:hover { text-decoration: underline; }
       button { transition: opacity 0.15s; }

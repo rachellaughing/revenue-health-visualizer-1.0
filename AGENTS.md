@@ -1,0 +1,1 @@
+- Shared styling lives in src/styles/components.css (mm- classes) and src/components/ui-mm; new/converted UI uses classes, with inline style only for a single data-driven CSS custom property — removes specificity fights with Tailwind and keeps dark mode token-driven.
