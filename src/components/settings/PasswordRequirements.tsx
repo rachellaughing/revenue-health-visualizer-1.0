@@ -31,19 +31,13 @@ const ITEMS: { key: keyof PasswordRules; label: string }[] = [
 export function PasswordRequirements({ password }: { password: string }) {
   const rules = checkPasswordRules(password);
   return (
-    <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0", fontSize: 13 }}>
+    <ul className="m-0 mt-2 list-none p-0 text-[13px]">
       {ITEMS.map((it) => {
         const ok = rules[it.key];
         return (
           <li
             key={it.key}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "3px 0",
-              color: ok ? "var(--mm-status-success)" : "var(--mm-mid)",
-            }}
+            className={`flex items-center gap-2 py-[3px] ${ok ? "text-[var(--mm-status-success)]" : "text-[var(--mm-text-muted)]"}`}
           >
             {ok ? (
               <Check size={14} strokeWidth={3} />
