@@ -69,7 +69,7 @@ function illustrativeForChild(seed: string, code: string) {
 function severity(score: number) {
   if (score < 40) return { label: "Critical", color: T.danger, bg: "color-mix(in srgb, var(--mm-danger) 10.0%, transparent)" };
   if (score < 60) return { label: "Fragile", color: T.sand, bg: "color-mix(in srgb, var(--mm-sand) 12.0%, transparent)" };
-  if (score < 75) return { label: "Stable", color: var(--mm-status-success), bg: "color-mix(in srgb, var(--mm-status-success) 10.0%, transparent)" };
+  if (score < 75) return { label: "Stable", color: "var(--mm-status-success)", bg: "color-mix(in srgb, var(--mm-status-success) 10.0%, transparent)" };
   return { label: "Strong", color: T.tealBright, bg: "color-mix(in srgb, var(--mm-teal-bright) 12.0%, transparent)" };
 }
 const NOT_ASSESSED = { label: "Not assessed", color: T.mid, bg: "color-mix(in srgb, var(--mm-mid) 10.0%, transparent)" };
@@ -285,7 +285,7 @@ function ChildRow({
                 fontSize: 12,
                 fontFamily: "Inter",
                 fontWeight: 600,
-                color: visGap > 25 ? T.danger : visGap > 15 ? T.sand : var(--mm-status-success),
+                color: visGap > 25 ? T.danger : visGap > 15 ? T.sand : "var(--mm-status-success)",
               }}
             >
               {visGap > 0 ? `+${visGap}` : visGap}
@@ -478,7 +478,7 @@ function SystemSection({
               fontSize: 18,
               fontFamily: "Inter",
               fontWeight: 700,
-              color: parentNotAssessed ? T.mid : visGap > 20 ? T.sand : var(--mm-status-success),
+              color: parentNotAssessed ? T.mid : visGap > 20 ? T.sand : "var(--mm-status-success)",
             }}
           >
             {parentNotAssessed ? "—" : visGap > 0 ? `+${visGap}` : visGap}

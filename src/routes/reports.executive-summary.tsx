@@ -57,8 +57,8 @@ function illustrativeForParent(seed: string, code: string) {
 function severityColor(s: string) {
   if (s === "critical") return T.danger;
   if (s === "fragile") return T.sand;
-  if (s === "stable") return var(--mm-status-success);
-  if (s === "strong") return var(--mm-status-success);
+  if (s === "stable") return "var(--mm-status-success)";
+  if (s === "strong") return "var(--mm-status-success)";
   return T.mid;
 }
 function severityBg(s: string) {
@@ -614,7 +614,7 @@ function ReportBody({
             <ScoreRing
               score={overallScore}
               size={100}
-              color={overallScore >= 70 ? var(--mm-status-success) : overallScore >= 50 ? T.sand : T.danger}
+              color={overallScore >= 70 ? "var(--mm-status-success)" : overallScore >= 50 ? T.sand : T.danger}
             />
             <div
               style={{
@@ -633,7 +633,7 @@ function ReportBody({
                   label:
                     overallScore >= 70 ? "Stable" : overallScore >= 50 ? "Fragile" : "Critical",
                   color:
-                    overallScore >= 70 ? var(--mm-status-success) : overallScore >= 50 ? T.sand : T.danger,
+                    overallScore >= 70 ? "var(--mm-status-success)" : overallScore >= 50 ? T.sand : T.danger,
                 },
                 { label: "Self-Assessment", color: T.mid },
               ].map((b, i) => (
@@ -663,7 +663,7 @@ function ReportBody({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
             {opConditions.map((c, i) => {
               const accent =
-                c.status === "danger" ? T.danger : c.status === "warning" ? T.sand : var(--mm-status-success);
+                c.status === "danger" ? T.danger : c.status === "warning" ? T.sand : "var(--mm-status-success)";
               return (
                 <Card key={i} style={{ padding: 18, borderTop: `3px solid ${accent}` }}>
                   <div
@@ -853,7 +853,7 @@ function ReportBody({
                       <div
                         style={{
                           fontSize: 10,
-                          color: var(--mm-status-success),
+                          color: "var(--mm-status-success)",
                           fontFamily: "Inter",
                           fontWeight: 600,
                           marginLeft: 16,
