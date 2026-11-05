@@ -71,10 +71,13 @@
 
   /* System colors */
   --mm-sys-positioning: #F9A11E;
-  --mm-sys-authority: #2BB457;
+  --mm-sys-authority: #223F99;
   --mm-sys-conversion: #05A4A3;
-  --mm-sys-lifecycle: #223F99;
+  --mm-sys-lifecycle: #2BB457;
   --mm-sys-visibility: #DE1A58;
+
+  /* Status */
+  --mm-status-success: #166534;
 
   --background: var(--mm-paper);
   --foreground: var(--mm-ink);
@@ -120,7 +123,8 @@
   --mm-rule: rgba(255, 255, 255, 0.10);
 
   --mm-sys-conversion: #2FCFCE;
-  --mm-sys-lifecycle: #5B7FE8;
+  --mm-sys-authority: #8AA8FF;
+  --mm-status-success: #4ADE80;
 
   --primary-foreground: #FFFFFF;
   --destructive-foreground: #FFFFFF;

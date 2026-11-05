@@ -55,7 +55,7 @@ const SEVERITY_STYLE: Record<string, { color: string; bg: string }> = {
   critical: { color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 12%, transparent)" },
   fragile: { color: "var(--mm-sand)", bg: "color-mix(in srgb, var(--mm-sand) 14%, transparent)" },
   stable: { color: "var(--mm-teal)", bg: "color-mix(in srgb, var(--mm-teal) 14%, transparent)" },
-  strong: { color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 14%, transparent)" },
+  strong: { color: "var(--mm-status-success)", bg: "color-mix(in srgb, var(--mm-status-success) 14%, transparent)" },
 };
 
 const LOCKED_BATCH = 10;

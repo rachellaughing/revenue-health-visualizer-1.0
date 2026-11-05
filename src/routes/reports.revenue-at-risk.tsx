@@ -25,7 +25,7 @@ const T = {
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
   sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" } as Record<string, string>,
-  risk: { critical: "var(--mm-danger)", high: "var(--mm-sys-positioning)", moderate: "var(--mm-sand)", low: "var(--mm-sys-authority)" },
+  risk: { critical: "var(--mm-danger)", high: "var(--mm-sys-positioning)", moderate: "var(--mm-sand)", low: "var(--mm-status-success)" },
 };
 
 const ARR_MIDPOINTS: Record<string, number> = {
@@ -82,7 +82,7 @@ function riskLevel(healthScore: number, visibilityGap: number) {
   if (healthScore < 40) return { label: "Critical", color: T.risk.critical, bg: "color-mix(in srgb, var(--mm-danger) 10.0%, transparent)" };
   if (healthScore < 50 || visibilityGap > 25) return { label: "High", color: T.risk.high, bg: "color-mix(in srgb, var(--mm-sys-positioning) 10.0%, transparent)" };
   if (healthScore < 65) return { label: "Moderate", color: T.sand, bg: "color-mix(in srgb, var(--mm-sand) 12.0%, transparent)" };
-  return { label: "Low", color: T.risk.low, bg: "color-mix(in srgb, var(--mm-sys-authority) 10.0%, transparent)" };
+  return { label: "Low", color: T.risk.low, bg: "color-mix(in srgb, var(--mm-status-success) 10.0%, transparent)" };
 }
 
 function fmtMoney(n: number) {

@@ -26,7 +26,7 @@ export const T = {
   mid: "var(--mm-mid)",
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
-  healthy: "var(--mm-sys-authority)",
+  healthy: "var(--mm-status-success)",
   danger: "var(--mm-danger)",
 };
 
@@ -48,7 +48,7 @@ export function depBg(label: string): string {
   if (label === "critical" || label === "dangerous") return "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)";
   if (label === "high") return "color-mix(in srgb, var(--mm-sand) 10.0%, transparent)";
   if (label === "moderate" || label === "mixed" || label === "low-moderate") return "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)";
-  return "color-mix(in srgb, var(--mm-sys-authority) 8.0%, transparent)";
+  return "color-mix(in srgb, var(--mm-status-success) 8.0%, transparent)";
 }
 
 export function ringLabel(score: number): string {
@@ -198,8 +198,8 @@ export function DependencySplit({ processes, systems }: { processes: FDProcess[]
         healthy,
         "HEALTHY DEPENDENCY",
         T.healthy,
-        "color-mix(in srgb, var(--mm-sys-authority) 5.0%, transparent)",
-        "color-mix(in srgb, var(--mm-sys-authority) 20.0%, transparent)",
+        "color-mix(in srgb, var(--mm-status-success) 5.0%, transparent)",
+        "color-mix(in srgb, var(--mm-status-success) 20.0%, transparent)",
         "Appropriate founder ownership at this stage. Strategy, culture, and vision-setting are founder work.",
       )}
     </div>
@@ -617,11 +617,11 @@ export function SystemsTab({
                           background:
                             p.type === "dangerous"
                               ? "color-mix(in srgb, var(--mm-danger) 4.0%, transparent)"
-                              : "color-mix(in srgb, var(--mm-sys-authority) 4.0%, transparent)",
+                              : "color-mix(in srgb, var(--mm-status-success) 4.0%, transparent)",
                           border: `1px solid ${
                             p.type === "dangerous"
                               ? "color-mix(in srgb, var(--mm-danger) 15.0%, transparent)"
-                              : "color-mix(in srgb, var(--mm-sys-authority) 15.0%, transparent)"
+                              : "color-mix(in srgb, var(--mm-status-success) 15.0%, transparent)"
                           }`,
                           borderRadius: 8,
                         }}

@@ -70,7 +70,7 @@ function SignInForm() {
       {verified && (
         <div
           className="mb-6 rounded-md px-4 py-3 text-sm"
-          style={{ backgroundColor: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", color: "var(--mm-sys-authority)", border: "1px solid color-mix(in srgb, var(--mm-sys-authority) 30%, transparent)" }}
+          style={{ backgroundColor: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))", color: "var(--mm-status-success)", border: "1px solid color-mix(in srgb, var(--mm-status-success) 30%, transparent)" }}
           role="status"
         >
           Email verified — sign in to continue.

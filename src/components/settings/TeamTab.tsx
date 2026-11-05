@@ -275,9 +275,9 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                   </div>
                   {!isMobile && (() => {
                     const palette: Record<string, { bg: string; fg: string }> = {
-                      Completed: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
+                      Completed: { bg: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))", fg: "var(--mm-status-success)" },
                       "In progress": { bg: "color-mix(in srgb, var(--mm-teal) 12%, var(--mm-off-white))", fg: "var(--mm-teal)" },
-                      Joined: { bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 12%, var(--mm-off-white))", fg: "var(--mm-sys-lifecycle)" },
+                      Joined: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
                       Invited: { bg: "color-mix(in srgb, var(--mm-sys-positioning) 12%, var(--mm-off-white))", fg: "var(--mm-sys-positioning)" },
                     };
                     const c = palette[m.status as string] ?? palette.Invited;
@@ -302,9 +302,9 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
 
                 {isMobile && (() => {
                   const palette: Record<string, { bg: string; fg: string }> = {
-                    Completed: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
+                    Completed: { bg: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))", fg: "var(--mm-status-success)" },
                     "In progress": { bg: "color-mix(in srgb, var(--mm-teal) 12%, var(--mm-off-white))", fg: "var(--mm-teal)" },
-                    Joined: { bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 12%, var(--mm-off-white))", fg: "var(--mm-sys-lifecycle)" },
+                    Joined: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
                     Invited: { bg: "color-mix(in srgb, var(--mm-sys-positioning) 12%, var(--mm-off-white))", fg: "var(--mm-sys-positioning)" },
                   };
                   const c = palette[m.status as string] ?? palette.Invited;

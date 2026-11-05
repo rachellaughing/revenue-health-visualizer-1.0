@@ -120,8 +120,8 @@ function Page() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
           {[
-            { label: "Overall Alignment", value: `${overallAlignment}%`, color: overallAlignment > 80 ? "var(--mm-sys-authority)" : overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand, sub: "Across all systems" },
-            { label: "Critical Gaps", value: criticalGaps, color: criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-sys-authority)", sub: "Require immediate attention" },
+            { label: "Overall Alignment", value: `${overallAlignment}%`, color: overallAlignment > 80 ? "var(--mm-status-success)" : overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand, sub: "Across all systems" },
+            { label: "Critical Gaps", value: criticalGaps, color: criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-status-success)", sub: "Require immediate attention" },
             { label: "Leader Sees Stronger", value: leaderHigher, color: T.ember, sub: "Potential blind spots" },
             { label: "Team Sees Stronger", value: teamHigher, color: T.teal, sub: "Hidden organisational strength" },
           ].map((c, i) => (

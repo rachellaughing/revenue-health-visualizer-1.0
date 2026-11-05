@@ -856,7 +856,7 @@ function ReturningView({ data }: { data: DashboardData }) {
               ? "Get a multi-perspective Health Check from your revenue team."
               : "Team Alignment is available on Revenue Health Assessment™ and Diagnostic™."
           }
-          color="var(--mm-sys-authority)"
+          color="var(--mm-teal)"
           cta={teamUnlocked ? "Manage team" : "See plans"}
           href={teamUnlocked ? "/settings/team" : "/settings/billing"}
         />

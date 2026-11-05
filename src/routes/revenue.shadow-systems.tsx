@@ -18,19 +18,19 @@ export const T = {
 };
 
 export const ACTION_TYPES = {
-  document: { label: "Document It", color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 8.0%, transparent)" },
+  document: { label: "Document It", color: "var(--mm-sys-lifecycle)", bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 8.0%, transparent)" },
   formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)" },
-  rebuild: { label: "Rebuild It", color: "var(--mm-sys-lifecycle)", bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 8%, transparent)" },
+  rebuild: { label: "Rebuild It", color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 8%, transparent)" },
   eliminate: { label: "Eliminate It", color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)" },
 } as const;
 
 export const TYPE_PILLS = {
-  spreadsheet: { label: "Spreadsheet", color: T.sys.AUTH },
+  spreadsheet: { label: "Spreadsheet", color: T.sys.LFC },
   document: { label: "Document", color: T.sys.POS },
   tribal: { label: "Tribal Knowledge", color: T.sand },
   informal_process: { label: "Informal Process", color: T.sys.CONV },
   workaround: { label: "Workaround", color: "var(--mm-danger)" },
-  messaging: { label: "Messaging Thread", color: T.sys.LFC },
+  messaging: { label: "Messaging Thread", color: T.sys.AUTH },
 } as const;
 
 export function typeIcon(t: string) {

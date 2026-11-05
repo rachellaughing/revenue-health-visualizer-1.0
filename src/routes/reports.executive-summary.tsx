@@ -57,15 +57,15 @@ function illustrativeForParent(seed: string, code: string) {
 function severityColor(s: string) {
   if (s === "critical") return T.danger;
   if (s === "fragile") return T.sand;
-  if (s === "stable") return T.sys.AUTH;
-  if (s === "strong") return T.sys.AUTH;
+  if (s === "stable") return var(--mm-status-success);
+  if (s === "strong") return var(--mm-status-success);
   return T.mid;
 }
 function severityBg(s: string) {
   if (s === "critical") return "color-mix(in srgb, var(--mm-danger) 10.0%, transparent)";
   if (s === "fragile") return "color-mix(in srgb, var(--mm-sand) 12.0%, transparent)";
-  if (s === "stable") return "color-mix(in srgb, var(--mm-sys-authority) 10.0%, transparent)";
-  if (s === "strong") return "color-mix(in srgb, var(--mm-sys-authority) 12.0%, transparent)";
+  if (s === "stable") return "color-mix(in srgb, var(--mm-status-success) 10.0%, transparent)";
+  if (s === "strong") return "color-mix(in srgb, var(--mm-status-success) 12.0%, transparent)";
   if (s === "not_assessed") return "color-mix(in srgb, var(--mm-mid) 10.0%, transparent)";
   return T.offWhite;
 }
@@ -614,7 +614,7 @@ function ReportBody({
             <ScoreRing
               score={overallScore}
               size={100}
-              color={overallScore >= 70 ? T.sys.AUTH : overallScore >= 50 ? T.sand : T.danger}
+              color={overallScore >= 70 ? var(--mm-status-success) : overallScore >= 50 ? T.sand : T.danger}
             />
             <div
               style={{
@@ -633,7 +633,7 @@ function ReportBody({
                   label:
                     overallScore >= 70 ? "Stable" : overallScore >= 50 ? "Fragile" : "Critical",
                   color:
-                    overallScore >= 70 ? T.sys.AUTH : overallScore >= 50 ? T.sand : T.danger,
+                    overallScore >= 70 ? var(--mm-status-success) : overallScore >= 50 ? T.sand : T.danger,
                 },
                 { label: "Self-Assessment", color: T.mid },
               ].map((b, i) => (
@@ -663,7 +663,7 @@ function ReportBody({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
             {opConditions.map((c, i) => {
               const accent =
-                c.status === "danger" ? T.danger : c.status === "warning" ? T.sand : T.sys.AUTH;
+                c.status === "danger" ? T.danger : c.status === "warning" ? T.sand : var(--mm-status-success);
               return (
                 <Card key={i} style={{ padding: 18, borderTop: `3px solid ${accent}` }}>
                   <div
@@ -853,7 +853,7 @@ function ReportBody({
                       <div
                         style={{
                           fontSize: 10,
-                          color: T.sys.AUTH,
+                          color: var(--mm-status-success),
                           fontFamily: "Inter",
                           fontWeight: 600,
                           marginLeft: 16,

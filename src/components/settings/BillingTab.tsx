@@ -102,11 +102,11 @@ export function BillingTab({ success }: { success?: boolean }) {
         <div
           style={{
             padding: "14px 18px",
-            background: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))",
-            border: "1px solid color-mix(in srgb, var(--mm-sys-authority) 35%, transparent)",
+            background: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))",
+            border: "1px solid color-mix(in srgb, var(--mm-status-success) 35%, transparent)",
             borderRadius: 10,
             fontSize: 14,
-            color: "var(--mm-sys-authority)",
+            color: "var(--mm-status-success)",
           }}
         >
           You're now on Revenue Health Assessment™. All 10 subsystems and full reports are unlocked.
@@ -361,7 +361,7 @@ export function BillingTab({ success }: { success?: boolean }) {
 
 function TierBadge({ tier }: { tier: string }) {
   const label = tier === "diagnostic" ? "DIAGNOSTIC" : tier === "pro" ? "ASSESSMENT" : "SNAPSHOT";
-  const bg = tier === "diagnostic" ? "var(--mm-sys-lifecycle)" : tier === "pro" ? "var(--mm-teal)" : "var(--mm-mid)";
+  const bg = tier === "diagnostic" ? "var(--mm-sys-authority)" : tier === "pro" ? "var(--mm-teal)" : "var(--mm-mid)";
   return (
     <span
       style={{

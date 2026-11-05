@@ -22,8 +22,8 @@ const T = {
 
 const REPORT_COLORS = {
   history: "var(--mm-ember)",
-  team: "var(--mm-sys-authority)",
-  founder: "var(--mm-sys-lifecycle)",
+  team: "var(--mm-sys-lifecycle)",
+  founder: "var(--mm-sys-authority)",
   shadow: "var(--mm-sys-visibility)",
   roadmap: "var(--mm-sys-conversion)",
 };

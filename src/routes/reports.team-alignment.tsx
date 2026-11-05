@@ -28,7 +28,7 @@ export function gapColor(status: AlignmentSystem["status"]): string {
   if (status === "critical_gap") return "var(--mm-danger)";
   if (status === "significant_gap") return T.sand;
   if (status === "moderate_gap") return "var(--mm-sys-visibility)";
-  return "var(--mm-sys-authority)";
+  return "var(--mm-status-success)";
 }
 
 export function statusLabel(status: AlignmentSystem["status"]): string {
@@ -364,13 +364,13 @@ function Page() {
               {
                 label: "Overall Alignment",
                 value: `${d.summary.overallAlignment}%`,
-                color: d.summary.overallAlignment > 80 ? "var(--mm-sys-authority)" : d.summary.overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand,
+                color: d.summary.overallAlignment > 80 ? "var(--mm-status-success)" : d.summary.overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand,
                 sub: "Across all systems",
               },
               {
                 label: "Critical Gaps",
                 value: d.summary.criticalGaps,
-                color: d.summary.criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-sys-authority)",
+                color: d.summary.criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-status-success)",
                 sub: "Require immediate attention",
               },
               { label: "Leader Sees Stronger", value: d.summary.leaderHigher, color: T.ember, sub: "Potential blind spots" },

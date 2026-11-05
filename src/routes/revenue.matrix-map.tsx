@@ -49,7 +49,7 @@ function healthColor(score: number) {
   if (score < 40) return "var(--mm-danger)";
   if (score < 55) return T.sand;
   if (score < 70) return T.sys.VIS;
-  return T.sys.AUTH;
+  return "var(--mm-status-success)";
 }
 function severityLabel(score: number) {
   if (score < 40) return "Critical";
@@ -273,7 +273,7 @@ function MatrixView({ payload }: { payload: MatrixMapData }) {
                   {
                     label: "Healthy",
                     count: counts.healthy,
-                    color: T.sys.AUTH,
+                    color: "var(--mm-status-success)",
                     desc: "Supporting outcomes",
                   },
                 ].map((c) => (
@@ -892,7 +892,7 @@ function MatrixMapSVG({
 
       <g transform="translate(20, 460)">
         {[
-          { color: T.sys.AUTH, label: "Strong (70+)" },
+          { color: "var(--mm-status-success)", label: "Strong (70+)" },
           { color: T.sys.VIS, label: "Stable (55-70)" },
           { color: T.sand, label: "Fragile (40-55)" },
           { color: "var(--mm-danger)", label: "Critical (<40)" },
@@ -1836,7 +1836,7 @@ function ScenarioCard({
         : T.mid;
   const confColor =
     scenario.confidenceScore >= 80
-      ? T.sys.AUTH
+      ? "var(--mm-status-success)"
       : scenario.confidenceScore >= 65
         ? T.sys.VIS
         : T.sand;

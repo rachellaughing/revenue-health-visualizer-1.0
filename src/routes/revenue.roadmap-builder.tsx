@@ -29,9 +29,9 @@ export const WATCH_OUT_CLOSING_LINE =
   "Which of these apply to your business? That's what a Diagnostic finds out.";
 
 export const HORIZONS: { id: RoadmapHorizon; label: string; sub: string; color: string }[] = [
-  { id: "quick_win", label: "Quick Wins", sub: "Under 30 days, low effort", color: T.sys.AUTH },
+  { id: "quick_win", label: "Quick Wins", sub: "Under 30 days, low effort", color: "var(--mm-status-success)" },
   { id: "30_days", label: "Next 30 Days", sub: "Foundational fixes", color: T.sys.VIS },
-  { id: "90_days", label: "30-90 Days", sub: "Structural improvements", color: T.sys.LFC },
+  { id: "90_days", label: "30-90 Days", sub: "Structural improvements", color: "var(--mm-sys-authority)" },
   { id: "120_days", label: "90-120 Days", sub: "Strategic capability building", color: T.sys.CONV },
 ];
 
