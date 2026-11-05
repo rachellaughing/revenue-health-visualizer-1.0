@@ -9,65 +9,40 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as JoinTeamRouteImport } from './routes/join-team'
-import { Route as DiagnosticRouteImport } from './routes/diagnostic'
-import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DiagnosticRouteImport } from './routes/diagnostic'
+import { Route as JoinTeamRouteImport } from './routes/join-team'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as HealthCheckIndexRouteImport } from './routes/health-check.index'
-import { Route as SettingsTeamRouteImport } from './routes/settings.team'
-import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
-import { Route as SettingsAccountRouteImport } from './routes/settings.account'
-import { Route as RevenueShadowSystemsPreviewRouteImport } from './routes/revenue.shadow-systems-preview'
-import { Route as RevenueShadowSystemsRouteImport } from './routes/revenue.shadow-systems'
-import { Route as RevenueRoadmapBuilderPreviewRouteImport } from './routes/revenue.roadmap-builder-preview'
-import { Route as RevenueRoadmapBuilderRouteImport } from './routes/revenue.roadmap-builder'
-import { Route as RevenueMatrixMapRouteImport } from './routes/revenue.matrix-map'
-import { Route as ReportsTopOpportunitiesRouteImport } from './routes/reports.top-opportunities'
-import { Route as ReportsTeamAlignmentPreviewRouteImport } from './routes/reports.team-alignment-preview'
-import { Route as ReportsTeamAlignmentRouteImport } from './routes/reports.team-alignment'
-import { Route as ReportsRevenueSystemHealthRouteImport } from './routes/reports.revenue-system-health'
-import { Route as ReportsRevenueAtRiskRouteImport } from './routes/reports.revenue-at-risk'
-import { Route as ReportsFounderDependencyPreviewRouteImport } from './routes/reports.founder-dependency-preview'
-import { Route as ReportsFounderDependencyRouteImport } from './routes/reports.founder-dependency'
-import { Route as ReportsExecutiveSummaryRouteImport } from './routes/reports.executive-summary'
-import { Route as ProfilePersonalRouteImport } from './routes/profile.personal'
-import { Route as ProfileCompanyRouteImport } from './routes/profile.company'
-import { Route as HealthCheckStartRouteImport } from './routes/health-check.start'
 import { Route as HealthCheckHistoryRouteImport } from './routes/health-check.history'
+import { Route as HealthCheckStartRouteImport } from './routes/health-check.start'
+import { Route as ProfileCompanyRouteImport } from './routes/profile.company'
+import { Route as ProfilePersonalRouteImport } from './routes/profile.personal'
+import { Route as ReportsExecutiveSummaryRouteImport } from './routes/reports.executive-summary'
+import { Route as ReportsFounderDependencyRouteImport } from './routes/reports.founder-dependency'
+import { Route as ReportsFounderDependencyPreviewRouteImport } from './routes/reports.founder-dependency-preview'
+import { Route as ReportsRevenueAtRiskRouteImport } from './routes/reports.revenue-at-risk'
+import { Route as ReportsRevenueSystemHealthRouteImport } from './routes/reports.revenue-system-health'
+import { Route as ReportsTeamAlignmentRouteImport } from './routes/reports.team-alignment'
+import { Route as ReportsTeamAlignmentPreviewRouteImport } from './routes/reports.team-alignment-preview'
+import { Route as ReportsTopOpportunitiesRouteImport } from './routes/reports.top-opportunities'
+import { Route as RevenueMatrixMapRouteImport } from './routes/revenue.matrix-map'
+import { Route as RevenueRoadmapBuilderRouteImport } from './routes/revenue.roadmap-builder'
+import { Route as RevenueRoadmapBuilderPreviewRouteImport } from './routes/revenue.roadmap-builder-preview'
+import { Route as RevenueShadowSystemsRouteImport } from './routes/revenue.shadow-systems'
+import { Route as RevenueShadowSystemsPreviewRouteImport } from './routes/revenue.shadow-systems-preview'
+import { Route as SettingsAccountRouteImport } from './routes/settings.account'
+import { Route as SettingsBillingRouteImport } from './routes/settings.billing'
+import { Route as SettingsTeamRouteImport } from './routes/settings.team'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JoinTeamRoute = JoinTeamRouteImport.update({
-  id: '/join-team',
-  path: '/join-team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DiagnosticRoute = DiagnosticRouteImport.update({
-  id: '/diagnostic',
-  path: '/diagnostic',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -75,9 +50,34 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const DiagnosticRoute = DiagnosticRouteImport.update({
+  id: '/diagnostic',
+  path: '/diagnostic',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinTeamRoute = JoinTeamRouteImport.update({
+  id: '/join-team',
+  path: '/join-team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthCheckIndexRoute = HealthCheckIndexRouteImport.update({
@@ -85,62 +85,46 @@ const HealthCheckIndexRoute = HealthCheckIndexRouteImport.update({
   path: '/health-check/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsTeamRoute = SettingsTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => SettingsRoute,
+const HealthCheckHistoryRoute = HealthCheckHistoryRouteImport.update({
+  id: '/health-check/history',
+  path: '/health-check/history',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsBillingRoute = SettingsBillingRouteImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => SettingsRoute,
+const HealthCheckStartRoute = HealthCheckStartRouteImport.update({
+  id: '/health-check/start',
+  path: '/health-check/start',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsAccountRoute = SettingsAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => SettingsRoute,
+const ProfileCompanyRoute = ProfileCompanyRouteImport.update({
+  id: '/profile/company',
+  path: '/profile/company',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const RevenueShadowSystemsPreviewRoute =
-  RevenueShadowSystemsPreviewRouteImport.update({
-    id: '/revenue/shadow-systems-preview',
-    path: '/revenue/shadow-systems-preview',
+const ProfilePersonalRoute = ProfilePersonalRouteImport.update({
+  id: '/profile/personal',
+  path: '/profile/personal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsExecutiveSummaryRoute = ReportsExecutiveSummaryRouteImport.update({
+  id: '/reports/executive-summary',
+  path: '/reports/executive-summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsFounderDependencyRoute =
+  ReportsFounderDependencyRouteImport.update({
+    id: '/reports/founder-dependency',
+    path: '/reports/founder-dependency',
     getParentRoute: () => rootRouteImport,
   } as any)
-const RevenueShadowSystemsRoute = RevenueShadowSystemsRouteImport.update({
-  id: '/revenue/shadow-systems',
-  path: '/revenue/shadow-systems',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RevenueRoadmapBuilderPreviewRoute =
-  RevenueRoadmapBuilderPreviewRouteImport.update({
-    id: '/revenue/roadmap-builder-preview',
-    path: '/revenue/roadmap-builder-preview',
+const ReportsFounderDependencyPreviewRoute =
+  ReportsFounderDependencyPreviewRouteImport.update({
+    id: '/reports/founder-dependency-preview',
+    path: '/reports/founder-dependency-preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const RevenueRoadmapBuilderRoute = RevenueRoadmapBuilderRouteImport.update({
-  id: '/revenue/roadmap-builder',
-  path: '/revenue/roadmap-builder',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RevenueMatrixMapRoute = RevenueMatrixMapRouteImport.update({
-  id: '/revenue/matrix-map',
-  path: '/revenue/matrix-map',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsTopOpportunitiesRoute = ReportsTopOpportunitiesRouteImport.update({
-  id: '/reports/top-opportunities',
-  path: '/reports/top-opportunities',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsTeamAlignmentPreviewRoute =
-  ReportsTeamAlignmentPreviewRouteImport.update({
-    id: '/reports/team-alignment-preview',
-    path: '/reports/team-alignment-preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ReportsTeamAlignmentRoute = ReportsTeamAlignmentRouteImport.update({
-  id: '/reports/team-alignment',
-  path: '/reports/team-alignment',
+const ReportsRevenueAtRiskRoute = ReportsRevenueAtRiskRouteImport.update({
+  id: '/reports/revenue-at-risk',
+  path: '/reports/revenue-at-risk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRevenueSystemHealthRoute =
@@ -149,47 +133,63 @@ const ReportsRevenueSystemHealthRoute =
     path: '/reports/revenue-system-health',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ReportsRevenueAtRiskRoute = ReportsRevenueAtRiskRouteImport.update({
-  id: '/reports/revenue-at-risk',
-  path: '/reports/revenue-at-risk',
+const ReportsTeamAlignmentRoute = ReportsTeamAlignmentRouteImport.update({
+  id: '/reports/team-alignment',
+  path: '/reports/team-alignment',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsFounderDependencyPreviewRoute =
-  ReportsFounderDependencyPreviewRouteImport.update({
-    id: '/reports/founder-dependency-preview',
-    path: '/reports/founder-dependency-preview',
+const ReportsTeamAlignmentPreviewRoute =
+  ReportsTeamAlignmentPreviewRouteImport.update({
+    id: '/reports/team-alignment-preview',
+    path: '/reports/team-alignment-preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ReportsFounderDependencyRoute =
-  ReportsFounderDependencyRouteImport.update({
-    id: '/reports/founder-dependency',
-    path: '/reports/founder-dependency',
+const ReportsTopOpportunitiesRoute = ReportsTopOpportunitiesRouteImport.update({
+  id: '/reports/top-opportunities',
+  path: '/reports/top-opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevenueMatrixMapRoute = RevenueMatrixMapRouteImport.update({
+  id: '/revenue/matrix-map',
+  path: '/revenue/matrix-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevenueRoadmapBuilderRoute = RevenueRoadmapBuilderRouteImport.update({
+  id: '/revenue/roadmap-builder',
+  path: '/revenue/roadmap-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevenueRoadmapBuilderPreviewRoute =
+  RevenueRoadmapBuilderPreviewRouteImport.update({
+    id: '/revenue/roadmap-builder-preview',
+    path: '/revenue/roadmap-builder-preview',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ReportsExecutiveSummaryRoute = ReportsExecutiveSummaryRouteImport.update({
-  id: '/reports/executive-summary',
-  path: '/reports/executive-summary',
+const RevenueShadowSystemsRoute = RevenueShadowSystemsRouteImport.update({
+  id: '/revenue/shadow-systems',
+  path: '/revenue/shadow-systems',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfilePersonalRoute = ProfilePersonalRouteImport.update({
-  id: '/profile/personal',
-  path: '/profile/personal',
-  getParentRoute: () => rootRouteImport,
+const RevenueShadowSystemsPreviewRoute =
+  RevenueShadowSystemsPreviewRouteImport.update({
+    id: '/revenue/shadow-systems-preview',
+    path: '/revenue/shadow-systems-preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SettingsAccountRoute = SettingsAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => SettingsRoute,
 } as any)
-const ProfileCompanyRoute = ProfileCompanyRouteImport.update({
-  id: '/profile/company',
-  path: '/profile/company',
-  getParentRoute: () => rootRouteImport,
+const SettingsBillingRoute = SettingsBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => SettingsRoute,
 } as any)
-const HealthCheckStartRoute = HealthCheckStartRouteImport.update({
-  id: '/health-check/start',
-  path: '/health-check/start',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HealthCheckHistoryRoute = HealthCheckHistoryRouteImport.update({
-  id: '/health-check/history',
-  path: '/health-check/history',
-  getParentRoute: () => rootRouteImport,
+const SettingsTeamRoute = SettingsTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => SettingsRoute,
 } as any)
 const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   id: '/api/public/stripe-webhook',
@@ -425,46 +425,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/join-team': {
-      id: '/join-team'
-      path: '/join-team'
-      fullPath: '/join-team'
-      preLoaderRoute: typeof JoinTeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/diagnostic': {
-      id: '/diagnostic'
-      path: '/diagnostic'
-      fullPath: '/diagnostic'
-      preLoaderRoute: typeof DiagnosticRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -474,11 +439,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/diagnostic': {
+      id: '/diagnostic'
+      path: '/diagnostic'
+      fullPath: '/diagnostic'
+      preLoaderRoute: typeof DiagnosticRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join-team': {
+      id: '/join-team'
+      path: '/join-team'
+      fullPath: '/join-team'
+      preLoaderRoute: typeof JoinTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health-check/': {
@@ -488,130 +488,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthCheckIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings/team': {
-      id: '/settings/team'
-      path: '/team'
-      fullPath: '/settings/team'
-      preLoaderRoute: typeof SettingsTeamRouteImport
-      parentRoute: typeof SettingsRoute
-    }
-    '/settings/billing': {
-      id: '/settings/billing'
-      path: '/billing'
-      fullPath: '/settings/billing'
-      preLoaderRoute: typeof SettingsBillingRouteImport
-      parentRoute: typeof SettingsRoute
-    }
-    '/settings/account': {
-      id: '/settings/account'
-      path: '/account'
-      fullPath: '/settings/account'
-      preLoaderRoute: typeof SettingsAccountRouteImport
-      parentRoute: typeof SettingsRoute
-    }
-    '/revenue/shadow-systems-preview': {
-      id: '/revenue/shadow-systems-preview'
-      path: '/revenue/shadow-systems-preview'
-      fullPath: '/revenue/shadow-systems-preview'
-      preLoaderRoute: typeof RevenueShadowSystemsPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/revenue/shadow-systems': {
-      id: '/revenue/shadow-systems'
-      path: '/revenue/shadow-systems'
-      fullPath: '/revenue/shadow-systems'
-      preLoaderRoute: typeof RevenueShadowSystemsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/revenue/roadmap-builder-preview': {
-      id: '/revenue/roadmap-builder-preview'
-      path: '/revenue/roadmap-builder-preview'
-      fullPath: '/revenue/roadmap-builder-preview'
-      preLoaderRoute: typeof RevenueRoadmapBuilderPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/revenue/roadmap-builder': {
-      id: '/revenue/roadmap-builder'
-      path: '/revenue/roadmap-builder'
-      fullPath: '/revenue/roadmap-builder'
-      preLoaderRoute: typeof RevenueRoadmapBuilderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/revenue/matrix-map': {
-      id: '/revenue/matrix-map'
-      path: '/revenue/matrix-map'
-      fullPath: '/revenue/matrix-map'
-      preLoaderRoute: typeof RevenueMatrixMapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/top-opportunities': {
-      id: '/reports/top-opportunities'
-      path: '/reports/top-opportunities'
-      fullPath: '/reports/top-opportunities'
-      preLoaderRoute: typeof ReportsTopOpportunitiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/team-alignment-preview': {
-      id: '/reports/team-alignment-preview'
-      path: '/reports/team-alignment-preview'
-      fullPath: '/reports/team-alignment-preview'
-      preLoaderRoute: typeof ReportsTeamAlignmentPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/team-alignment': {
-      id: '/reports/team-alignment'
-      path: '/reports/team-alignment'
-      fullPath: '/reports/team-alignment'
-      preLoaderRoute: typeof ReportsTeamAlignmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/revenue-system-health': {
-      id: '/reports/revenue-system-health'
-      path: '/reports/revenue-system-health'
-      fullPath: '/reports/revenue-system-health'
-      preLoaderRoute: typeof ReportsRevenueSystemHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/revenue-at-risk': {
-      id: '/reports/revenue-at-risk'
-      path: '/reports/revenue-at-risk'
-      fullPath: '/reports/revenue-at-risk'
-      preLoaderRoute: typeof ReportsRevenueAtRiskRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/founder-dependency-preview': {
-      id: '/reports/founder-dependency-preview'
-      path: '/reports/founder-dependency-preview'
-      fullPath: '/reports/founder-dependency-preview'
-      preLoaderRoute: typeof ReportsFounderDependencyPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/founder-dependency': {
-      id: '/reports/founder-dependency'
-      path: '/reports/founder-dependency'
-      fullPath: '/reports/founder-dependency'
-      preLoaderRoute: typeof ReportsFounderDependencyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports/executive-summary': {
-      id: '/reports/executive-summary'
-      path: '/reports/executive-summary'
-      fullPath: '/reports/executive-summary'
-      preLoaderRoute: typeof ReportsExecutiveSummaryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile/personal': {
-      id: '/profile/personal'
-      path: '/profile/personal'
-      fullPath: '/profile/personal'
-      preLoaderRoute: typeof ProfilePersonalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile/company': {
-      id: '/profile/company'
-      path: '/profile/company'
-      fullPath: '/profile/company'
-      preLoaderRoute: typeof ProfileCompanyRouteImport
+    '/health-check/history': {
+      id: '/health-check/history'
+      path: '/health-check/history'
+      fullPath: '/health-check/history'
+      preLoaderRoute: typeof HealthCheckHistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health-check/start': {
@@ -621,12 +502,131 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HealthCheckStartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/health-check/history': {
-      id: '/health-check/history'
-      path: '/health-check/history'
-      fullPath: '/health-check/history'
-      preLoaderRoute: typeof HealthCheckHistoryRouteImport
+    '/profile/company': {
+      id: '/profile/company'
+      path: '/profile/company'
+      fullPath: '/profile/company'
+      preLoaderRoute: typeof ProfileCompanyRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/profile/personal': {
+      id: '/profile/personal'
+      path: '/profile/personal'
+      fullPath: '/profile/personal'
+      preLoaderRoute: typeof ProfilePersonalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/executive-summary': {
+      id: '/reports/executive-summary'
+      path: '/reports/executive-summary'
+      fullPath: '/reports/executive-summary'
+      preLoaderRoute: typeof ReportsExecutiveSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/founder-dependency': {
+      id: '/reports/founder-dependency'
+      path: '/reports/founder-dependency'
+      fullPath: '/reports/founder-dependency'
+      preLoaderRoute: typeof ReportsFounderDependencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/founder-dependency-preview': {
+      id: '/reports/founder-dependency-preview'
+      path: '/reports/founder-dependency-preview'
+      fullPath: '/reports/founder-dependency-preview'
+      preLoaderRoute: typeof ReportsFounderDependencyPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/revenue-at-risk': {
+      id: '/reports/revenue-at-risk'
+      path: '/reports/revenue-at-risk'
+      fullPath: '/reports/revenue-at-risk'
+      preLoaderRoute: typeof ReportsRevenueAtRiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/revenue-system-health': {
+      id: '/reports/revenue-system-health'
+      path: '/reports/revenue-system-health'
+      fullPath: '/reports/revenue-system-health'
+      preLoaderRoute: typeof ReportsRevenueSystemHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/team-alignment': {
+      id: '/reports/team-alignment'
+      path: '/reports/team-alignment'
+      fullPath: '/reports/team-alignment'
+      preLoaderRoute: typeof ReportsTeamAlignmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/team-alignment-preview': {
+      id: '/reports/team-alignment-preview'
+      path: '/reports/team-alignment-preview'
+      fullPath: '/reports/team-alignment-preview'
+      preLoaderRoute: typeof ReportsTeamAlignmentPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/top-opportunities': {
+      id: '/reports/top-opportunities'
+      path: '/reports/top-opportunities'
+      fullPath: '/reports/top-opportunities'
+      preLoaderRoute: typeof ReportsTopOpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenue/matrix-map': {
+      id: '/revenue/matrix-map'
+      path: '/revenue/matrix-map'
+      fullPath: '/revenue/matrix-map'
+      preLoaderRoute: typeof RevenueMatrixMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenue/roadmap-builder': {
+      id: '/revenue/roadmap-builder'
+      path: '/revenue/roadmap-builder'
+      fullPath: '/revenue/roadmap-builder'
+      preLoaderRoute: typeof RevenueRoadmapBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenue/roadmap-builder-preview': {
+      id: '/revenue/roadmap-builder-preview'
+      path: '/revenue/roadmap-builder-preview'
+      fullPath: '/revenue/roadmap-builder-preview'
+      preLoaderRoute: typeof RevenueRoadmapBuilderPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenue/shadow-systems': {
+      id: '/revenue/shadow-systems'
+      path: '/revenue/shadow-systems'
+      fullPath: '/revenue/shadow-systems'
+      preLoaderRoute: typeof RevenueShadowSystemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revenue/shadow-systems-preview': {
+      id: '/revenue/shadow-systems-preview'
+      path: '/revenue/shadow-systems-preview'
+      fullPath: '/revenue/shadow-systems-preview'
+      preLoaderRoute: typeof RevenueShadowSystemsPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/account': {
+      id: '/settings/account'
+      path: '/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof SettingsAccountRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/billing': {
+      id: '/settings/billing'
+      path: '/billing'
+      fullPath: '/settings/billing'
+      preLoaderRoute: typeof SettingsBillingRouteImport
+      parentRoute: typeof SettingsRoute
+    }
+    '/settings/team': {
+      id: '/settings/team'
+      path: '/team'
+      fullPath: '/settings/team'
+      preLoaderRoute: typeof SettingsTeamRouteImport
+      parentRoute: typeof SettingsRoute
     }
     '/api/public/stripe-webhook': {
       id: '/api/public/stripe-webhook'
