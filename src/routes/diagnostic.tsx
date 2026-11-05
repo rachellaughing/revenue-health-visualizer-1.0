@@ -1,3 +1,4 @@
+import { fetchDashboardDataSafe } from "@/lib/viewer-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -63,7 +64,7 @@ function scrollToForm() {
 }
 
 function DiagnosticPage() {
-  const { data: dash } = useQuery({ queryKey: ["dashboard"], queryFn: () => getDashboardData(), staleTime: 30_000 });
+  const { data: dash } = useQuery({ queryKey: ["dashboard"], queryFn: () => fetchDashboardDataSafe(), staleTime: 30_000 });
   const { data: personal } = useQuery({ queryKey: ["profile", "personal"], queryFn: () => getPersonalProfile() });
   const { data: company } = useQuery({ queryKey: ["profile", "company"], queryFn: () => getCompanyProfile() });
 

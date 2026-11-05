@@ -1,3 +1,4 @@
+import { fetchDashboardDataSafe } from "@/lib/viewer-query";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -143,7 +144,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
 
   const { data } = useQuery({
     queryKey: ["dashboard"],
-    queryFn: () => getDashboardData(),
+    queryFn: () => fetchDashboardDataSafe(),
     staleTime: 30_000,
   });
 

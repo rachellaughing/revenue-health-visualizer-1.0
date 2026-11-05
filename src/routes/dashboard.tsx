@@ -1,3 +1,4 @@
+import { fetchDashboardDataSafe } from "@/lib/viewer-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
@@ -38,7 +39,7 @@ function DashboardPage() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["dashboard"],
-    queryFn: () => getDashboardData(),
+    queryFn: () => fetchDashboardDataSafe(),
     enabled: viewerQ.data?.role !== "team_member",
   });
 

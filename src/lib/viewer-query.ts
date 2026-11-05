@@ -16,3 +16,16 @@ export async function fetchViewerContextSafe(): Promise<ViewerContext | null> {
     throw e;
   }
 }
+
+/** Same guard for dashboard data: null when signed out instead of throwing. */
+export async function fetchDashboardDataSafe() {
+  const { getDashboardData } = await import("@/lib/dashboard.functions");
+  const { data } = await supabase.auth.getSession();
+  if (!data.session?.access_token) return null;
+  try {
+    return await getDashboardData();
+  } catch (e) {
+    if (e instanceof Error && /Unauthorized/i.test(e.message)) return null;
+    throw e;
+  }
+}
