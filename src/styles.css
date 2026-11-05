@@ -79,6 +79,8 @@
 
   /* Status */
   --mm-status-success: #166534;
+  --mm-status-warning: #854D0E;
+  --mm-status-error: #B42318;
 
   /* Semantic text tokens (flip with theme, except --mm-on-dark) */
   --mm-text: var(--mm-ink);
@@ -147,6 +149,8 @@
   --mm-sys-authority: #8AA8FF;
   --mm-sys-visibility: #FF6B9A;
   --mm-status-success: #4ADE80;
+  --mm-status-warning: #FBBF24;
+  --mm-status-error: #FF7A6B;
 
   --mm-surface: #182829;
   --mm-surface-raised: #223536;

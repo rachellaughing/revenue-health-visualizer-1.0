@@ -95,10 +95,9 @@
   border: 1px solid color-mix(in srgb, var(--badge-color) 25%, transparent);
 }
 .mm-badge--neutral { --badge-color: var(--mm-text-muted); }
-.mm-badge--sand    { --badge-color: var(--mm-sand); }
 .mm-badge--success { --badge-color: var(--mm-status-success); }
-.mm-badge--warning { --badge-color: var(--mm-sys-positioning); }
-.mm-badge--error   { --badge-color: var(--mm-danger); }
+.mm-badge--warning { --badge-color: var(--mm-status-warning); }
+.mm-badge--error   { --badge-color: var(--mm-status-error); }
 .mm-badge--info    { --badge-color: var(--mm-link); }
 .mm-badge--solid-dark {
   background: var(--mm-abyss); color: var(--mm-on-dark); border-color: transparent;
@@ -140,6 +139,19 @@
   background-size: 800px 100%; animation: mmShimmer 1.4s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) { .mm-skeleton { animation: none; } }
+
+/* ---------- Mobile bottom tab bar ---------- */
+.mm-tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: flex;
+  background: var(--mm-surface); border-top: 1px solid var(--mm-divider);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.mm-tabbar__item {
+  flex: 1; height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; font-size: 10px; font-weight: 500; text-decoration: none; color: var(--mm-text-muted);
+}
+.mm-tabbar__item--active { color: var(--mm-ember); font-weight: 600; }
+.mm-tabbar__item:focus-visible { outline: 3px solid var(--mm-teal); outline-offset: -3px; }
 
 /* ---------- Layout helpers ---------- */
 .mm-stack { display: flex; flex-direction: column; gap: var(--gap, 12px); }

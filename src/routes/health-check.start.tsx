@@ -6,5 +6,5 @@ export const Route = createFileRoute("/health-check/start")({
 });
 
 function Page() {
-  return <h1 className="text-4xl" style={{ color: "var(--mm-ink)" }}>Start / Resume Health Check</h1>;
+  return <h1 className="text-4xl text-[var(--mm-text)]">Start / Resume Health Check</h1>;
 }

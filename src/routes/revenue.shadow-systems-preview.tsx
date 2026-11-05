@@ -135,7 +135,7 @@ function Page() {
       </div>
 
       <div className="mm-row mm-gap-sm mb-5">
-        <Badge tone="sand">ILLUSTRATIVE EXAMPLES</Badge>
+        <Badge tone="neutral">ILLUSTRATIVE EXAMPLES</Badge>
         <span className="text-xs mm-muted">
           Based on shadow systems commonly found in businesses like yours. Yours will be different.
         </span>

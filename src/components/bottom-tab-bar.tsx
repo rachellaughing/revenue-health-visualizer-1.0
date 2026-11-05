@@ -1,13 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { LayoutDashboard, ClipboardCheck, FileBarChart, Settings } from "lucide-react";
 
-const T = {
-  paper: "var(--mm-paper)",
-  offWhite: "var(--mm-off-white)",
-  ember: "var(--mm-ember)",
-  mid: "var(--mm-mid)",
-};
-
 type Tab = {
   label: string;
   to: string;
@@ -49,43 +42,20 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="md:hidden"
-      style={{
-        position: "fixed",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 40,
-        background: T.paper,
-        borderTop: `1px solid ${T.offWhite}`,
-        paddingBottom: "env(safe-area-inset-bottom)",
-        display: "flex",
-      }}
+      className="mm-tabbar md:hidden"
       aria-label="Primary"
     >
       {TABS.map((tab) => {
         const active = tab.match(pathname);
-        const color = active ? T.ember : T.mid;
         return (
           <Link
             key={tab.label}
             to={tab.to}
             search={tab.search as any}
-            style={{
-              flex: 1,
-              height: 56,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-              color,
-              textDecoration: "none",
-              fontSize: 10,
-              fontWeight: active ? 600 : 500,
-            }}
+            className={`mm-tabbar__item${active ? " mm-tabbar__item--active" : ""}`}
+            aria-current={active ? "page" : undefined}
           >
-            <tab.Icon size={20} color={color} />
+            <tab.Icon size={20} color="currentColor" />
             <span>{tab.label}</span>
           </Link>
         );

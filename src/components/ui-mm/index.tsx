@@ -18,7 +18,7 @@ export function SectionLabel({ className, children }: Base) {
 }
 
 export function Badge({ tone = "neutral", className, children }: Base & {
-  tone?: "neutral" | "sand" | "success" | "warning" | "error" | "info" | "solid-dark";
+  tone?: "neutral" | "success" | "warning" | "error" | "info" | "solid-dark";
 }) {
   return <span className={cx("mm-badge", `mm-badge--${tone}`, className)}>{children}</span>;
 }
