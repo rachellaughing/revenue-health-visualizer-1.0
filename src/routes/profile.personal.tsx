@@ -85,17 +85,16 @@ function PersonalProfilePage() {
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto" }}>
+    <div className="mx-auto max-w-[680px]">
       <ProgressSteps steps={["Personal Profile", "Company Profile", "Done"]} current={0} />
 
       <div className="mb-7">
         <h2
-          className="text-2xl mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
+          className="mb-2 font-display text-2xl text-[var(--mm-text)]"
         >
           Tell us about yourself
         </h2>
-        <p className="text-sm leading-relaxed" style={{ color: "var(--mm-mid)" }}>
+        <p className="text-sm leading-relaxed text-[var(--mm-text-muted)]">
           This helps us personalize your Health Check experience and report language.
         </p>
       </div>
@@ -159,7 +158,7 @@ function PersonalProfilePage() {
       </SectionCard>
 
       {error && (
-        <p className="text-sm mb-4" style={{ color: "var(--mm-eyebrow)" }}>
+        <p className="mb-4 text-sm text-[var(--mm-eyebrow)]">
           {error}
         </p>
       )}
