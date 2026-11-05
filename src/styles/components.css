@@ -191,11 +191,11 @@
   position: relative; display: flex; align-items: center; gap: 12px;
   padding: 8px 16px; font-size: 14px; line-height: 20px; transition: color 150ms, background-color 150ms;
   color: color-mix(in srgb, var(--mm-on-dark) 70%, transparent);
-  border-left: 3px solid transparent; padding-left: calc(1rem - 3px);
+  border-left: 3px solid transparent; padding-left: 1rem;
 }
 .mm-side-item--active {
   color: var(--mm-on-dark);
   background: color-mix(in srgb, var(--mm-on-dark) 5%, transparent);
-  border-left-color: var(--mm-ember);
+  border-left-color: var(--mm-ember); padding-left: calc(1rem - 3px);
 }
 .mm-side-item--locked { color: color-mix(in srgb, var(--mm-on-dark) 30%, transparent); }
