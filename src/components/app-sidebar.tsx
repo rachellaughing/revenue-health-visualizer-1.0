@@ -164,21 +164,15 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   return (
     <TooltipProvider delayDuration={150}>
       <aside
-        className="flex h-full max-h-dvh flex-col overflow-hidden text-[var(--mm-on-dark)] transition-all duration-200"
-        style={{
-          backgroundColor: "var(--mm-abyss)",
-          width: collapsed ? 64 : 240,
-          minWidth: collapsed ? 64 : 240,
-        }}
+        className={`flex h-full max-h-dvh flex-col overflow-hidden bg-[var(--mm-abyss)] text-[var(--mm-on-dark)] transition-all duration-200 motion-reduce:transition-none ${collapsed ? "w-16 min-w-16" : "w-60 min-w-60"}`}
       >
         <div
-          className="flex h-14 items-center px-4"
-          style={{ borderBottom: "1px solid color-mix(in srgb, var(--mm-white) 6.0%, transparent)", justifyContent: collapsed ? "center" : "flex-start" }}
+          className={`flex h-14 items-center border-b border-[color-mix(in_srgb,var(--mm-on-dark)_6%,transparent)] px-4 ${collapsed ? "justify-center" : "justify-start"}`}
         >
           <img
             src={rhIconLight.url}
             alt="Revenue Health Visualizer"
-            style={{ height: 32, width: "auto", display: "block" }}
+            className="block h-8 w-auto"
           />
         </div>
 
@@ -191,13 +185,11 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
                 {!collapsed && (
                   <button
                     onClick={() => toggle(section.label)}
-                    className="flex w-full items-center justify-between px-4 py-2 text-[11px] font-medium tracking-wider transition-colors hover:text-white/80"
-                    style={{ color: "color-mix(in srgb, var(--mm-white) 50.0%, transparent)" }}
+                    className="flex w-full items-center justify-between px-4 py-2 text-[11px] font-medium tracking-wider transition-colors text-[color-mix(in_srgb,var(--mm-on-dark)_50%,transparent)] hover:text-[color-mix(in_srgb,var(--mm-on-dark)_80%,transparent)]"
                   >
                     <span>{section.label}</span>
                     <ChevronDown
-                      className="h-3 w-3 transition-transform"
-                      style={{ transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+                      className={`h-3 w-3 transition-transform ${isOpen ? "" : "-rotate-90"}`}
                     />
                   </button>
                 )}
@@ -214,21 +206,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
 
                       const baseRow = (
                         <div
-                          className="relative flex items-center gap-3 px-4 py-2 text-sm transition-colors"
-                          style={{
-                            color: locked
-                              ? "color-mix(in srgb, var(--mm-white) 30.0%, transparent)"
-                              : active
-                                ? "var(--mm-white)"
-                                : "color-mix(in srgb, var(--mm-white) 70.0%, transparent)",
-                            backgroundColor: active && !locked ? "color-mix(in srgb, var(--mm-white) 5.0%, transparent)" : "transparent",
-                            borderLeft:
-                              active && !locked
-                                ? "3px solid var(--mm-ember)"
-                                : "3px solid transparent",
-                            paddingLeft: active && !locked ? "calc(1rem - 3px)" : "1rem",
-                            cursor: locked && !item.previewWhenLocked ? "not-allowed" : "pointer",
-                          }}
+                          className={`mm-side-item${locked ? " mm-side-item--locked" : active ? " mm-side-item--active" : ""}${locked && !item.previewWhenLocked ? " cursor-not-allowed" : " cursor-pointer"}`}
                         >
                           <Icon className="h-4 w-4 shrink-0" />
                           {!collapsed && (
