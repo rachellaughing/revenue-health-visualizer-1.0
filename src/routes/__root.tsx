@@ -24,7 +24,7 @@ import { Toaster } from "../components/ui/sonner";
 import { useIsMobile } from "../hooks/use-mobile";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { getViewerContext } from "../lib/viewer.functions";
+import { fetchViewerContextSafe } from "@/lib/viewer-query";
 
 function NotFoundComponent() {
   return (
@@ -157,10 +157,9 @@ function AuthGate() {
   const navigate = useNavigate();
   const { session, loading, user } = useAuth();
   const isPublic = PUBLIC_ROUTES.includes(pathname);
-  const fetchViewer = useServerFn(getViewerContext);
   const viewerQ = useQuery({
     queryKey: ["viewer-context"],
-    queryFn: () => fetchViewer(),
+    queryFn: fetchViewerContextSafe,
     enabled: !!session && !isPublic,
   });
 

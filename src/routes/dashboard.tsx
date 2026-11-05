@@ -5,7 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, Lock, ArrowRight } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/lib/dashboard.functions";
-import { getViewerContext } from "@/lib/viewer.functions";
+import { fetchViewerContextSafe } from "@/lib/viewer-query";
 import {
   getHealthCheckData,
   updateSelectedChildIds,
@@ -33,7 +33,7 @@ const TIER_LABEL: Record<string, string> = {
 function DashboardPage() {
   const viewerQ = useQuery({
     queryKey: ["viewer-context"],
-    queryFn: () => getViewerContext(),
+    queryFn: fetchViewerContextSafe,
   });
 
   const { data, isLoading, error } = useQuery({

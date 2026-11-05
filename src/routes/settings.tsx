@@ -4,7 +4,7 @@ import { PersonalDetailsCard } from "@/components/settings/PersonalDetailsCard";
 import { ChangePasswordCard } from "@/components/settings/ChangePasswordCard";
 import { BillingTab } from "@/components/settings/BillingTab";
 import { TeamTab } from "@/components/settings/TeamTab";
-import { getViewerContext } from "@/lib/viewer.functions";
+import { fetchViewerContextSafe } from "@/lib/viewer-query";
 
 type TabKey = "account" | "billing" | "team";
 
@@ -36,7 +36,7 @@ function SettingsPage() {
 
   const viewerQ = useQuery({
     queryKey: ["viewer-context"],
-    queryFn: () => getViewerContext(),
+    queryFn: fetchViewerContextSafe,
   });
   const isMember = viewerQ.data?.role === "team_member";
   const TABS = isMember
