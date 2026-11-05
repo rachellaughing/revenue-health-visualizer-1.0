@@ -125,7 +125,7 @@ export const Label = ({
     className="text-xs font-semibold mb-1.5"
     style={{ color: "var(--mm-ink)", letterSpacing: "0.02em" }}
   >
-    {children} {required && <span style={{ color: "var(--mm-ember)" }}>*</span>}
+    {children} {required && <span style={{ color: "var(--mm-eyebrow)" }}>*</span>}
   </div>
 );
 
@@ -254,7 +254,7 @@ export function GhostButton({
       style={{
         background: "transparent",
         border: "1.5px solid var(--mm-teal)",
-        color: "var(--mm-teal)",
+        color: "var(--mm-link)",
         padding: "12px 22px",
         cursor: "pointer",
       }}

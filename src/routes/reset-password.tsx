@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Reset password — Revenue Health Visualizer" }] }),
   component: ResetPasswordPage,
 });
 
@@ -55,7 +55,7 @@ function ResetPasswordPage() {
           Set a new password
         </h1>
         <p className="text-sm mb-8" style={{ color: "var(--mm-mid)" }}>
-          Choose a new password for your Revenue Health Visualiser™ account.
+          Choose a new password for your Revenue Health Visualizer™ account.
         </p>
 
         {!ready && (
@@ -64,10 +64,10 @@ function ResetPasswordPage() {
 
         {ready && !hasSession && !success && (
           <div className="space-y-4">
-            <p className="text-sm" style={{ color: "var(--mm-ember)" }}>
+            <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>
               This reset link is invalid or has expired.
             </p>
-            <Link to="/login" className="text-sm font-semibold" style={{ color: "var(--mm-ember)" }}>
+            <Link to="/login" className="text-sm font-semibold" style={{ color: "var(--mm-eyebrow)" }}>
               ← Back to sign in
             </Link>
           </div>
@@ -77,7 +77,7 @@ function ResetPasswordPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             <Field label="New password" value={password} onChange={setPassword} required />
             <Field label="Confirm new password" value={confirm} onChange={setConfirm} required />
-            {error && <p className="text-sm" style={{ color: "var(--mm-ember)" }}>{error}</p>}
+            {error && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{error}</p>}
             <button
               type="submit"
               disabled={saving}

@@ -13,7 +13,7 @@ import {
 import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 
 export const Route = createFileRoute("/revenue/roadmap-builder")({
-  head: () => ({ meta: [{ title: "Roadmap Builder — Revenue Health Visualiser™" }] }),
+  head: () => ({ meta: [{ title: "Roadmap Builder — Revenue Health Visualizer™" }] }),
   component: Page,
 });
 
@@ -74,7 +74,7 @@ export function FramingBanner() {
         A Revenue Health Diagnostic™ roadmap is built from your actual data, your team, and your constraints, not a template.
       </p>
       <a href="/diagnostic" style={{
-        fontFamily: "Inter", fontSize: 12, fontWeight: 700, color: T.teal, textDecoration: "none",
+        fontFamily: "Inter", fontSize: 12, fontWeight: 700, color: "var(--mm-link)", textDecoration: "none",
       }}>
         See what a Diagnostic roadmap includes →
       </a>
@@ -221,7 +221,7 @@ export function SystemCard({
                       background: checked ? item.color : "transparent",
                       border: `1.5px solid ${checked ? item.color : "var(--mm-rule)"}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      color: T.white, fontSize: 11, fontWeight: 700,
+                      color: "var(--mm-white)", fontSize: 11, fontWeight: 700,
                     }}>{checked ? "✓" : ""}</div>
                     <p style={{ fontSize: 12, fontFamily: "Inter", color: T.ink, lineHeight: 1.6, margin: 0 }}>{task}</p>
                   </button>
@@ -391,7 +391,7 @@ function Page() {
         </div>
         {totalTasks > 0 && (
           <button onClick={() => exportToCSV(items)} style={{
-            background: T.teal, color: T.white, border: "none",
+            background: T.teal, color: "var(--mm-white)", border: "none",
             borderRadius: 8, padding: "7px 16px",
             fontFamily: "Inter", fontSize: 12, fontWeight: 600, cursor: "pointer",
             display: "flex", alignItems: "center", gap: 6,
@@ -420,7 +420,7 @@ function Page() {
               background: `color-mix(in srgb, ${T.tealBright} 8%, transparent)`, border: `1px solid ${`color-mix(in srgb, ${T.tealBright} 19%, transparent)`}`,
               borderRadius: 10, padding: "10px 16px", textAlign: "center", flexShrink: 0,
             }}>
-              <div style={{ fontSize: 22, fontFamily: "'Instrument Serif', Georgia, serif", color: T.teal, fontWeight: 400 }}>{totalTasks}</div>
+              <div style={{ fontSize: 22, fontFamily: "'Instrument Serif', Georgia, serif", color: "var(--mm-link)", fontWeight: 400 }}>{totalTasks}</div>
               <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.06em" }}>TASKS</div>
             </div>
           )}
@@ -442,7 +442,7 @@ function Page() {
           background: `color-mix(in srgb, ${T.tealBright} 6%, transparent)`, border: `1px solid ${`color-mix(in srgb, ${T.tealBright} 19%, transparent)`}`,
           borderRadius: 14, padding: "24px 28px", marginTop: 8,
         }}>
-          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.teal, letterSpacing: "0.12em", marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "var(--mm-link)", letterSpacing: "0.12em", marginBottom: 8 }}>
             YOUR DIAGNOSTIC ROADMAP
           </div>
           <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: T.ink, margin: "0 0 6px" }}>

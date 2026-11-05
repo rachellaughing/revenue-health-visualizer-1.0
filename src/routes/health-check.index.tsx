@@ -29,7 +29,7 @@ import {
 
 
 export const Route = createFileRoute("/health-check/")({
-  head: () => ({ meta: [{ title: "Health Check — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Health Check — Revenue Health Visualizer" }] }),
   component: HealthCheckPage,
 });
 
@@ -158,7 +158,7 @@ function SelectionBreadcrumb({
             onClick={(e) => e.stopPropagation()}
             style={{
               fontSize: 12.5,
-              color: T.teal,
+              color: "var(--mm-link)",
               fontWeight: 600,
               textDecoration: "none",
               display: "flex",
@@ -193,7 +193,7 @@ function SelectionBreadcrumb({
         >
           <div style={{ fontSize: 12, color: inkSoft, marginBottom: 14 }}>
             Here's what you're evaluating — chosen on your Dashboard.{" "}
-            <Link to="/dashboard" style={{ color: T.teal, fontWeight: 600, textDecoration: "none" }}>
+            <Link to="/dashboard" style={{ color: "var(--mm-link)", fontWeight: 600, textDecoration: "none" }}>
               Edit selections
             </Link>
           </div>
@@ -218,7 +218,7 @@ function SelectionBreadcrumb({
                         fontSize: 10.5,
                         fontWeight: 700,
                         background: color,
-                        color: T.offWhite,
+                        color: "var(--mm-white)",
                       }}
                     >
                       {sub.name}
@@ -257,7 +257,7 @@ function CavitySearchCTA() {
           style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
             fontSize: 22,
-            color: T.paper,
+            color: "var(--mm-on-dark)",
             lineHeight: 1.25,
           }}
         >
@@ -302,7 +302,7 @@ function CavitySearchCTA() {
               padding: "10px 18px",
               borderRadius: 8,
               background: T.ember,
-              color: T.offWhite,
+              color: "var(--mm-white)",
               fontSize: 13,
               fontWeight: 700,
               textDecoration: "none",
@@ -337,7 +337,7 @@ function HealthCheckPage() {
   }
   if (error) {
     return (
-      <div className="p-8 text-sm" style={{ color: T.ember }}>
+      <div className="p-8 text-sm" style={{ color: "var(--mm-eyebrow)" }}>
         Failed to load: {(error as Error).message}
       </div>
     );
@@ -381,7 +381,7 @@ function TeamMemberCompletionInline({
   return (
     <div style={{ minHeight: "100%", background: T.paper, padding: "48px 24px", display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", maxWidth: 640 }}>
-        <div style={{ background: T.abyss, borderRadius: 16, padding: "40px 36px", color: T.white }}>
+        <div style={{ background: T.abyss, borderRadius: 16, padding: "40px 36px", color: "var(--mm-on-dark)" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 16 }}>
             ✓ HEALTH CHECK COMPLETE
           </div>
@@ -593,7 +593,7 @@ function AnswerCard({
             disabled={saving || !health || !tracking}
             style={{
               background: systemColor,
-              color: T.offWhite,
+              color: "var(--mm-white)",
               border: "none",
               borderRadius: 8,
               padding: "8px 16px",
@@ -653,7 +653,7 @@ function AnswerCard({
             marginLeft: "auto",
             background: "none",
             border: "none",
-            color: T.teal,
+            color: "var(--mm-link)",
             fontSize: 11,
             cursor: "pointer",
             padding: 0,
@@ -1051,7 +1051,7 @@ function CompletedLanding({
                 fontFamily: "'Instrument Serif', Georgia, serif",
                 fontSize: 32,
                 fontWeight: 400,
-                color: T.offWhite,
+                color: "var(--mm-on-dark)",
                 margin: 0,
                 lineHeight: 1.2,
               }}
@@ -1089,7 +1089,7 @@ function CompletedLanding({
                 to="/reports/executive-summary"
                 style={{
                   background: T.ember,
-                  color: T.offWhite,
+                  color: "var(--mm-white)",
                   borderRadius: 8,
                   padding: "11px 22px",
                   fontSize: 13,
@@ -1133,7 +1133,7 @@ function CompletedLanding({
           </h3>
           <p style={{ fontSize: 12, color: T.mid, margin: 0 }}>
             {assessedChildren.length} subsystems assessed · click any subsystem to review your answers
-            {!isLocked && <span style={{ color: T.teal }}> · hover any answer to edit</span>}
+            {!isLocked && <span style={{ color: "var(--mm-link)" }}> · hover any answer to edit</span>}
           </p>
         </div>
 
@@ -1192,7 +1192,7 @@ function CompletedLanding({
                   style={{
                     marginLeft: "auto",
                     fontSize: 11,
-                    color: T.teal,
+                    color: "var(--mm-link)",
                     cursor: "pointer",
                   }}
                 >
@@ -1748,7 +1748,7 @@ function HealthCheckShell({
             <span style={{ fontSize: 11, color: T.mid }}>Saving…</span>
           )}
           {saveState === "saved" && (
-            <span style={{ fontSize: 11, color: T.teal }}>✓ Saved</span>
+            <span style={{ fontSize: 11, color: "var(--mm-link)" }}>✓ Saved</span>
           )}
         </div>
       </div>
@@ -2084,7 +2084,7 @@ function HealthCheckShell({
                 to="/reports/executive-summary"
                 style={{
                   background: T.ember,
-                  color: T.offWhite,
+                  color: "var(--mm-white)",
                   borderRadius: 6,
                   padding: "8px 16px",
                   fontSize: 12,
@@ -2272,7 +2272,7 @@ function HealthCheckShell({
                         padding: "4px 14px",
                         fontSize: 11,
                         fontWeight: 600,
-                        color: T.teal,
+                        color: "var(--mm-link)",
                       }}
                     >
                       ✓ Complete
@@ -2311,14 +2311,14 @@ function HealthCheckShell({
                 }}
               >
                 <div style={{ fontSize: 28 }}>🔒</div>
-                <p style={{ fontSize: 14, color: T.teal, fontWeight: 500 }}>
+                <p style={{ fontSize: 14, color: "var(--mm-link)", fontWeight: 500 }}>
                   {activeChild.name} is available in Revenue Health Assessment™
                 </p>
                 <Link
                   to="/settings/billing"
                   style={{
                     background: T.ember,
-                    color: T.offWhite,
+                    color: "var(--mm-white)",
                     borderRadius: 8,
                     padding: "10px 22px",
                     fontSize: 13,
@@ -2450,7 +2450,7 @@ function HealthCheckShell({
                         style={{
                           marginLeft: "auto",
                           fontSize: 11,
-                          color: T.teal,
+                          color: "var(--mm-link)",
                           whiteSpace: "nowrap",
                         }}
                       >
@@ -2484,7 +2484,7 @@ function HealthCheckShell({
                           top: 12,
                           right: 12,
                           background: T.tealBright,
-                          color: T.offWhite,
+                          color: "var(--mm-white)",
                           borderRadius: "50%",
                           width: 22,
                           height: 22,
@@ -2685,7 +2685,7 @@ function HealthCheckShell({
                       style={{
                         background: "transparent",
                         border: `1px solid ${T.ember}`,
-                        color: T.ember,
+                        color: "var(--mm-eyebrow)",
                         borderRadius: 6,
                         padding: "6px 14px",
                         fontSize: 12,
@@ -2716,7 +2716,7 @@ function HealthCheckShell({
                       style={{
                         background: T.ember,
                         border: "none",
-                        color: T.offWhite,
+                        color: "var(--mm-white)",
                         borderRadius: 6,
                         padding: "6px 14px",
                         fontSize: 12,

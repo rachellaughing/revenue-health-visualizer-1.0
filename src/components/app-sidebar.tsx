@@ -163,7 +163,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   return (
     <TooltipProvider delayDuration={150}>
       <aside
-        className="flex h-full max-h-dvh flex-col overflow-hidden text-white transition-all duration-200"
+        className="flex h-full max-h-dvh flex-col overflow-hidden text-[var(--mm-on-dark)] transition-all duration-200"
         style={{
           backgroundColor: "var(--mm-abyss)",
           width: collapsed ? 64 : 240,
@@ -176,7 +176,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         >
           <img
             src={rhIconLight.url}
-            alt="Revenue Health Visualiser"
+            alt="Revenue Health Visualizer"
             style={{ height: 32, width: "auto", display: "block" }}
           />
         </div>

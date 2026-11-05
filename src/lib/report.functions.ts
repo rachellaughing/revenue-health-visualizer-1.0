@@ -442,7 +442,7 @@ function buildFallbackNarrative(
           ? `Shadow-system signals were detected in ${assessed.filter((s) => s.isHardShadow || s.isSoftShadow).map((s) => s.name).join(", ")}, meaning work is happening without the tracking to see it.`
           : `Tracking coverage averages ${Math.round(assessed.reduce((a, b) => a + b.trackingScore, 0) / assessed.length)}, which shapes how much of this picture is visible day to day.`
       }`
-    : `${companyName} does not yet have enough completed Health Check data to summarise. Complete a Health Check to see a full picture.`;
+    : `${companyName} does not yet have enough completed Health Check data to summarize. Complete a Health Check to see a full picture.`;
 
   const risks: RiskItem[] = ranked.slice(0, 3).map((s, i) => ({
     rank: i + 1,
@@ -2759,7 +2759,7 @@ const ILLUSTRATIVE_FD_SYSTEMS: Record<string, { type: "healthy" | "dangerous" | 
   POS: {
     type: "mixed", level: 65,
     handoffReadiness: "A documented positioning brief and ICP criteria need to exist before this can be delegated. Currently the positioning lives in the founder's head and surfaces differently in every sales conversation.",
-    narrative: "Positioning is mixed — the founder has a sophisticated understanding of the market position that is not yet operationalised. The strategic positioning is healthy founder ownership. The day-to-day execution inconsistency is dangerous dependency.",
+    narrative: "Positioning is mixed — the founder has a sophisticated understanding of the market position that is not yet operationalized. The strategic positioning is healthy founder ownership. The day-to-day execution inconsistency is dangerous dependency.",
   },
   AUTH: {
     type: "healthy", level: 25,

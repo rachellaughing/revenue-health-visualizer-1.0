@@ -19,7 +19,7 @@ import {
 
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Revenue Health Visualizer" }] }),
   component: DashboardPage,
 });
 
@@ -167,12 +167,12 @@ function HeroCard({ isStarter }: { isStarter: boolean }) {
       />
       <div className="relative flex flex-col gap-5">
         <p
-          className="m-0 text-[22px] leading-[1.25] text-white"
+          className="m-0 text-[22px] leading-[1.25] text-[var(--mm-on-dark)]"
           style={{ fontFamily: "'Instrument Serif', serif" }}
         >
           A prompt didn’t create the Revenue Health Matrix™.
         </p>
-        <p className="m-0 max-w-[560px] text-[13px] leading-[1.65] text-white/65">
+        <p className="m-0 max-w-[560px] text-[13px] leading-[1.65] text-[color-mix(in_srgb,var(--mm-on-dark)_65%,transparent)]">
           Five interconnected systems, built from years of pattern recognition
           inside founder-led companies — not generated. Here’s the shape of it.
         </p>
@@ -195,7 +195,7 @@ function HeroCard({ isStarter }: { isStarter: boolean }) {
               >
                 {s.num}
               </div>
-              <div className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-white/50">
+              <div className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[color-mix(in_srgb,var(--mm-on-dark)_50%,transparent)]">
                 {s.label}
               </div>
               {s.note && (
@@ -245,7 +245,7 @@ function SnapshotIncludesCard({ tier }: { tier: "starter" | "pro" | "diagnostic"
   };
   const c = content[tier] || content.starter;
   return (
-    <section className="rounded-[14px] border border-white/10 bg-[var(--mm-abyss)] p-6 text-white">
+    <section className="rounded-[14px] border border-white/10 bg-[var(--mm-abyss)] p-6 text-[var(--mm-on-dark)]">
       <h3
         className="m-0 mb-4 text-[18px]"
         style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
@@ -258,7 +258,7 @@ function SnapshotIncludesCard({ tier }: { tier: "starter" | "pro" | "diagnostic"
             <div className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[color-mix(in srgb, var(--mm-teal-bright) 18.0%, transparent)]">
               <Check className="h-2.5 w-2.5 text-[var(--mm-teal-bright)]" strokeWidth={3} />
             </div>
-            <span className="text-[12.5px] leading-[1.5] text-white/85">{item}</span>
+            <span className="text-[12.5px] leading-[1.5] text-[color-mix(in_srgb,var(--mm-on-dark)_85%,transparent)]">{item}</span>
           </li>
         ))}
       </ul>
@@ -546,7 +546,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
                   <div
                     key={c.id}
                     className="rounded-full px-3 py-1.5 text-[11.5px] font-semibold"
-                    style={{ background: color, color: "var(--mm-paper)" }}
+                    style={{ background: color, color: "var(--mm-white)" }}
                   >
                     {c.name}
                   </div>
@@ -778,7 +778,7 @@ function ReturningView({ data }: { data: DashboardData }) {
       <section className="mb-6 grid items-center gap-7 rounded-[14px] bg-[var(--mm-abyss)] px-7 py-6 md:grid-cols-[84px_1fr]">
         <div className="text-center">
           <ScoreRing score={overall} color="var(--mm-teal-bright)" size={76} />
-          <div className="mt-1.5 text-[9px] font-bold tracking-[0.1em] text-white/40">OVERALL</div>
+          <div className="mt-1.5 text-[9px] font-bold tracking-[0.1em] text-[color-mix(in_srgb,var(--mm-on-dark)_40%,transparent)]">OVERALL</div>
         </div>
         <div className="grid gap-x-7 gap-y-2.5 md:grid-cols-2">
           {systems.map((sys) => {
@@ -788,7 +788,7 @@ function ReturningView({ data }: { data: DashboardData }) {
             return (
               <div key={sys.id}>
                 <div className="mb-1 flex justify-between">
-                  <span className="text-[11px] font-medium text-white/70">{sys.name}</span>
+                  <span className="text-[11px] font-medium text-[color-mix(in_srgb,var(--mm-on-dark)_70%,transparent)]">{sys.name}</span>
                   <span className="text-[11px] font-bold" style={{ color: assessed ? color : "color-mix(in srgb, var(--mm-white) 40.0%, transparent)" }}>
                     {assessed ? val : "—"}
                   </span>
@@ -803,7 +803,7 @@ function ReturningView({ data }: { data: DashboardData }) {
             );
           })}
           {!hasSummary && !summaryLoading && (
-            <div className="col-span-2 text-[11px] text-white/50">
+            <div className="col-span-2 text-[11px] text-[color-mix(in_srgb,var(--mm-on-dark)_50%,transparent)]">
               Complete your Health Check to see your scores.
             </div>
           )}
@@ -817,7 +817,7 @@ function ReturningView({ data }: { data: DashboardData }) {
             label="Weakest System"
             title={weakest.name}
             value={`${Math.round(weakest.healthScore)} / 100`}
-            sub="This system shows the largest gap. Prioritise it in your roadmap."
+            sub="This system shows the largest gap. Prioritize it in your roadmap."
             color={getSystemColor(weakest.code)}
             cta="View System Report"
             href="/reports/revenue-system-health"

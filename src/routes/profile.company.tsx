@@ -27,7 +27,7 @@ import {
 } from "@/lib/profile.functions";
 
 export const Route = createFileRoute("/profile/company")({
-  head: () => ({ meta: [{ title: "Company Profile — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Company Profile — Revenue Health Visualizer" }] }),
   component: CompanyProfilePage,
 });
 
@@ -481,7 +481,7 @@ function OwnerCompanyForm() {
       </SectionCard>
 
       {error && (
-        <p className="text-sm mb-4" style={{ color: "var(--mm-ember)" }}>
+        <p className="text-sm mb-4" style={{ color: "var(--mm-eyebrow)" }}>
           {error}
         </p>
       )}
@@ -587,7 +587,7 @@ function SymptomSelector({
                 <div key={cat.category} className="mb-4">
                   <div
                     className="text-[11px] font-bold mb-2"
-                    style={{ color: "var(--mm-teal)", letterSpacing: "0.08em" }}
+                    style={{ color: "var(--mm-link)", letterSpacing: "0.08em" }}
                   >
                     {meta.icon} {cat.category.toUpperCase()}
                   </div>
@@ -650,7 +650,7 @@ function SymptomSelector({
         >
           <div
             className="text-[11px] font-semibold mb-1.5"
-            style={{ color: "var(--mm-teal)" }}
+            style={{ color: "var(--mm-link)" }}
           >
             {selected.length}/5 SELECTED — RANKED BY ORDER CHOSEN
           </div>
@@ -971,12 +971,12 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
         </FieldGroup>
 
         {error && (
-          <p className="text-sm mb-3" style={{ color: "var(--mm-ember)" }}>
+          <p className="text-sm mb-3" style={{ color: "var(--mm-eyebrow)" }}>
             {error}
           </p>
         )}
         {saved && !error && (
-          <p className="text-sm mb-3" style={{ color: "var(--mm-teal)" }}>
+          <p className="text-sm mb-3" style={{ color: "var(--mm-link)" }}>
             Saved.
           </p>
         )}
@@ -996,7 +996,7 @@ function SectionSubheading({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="text-[11px] font-bold mb-3"
-      style={{ color: "var(--mm-teal)", letterSpacing: "0.08em" }}
+      style={{ color: "var(--mm-link)", letterSpacing: "0.08em" }}
     >
       {children?.toString().toUpperCase()}
     </div>

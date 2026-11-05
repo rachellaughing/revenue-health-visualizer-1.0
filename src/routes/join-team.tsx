@@ -13,7 +13,7 @@ import {
 } from "@/lib/team.functions";
 
 export const Route = createFileRoute("/join-team")({
-  head: () => ({ meta: [{ title: "Join your team — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Join your team — Revenue Health Visualizer" }] }),
   component: JoinTeamPage,
 });
 
@@ -244,7 +244,7 @@ function JoinTeamPage() {
         </label>
 
         {error && (
-          <p className="text-sm" style={{ color: "var(--mm-ember)" }}>
+          <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>
             {error}
           </p>
         )}

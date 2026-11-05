@@ -11,7 +11,7 @@ import {
 } from "@/lib/report.functions";
 
 export const Route = createFileRoute("/reports/founder-dependency")({
-  head: () => ({ meta: [{ title: "Founder Dependency — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Founder Dependency — Revenue Health Visualizer" }] }),
   component: Page,
 });
 
@@ -426,7 +426,7 @@ export function ActionPlan({ processes, systems }: { processes: FDProcess[]; sys
                     fontSize: 10,
                     fontFamily: "Inter",
                     fontWeight: 700,
-                    color: T.teal,
+                    color: "var(--mm-link)",
                     letterSpacing: "0.08em",
                     marginBottom: 4,
                   }}
@@ -674,7 +674,7 @@ export function SystemsTab({
                         fontSize: 10,
                         fontFamily: "Inter",
                         fontWeight: 700,
-                        color: T.teal,
+                        color: "var(--mm-link)",
                         letterSpacing: "0.1em",
                         marginBottom: 6,
                       }}
@@ -708,7 +708,7 @@ export function SystemsTab({
                         fontSize: 10,
                         fontFamily: "Inter",
                         fontWeight: 700,
-                        color: T.teal,
+                        color: "var(--mm-link)",
                         letterSpacing: "0.1em",
                         marginBottom: 8,
                       }}
@@ -905,7 +905,7 @@ function Page() {
                 fontSize: 10,
                 fontFamily: "Inter",
                 fontWeight: 700,
-                color: T.teal,
+                color: "var(--mm-link)",
                 letterSpacing: "0.12em",
                 marginBottom: 10,
               }}

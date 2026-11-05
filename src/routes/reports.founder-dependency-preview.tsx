@@ -13,7 +13,7 @@ import {
 } from "./reports.founder-dependency";
 
 export const Route = createFileRoute("/reports/founder-dependency-preview")({
-  head: () => ({ meta: [{ title: "Founder Dependency (Sample) — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Founder Dependency (Sample) — Revenue Health Visualizer" }] }),
   component: Page,
 });
 
@@ -153,7 +153,7 @@ function Page() {
             display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
           }}
         >
-          <div style={{ color: T.white, fontFamily: "Inter", fontSize: 13 }}>
+          <div style={{ color: "var(--mm-on-dark)", fontFamily: "Inter", fontSize: 13 }}>
             Ready for your real dependency analysis with consultant observations?
           </div>
           <a
@@ -161,7 +161,7 @@ function Page() {
             target="_blank"
             rel="noreferrer"
             style={{
-              background: T.ember, color: T.white, borderRadius: 8, padding: "10px 18px",
+              background: T.ember, color: "var(--mm-white)", borderRadius: 8, padding: "10px 18px",
               fontFamily: "Inter", fontSize: 12, fontWeight: 600, textDecoration: "none",
             }}
           >

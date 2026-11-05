@@ -54,7 +54,7 @@ function LeftPanel() {
         <div style={{ marginBottom: 24 }}>
           <img
             src={rhLogoLight.url}
-            alt="Revenue Health Visualiser™"
+            alt="Revenue Health Visualizer™"
             style={{ width: 260, maxWidth: "100%", height: "auto", display: "block" }}
           />
         </div>
@@ -65,7 +65,7 @@ function LeftPanel() {
             fontStyle: "italic",
             fontSize: 44,
             lineHeight: 1.08,
-            color: "var(--mm-white)",
+            color: "var(--mm-on-dark)",
             margin: 0,
             fontWeight: 400,
           }}
@@ -144,7 +144,7 @@ function LeftPanel() {
                     fontFamily: "'Instrument Serif', Georgia, serif",
                     fontSize: 36,
                     lineHeight: 1,
-                    color: "var(--mm-white)",
+                    color: "var(--mm-on-dark)",
                   }}
                 >
                   {s.n}

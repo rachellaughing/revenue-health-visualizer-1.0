@@ -51,11 +51,11 @@ export function TeamMemberShell({ firstName }: { firstName: string | null }) {
         <Link
           to="/dashboard"
           style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
-          aria-label="Revenue Health Visualiser"
+          aria-label="Revenue Health Visualizer"
         >
           <img
             src={rhIconDark.url}
-            alt="Revenue Health Visualiser"
+            alt="Revenue Health Visualizer"
             style={{ height: 36, width: "auto", display: "block" }}
           />
         </Link>
@@ -64,7 +64,7 @@ export function TeamMemberShell({ firstName }: { firstName: string | null }) {
         <nav style={{ display: "flex", gap: 24 }}>
           <Link
             to="/health-check"
-            activeProps={{ style: { color: T.abyss, fontWeight: 600 } }}
+            activeProps={{ style: { color: "var(--mm-text)", fontWeight: 600 } }}
             inactiveProps={{ style: { color: T.mid, fontWeight: 500 } }}
             style={{
               fontSize: 13,
@@ -78,7 +78,7 @@ export function TeamMemberShell({ firstName }: { firstName: string | null }) {
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16 }}>
           {firstName && (
             <span style={{ fontSize: 12, color: T.mid }}>
-              Signed in as <span style={{ color: T.abyss, fontWeight: 500 }}>{firstName}</span>
+              Signed in as <span style={{ color: "var(--mm-text)", fontWeight: 500 }}>{firstName}</span>
             </span>
           )}
           <button

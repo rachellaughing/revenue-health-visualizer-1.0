@@ -79,6 +79,13 @@
   /* Status */
   --mm-status-success: #166534;
 
+  /* Semantic text tokens (flip with theme, except --mm-on-dark) */
+  --mm-text: var(--mm-ink);
+  --mm-text-muted: var(--mm-mid);
+  --mm-link: var(--mm-teal);
+  --mm-eyebrow: var(--mm-ember);
+  --mm-on-dark: #EDF3F7;
+
   --background: var(--mm-paper);
   --foreground: var(--mm-ink);
   --card: var(--mm-paper);
@@ -113,8 +120,12 @@
 [data-theme="dark"] {
   --mm-paper: #182829;
   --mm-off-white: #223536;
-  --mm-ink: #F5F5F0;
-  --mm-mid: #8FA3A3;
+  --mm-ink: #EDF3F7;
+  --mm-mid: #B4C3CE;
+  --mm-text: #EDF3F7;
+  --mm-text-muted: #B4C3CE;
+  --mm-link: #22BDC1;
+  --mm-eyebrow: #FF8A66;
   --mm-abyss: #182829;
   --mm-white: #FFFFFF;
   --mm-ember: #F05223;

@@ -17,7 +17,7 @@ import { getPersonalProfile, savePersonalProfile } from "@/lib/profile.functions
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/profile/personal")({
-  head: () => ({ meta: [{ title: "Personal Profile — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Personal Profile — Revenue Health Visualizer" }] }),
   component: PersonalProfilePage,
 });
 
@@ -96,7 +96,7 @@ function PersonalProfilePage() {
           Tell us about yourself
         </h2>
         <p className="text-sm leading-relaxed" style={{ color: "var(--mm-mid)" }}>
-          This helps us personalise your Health Check experience and report language.
+          This helps us personalize your Health Check experience and report language.
         </p>
       </div>
 
@@ -159,7 +159,7 @@ function PersonalProfilePage() {
       </SectionCard>
 
       {error && (
-        <p className="text-sm mb-4" style={{ color: "var(--mm-ember)" }}>
+        <p className="text-sm mb-4" style={{ color: "var(--mm-eyebrow)" }}>
           {error}
         </p>
       )}

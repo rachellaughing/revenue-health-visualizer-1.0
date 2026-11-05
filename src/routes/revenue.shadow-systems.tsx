@@ -7,7 +7,7 @@ import { getShadowSystems, type ShadowSystemItem } from "@/lib/report.functions"
 import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 
 export const Route = createFileRoute("/revenue/shadow-systems")({
-  head: () => ({ meta: [{ title: "Shadow Systems™ — Revenue Health Visualiser™" }] }),
+  head: () => ({ meta: [{ title: "Shadow Systems™ — Revenue Health Visualizer™" }] }),
   component: Page,
 });
 
@@ -20,7 +20,7 @@ export const T = {
 
 export const ACTION_TYPES = {
   document: { label: "Document It", color: "var(--mm-sys-lifecycle)", bg: "color-mix(in srgb, var(--mm-sys-lifecycle) 8.0%, transparent)" },
-  formalise: { label: "Formalise It", color: "var(--mm-sys-visibility)", bg: "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)" },
+  formalise: { label: "Formalize It", color: "var(--mm-sys-visibility)", bg: "color-mix(in srgb, var(--mm-sys-positioning) 8%, transparent)" },
   rebuild: { label: "Rebuild It", color: "var(--mm-sys-authority)", bg: "color-mix(in srgb, var(--mm-sys-authority) 8%, transparent)" },
   eliminate: { label: "Eliminate It", color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 8.0%, transparent)" },
 } as const;

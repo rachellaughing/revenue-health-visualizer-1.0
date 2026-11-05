@@ -5,7 +5,7 @@ import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
 import { T, ShadowCard, RiskDots, TYPE_PILLS, typeIcon } from "./revenue.shadow-systems";
 
 export const Route = createFileRoute("/revenue/shadow-systems-preview")({
-  head: () => ({ meta: [{ title: "Shadow Systems™ (Sample) — Revenue Health Visualiser™" }] }),
+  head: () => ({ meta: [{ title: "Shadow Systems™ (Sample) — Revenue Health Visualizer™" }] }),
   component: Page,
 });
 
@@ -50,7 +50,7 @@ function PBJDivider() {
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 28 }}>
         <div style={{ flex: 1, height: 1, background: T.offWhite }} />
         <div style={{
-          padding: "6px 16px", borderRadius: 20, background: T.abyss, color: T.white,
+          padding: "6px 16px", borderRadius: 20, background: T.abyss, color: "var(--mm-on-dark)",
           fontSize: 11, fontFamily: "Inter", fontWeight: 700, letterSpacing: "0.08em", whiteSpace: "nowrap",
         }}>HOW WE FIND YOURS</div>
         <div style={{ flex: 1, height: 1, background: T.offWhite }} />
@@ -62,7 +62,7 @@ function PBJDivider() {
       }}>
         <div>
           <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 10 }}>REVENUE HEALTH DIAGNOSTIC™</div>
-          <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 24, fontWeight: 400, color: T.white, margin: "0 0 14px", lineHeight: 1.3 }}>
+          <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 24, fontWeight: 400, color: "var(--mm-on-dark)", margin: "0 0 14px", lineHeight: 1.3 }}>
             The 4 shadow systems above are illustrative. Your business has its own.
           </h3>
           <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 65.0%, transparent)", lineHeight: 1.75, margin: "0 0 16px" }}>
@@ -107,7 +107,7 @@ function DiagnosticCTA() {
     }}>
       <div>
         <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)", letterSpacing: "0.12em", marginBottom: 8 }}>UNLOCK YOUR SHADOW SYSTEMS</div>
-        <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
+        <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 22, fontWeight: 400, color: "var(--mm-white)", margin: "0 0 6px" }}>
           Find out what your business is running on that nobody knows about.
         </h3>
         <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 85.0%, transparent)", margin: 0, lineHeight: 1.6 }}>
@@ -116,7 +116,7 @@ function DiagnosticCTA() {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
         <Link to="/diagnostic" style={{
-          display: "inline-block", background: T.white, color: T.ember,
+          display: "inline-block", background: T.white, color: "var(--mm-eyebrow)",
           fontFamily: "Inter", fontSize: 13, fontWeight: 700,
           padding: "12px 24px", borderRadius: 10, textDecoration: "none",
           textAlign: "center", whiteSpace: "nowrap",

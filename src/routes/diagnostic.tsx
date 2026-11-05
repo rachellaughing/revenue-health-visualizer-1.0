@@ -79,7 +79,7 @@ function DiagnosticPage() {
   return (
     <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif", color: T.ink }}>
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section style={{ background: T.hero, color: T.white, padding: "80px 48px" }}>
+      <section style={{ background: T.hero, color: "var(--mm-on-dark)", padding: "80px 48px" }}>
         <div style={{ maxWidth: 980, margin: "0 auto" }}>
           <Eyebrow color={T.ember}>Revenue Health Diagnostic™</Eyebrow>
           <h1
@@ -89,7 +89,7 @@ function DiagnosticPage() {
               fontWeight: 400,
               lineHeight: 1.1,
               margin: "0 0 24px",
-              color: T.white,
+              color: "var(--mm-on-dark)",
               maxWidth: 880,
             }}
           >
@@ -123,9 +123,9 @@ function DiagnosticPage() {
               }}
             >
               <span style={{ opacity: 0.65 }}>Your current score</span>
-              <span style={{ fontWeight: 700, color: T.white }}>{overallScore}</span>
+              <span style={{ fontWeight: 700, color: "var(--mm-white)" }}>{overallScore}</span>
               <span style={{ width: 1, height: 14, background: "color-mix(in srgb, var(--mm-white) 20.0%, transparent)" }} />
-              <span style={{ color: T.ember, fontWeight: 700, letterSpacing: "0.04em" }}>{label}</span>
+              <span style={{ color: "var(--mm-eyebrow)", fontWeight: 700, letterSpacing: "0.04em" }}>{label}</span>
             </div>
           )}
 
@@ -134,7 +134,7 @@ function DiagnosticPage() {
               onClick={scrollToForm}
               style={{
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 border: "none",
                 fontFamily: "Inter, sans-serif",
                 fontSize: 14,
@@ -161,7 +161,7 @@ function DiagnosticPage() {
             href="https://marketplacemaven.com/core-concepts/founder-blindspots/"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: T.ember, fontWeight: 600, fontSize: 14, textDecoration: "none" }}
+            style={{ color: "var(--mm-eyebrow)", fontWeight: 600, fontSize: 14, textDecoration: "none" }}
           >
             Read about founder blind spots →
           </a>
@@ -175,7 +175,7 @@ function DiagnosticPage() {
             maxWidth: 1100,
             margin: "0 auto",
             background: T.hero,
-            color: T.white,
+            color: "var(--mm-on-dark)",
             borderRadius: 16,
             padding: "56px 56px",
             display: "grid",
@@ -191,7 +191,7 @@ function DiagnosticPage() {
                 fontSize: 38,
                 fontWeight: 400,
                 margin: "0 0 20px",
-                color: T.white,
+                color: "var(--mm-on-dark)",
                 lineHeight: 1.15,
               }}
             >
@@ -235,7 +235,7 @@ function DiagnosticPage() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: T.white, marginBottom: 4 }}>{s.t}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--mm-on-dark)", marginBottom: 4 }}>{s.t}</div>
                   <div style={{ fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", lineHeight: 1.5 }}>{s.d}</div>
                 </div>
               </li>
@@ -333,7 +333,7 @@ function DiagnosticPage() {
                   padding: "24px 22px",
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 700, color: T.ember, letterSpacing: "0.12em", marginBottom: 10 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--mm-eyebrow)", letterSpacing: "0.12em", marginBottom: 10 }}>
                   {s.w}
                 </div>
                 <div style={{ fontSize: 17, fontWeight: 600, color: T.ink, marginBottom: 10 }}>{s.t}</div>
@@ -414,7 +414,7 @@ function ReportCard({
           fontSize: 10,
           fontWeight: 700,
           letterSpacing: "0.12em",
-          color: T.ember,
+          color: "var(--mm-eyebrow)",
           marginTop: "auto",
           paddingTop: 12,
         }}
@@ -569,7 +569,7 @@ function DiscoveryForm({
         disabled={state === "submitting"}
         style={{
           background: T.ember,
-          color: T.white,
+          color: "var(--mm-white)",
           border: "none",
           fontFamily: "Inter, sans-serif",
           fontSize: 14,

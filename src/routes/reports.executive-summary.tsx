@@ -12,7 +12,7 @@ import {
 
 
 export const Route = createFileRoute("/reports/executive-summary")({
-  head: () => ({ meta: [{ title: "Executive Summary — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Executive Summary — Revenue Health Visualizer" }] }),
   component: ExecSummaryPage,
 });
 
@@ -204,7 +204,7 @@ function BlindspotCallout() {
           href="https://marketplacemaven.com/founder-blindspots"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ fontSize: 13, fontFamily: "Inter", color: T.teal, fontWeight: 500 }}
+          style={{ fontSize: 13, fontFamily: "Inter", color: "var(--mm-link)", fontWeight: 500 }}
         >
           Read about founder blind spots →
         </a>
@@ -343,7 +343,7 @@ function ExecSummaryPage() {
               style={{
                 marginTop: 14,
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 border: "none",
                 borderRadius: 8,
                 padding: "8px 16px",
@@ -381,7 +381,7 @@ function ExecSummaryPage() {
               to="/health-check"
               style={{
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 borderRadius: 8,
                 padding: "10px 18px",
                 fontFamily: "Inter",
@@ -515,7 +515,7 @@ function ReportBody({
       : `Revenue health scores ${overallScore}/100`,
     body: rankedAssessed.length
       ? `${companyName} scores ${overallScore}/100 overall. ${rankedAssessed[0].name} is the lowest-scoring system at ${rankedAssessed[0].healthScore}, and ${rankedAssessed[rankedAssessed.length - 1].name} is the strongest at ${rankedAssessed[rankedAssessed.length - 1].healthScore}.`
-      : `${companyName} does not yet have enough completed Health Check data to summarise.`,
+      : `${companyName} does not yet have enough completed Health Check data to summarize.`,
     risks: rankedAssessed.slice(0, 3).map((s, i) => ({
       rank: i + 1,
       system: s.name,
@@ -588,7 +588,7 @@ function ReportBody({
                   borderRadius: 8,
                   fontSize: 12,
                   fontFamily: "Inter",
-                  color: T.ember,
+                  color: "var(--mm-eyebrow)",
                 }}
               >
                 This summary is based on 3 of 10 subsystems per system. Upgrade to Revenue Health Assessment™ for a complete picture.
@@ -808,7 +808,7 @@ function ReportBody({
                         style={{
                           marginLeft: "auto",
                           background: T.ember,
-                          color: T.white,
+                          color: "var(--mm-white)",
                           border: "none",
                           borderRadius: 6,
                           padding: "5px 12px",
@@ -983,7 +983,7 @@ function ReportBody({
                         fontSize: 10,
                         fontFamily: "Inter",
                         fontWeight: 700,
-                        color: T.ember,
+                        color: "var(--mm-eyebrow)",
                         letterSpacing: "0.1em",
                         marginBottom: 4,
                       }}
@@ -1049,13 +1049,13 @@ function ReportBody({
                     maxWidth: 380,
                   }}
                 >
-                  Revenue problems rarely exist in isolation. The Matrix Map shows where friction originates and how it propagates through the organisation.
+                  Revenue problems rarely exist in isolation. The Matrix Map shows where friction originates and how it propagates through the organization.
                 </p>
                 <Link
                   to="/revenue/matrix-map"
                   style={{
                     background: T.ember,
-                    color: T.white,
+                    color: "var(--mm-white)",
                     border: "none",
                     borderRadius: 8,
                     padding: "10px 20px",
@@ -1143,7 +1143,7 @@ function ReportBody({
                     fontSize: 10,
                     fontFamily: "Inter",
                     fontWeight: 700,
-                    color: T.ember,
+                    color: "var(--mm-eyebrow)",
                     letterSpacing: "0.12em",
                     marginBottom: 8,
                   }}
@@ -1177,7 +1177,7 @@ function ReportBody({
                 to="/settings/billing"
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: "var(--mm-white)",
                   border: "none",
                   borderRadius: 8,
                   padding: "12px 22px",
@@ -1225,7 +1225,7 @@ function ReportBody({
                     fontFamily: "'Instrument Serif', Georgia, serif",
                     fontSize: 20,
                     fontWeight: 400,
-                    color: T.white,
+                    color: "var(--mm-on-dark)",
                     margin: "0 0 8px",
                   }}
                 >
@@ -1248,7 +1248,7 @@ function ReportBody({
                 to="/settings/billing"
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: "var(--mm-white)",
                   border: "none",
                   borderRadius: 8,
                   padding: "12px 22px",
@@ -1296,7 +1296,7 @@ function ReportBody({
                     fontFamily: "'Instrument Serif', Georgia, serif",
                     fontSize: 20,
                     fontWeight: 400,
-                    color: T.white,
+                    color: "var(--mm-on-dark)",
                     margin: "0 0 8px",
                   }}
                 >
@@ -1319,7 +1319,7 @@ function ReportBody({
                 to="/revenue/roadmap-builder"
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: "var(--mm-white)",
                   border: "none",
                   borderRadius: 8,
                   padding: "12px 22px",

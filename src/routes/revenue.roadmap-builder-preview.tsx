@@ -5,7 +5,7 @@ import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
 import { T, HORIZONS, HorizonSection, MAX_TASKS } from "./revenue.roadmap-builder";
 
 export const Route = createFileRoute("/revenue/roadmap-builder-preview")({
-  head: () => ({ meta: [{ title: "Roadmap Builder (Sample) — Revenue Health Visualiser™" }] }),
+  head: () => ({ meta: [{ title: "Roadmap Builder (Sample) — Revenue Health Visualizer™" }] }),
   component: Page,
 });
 
@@ -68,7 +68,7 @@ const SAMPLE_ITEMS: SampleItem[] = [
     kpis: ["Forecast accuracy", "Data completeness score"],
   },
   {
-    code: "AUTH-07", childSystemId: "ill-auth-07", name: "Positioning Operationalisation", parent: "Authority", parentCode: "AUTH",
+    code: "AUTH-07", childSystemId: "ill-auth-07", name: "Positioning Operationalization", parent: "Authority", parentCode: "AUTH",
     color: T.sys.AUTH, healthScore: 55, effort: "medium", horizon: "90_days",
     title: "Embed positioning into the sales motion",
     why: "Messaging exists in decks but hasn't been embedded into day-to-day sales conversations.",
@@ -196,7 +196,7 @@ function Page() {
             <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)", letterSpacing: "0.12em", marginBottom: 8 }}>
               GET YOUR REAL ROADMAP
             </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
+            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: "var(--mm-white)", margin: "0 0 6px" }}>
               Turn this sample into a plan built from your own assessment.
             </h3>
             <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 75.0%, transparent)", margin: 0, lineHeight: 1.6 }}>
@@ -204,7 +204,7 @@ function Page() {
             </p>
           </div>
           <a href="/diagnostic" style={{
-            display: "inline-block", background: T.white, color: T.ember,
+            display: "inline-block", background: T.white, color: "var(--mm-eyebrow)",
             fontFamily: "Inter", fontSize: 13, fontWeight: 700,
             padding: "12px 24px", borderRadius: 10,
             textDecoration: "none", textAlign: "center", whiteSpace: "nowrap",

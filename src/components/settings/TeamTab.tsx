@@ -336,7 +336,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                       style={{
                         background: "transparent",
                         border: "1px solid var(--mm-hairline)",
-                        color: "var(--mm-teal)",
+                        color: "var(--mm-link)",
                         padding: isMobile ? "10px 12px" : "6px 12px",
                         borderRadius: 8,
                         fontSize: 12,
@@ -382,7 +382,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
           lineHeight: 1.6,
         }}
       >
-        Team members complete the Health Check independently. Their responses are anonymised in your Team Alignment report.
+        Team members complete the Health Check independently. Their responses are anonymized in your Team Alignment report.
         {isDiag && " Your Diagnostic includes a facilitated PBJ session with your team."}
       </div>
     </div>

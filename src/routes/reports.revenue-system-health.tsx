@@ -19,7 +19,7 @@ import {
 import { matrixMapLink, resolveTopOpportunityLink } from "@/lib/report-links";
 
 export const Route = createFileRoute("/reports/revenue-system-health")({
-  head: () => ({ meta: [{ title: "Revenue System Health — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Revenue System Health — Revenue Health Visualizer" }] }),
   component: Page,
 });
 
@@ -613,7 +613,7 @@ function SystemSection({
                     href="https://marketplacemaven.com/upgrade"
                     style={{
                       background: T.ember,
-                      color: T.white,
+                      color: "var(--mm-white)",
                       border: "none",
                       borderRadius: 8,
                       padding: "9px 20px",
@@ -953,7 +953,7 @@ function Page() {
               to="/health-check"
               style={{
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 borderRadius: 8,
                 padding: "10px 18px",
                 fontFamily: "Inter",
@@ -992,7 +992,7 @@ function KeyFindingBanner({ keyFinding }: { keyFinding: RevenueSystemHealth["key
           fontSize: 10,
           fontFamily: "Inter",
           fontWeight: 700,
-          color: T.teal,
+          color: "var(--mm-link)",
           letterSpacing: "0.1em",
           textTransform: "uppercase",
           marginBottom: 8,
@@ -1190,11 +1190,11 @@ function ShortlistRow({
           )}
 
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-            <Link to={matrixMapLink(child.id)} style={{ fontSize: 12, fontFamily: "Inter", color: T.teal, fontWeight: 500 }}>
+            <Link to={matrixMapLink(child.id)} style={{ fontSize: 12, fontFamily: "Inter", color: "var(--mm-link)", fontWeight: 500 }}>
               See this on the Matrix Map →
             </Link>
             {opportunityHref && (
-              <Link to={opportunityHref} style={{ fontSize: 12, fontFamily: "Inter", color: T.teal, fontWeight: 500 }}>
+              <Link to={opportunityHref} style={{ fontSize: 12, fontFamily: "Inter", color: "var(--mm-link)", fontWeight: 500 }}>
                 View in Top Opportunities →
               </Link>
             )}
@@ -1493,7 +1493,7 @@ function ReportBody({
               href="https://marketplacemaven.com/core-concepts/founder-blindspots/"
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: T.teal, fontWeight: 500 }}
+              style={{ color: "var(--mm-link)", fontWeight: 500 }}
             >
               Read about founder blind spots →
             </a>

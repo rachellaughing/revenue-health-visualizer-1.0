@@ -6,7 +6,7 @@ import { getTeamAlignment, type TeamAlignmentData, type AlignmentSystem } from "
 import { useDiagnosticTierGate } from "@/components/reports/tier-gate";
 
 export const Route = createFileRoute("/reports/team-alignment")({
-  head: () => ({ meta: [{ title: "Team Alignment — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Team Alignment — Revenue Health Visualizer" }] }),
   component: Page,
 });
 
@@ -53,7 +53,7 @@ export function gapInterpretation(d: AlignmentSystem): string {
   if (d.direction === "founder_high") {
     return `You score ${d.name} ${abs} points higher than your team. This may reflect leadership context the team lacks — or a blind spot worth examining.`;
   }
-  return `Your team scores ${d.name} ${abs} points higher than you do. You may be seeing problems your team is not yet aware of — or underestimating a genuine organisational strength.`;
+  return `Your team scores ${d.name} ${abs} points higher than you do. You may be seeing problems your team is not yet aware of — or underestimating a genuine organizational strength.`;
 }
 
 // ---------- Radar Chart ----------
@@ -135,11 +135,11 @@ export function SideBySideBars({ data }: { data: AlignmentSystem[] }) {
               </span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-              <span style={{ fontSize: 10, color: T.ember, width: 56, fontWeight: 600 }}>You</span>
+              <span style={{ fontSize: 10, color: "var(--mm-eyebrow)", width: 56, fontWeight: 600 }}>You</span>
               <div style={{ flex: 1, height: 8, background: T.offWhite, borderRadius: 4, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${d.founderScore}%`, background: T.ember, borderRadius: 4 }} />
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: T.ember, width: 28, textAlign: "right" }}>{d.founderScore}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: "var(--mm-eyebrow)", width: 28, textAlign: "right" }}>{d.founderScore}</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ fontSize: 10, color: T.tealBright, width: 56, fontWeight: 600 }}>Team avg</span>
@@ -210,7 +210,7 @@ export function SystemCard({
         <div style={{ padding: "20px 24px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 20 }}>
             {[
-              { label: "Your Score", value: String(d.founderScore), color: T.ember },
+              { label: "Your Score", value: String(d.founderScore), color: "var(--mm-eyebrow)" },
               { label: "Team Average", value: String(d.teamAvg), color: T.tealBright },
               { label: "Gap", value: `${d.gap > 0 ? "+" : ""}${d.gap}`, color: gc },
             ].map((it, i) => (
@@ -243,7 +243,7 @@ export function SystemCard({
 
           {isDiagnostic && d.narrative && (
             <div style={{ borderLeft: `3px solid ${T.teal}`, background: `color-mix(in srgb, ${T.abyss} 2.4%, transparent)`, borderRadius: 10, padding: "16px 18px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.teal, letterSpacing: "0.1em", marginBottom: 8 }}>CONSULTANT OBSERVATION</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--mm-link)", letterSpacing: "0.1em", marginBottom: 8 }}>CONSULTANT OBSERVATION</div>
               <p style={{ fontSize: 13, color: T.ink, lineHeight: 1.75, margin: 0 }}>{d.narrative}</p>
             </div>
           )}
@@ -309,7 +309,7 @@ function Page() {
             <Link
               to="/settings"
               search={{ tab: "team", success: undefined }}
-              style={{ background: T.ember, color: T.white, border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, textDecoration: "none", display: "inline-block" }}
+              style={{ background: T.ember, color: "var(--mm-white)", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 600, textDecoration: "none", display: "inline-block" }}
             >
               Go to Settings → Team to invite or resend
             </Link>
@@ -353,7 +353,7 @@ function Page() {
           <span style={{ fontSize: 14, flexShrink: 0, color: T.sand, marginTop: 1 }}>ⓘ</span>
           <div style={{ fontSize: 12, color: T.mid, lineHeight: 1.65 }}>
             <span style={{ fontWeight: 600, color: T.ink }}>About this report: </span>
-            Team members completed the Health Check independently. Their scores are anonymised — no individual responses are shown to the founder. Clusters represent functional groups (Leadership, Sales, Marketing) not named individuals.
+            Team members completed the Health Check independently. Their scores are anonymized — no individual responses are shown to the founder. Clusters represent functional groups (Leadership, Sales, Marketing) not named individuals.
           </div>
         </div>
 
@@ -373,8 +373,8 @@ function Page() {
                 color: d.summary.criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-status-success)",
                 sub: "Require immediate attention",
               },
-              { label: "Leader Sees Stronger", value: d.summary.leaderHigher, color: T.ember, sub: "Potential blind spots" },
-              { label: "Team Sees Stronger", value: d.summary.teamHigher, color: T.teal, sub: "Hidden organisational strength" },
+              { label: "Leader Sees Stronger", value: d.summary.leaderHigher, color: "var(--mm-eyebrow)", sub: "Potential blind spots" },
+              { label: "Team Sees Stronger", value: d.summary.teamHigher, color: "var(--mm-link)", sub: "Hidden organizational strength" },
             ].map((c, i) => (
               <div
                 key={i}

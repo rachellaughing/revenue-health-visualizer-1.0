@@ -17,7 +17,7 @@ import {
 } from "@/components/settings/PasswordRequirements";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualizer" }] }),
   validateSearch: (
     search: Record<string, unknown>,
   ): { verified?: true; tab?: "signin" | "signup" } => ({
@@ -84,12 +84,12 @@ function SignInForm() {
             type="button"
             onClick={() => setForgotOpen(true)}
             className="text-sm font-medium hover:underline"
-            style={{ color: "var(--mm-ember)" }}
+            style={{ color: "var(--mm-eyebrow)" }}
           >
             Forgot password?
           </button>
         </div>
-        {error && <p className="text-sm" style={{ color: "var(--mm-ember)" }}>{error}</p>}
+        {error && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{error}</p>}
         <button
           type="submit"
           disabled={loading}
@@ -226,7 +226,7 @@ function SignUpForm() {
               : "Resend verification email"}
         </button>
         {error && (
-          <p className="text-sm mt-3" style={{ color: "var(--mm-ember)" }}>
+          <p className="text-sm mt-3" style={{ color: "var(--mm-eyebrow)" }}>
             {error}
           </p>
         )}
@@ -283,7 +283,7 @@ function SignUpForm() {
         value={businessName}
         onChange={setBusinessName}
       />
-      {error && <p className="text-sm" style={{ color: "var(--mm-ember)" }}>{error}</p>}
+      {error && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{error}</p>}
       <button
         type="submit"
         disabled={!canSubmit}
@@ -361,7 +361,7 @@ function ForgotPasswordDialog({
         {!sent && (
           <form onSubmit={handleSend} className="space-y-4">
             <Field label="Email" type="email" value={email} onChange={setEmail} required />
-            {err && <p className="text-sm" style={{ color: "var(--mm-ember)" }}>{err}</p>}
+            {err && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{err}</p>}
             <button
               type="submit"
               disabled={sending || !email}

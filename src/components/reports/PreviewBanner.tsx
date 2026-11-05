@@ -14,7 +14,7 @@ export function IllustrativeDataBanner({ note }: { note?: string }) {
         top: 0,
         zIndex: 50,
         background: T.ember,
-        color: T.white,
+        color: "var(--mm-white)",
         padding: "11px 24px",
         textAlign: "center",
         fontFamily: "Inter, sans-serif",

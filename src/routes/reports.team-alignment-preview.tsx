@@ -13,7 +13,7 @@ import {
 import type { AlignmentSystem } from "@/lib/report.functions";
 
 export const Route = createFileRoute("/reports/team-alignment-preview")({
-  head: () => ({ meta: [{ title: "Team Alignment (Sample) — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Team Alignment (Sample) — Revenue Health Visualizer" }] }),
   component: Page,
 });
 
@@ -86,7 +86,7 @@ function Page() {
             <div style={{ fontSize: 10, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 8 }}>
               SAMPLE REPORT
             </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: T.white, margin: "0 0 6px" }}>
+            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: "var(--mm-on-dark)", margin: "0 0 6px" }}>
               This is what your Team Alignment report will look like.
             </h3>
             <p style={{ fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", margin: 0, lineHeight: 1.6, maxWidth: 480 }}>
@@ -98,7 +98,7 @@ function Page() {
             target="_blank"
             rel="noreferrer"
             style={{
-              background: T.ember, color: T.white, border: "none", borderRadius: 8, padding: "12px 22px",
+              background: T.ember, color: "var(--mm-white)", border: "none", borderRadius: 8, padding: "12px 22px",
               whiteSpace: "nowrap", fontSize: 13, fontWeight: 600, textDecoration: "none",
             }}
           >
@@ -115,7 +115,7 @@ function Page() {
           <span style={{ fontSize: 14, flexShrink: 0, color: T.sand, marginTop: 1 }}>ⓘ</span>
           <div style={{ fontSize: 12, color: T.mid, lineHeight: 1.65 }}>
             <span style={{ fontWeight: 600, color: T.ink }}>About this report: </span>
-            Team members complete the Health Check independently. Their scores are anonymised — no individual responses are shown to the founder. Clusters represent functional groups (Leadership, Sales, Marketing), not named individuals.
+            Team members complete the Health Check independently. Their scores are anonymized — no individual responses are shown to the founder. Clusters represent functional groups (Leadership, Sales, Marketing), not named individuals.
           </div>
         </div>
 
@@ -123,8 +123,8 @@ function Page() {
           {[
             { label: "Overall Alignment", value: `${overallAlignment}%`, color: overallAlignment > 80 ? "var(--mm-status-success)" : overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand, sub: "Across all systems" },
             { label: "Critical Gaps", value: criticalGaps, color: criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-status-success)", sub: "Require immediate attention" },
-            { label: "Leader Sees Stronger", value: leaderHigher, color: T.ember, sub: "Potential blind spots" },
-            { label: "Team Sees Stronger", value: teamHigher, color: T.teal, sub: "Hidden organisational strength" },
+            { label: "Leader Sees Stronger", value: leaderHigher, color: "var(--mm-eyebrow)", sub: "Potential blind spots" },
+            { label: "Team Sees Stronger", value: teamHigher, color: "var(--mm-link)", sub: "Hidden organizational strength" },
           ].map((c, i) => (
             <div key={i} style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderTop: `3px solid ${c.color}`, borderRadius: 10, padding: "16px 18px" }}>
               <div style={{ fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", color: c.color, marginBottom: 4 }}>{c.value}</div>
@@ -221,7 +221,7 @@ function Page() {
             <div style={{ fontSize: 10, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 6 }}>
               REVENUE HEALTH DIAGNOSTIC™
             </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 17, fontWeight: 400, color: T.white, margin: "0 0 4px" }}>
+            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 17, fontWeight: 400, color: "var(--mm-on-dark)", margin: "0 0 4px" }}>
               Get your team's real scores and consultant observations.
             </h3>
             <p style={{ fontSize: 12, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", margin: 0 }}>
@@ -231,7 +231,7 @@ function Page() {
           <Link
             to="/diagnostic"
             style={{
-              background: T.ember, color: T.white, border: "none", borderRadius: 8, padding: "11px 20px",
+              background: T.ember, color: "var(--mm-white)", border: "none", borderRadius: 8, padding: "11px 20px",
               whiteSpace: "nowrap", fontSize: 12, fontWeight: 600, textDecoration: "none",
             }}
           >

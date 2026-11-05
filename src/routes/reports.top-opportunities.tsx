@@ -20,17 +20,17 @@ import {
 export const Route = createFileRoute("/reports/top-opportunities")({
   head: () => ({
     meta: [
-      { title: "Top Opportunities — Revenue Health Visualiser™" },
+      { title: "Top Opportunities — Revenue Health Visualizer™" },
       {
         name: "description",
         content:
           "See where to focus next across your revenue systems: the weaknesses with the widest knock-on effect and the improvements you can start now.",
       },
-      { property: "og:title", content: "Top Opportunities — Revenue Health Visualiser™" },
+      { property: "og:title", content: "Top Opportunities — Revenue Health Visualizer™" },
       {
         property: "og:description",
         content:
-          "Your prioritised revenue opportunities: widest impact first, practical improvements second.",
+          "Your prioritized revenue opportunities: widest impact first, practical improvements second.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -55,7 +55,7 @@ const T = {
 const SEVERITY_STYLE: Record<string, { color: string; bg: string }> = {
   critical: { color: "var(--mm-danger)", bg: "color-mix(in srgb, var(--mm-danger) 12%, transparent)" },
   fragile: { color: "var(--mm-sand)", bg: "color-mix(in srgb, var(--mm-sand) 14%, transparent)" },
-  stable: { color: "var(--mm-teal)", bg: "color-mix(in srgb, var(--mm-teal) 14%, transparent)" },
+  stable: { color: "var(--mm-link)", bg: "color-mix(in srgb, var(--mm-teal) 14%, transparent)" },
   strong: { color: "var(--mm-status-success)", bg: "color-mix(in srgb, var(--mm-status-success) 14%, transparent)" },
 };
 
@@ -173,7 +173,7 @@ function PageBody({ payload }: { payload: TopOpportunities }) {
                 padding: "10px 16px",
                 fontSize: 13,
                 fontWeight: 600,
-                color: T.abyss,
+                color: "var(--mm-text)",
                 whiteSpace: "nowrap",
               }}
             >
@@ -610,7 +610,7 @@ function LockedSection({
               />
               {t.parentName}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: T.abyss }}>{t.count}</div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--mm-text)" }}>{t.count}</div>
           </div>
         ))}
       </div>
@@ -678,7 +678,7 @@ function LockedSection({
             style={{
               background: "transparent",
               border: `1px solid ${T.mid}`,
-              color: T.abyss,
+              color: "var(--mm-text)",
               borderRadius: 8,
               padding: "8px 18px",
               fontSize: 13,
@@ -696,7 +696,7 @@ function LockedSection({
           style={{
             display: "inline-block",
             background: T.ember,
-            color: T.white,
+            color: "var(--mm-white)",
             borderRadius: 8,
             padding: "11px 24px",
             fontSize: 13,

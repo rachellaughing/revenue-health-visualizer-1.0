@@ -42,7 +42,7 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
             background: T.abyss,
             borderRadius: 16,
             padding: "40px 36px",
-            color: T.white,
+            color: "var(--mm-on-dark)",
             position: "relative",
             overflow: "hidden",
           }}
@@ -86,7 +86,7 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
               style={{
                 display: "inline-block",
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 padding: "14px 28px",
                 borderRadius: 10,
                 fontSize: 14,
@@ -163,7 +163,7 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
             background: T.abyss,
             borderRadius: 16,
             padding: "40px 36px",
-            color: T.white,
+            color: "var(--mm-on-dark)",
           }}
         >
           <div

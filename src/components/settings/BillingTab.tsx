@@ -164,7 +164,7 @@ export function BillingTab({ success }: { success?: boolean }) {
         <div
           style={{
             background: T.abyss,
-            color: T.white,
+            color: "var(--mm-on-dark)",
             borderRadius: 14,
             padding: "28px 32px",
           }}
@@ -220,7 +220,7 @@ export function BillingTab({ success }: { success?: boolean }) {
               disabled={redeem.isPending}
               style={{
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 border: "none",
                 padding: "14px 28px",
                 borderRadius: 10,
@@ -237,7 +237,7 @@ export function BillingTab({ success }: { success?: boolean }) {
               disabled={checkout.isPending}
               style={{
                 background: T.ember,
-                color: T.white,
+                color: "var(--mm-white)",
                 border: "none",
                 padding: "14px 28px",
                 borderRadius: 10,
@@ -290,7 +290,7 @@ export function BillingTab({ success }: { success?: boolean }) {
                   flex: 1,
                   background: "color-mix(in srgb, var(--mm-white) 6.0%, transparent)",
                   border: "1px solid color-mix(in srgb, var(--mm-white) 18.0%, transparent)",
-                  color: T.white,
+                  color: "var(--mm-white)",
                   padding: "10px 12px",
                   borderRadius: 8,
                   fontSize: 14,
@@ -303,7 +303,7 @@ export function BillingTab({ success }: { success?: boolean }) {
                 disabled={!codeInput.trim() || apply.isPending}
                 style={{
                   background: "transparent",
-                  color: T.white,
+                  color: "var(--mm-on-dark)",
                   border: "1px solid color-mix(in srgb, var(--mm-white) 35.0%, transparent)",
                   padding: "10px 18px",
                   borderRadius: 8,
@@ -431,7 +431,7 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
           {ownerEmail ? (
             <>
               {" "}To make changes to your plan, contact {ownerFirst} at{" "}
-              <a href={`mailto:${ownerEmail}`} style={{ color: T.ember, textDecoration: "none" }}>
+              <a href={`mailto:${ownerEmail}`} style={{ color: "var(--mm-eyebrow)", textDecoration: "none" }}>
                 {ownerEmail}
               </a>.
             </>
@@ -475,7 +475,7 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
             style={{
               display: "inline-block",
               background: T.ember,
-              color: T.white,
+              color: "var(--mm-white)",
               padding: "12px 22px",
               borderRadius: 10,
               fontWeight: 700,

@@ -21,7 +21,7 @@ import { useAuth } from "@/lib/auth-context";
 
 
 export const Route = createFileRoute("/revenue/matrix-map")({
-  head: () => ({ meta: [{ title: "Matrix Map — Revenue Health Visualiser" }] }),
+  head: () => ({ meta: [{ title: "Matrix Map — Revenue Health Visualizer" }] }),
   component: Page,
 });
 
@@ -932,7 +932,7 @@ function MatrixMapSVG({
             textAnchor="middle"
             fontSize="10"
             fontFamily="Inter"
-            fill={T.white}
+            fill="var(--mm-on-dark)"
           >
             {linkTooltip.conn.strength}{" "}
             {linkTooltip.conn.strength === 1 ? "link" : "links"} ·{" "}
@@ -1232,7 +1232,7 @@ function ZoomedSystem({
               <button
                 style={{
                   background: T.ember,
-                  color: T.white,
+                  color: "var(--mm-white)",
                   border: "none",
                   borderRadius: 8,
                   padding: "7px 16px",
@@ -1331,7 +1331,7 @@ function ZoomedSystem({
                     marginBottom: 14,
                     fontSize: 11,
                     fontFamily: "Inter",
-                    color: T.ember,
+                    color: "var(--mm-eyebrow)",
                     lineHeight: 1.5,
                   }}
                 >
@@ -2039,7 +2039,7 @@ function ScenarioCard({
               <span style={{ fontWeight: 600, color: T.ink }}>*Illustrative scenario — </span>
               {scenario.name} was not evaluated in your Health Check. This scenario is based on
               framework data, not your actual scores. Select this subsystem in your next
-              quarterly Health Check to see personalised projections.
+              quarterly Health Check to see personalized projections.
             </div>
           )}
 
@@ -2165,7 +2165,7 @@ function ScenarioCard({
               lineHeight: 1.6,
             }}
           >
-            <span style={{ fontWeight: 600, color: T.ink }}>Stabilisation note: </span>
+            <span style={{ fontWeight: 600, color: T.ink }}>Stabilization note: </span>
             {scenario.stabilisationNote}
           </div>
         </div>
