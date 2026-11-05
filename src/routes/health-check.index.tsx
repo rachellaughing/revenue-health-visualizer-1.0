@@ -15,6 +15,13 @@ import {
   type Area,
 } from "@/lib/healthcheck.functions";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FocusMode, FOCUS_RING } from "@/components/health-check/FocusMode";
+import {
+  buildSteps,
+  isAreaAnswered,
+  isAreaDone,
+  timeEstimateLabel,
+} from "@/lib/health-check-progress";
 
 
 
@@ -1549,6 +1556,132 @@ function HealthCheckShell({
     setShowSkipWarning(false);
   }
 
+  // ---------- Focus mode + honest progress (additive) ----------
+  const VIEW_KEY = "hc-view-mode";
+  const [viewMode, setViewMode] = useState<"list" | "focus">(
+    data.responses.length === 0 ? "focus" : "list",
+  );
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(VIEW_KEY);
+      if (stored === "list" || stored === "focus") setViewMode(stored);
+    } catch {
+      /* storage unavailable — keep default */
+    }
+  }, []);
+  function changeViewMode(m: "list" | "focus") {
+    setViewMode(m);
+    try {
+      window.localStorage.setItem(VIEW_KEY, m);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const steps = useMemo(
+    () => buildSteps(parents, children, areas, tier, selectedSet),
+    [parents, children, areas, tier, selectedSet],
+  );
+  const [focusIdx, setFocusIdx] = useState<number>(() => {
+    const i = steps.findIndex((st) => !isAreaDone(initialResponses[st.area.question_id]));
+    return i === -1 ? 0 : i;
+  });
+  const safeFocusIdx = Math.min(focusIdx, Math.max(0, steps.length - 1));
+  const focusStep = steps[safeFocusIdx];
+
+  // Focus step drives the active system/subsystem so chips and rail stay in sync.
+  useEffect(() => {
+    if (viewMode !== "focus" || !focusStep) return;
+    if (activeParentId !== focusStep.parent.id) setActiveParentId(focusStep.parent.id);
+    if (activeChildId !== focusStep.child.id) setActiveChildId(focusStep.child.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, focusStep?.area.id]);
+  // Jumping via chips or the rail moves Focus mode to that subsystem.
+  useEffect(() => {
+    if (viewMode !== "focus" || !activeChild) return;
+    if (focusStep && focusStep.child.id === activeChild.id) return;
+    const inChild = steps
+      .map((st, i) => ({ st, i }))
+      .filter(({ st }) => st.child.id === activeChild.id);
+    if (inChild.length === 0) return;
+    const firstOpen = inChild.find(({ st }) => !isAreaDone(responses[st.area.question_id]));
+    setFocusIdx((firstOpen ?? inChild[0]).i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, activeChild?.id]);
+
+  // Per-system progress for the person's tier.
+  const avgAreasPerChild = children.length ? Math.round(areas.length / children.length) : 4;
+  const systemProgress = useMemo(() => {
+    const m = new Map<string, { answered: number; total: number; done: number; doneTotal: number }>();
+    for (const p of parents) {
+      const list = childrenByParent.get(p.id) ?? [];
+      const relevant = tier === "starter" ? list.filter((c) => selectedSet.has(c.code)) : list;
+      let answered = 0;
+      let done = 0;
+      let real = 0;
+      for (const c of relevant) {
+        for (const a of areasByChild.get(c.id) ?? []) {
+          real++;
+          const r = responses[a.question_id];
+          if (isAreaAnswered(r)) answered++;
+          if (isAreaDone(r)) done++;
+        }
+      }
+      const total =
+        tier === "starter" ? real + Math.max(0, 3 - relevant.length) * avgAreasPerChild : real;
+      m.set(p.id, { answered, total, done, doneTotal: tier === "starter" && relevant.length < 3 ? total : real });
+    }
+    return m;
+  }, [parents, childrenByParent, areasByChild, responses, tier, selectedSet, avgAreasPerChild]);
+
+  const doneOrSkippedCount = useMemo(
+    () => steps.filter((st) => isAreaDone(responses[st.area.question_id])).length,
+    [steps, responses],
+  );
+  const remainingAreas = Math.max(0, totalUnlocked - doneOrSkippedCount);
+  const estimate = timeEstimateLabel(remainingAreas, completedCount);
+
+  const relevantActiveChildren = activeParent
+    ? tier === "starter"
+      ? activeChildren.filter((c) => selectedSet.has(c.code))
+      : activeChildren
+    : [];
+  const subsystemPos = activeChild
+    ? relevantActiveChildren.findIndex((c) => c.id === activeChild.id) + 1
+    : 0;
+
+  // Brief progress moments
+  const [moment, setMoment] = useState<string | null>(null);
+  const prevDone = useRef<{ children: Set<string>; parents: Set<string> } | null>(null);
+  useEffect(() => {
+    const doneChildren = new Set<string>();
+    const doneParents = new Set<string>();
+    for (const c of children) {
+      const arr = areasByChild.get(c.id) ?? [];
+      if (arr.length && arr.every((a) => isAreaDone(responses[a.question_id]))) doneChildren.add(c.id);
+    }
+    for (const p of parents) {
+      const sp = systemProgress.get(p.id);
+      if (sp && sp.doneTotal > 0 && sp.done >= sp.doneTotal) doneParents.add(p.id);
+    }
+    const prev = prevDone.current;
+    prevDone.current = { children: doneChildren, parents: doneParents };
+    if (!prev) return;
+    const newParent = parents.find((p) => doneParents.has(p.id) && !prev.parents.has(p.id));
+    const newChild = children.find((c) => doneChildren.has(c.id) && !prev.children.has(c.id));
+    let msg: string | null = null;
+    if (newParent) {
+      msg = `${newParent.name} complete, ${doneParents.size} of ${parents.length} systems mapped`;
+    } else if (newChild) {
+      msg = `${newChild.name} complete`;
+    }
+    if (!msg) return;
+    setMoment(msg);
+    const t = setTimeout(() => setMoment(null), 4000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [responses]);
+
   // Left rail collapse — persisted; default collapsed on small screens
   const [leftRailCollapsed, setLeftRailCollapsed] = useState<boolean>(false);
   const leftRailHydrated = useRef(false);
@@ -1639,20 +1772,9 @@ function HealthCheckShell({
         >
           {parents.map((p) => {
             const list = childrenByParent.get(p.id) ?? [];
-            const totalAreas = list.reduce(
-              (s, c) => s + (areasByChild.get(c.id)?.length ?? 0),
-              0,
-            );
-            const doneAreas = list.reduce((s, c) => {
-              const arr = areasByChild.get(c.id) ?? [];
-              return (
-                s +
-                arr.filter((a) => {
-                  const r = responses[a.question_id];
-                  return r && r.health !== null && r.health > 0 && r.tracking !== null;
-                }).length
-              );
-            }, 0);
+            const sp = systemProgress.get(p.id) ?? { answered: 0, total: 0 };
+            const totalAreas = sp.total;
+            const doneAreas = sp.answered;
             const pct = totalAreas ? Math.round((doneAreas / totalAreas) * 100) : 0;
             const isActiveParent = p.id === activeParent?.id;
             const color = getSystemColor(p.code ?? p.name);
@@ -1660,7 +1782,10 @@ function HealthCheckShell({
               <button
                 key={p.id}
                 onClick={() => selectParent(p.id)}
+                className={FOCUS_RING}
+                aria-label={`${p.name}, ${doneAreas} of ${totalAreas} areas answered`}
                 style={{
+                  minHeight: 44,
                   flexShrink: 0,
                   whiteSpace: "nowrap",
                   padding: "10px 16px",
@@ -1691,9 +1816,9 @@ function HealthCheckShell({
                 >
                   {p.name}
                 </span>
-                {pct > 0 && (
-                  <span style={{ fontSize: 11, color: T.mid }}>{pct}%</span>
-                )}
+                <span style={{ fontSize: 11, color: T.mid }}>
+                  {doneAreas}/{totalAreas}
+                </span>
               </button>
             );
           })}
@@ -1750,20 +1875,9 @@ function HealthCheckShell({
 
           {parents.map((p) => {
             const list = childrenByParent.get(p.id) ?? [];
-            const totalAreas = list.reduce(
-              (s, c) => s + (areasByChild.get(c.id)?.length ?? 0),
-              0,
-            );
-            const doneAreas = list.reduce((s, c) => {
-              const arr = areasByChild.get(c.id) ?? [];
-              return (
-                s +
-                arr.filter((a) => {
-                  const r = responses[a.question_id];
-                  return r && r.health !== null && r.health > 0 && r.tracking !== null;
-                }).length
-              );
-            }, 0);
+            const sp = systemProgress.get(p.id) ?? { answered: 0, total: 0 };
+            const totalAreas = sp.total;
+            const doneAreas = sp.answered;
             const pct = totalAreas ? Math.round((doneAreas / totalAreas) * 100) : 0;
             const isActiveParent = p.id === activeParent?.id;
             const color = getSystemColor(p.code ?? p.name);
@@ -1775,8 +1889,10 @@ function HealthCheckShell({
                     if (leftRailCollapsed) setLeftRailCollapsed(false);
                     selectParent(p.id);
                   }}
-                  title={leftRailCollapsed ? `${p.name}${pct > 0 ? ` — ${pct}%` : ""}` : undefined}
+                  title={leftRailCollapsed ? `${p.name} — ${doneAreas}/${totalAreas}` : undefined}
+                  className={FOCUS_RING}
                   style={{
+                    minHeight: 44,
                     width: "100%",
                     display: "flex",
                     alignItems: "center",
@@ -1806,20 +1922,25 @@ function HealthCheckShell({
                           style={{
                             fontSize: 12,
                             fontWeight: 600,
-                            color: isActiveParent ? color : T.ink,
+                            color: T.ink,
                           }}
                         >
                           {p.name}
                         </div>
-                        {pct > 0 && (
-                          <div style={{ marginTop: 4 }}>
-                            <ProgressBar pct={pct} color={color} />
-                          </div>
-                        )}
+                        <div
+                          style={{ marginTop: 4 }}
+                          role="progressbar"
+                          aria-label={`${p.name} progress`}
+                          aria-valuemin={0}
+                          aria-valuemax={totalAreas}
+                          aria-valuenow={doneAreas}
+                        >
+                          <ProgressBar pct={pct} color={color} />
+                        </div>
                       </div>
-                      {pct > 0 && (
-                        <span style={{ fontSize: 10, color: T.mid }}>{pct}%</span>
-                      )}
+                      <span style={{ fontSize: 10, color: T.mid, whiteSpace: "nowrap" }}>
+                        {doneAreas}/{totalAreas}
+                      </span>
                     </>
                   )}
                 </button>
@@ -1890,7 +2011,44 @@ function HealthCheckShell({
 
 
         {/* Right panel */}
-        <div style={{ flex: 1, overflowY: "auto", padding: isMobile ? 16 : "24px 32px" }}>
+        <div style={{ flex: 1, minWidth: 0, overflowY: "auto", overflowX: "hidden", padding: isMobile ? 16 : "24px 32px" }}>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0 text-xs text-[var(--mm-mid)]">
+              {activeParent && activeChild && subsystemPos > 0 && (
+                <div className="font-semibold text-[var(--mm-ink)]">
+                  Subsystem {subsystemPos} of {relevantActiveChildren.length} in {activeParent.name}
+                </div>
+              )}
+              <div>
+                {completedCount} of {totalUnlocked} areas answered
+                {estimate && <span> · {estimate}</span>}
+              </div>
+              <div aria-live="polite" className="min-h-[1rem] font-semibold text-[var(--mm-teal)]">
+                {moment ?? ""}
+              </div>
+            </div>
+            <div
+              role="group"
+              aria-label="Questionnaire view"
+              className="inline-flex rounded-lg border border-border bg-[var(--mm-off-white)] p-1"
+            >
+              {(["list", "focus"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={viewMode === m}
+                  onClick={() => changeViewMode(m)}
+                  className={`min-h-[44px] rounded-md px-4 text-xs font-semibold ${FOCUS_RING} ${
+                    viewMode === m
+                      ? "bg-[var(--mm-paper)] text-[var(--mm-ink)] shadow-sm"
+                      : "text-[var(--mm-mid)]"
+                  }`}
+                >
+                  {m === "list" ? "List view" : "Focus mode"}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {!data.isTeamMember && (
             <SelectionBreadcrumb
@@ -1997,7 +2155,9 @@ function HealthCheckShell({
                     const r = responses[a.question_id];
                     return r && r.health !== null && r.health > 0 && r.tracking !== null;
                   }).length;
-                  const complete = arr.length > 0 && answered === arr.length;
+                  const doneCount = arr.filter((a) => isAreaDone(responses[a.question_id])).length;
+                  const complete = arr.length > 0 && doneCount === arr.length;
+                  void answered;
                   const active = c.id === activeChild?.id;
                   // Selection-mode only: show "picked" tint on non-active chips already selected
                   const selectedInSelMode =
@@ -2014,16 +2174,17 @@ function HealthCheckShell({
                       key={c.id}
                       onClick={() => selectChild(c)}
                       disabled={disabledForPick}
+                      className={FOCUS_RING}
+                      aria-current={active ? "step" : undefined}
                       style={{
+                        minHeight: 44,
                         padding: "6px 14px",
-                        borderRadius: 20,
-                        border: `1.5px solid color-mix(in srgb, ${
-                          active
-                            ? systemColor
-                            : selectedInSelMode
+                        borderRadius: 22,
+                        border: `1.5px solid ${
+                          active || selectedInSelMode
                             ? systemColor
                             : complete
-                            ? `${T.tealBright} 37.6%, transparent)`
+                            ? `color-mix(in srgb, ${T.tealBright} 37.6%, transparent)`
                             : "color-mix(in srgb, var(--mm-ink) 10.0%, transparent)"
                         }`,
                         background: active
@@ -2031,11 +2192,7 @@ function HealthCheckShell({
                           : complete
                           ? `color-mix(in srgb, ${T.tealBright} 6.3%, transparent)`
                           : T.offWhite,
-                        color: active
-                          ? systemColor
-                          : complete
-                          ? T.teal
-                          : T.ink,
+                        color: T.ink,
                         fontSize: 12,
                         fontWeight: active ? 700 : 500,
                         cursor: disabledForPick ? "not-allowed" : "pointer",
@@ -2049,13 +2206,14 @@ function HealthCheckShell({
                       {c.name}
                       {(!inSelectionMode || tier !== "starter") && (
                         <span
+                          aria-label={complete ? "complete" : `${doneCount} of ${arr.length} done`}
                           style={{
                             fontSize: 11,
                             fontWeight: 700,
-                            color: complete ? T.teal : active ? systemColor : T.mid,
+                            color: complete ? T.teal : T.mid,
                           }}
                         >
-                          {answered}/{arr.length}
+                          {complete ? "\u2713" : `${doneCount}/${arr.length}`}
                         </span>
                       )}
                     </button>
@@ -2172,6 +2330,18 @@ function HealthCheckShell({
                 </Link>
               </div>
             </div>
+          ) : viewMode === "focus" ? (
+            <FocusMode
+              steps={steps}
+              index={safeFocusIdx}
+              onIndexChange={setFocusIdx}
+              responses={responses}
+              healthLabels={HEALTH_LABELS}
+              trackingLabels={TRACKING_LABELS}
+              onHealth={setHealth}
+              onTracking={setTracking}
+              isMobile={isMobile}
+            />
           ) : (
             <>
               {activeAreas.map((area) => {
