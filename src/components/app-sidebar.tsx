@@ -163,7 +163,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
   return (
     <TooltipProvider delayDuration={150}>
       <aside
-        className="flex h-screen flex-col text-white transition-all duration-200"
+        className="flex h-full max-h-dvh flex-col overflow-hidden text-white transition-all duration-200"
         style={{
           backgroundColor: "var(--mm-abyss)",
           width: collapsed ? 64 : 240,
@@ -182,7 +182,7 @@ export function AppSidebar({ collapsed }: { collapsed: boolean }) {
         </div>
 
 
-        <nav className="flex-1 overflow-y-auto py-4">
+        <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-4">
           {sections.map((section) => {
             const isOpen = openSections[section.label];
             return (

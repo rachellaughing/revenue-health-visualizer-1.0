@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -36,13 +37,7 @@ const T = {
   mid: "var(--mm-mid)",
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
-  sys: {
-    POS: "var(--mm-sys-positioning)",
-    AUTH: "var(--mm-sys-authority)",
-    CONV: "var(--mm-ember)",
-    LFC: "var(--mm-sys-lifecycle)",
-    VIS: "var(--mm-sys-visibility)",
-  } as Record<string, string>,
+  sys: SYSTEM_COLOR as Record<string, string>,
 };
 
 function healthColor(score: number) {
@@ -1555,7 +1550,7 @@ function RelationshipPanel({
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {relationships.map((r) => {
-          const color = T.sys[r.parentCode] ?? r.parentColorHex;
+          const color = getSystemColor(r.parentCode);
           return (
             <div
               key={r.parentCode}

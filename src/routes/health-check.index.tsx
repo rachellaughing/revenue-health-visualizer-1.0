@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -131,7 +132,7 @@ function SelectionBreadcrumb({
                   width: 7,
                   height: 7,
                   borderRadius: "50%",
-                  background: `#${p.color_hex}`,
+                  background: getSystemColor(p.code ?? p.name),
                   marginLeft: i === 0 ? 0 : -2.5,
                   border: `1.5px solid ${sand}`,
                 }}
@@ -190,7 +191,7 @@ function SelectionBreadcrumb({
             </Link>
           </div>
           {parents.map((p) => {
-            const color = `#${p.color_hex}`;
+            const color = getSystemColor(p.code ?? p.name);
             const list = childrenByParent.get(p.id) ?? [];
             const shown =
               tier === "starter" ? list.filter((c) => selectedSet.has(c.code)) : list;
@@ -827,7 +828,7 @@ function CompletedLanding({
 
   const [activeParentId, setActiveParentId] = useState<string>(data.parents[0]?.id ?? "");
   const activeParent = data.parents.find((p) => p.id === activeParentId) ?? data.parents[0];
-  const systemColor = activeParent?.color_hex ? `#${activeParent.color_hex}` : T.teal;
+  const systemColor = getSystemColor(activeParent?.code ?? activeParent?.name);
 
   async function handleStart() {
     setStarting(true);
@@ -886,7 +887,7 @@ function CompletedLanding({
         }}
       >
         {data.parents.map((p) => {
-          const color = `#${p.color_hex}`;
+          const color = getSystemColor(p.code ?? p.name);
           const active = activeParentId === p.id;
           return (
             <button
@@ -955,7 +956,7 @@ function CompletedLanding({
           }}
         >
           {data.parents.map((p) => {
-            const color = `#${p.color_hex}`;
+            const color = getSystemColor(p.code ?? p.name);
             const active = activeParentId === p.id;
             return (
               <button
@@ -1511,7 +1512,7 @@ function HealthCheckShell({
       activeChildren[0] ??
       null;
   const activeAreas = activeChild ? areasByChild.get(activeChild.id) ?? [] : [];
-  const systemColor = activeParent?.color_hex ? `#${activeParent.color_hex}` : T.teal;
+  const systemColor = getSystemColor(activeParent?.code ?? activeParent?.name);
 
   const childComplete =
     activeChild &&
@@ -1575,7 +1576,8 @@ function HealthCheckShell({
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100dvh",
+        height: "100%"
+        ,minHeight: 0,
         background: T.paper,
         fontFamily: "Inter, sans-serif",
       }}
@@ -1653,7 +1655,7 @@ function HealthCheckShell({
             }, 0);
             const pct = totalAreas ? Math.round((doneAreas / totalAreas) * 100) : 0;
             const isActiveParent = p.id === activeParent?.id;
-            const color = `#${p.color_hex}`;
+            const color = getSystemColor(p.code ?? p.name);
             return (
               <button
                 key={p.id}
@@ -1764,7 +1766,7 @@ function HealthCheckShell({
             }, 0);
             const pct = totalAreas ? Math.round((doneAreas / totalAreas) * 100) : 0;
             const isActiveParent = p.id === activeParent?.id;
-            const color = `#${p.color_hex}`;
+            const color = getSystemColor(p.code ?? p.name);
 
             return (
               <div key={p.id}>

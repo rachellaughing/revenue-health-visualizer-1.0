@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import type { ParentSystem, ChildSystem } from "@/lib/healthcheck.functions";
 
 // Brand tokens (kept local to avoid coupling)
@@ -15,13 +16,6 @@ const C = {
 };
 
 // Match the CSS variables set in styles.css.
-const SYSTEM_COLORS: Record<string, string> = {
-  Positioning: "var(--mm-sys-positioning)",
-  Authority: "var(--mm-sys-authority)",
-  Conversion: "var(--mm-sys-conversion)",
-  Lifecycle: "var(--mm-sys-lifecycle)",
-  Visibility: "var(--mm-sys-visibility)",
-};
 
 const ORDERED_SYSTEM_NAMES = [
   "Positioning",
@@ -117,7 +111,7 @@ export function FrameworkExplainer({
   const totalEvaluationAreas = totalSelected * 4;
 
   const dotColors = sortedParents.map(
-    (p) => SYSTEM_COLORS[p.name] ?? `#${p.color_hex}`,
+    (p) => getSystemColor(p.code ?? p.name),
   );
 
   return (
@@ -299,7 +293,7 @@ export function FrameworkExplainer({
 
           {/* Per-system read-only grid */}
           {sortedParents.map((p) => {
-            const color = SYSTEM_COLORS[p.name] ?? `#${p.color_hex}`;
+            const color = getSystemColor(p.code ?? p.name);
             const list = childrenByParent.get(p.id) ?? [];
             const selectedInParent = list.filter((c) =>
               effectiveSelected.has(c.code),

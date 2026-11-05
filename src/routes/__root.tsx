@@ -202,7 +202,7 @@ function AuthGate() {
   };
 
   return (
-    <div className="flex h-screen w-full" style={{ backgroundColor: "var(--mm-paper)" }}>
+    <div className="flex h-dvh w-full overflow-hidden" style={{ backgroundColor: "var(--mm-paper)" }}>
       {/* Desktop: inline sidebar */}
       {!isMobile && <AppSidebar collapsed={collapsed} />}
 
@@ -239,14 +239,14 @@ function AuthGate() {
         </>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <TopBar
           onToggleSidebar={handleToggle}
           firstName={viewerQ.data?.firstName ?? null}
           email={user?.email ?? null}
         />
         <main
-          className="flex-1 overflow-y-auto p-4 md:p-8"
+          className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8"
           style={
             isMobile
               ? { paddingBottom: "calc(56px + env(safe-area-inset-bottom) + 16px)" }

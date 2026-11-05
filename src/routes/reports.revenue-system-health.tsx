@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -41,13 +42,7 @@ const T = {
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
   danger: "var(--mm-danger)",
-  sys: {
-    POS: "var(--mm-sys-positioning)",
-    AUTH: "var(--mm-sys-authority)",
-    CONV: "var(--mm-ember)",
-    LFC: "var(--mm-sys-lifecycle)",
-    VIS: "var(--mm-sys-visibility)",
-  } as Record<string, string>,
+  sys: SYSTEM_COLOR as Record<string, string>,
 };
 
 // Deterministic illustrative scores for blurred child rows
@@ -335,7 +330,7 @@ function SystemSection({
   const [open, setOpen] = useState(defaultOpen);
   const isStarter = tier === "starter";
   const isDiagnostic = tier === "diagnostic";
-  const systemColor = T.sys[system.code] ?? system.color_hex;
+  const systemColor = getSystemColor(system.code);
   const parentNotAssessed = system.severity === "not_assessed";
   const sev = parentNotAssessed ? NOT_ASSESSED : severity(system.healthScore);
   const visGap = Math.round(system.healthScore - system.trackingScore);
@@ -1229,7 +1224,7 @@ function AttentionShortlist({
           .map((c) => ({
             ...c,
             systemName: s.name,
-            systemColor: T.sys[s.code] ?? s.color_hex,
+            systemColor: getSystemColor(s.code),
           })),
       ),
     [systems],

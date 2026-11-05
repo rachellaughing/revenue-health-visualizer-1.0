@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -298,7 +299,7 @@ function Block({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function OpportunityCard({ card, isQuickWin }: { card: FeaturedCard; isQuickWin: boolean }) {
-  const color = card.parentColorHex || T.teal;
+  const color = getSystemColor(card.parentCode);
   const affectingLabel = isQuickWin
     ? QUESTION_LABELS.affectingQuickWin
     : QUESTION_LABELS.affectingImpact;
@@ -457,7 +458,7 @@ function OtherOpportunities({ groups }: { groups: OtherOpportunityGroup[] }) {
                   width: 8,
                   height: 8,
                   borderRadius: "50%",
-                  background: g.parentColorHex,
+                  background: getSystemColor(g.parentCode),
                 }}
               />
               <span style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>
@@ -604,7 +605,7 @@ function LockedSection({
                   width: 7,
                   height: 7,
                   borderRadius: "50%",
-                  background: t.parentColorHex,
+                  background: getSystemColor(t.parentCode),
                 }}
               />
               {t.parentName}
@@ -648,7 +649,7 @@ function LockedSection({
                   width: 7,
                   height: 7,
                   borderRadius: "50%",
-                  background: s.parentColorHex,
+                  background: getSystemColor(s.parentCode),
                 }}
               />
               {s.parentName}

@@ -1,3 +1,4 @@
+import { getSystemColor } from "@/lib/system-colors";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -1266,7 +1267,7 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
           name: r.child.name,
           parentCode: r.parent?.code ?? "",
           parentName: r.parent?.name ?? "",
-          parentColorHex: r.parent?.color_hex ?? "#888880",
+          parentColorHex: getSystemColor(r.parent?.code),
           badgeKey,
           whatWeSee: copy?.whatWeSee ?? r.coreSymptom,
           whyItMatters: copy?.whyItMatters ?? r.likelyRootCause,
@@ -1287,7 +1288,7 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
         groupMap.set(p.id, {
           parentCode: p.code,
           parentName: p.name,
-          parentColorHex: p.color_hex ?? "#888880",
+          parentColorHex: getSystemColor(p.code),
           items: [],
         });
       }
@@ -1320,7 +1321,7 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
             name: c.name,
             parentCode: p?.code ?? "",
             parentName: p?.name ?? "",
-            parentColorHex: p?.color_hex ?? "#888880",
+            parentColorHex: getSystemColor(p?.code),
             governs: c.customer_facing_description ?? "",
           });
           lockedCounts.set(c.parent_system_id, (lockedCounts.get(c.parent_system_id) ?? 0) + 1);
@@ -1332,7 +1333,7 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
             .map((p) => ({
               parentCode: p.code,
               parentName: p.name,
-              parentColorHex: p.color_hex ?? "#888880",
+              parentColorHex: getSystemColor(p.code),
               count: lockedCounts.get(p.id) ?? 0,
             }))
         : [];
@@ -1532,7 +1533,7 @@ export const getRevenueAtRisk = createServerFn({ method: "POST" })
           name: c.name,
           parentCode: parent?.code ?? "",
           parentName: parent?.name ?? "",
-          parentColorHex: parent?.color_hex ?? "#888880",
+          parentColorHex: getSystemColor(parent?.code),
           healthScore,
           trackingScore,
           visibilityGap,
@@ -1880,7 +1881,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
             id: p.id,
             code: p.code,
             name: p.name,
-            colorHex: p.color_hex,
+            colorHex: getSystemColor(p.code),
             healthScore,
             trackingScore,
             severity: severityFor(healthScore),
@@ -2032,7 +2033,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
 
       const parentMetaByCode = new Map<string, { name: string; color: string }>();
       for (const p of parentsRaw) {
-        parentMetaByCode.set(p.code, { name: p.name, color: p.color_hex ?? "#888880" });
+        parentMetaByCode.set(p.code, { name: p.name, color: getSystemColor(p.code) });
       }
 
       function buildRelationships(
@@ -2059,7 +2060,7 @@ export const getMatrixMap = createServerFn({ method: "POST" })
           out.push({
             parentCode: code,
             parentName: meta?.name ?? code,
-            parentColorHex: meta?.color ?? "#888880",
+            parentColorHex: meta?.color ?? getSystemColor(null),
             direction,
             viaUpstream: [...entry.up].sort(),
             viaDownstream: [...entry.down].sort(),
@@ -2623,7 +2624,7 @@ export const getTeamAlignment = createServerFn({ method: "POST" })
     }
 
     const systems: AlignmentSystem[] = parents.map((p: any) => {
-      const color = `#${p.color_hex}`;
+      const color = getSystemColor(p.code ?? p.name);
       const name = aShortName(p.name);
       const useReal = state === "ready" && aggByParent.has(p.id);
 
@@ -2692,7 +2693,7 @@ export const getTeamAlignment = createServerFn({ method: "POST" })
         rationale: r.rationale ?? "",
         effortLevel: r.effort_level ?? null,
         timeframe: r.timeframe ?? null,
-        systemColor: p ? `#${p.color_hex}` : "#888880",
+        systemColor: getSystemColor(p?.code ?? p?.name),
         systemName: p ? aShortName(p.name) : "",
       };
     });
@@ -2894,7 +2895,7 @@ export const getFounderDependency = createServerFn({ method: "POST" })
         return {
           code: p.code,
           name: p.name,
-          color: `#${p.color_hex}`,
+          color: getSystemColor(p.code),
           type: (row?.dependency_type ?? "healthy") as FDSystem["type"],
           level: Math.round(Number(row?.dependency_level ?? 0)),
           handoffReadiness: row?.handoff_readiness ?? "",
@@ -2907,7 +2908,7 @@ export const getFounderDependency = createServerFn({ method: "POST" })
         return {
           code: p.code,
           name: p.name,
-          color: `#${p.color_hex}`,
+          color: getSystemColor(p.code),
           type: ill.type,
           level: ill.level,
           handoffReadiness: ill.handoffReadiness,
@@ -3031,7 +3032,7 @@ export const getShadowSystems = createServerFn({ method: "POST" })
         id: r.id,
         name: r.process_name ?? "",
         parentSystem: p?.name ?? "",
-        parentColor: p ? `#${p.color_hex}` : "#888880",
+        parentColor: getSystemColor(p?.name),
         type: "informal_process",
         keyPerson: "Team member on file",
         compensatesFor: p?.name ?? "",
@@ -3084,9 +3085,6 @@ export type RoadmapData = {
   items: RoadmapItem[];
 };
 
-const PARENT_COLOR_BY_CODE: Record<string, string> = {
-  POS: "#3B82F6", AUTH: "#10B981", CONV: "#F05223", LFC: "#8B5CF6", VIS: "#F59E0B",
-};
 
 // Illustrative items shown when no real assessment data exists
 const ILLUSTRATIVE_CODES: { code: string; name: string; parent: string; parentCode: string; healthScore: number }[] = [
@@ -3207,7 +3205,7 @@ export const getRoadmap = createServerFn({ method: "POST" })
           name: child.name,
           parent: parent.name,
           parentCode: parent.code,
-          color: PARENT_COLOR_BY_CODE[parent.code] ?? `#${parent.color_hex}`,
+          color: getSystemColor(parent.code),
           healthScore: Math.round(health),
           effort: effortFor(health),
           horizon: horizonFor(health, tracking),
@@ -3236,7 +3234,7 @@ export const getRoadmap = createServerFn({ method: "POST" })
           name: ill.name,
           parent: ill.parent,
           parentCode: ill.parentCode,
-          color: PARENT_COLOR_BY_CODE[ill.parentCode],
+          color: getSystemColor(ill.parentCode),
           healthScore: ill.healthScore,
           effort: effortFor(ill.healthScore),
           horizon: fallbackHorizon[ill.code] ?? "30_days",

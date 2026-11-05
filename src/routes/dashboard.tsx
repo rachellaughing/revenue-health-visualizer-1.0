@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -98,13 +99,6 @@ function DashboardPage() {
 
 /* ─────────────────────────  NEW USER  ───────────────────────── */
 
-const SYSTEM_COLORS: Record<string, string> = {
-  Positioning: "var(--mm-sys-positioning)",
-  Authority: "var(--mm-sys-authority)",
-  Conversion: "var(--mm-sys-conversion)",
-  Lifecycle: "var(--mm-sys-lifecycle)",
-  Visibility: "var(--mm-sys-visibility)",
-};
 const ORDERED_SYSTEMS = [
   "Positioning",
   "Authority",
@@ -405,7 +399,7 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
 
       <div className="space-y-5">
         {parents.map((p) => {
-          const color = SYSTEM_COLORS[p.name] ?? `#${p.color_hex}`;
+          const color = getSystemColor(p.code ?? p.name);
           const kids = childrenByParent.get(p.id) ?? [];
           const chosen = picks[p.id] ?? [];
           const full = chosen.length >= FREE_LIMIT;
@@ -534,7 +528,7 @@ function FullAccessCard({ data }: { data: DashboardData }) {
 
       <div className="space-y-4">
         {parents.map((p) => {
-          const color = SYSTEM_COLORS[p.name] ?? `#${p.color_hex}`;
+          const color = getSystemColor(p.code ?? p.name);
           const kids = childrenByParent.get(p.id) ?? [];
           return (
             <div key={p.id}>
@@ -746,14 +740,6 @@ function ReturningView({ data }: { data: DashboardData }) {
     queryFn: () => fetchSummary({ data: {} }),
   });
 
-  const SYS_COLOR: Record<string, string> = {
-    POS: "var(--mm-sys-positioning)",
-    AUTH: "var(--mm-sys-authority)",
-    CONV: "var(--mm-sys-conversion)",
-    LFC: "var(--mm-sys-lifecycle)",
-    VIS: "var(--mm-sys-visibility)",
-  };
-
   const hasSummary = summary && !("error" in summary);
   const systems = hasSummary ? (summary as any).systems as Array<any> : [];
   const overall = hasSummary ? (summary as any).overallScore as number : 0;
@@ -796,7 +782,7 @@ function ReturningView({ data }: { data: DashboardData }) {
         </div>
         <div className="grid gap-x-7 gap-y-2.5 md:grid-cols-2">
           {systems.map((sys) => {
-            const color = SYS_COLOR[sys.code] || "var(--mm-teal-bright)";
+            const color = getSystemColor(sys.code);
             const assessed = sys.assessed > 0;
             const val = assessed ? Math.round(sys.healthScore) : 0;
             return (
@@ -832,7 +818,7 @@ function ReturningView({ data }: { data: DashboardData }) {
             title={weakest.name}
             value={`${Math.round(weakest.healthScore)} / 100`}
             sub="This system shows the largest gap. Prioritise it in your roadmap."
-            color={SYS_COLOR[weakest.code] || "var(--mm-ember)"}
+            color={getSystemColor(weakest.code)}
             cta="View System Report"
             href="/reports/revenue-system-health"
           />

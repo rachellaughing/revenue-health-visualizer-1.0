@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -24,7 +25,7 @@ const T = {
   mid: "var(--mm-mid)",
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
-  sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" } as Record<string, string>,
+  sys: SYSTEM_COLOR as Record<string, string>,
   risk: { critical: "var(--mm-danger)", high: "var(--mm-sys-positioning)", moderate: "var(--mm-sand)", low: "var(--mm-status-success)" },
 };
 
@@ -360,7 +361,7 @@ function RiskCard({
   onToggle: () => void;
   isLocked: boolean;
 }) {
-  const color = T.sys[item.parentCode] ?? item.parentColorHex;
+  const color = getSystemColor(item.parentCode);
   const exposure = calcExposure(item, company);
   const risk = riskLevel(item.healthScore, item.visibilityGap);
 

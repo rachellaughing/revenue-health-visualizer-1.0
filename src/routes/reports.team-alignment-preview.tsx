@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useState } from "react";
 import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
 import {
@@ -32,7 +33,7 @@ const ILLUSTRATIVE_SYSTEMS: AlignmentSystem[] = [
     narrative: null,
   },
   {
-    code: "CONV", name: "Conversion", color: "var(--mm-ember)",
+    code: "CONV", name: "Conversion", color: getSystemColor("CONV"),
     founderScore: 55, teamAvg: 74, gap: -19, direction: "team_high", status: "significant_gap",
     clusters: [{ label: "Leadership", score: 60 }, { label: "Sales", score: 79 }, { label: "Marketing", score: 68 }],
     narrative: null,

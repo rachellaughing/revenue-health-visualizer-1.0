@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -29,13 +30,7 @@ const T = {
   ink: "var(--mm-ink)",
   white: "var(--mm-white)",
   danger: "var(--mm-danger)",
-  sys: {
-    POS: "var(--mm-sys-positioning)",
-    AUTH: "var(--mm-sys-authority)",
-    CONV: "var(--mm-ember)",
-    LFC: "var(--mm-sys-lifecycle)",
-    VIS: "var(--mm-sys-visibility)",
-  } as Record<string, string>,
+  sys: SYSTEM_COLOR as Record<string, string>,
 };
 
 // Deterministic illustrative scores per parent code (for blurred rows)
@@ -770,7 +765,7 @@ function ReportBody({
             </div>
 
             {visibleSystems.map((sys, i) => {
-              const sysColor = T.sys[sys.code] ?? sys.color_hex;
+              const sysColor = getSystemColor(sys.code);
               return (
                 <div
                   key={sys.id}
@@ -1076,7 +1071,7 @@ function ReportBody({
 
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {visibleSystems.map((sys, i) => {
-                  const sysColor = T.sys[sys.code] ?? sys.color_hex;
+                  const sysColor = getSystemColor(sys.code);
                   return (
                     <div key={sys.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <div style={{ textAlign: "center" }}>

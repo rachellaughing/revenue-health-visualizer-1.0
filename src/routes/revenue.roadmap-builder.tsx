@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -20,7 +21,7 @@ export const T = {
   abyss: "var(--mm-abyss)", paper: "var(--mm-paper)", offWhite: "var(--mm-off-white)",
   ember: "var(--mm-ember)", teal: "var(--mm-teal)", tealBright: "var(--mm-teal-bright)",
   mid: "var(--mm-mid)", ink: "var(--mm-ink)", white: "var(--mm-white)",
-  sys: { POS: "var(--mm-sys-positioning)", AUTH: "var(--mm-sys-authority)", CONV: "var(--mm-ember)", LFC: "var(--mm-sys-lifecycle)", VIS: "var(--mm-sys-visibility)" },
+  sys: SYSTEM_COLOR as Record<string, string>,
 };
 
 export const MAX_TASKS = 3;

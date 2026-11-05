@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useState } from "react";
 import type { FDSystem, FDProcess } from "@/lib/report.functions";
 import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/reports/founder-dependency-preview")({
 
 // Hardcoded illustrative sample — not any real user's data.
 const ILLUSTRATIVE_SYSTEMS: FDSystem[] = [
-  { code: "CONV", name: "Conversion", color: "var(--mm-ember)", type: "dangerous", level: 82, handoffReadiness: "Low", narrative: null },
+  { code: "CONV", name: "Conversion", color: getSystemColor("CONV"), type: "dangerous", level: 82, handoffReadiness: "Low", narrative: null },
   { code: "LFC", name: "Lifecycle", color: "var(--mm-sys-lifecycle)", type: "dangerous", level: 64, handoffReadiness: "Low", narrative: null },
   { code: "VIS", name: "Visibility", color: "var(--mm-sys-visibility)", type: "mixed", level: 48, handoffReadiness: "Moderate", narrative: null },
   { code: "POS", name: "Positioning", color: "var(--mm-sys-positioning)", type: "healthy", level: 30, handoffReadiness: "High", narrative: null },
