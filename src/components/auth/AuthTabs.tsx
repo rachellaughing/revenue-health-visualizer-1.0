@@ -10,19 +10,17 @@ export function AuthTabs({
   return (
     <div className="mb-6">
       <h1
-        className="text-5xl mb-2"
-        style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
+        className="mb-2 font-display text-5xl text-[var(--mm-text)]"
       >
         Welcome
       </h1>
-      <p className="text-sm mb-6" style={{ color: "var(--mm-mid)" }}>
+      <p className="mb-6 text-sm text-[var(--mm-text-muted)]">
         Sign in to continue, or create your account.
       </p>
       <div
         role="tablist"
         aria-label="Authentication"
-        className="grid grid-cols-2 gap-2 p-1 rounded-md"
-        style={{ backgroundColor: "var(--mm-off-white)", border: "1px solid var(--mm-hairline)" }}
+        className="grid grid-cols-2 gap-2 rounded-md border border-[var(--mm-border-subtle)] bg-[var(--mm-surface-sunken)] p-1"
       >
         <TabButton active={active === "signin"} onClick={() => onChange("signin")}>
           Sign in
@@ -50,11 +48,7 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className="rounded-md px-4 py-2 text-sm font-semibold transition-colors"
-      style={{
-        backgroundColor: active ? "var(--mm-abyss)" : "transparent",
-        color: active ? "var(--mm-white)" : "var(--mm-ink)",
-      }}
+      className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${active ? "bg-[var(--mm-abyss)] text-[var(--mm-on-dark)]" : "bg-transparent text-[var(--mm-text)]"}`}
     >
       {children}
     </button>
