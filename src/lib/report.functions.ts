@@ -274,6 +274,7 @@ function buildNarrativePrompt(args: {
   return `You are writing an executive summary for a Revenue Health report.
 Use ONLY the data provided below. Do not reference anything outside it.
 Do not make up facts. Do not use generic language.
+Use US English spelling (e.g. organize, behavior, prioritize, program, judgment).
 
 Company: ${args.companyName} · ${args.annualRevenue} · ${args.fundingStage}
 Overall score: ${args.overallScore}/100
@@ -924,6 +925,7 @@ Other systems it affects: ${i.impacts.length ? i.impacts.join(", ") : "none reco
 Use ONLY the data provided below. Do not invent facts. Be direct and specific. No generic filler,
 no framework jargon, no consulting cliches. Write so a founder could bring it to a meeting without
 translating it first.
+Use US English spelling (e.g. organize, behavior, prioritize, program, judgment).
 
 Never describe anything as "low effort", "easy", "quick to implement" or imply an effort/complexity
 estimate — we do not measure effort.
