@@ -17,7 +17,16 @@ import {
 } from "@/components/settings/PasswordRequirements";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — Revenue Health Visualizer" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sign in — Revenue Health Visualizer™" },
+      { name: "description", content: "Sign in or create your account to run your Revenue Health Check." },
+      { property: "og:title", content: "Sign in — Revenue Health Visualizer™" },
+      { property: "og:description", content: "Sign in or create your account to run your Revenue Health Check." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   validateSearch: (
     search: Record<string, unknown>,
   ): { verified?: true; tab?: "signin" | "signup" } => ({
@@ -68,11 +77,7 @@ function SignInForm() {
   return (
     <>
       {verified && (
-        <div
-          className="mb-6 rounded-md px-4 py-3 text-sm"
-          style={{ backgroundColor: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))", color: "var(--mm-status-success)", border: "1px solid color-mix(in srgb, var(--mm-status-success) 30%, transparent)" }}
-          role="status"
-        >
+        <div className="mm-notice--success mb-6" role="status">
           Email verified — sign in to continue.
         </div>
       )}
@@ -83,18 +88,16 @@ function SignInForm() {
           <button
             type="button"
             onClick={() => setForgotOpen(true)}
-            className="text-sm font-medium hover:underline"
-            style={{ color: "var(--mm-eyebrow)" }}
+            className="mm-link-eyebrow font-medium"
           >
             Forgot password?
           </button>
         </div>
-        {error && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{error}</p>}
+        {error && <p className="mm-text-error">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60"
-          style={{ backgroundColor: "var(--mm-ember)" }}
+          className="mm-btn-block"
         >
           {loading ? "Signing in…" : "Sign in"}
         </button>
@@ -198,26 +201,22 @@ function SignUpForm() {
   if (submitted) {
     return (
       <div>
-        <h2
-          className="text-3xl mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
-        >
+        <h2 className="mm-auth-title mm-auth-title--sm">
           Check your email
         </h2>
-        <p className="text-sm mb-6" style={{ color: "var(--mm-mid)" }}>
+        <p className="mm-auth-lede mb-6">
           We sent a verification link to{" "}
-          <strong style={{ color: "var(--mm-ink)" }}>{email}</strong>. Click the link to activate
+          <strong className="mm-text">{email}</strong>. Click the link to activate
           your account, then sign in to continue.
         </p>
-        <p className="text-xs mb-8" style={{ color: "var(--mm-mid)" }}>
+        <p className="mm-auth-lede text-xs mb-8">
           Didn't get it? Check your spam folder, or resend below.
         </p>
         <button
           type="button"
           onClick={onResend}
           disabled={resendState !== "idle"}
-          className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60"
-          style={{ backgroundColor: "var(--mm-ember)" }}
+          className="mm-btn-block"
         >
           {resendState === "sending"
             ? "Sending…"
@@ -226,7 +225,7 @@ function SignUpForm() {
               : "Resend verification email"}
         </button>
         {error && (
-          <p className="text-sm mt-3" style={{ color: "var(--mm-eyebrow)" }}>
+          <p className="mm-text-error mt-3">
             {error}
           </p>
         )}
@@ -242,11 +241,9 @@ function SignUpForm() {
       </div>
       <Field label="Email" type="email" value={email} onChange={setEmail} required />
 
-      <label className="block">
-        <span className="block text-sm font-medium mb-1" style={{ color: "var(--mm-ink)" }}>
-          Password
-        </span>
-        <div className="relative">
+      <label className="mm-field">
+        <span className="mm-field__label">Password</span>
+        <div className="mm-input-wrap">
           <input
             type={showPw ? "text" : "password"}
             value={password}
@@ -256,20 +253,13 @@ function SignUpForm() {
             }}
             onBlur={() => setPwBlurInvalid(password.length > 0 && !allRulesMet(password))}
             required
-            className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-            style={{
-              backgroundColor: "var(--mm-off-white)",
-              borderColor: pwBlurInvalid ? "var(--mm-danger)" : "var(--mm-hairline)",
-              color: "var(--mm-ink)",
-              paddingRight: 40,
-            }}
+            className={`mm-input mm-input--pw${pwBlurInvalid ? " mm-input--invalid" : ""}`}
           />
           <button
             type="button"
             onClick={() => setShowPw((s) => !s)}
             aria-label={showPw ? "Hide password" : "Show password"}
-            className="absolute inset-y-0 right-0 flex items-center px-3"
-            style={{ color: "var(--mm-mid)" }}
+            className="mm-input-toggle"
           >
             {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -283,15 +273,11 @@ function SignUpForm() {
         value={businessName}
         onChange={setBusinessName}
       />
-      {error && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{error}</p>}
+      {error && <p className="mm-text-error">{error}</p>}
       <button
         type="submit"
         disabled={!canSubmit}
-        className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60"
-        style={{
-          backgroundColor: "var(--mm-ember)",
-          cursor: canSubmit ? "pointer" : "not-allowed",
-        }}
+        className="mm-btn-block"
       >
         {loading ? "Creating account…" : "Create account"}
       </button>
@@ -341,18 +327,12 @@ function ForgotPasswordDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent style={{ backgroundColor: "var(--mm-paper)" }}>
+      <DialogContent className="mm-dialog-surface">
         <DialogHeader>
-          <DialogTitle
-            style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontSize: 28,
-              color: "var(--mm-ink)",
-            }}
-          >
+          <DialogTitle className="mm-dialog-title">
             Reset your password
           </DialogTitle>
-          <DialogDescription style={{ color: "var(--mm-mid)" }}>
+          <DialogDescription className="mm-muted">
             {sent
               ? `If an account exists for ${email}, we've sent a password reset link. Check your inbox.`
               : "Enter your email and we'll send you a link to reset your password."}
@@ -361,12 +341,11 @@ function ForgotPasswordDialog({
         {!sent && (
           <form onSubmit={handleSend} className="space-y-4">
             <Field label="Email" type="email" value={email} onChange={setEmail} required />
-            {err && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{err}</p>}
+            {err && <p className="mm-text-error">{err}</p>}
             <button
               type="submit"
               disabled={sending || !email}
-              className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60"
-              style={{ backgroundColor: "var(--mm-ember)" }}
+              className="mm-btn-block"
             >
               {sending ? "Sending…" : "Send reset link"}
             </button>
@@ -376,8 +355,7 @@ function ForgotPasswordDialog({
           <button
             type="button"
             onClick={() => handleOpenChange(false)}
-            className="w-full rounded-md px-4 py-3 text-white font-semibold"
-            style={{ backgroundColor: "var(--mm-ember)" }}
+            className="mm-btn-block"
           >
             Done
           </button>
@@ -405,31 +383,22 @@ function Field({
   const inputType = isPassword && show ? "text" : type;
 
   return (
-    <label className="block">
-      <span className="block text-sm font-medium mb-1" style={{ color: "var(--mm-ink)" }}>
-        {label}
-      </span>
-      <div className="relative">
+    <label className="mm-field">
+      <span className="mm-field__label">{label}</span>
+      <div className="mm-input-wrap">
         <input
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required={required}
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-          style={{
-            backgroundColor: "var(--mm-off-white)",
-            borderColor: "var(--mm-hairline)",
-            color: "var(--mm-ink)",
-            paddingRight: isPassword ? 40 : undefined,
-          }}
+          className={`mm-input${isPassword ? " mm-input--pw" : ""}`}
         />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShow((s) => !s)}
             aria-label={show ? "Hide password" : "Show password"}
-            className="absolute inset-y-0 right-0 flex items-center px-3"
-            style={{ color: "var(--mm-mid)" }}
+            className="mm-input-toggle"
           >
             {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
