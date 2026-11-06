@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import {
   getExecutiveSummary,
   generateReportNarrative,
@@ -455,17 +455,21 @@ function ReportBody({
   const isStarter = tier === "starter";
 
   const generate = useServerFn(generateReportNarrative);
-  const triggered = useRef(false);
-  useEffect(() => {
-    // Retry generation once per mount when there is no narrative at all, or when
-    // the server fell back to deterministic copy because generation failed.
-    if ((!narrative || narrative.isFallback) && !triggered.current) {
-      triggered.current = true;
-      generate({ data: { assessmentId: assessment.id } })
-        .then(() => onNarrativeReady())
-        .catch((e) => console.error("[narrative] generation failed", e));
-    }
-  }, [narrative, assessment.id, generate, onNarrativeReady]);
+  // Generation is attempted once by the server when the page first loads.
+  // If it failed, the user can try again explicitly; we never auto-regenerate.
+  const [retrying, setRetrying] = useState(false);
+  const [retryFailed, setRetryFailed] = useState(false);
+  const retryNarrative = () => {
+    setRetrying(true);
+    setRetryFailed(false);
+    generate({ data: { assessmentId: assessment.id } })
+      .then(() => onNarrativeReady())
+      .catch((e) => {
+        console.error("[narrative] generation failed", e);
+        setRetryFailed(true);
+      })
+      .finally(() => setRetrying(false));
+  };
 
 
 
@@ -545,6 +549,24 @@ function ReportBody({
         </div>
 
         <BlindspotCallout />
+
+        {(!narrative || narrative.isFallback) && (
+          <div role="status" className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--mm-border-subtle)] bg-[var(--mm-surface-sunken)] px-4 py-3 text-[13px] text-[var(--mm-text)]">
+            <span>
+              {retryFailed
+                ? "We still couldn't write this summary. Please try again in a few minutes."
+                : "We couldn't write the full summary yet, so you're seeing a short version based on your scores."}
+            </span>
+            <button
+              type="button"
+              onClick={retryNarrative}
+              disabled={retrying}
+              className="min-h-[44px] rounded-lg bg-[var(--mm-ember)] px-4 text-[12px] font-semibold text-[var(--mm-white)] disabled:opacity-60"
+            >
+              {retrying ? "Writing…" : "Try again"}
+            </button>
+          </div>
+        )}
 
         {/* Hero */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24, marginBottom: 32 }}>
