@@ -77,7 +77,7 @@ function SignInForm() {
   return (
     <>
       {verified && (
-        <div className="mm-notice--success mb-6" role="status">
+        <div className="mm-notice--success mm-mb-lg" role="status">
           Email verified — sign in to continue.
         </div>
       )}
@@ -204,12 +204,12 @@ function SignUpForm() {
         <h2 className="mm-auth-title mm-auth-title--sm">
           Check your email
         </h2>
-        <p className="mm-auth-lede mb-6">
+        <p className="mm-auth-lede mm-mb-lg">
           We sent a verification link to{" "}
           <strong className="mm-text">{email}</strong>. Click the link to activate
           your account, then sign in to continue.
         </p>
-        <p className="mm-auth-lede text-xs mb-8">
+        <p className="mm-auth-lede text-xs mm-mb-2xl">
           Didn't get it? Check your spam folder, or resend below.
         </p>
         <button
@@ -225,7 +225,7 @@ function SignUpForm() {
               : "Resend verification email"}
         </button>
         {error && (
-          <p className="mm-text-error mt-3">
+          <p className="mm-text-error mm-mt-sm">
             {error}
           </p>
         )}
