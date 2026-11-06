@@ -167,11 +167,7 @@ export function FrameworkExplainer({
                     const chosen = effectiveSelected.has(c.code);
                     return (
                       <div key={c.id}
-                        className={`select-none rounded-full border-[1.3px] px-3 py-1.5 text-[11.5px] ${
-                          chosen
-                            ? "border-[var(--sys-color)] bg-[var(--sys-color)] font-semibold text-[var(--mm-abyss)]"
-                            : "border-[color-mix(in_srgb,var(--mm-on-dark)_25%,transparent)] bg-transparent text-[color-mix(in_srgb,var(--mm-on-dark)_75%,transparent)]"
-                        }`}>
+                        className={`mm-chip mm-chip--static select-none ${chosen ? "mm-chip--on" : ""}`}>
                         {c.name}
                       </div>
                     );

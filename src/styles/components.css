@@ -558,15 +558,17 @@ textarea.mm-pf-input { resize: vertical; line-height: 1.6; }
 .mm-dash-count--todo { color: var(--mm-eyebrow); }
 .mm-dash-sep { border-top: 1px solid var(--mm-divider); }
 
-/* Subsystem chips: system color on the border only */
+/* Subsystem chips: included = filled with system color; not included = grey, no border */
 .mm-chip {
   border-radius: 999px; padding: 6px 12px; font-size: 11.5px; font-weight: 400; cursor: pointer;
-  background: transparent; color: var(--mm-text);
-  border: 1px solid color-mix(in srgb, var(--mm-text) 14%, transparent);
-  transition: border-color 150ms, color 150ms;
+  border: none; background: var(--mm-surface-sunken); color: var(--mm-text-muted);
+  transition: background-color 150ms, color 150ms;
 }
-.mm-chip--on { border: 1.5px solid var(--sys-color); padding: 5.5px 11.5px; font-weight: 600; }
-.mm-chip:disabled { cursor: not-allowed; border-color: var(--mm-border-subtle); color: color-mix(in srgb, var(--mm-text) 40%, transparent); }
+.mm-chip--on { background: var(--sys-color); color: var(--mm-abyss); font-weight: 600; }
+/* Light-mode Authority blue and Visibility magenta are dark fills: use white text. */
+.mm-sys--auth .mm-chip--on, .mm-sys--vis .mm-chip--on { color: var(--mm-white); }
+[data-theme="dark"] .mm-sys--auth .mm-chip--on, [data-theme="dark"] .mm-sys--vis .mm-chip--on { color: var(--mm-abyss); }
+.mm-chip:disabled { cursor: not-allowed; }
 .mm-chip--static { cursor: default; }
 .mm-chip:focus-visible { outline: 3px solid var(--mm-teal); outline-offset: 2px; }
 
