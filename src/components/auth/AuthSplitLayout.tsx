@@ -3,34 +3,16 @@ import rhLogoLight from "@/assets/rh-logo-light.svg.asset.json";
 
 export function AuthSplitLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2">
+    <div className="mm-auth-split">
       <LeftPanel />
-      <div
-        className="flex min-h-screen items-center justify-center px-4 py-12 relative"
-        style={{ backgroundColor: "var(--mm-paper)" }}
-      >
-        <div className="w-full max-w-md">
+      <div className="mm-auth-split__right">
+        <div className="mm-auth-box">
           {children}
-          <div className="mt-10 flex items-center justify-center gap-2 text-xs" style={{ color: "var(--mm-mid)" }}>
-            <a
-              href="https://marketplacemaven.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline"
-              style={{ color: "var(--mm-mid)" }}
-            >
+          <div className="mm-auth-split__credit">
+            <a href="https://marketplacemaven.com" target="_blank" rel="noopener noreferrer">
               A Marketplace Maven product
             </a>
-            <span
-              aria-hidden
-              style={{
-                display: "inline-block",
-                width: 5,
-                height: 5,
-                borderRadius: 999,
-                backgroundColor: "var(--mm-ember)",
-              }}
-            />
+            <span aria-hidden className="mm-dot-ember" />
           </div>
         </div>
       </div>
@@ -38,152 +20,55 @@ export function AuthSplitLayout({ children }: { children: ReactNode }) {
   );
 }
 
+const STATS = [
+  { n: "5", l: "Systems" },
+  { n: "50", l: "Subsystems" },
+  { n: "200", l: "Questions" },
+];
+
 function LeftPanel() {
   return (
-    <div
-      className="relative hidden lg:flex flex-col justify-between overflow-hidden px-12 py-10"
-      style={{ backgroundColor: "var(--mm-abyss)", minHeight: "100vh" }}
-    >
+    <div className="mm-auth-brand">
       <TreeBackground />
 
       {/* Top spacer */}
       <div />
 
-      {/* Center content */}
-      <div className="relative z-10 w-full" style={{ maxWidth: 420 }}>
-        <div style={{ marginBottom: 24 }}>
-          <img
-            src={rhLogoLight.url}
-            alt="Revenue Health Visualizer™"
-            style={{ width: 260, maxWidth: "100%", height: "auto", display: "block" }}
-          />
-        </div>
+      <div className="mm-auth-brand__center">
+        <img src={rhLogoLight.url} alt="Revenue Health Visualizer™" className="mm-auth-brand__logo" />
 
-        <h2
-          style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontStyle: "italic",
-            fontSize: 44,
-            lineHeight: 1.08,
-            color: "var(--mm-on-dark)",
-            margin: 0,
-            fontWeight: 400,
-          }}
-        >
+        <h2 className="mm-auth-brand__headline">
           A prompt didn't create this.
           <br />
           Neither did a quiz.
         </h2>
 
-        <p
-          style={{
-            color: "color-mix(in srgb, var(--mm-white) 72.0%, transparent)",
-            fontSize: 14,
-            lineHeight: 1.6,
-            marginTop: 22,
-          }}
-        >
+        <p className="mm-auth-brand__body">
           After years of watching the same patterns surface inside founder-led companies — the same invisible friction, the same structural gaps disguised as execution problems — this framework was built to expose what you can't see from the inside.
         </p>
 
-        <blockquote
-          style={{
-            borderLeft: "2px solid var(--mm-ember)",
-            background: "color-mix(in srgb, var(--mm-white) 4.0%, transparent)",
-            padding: "14px 18px",
-            margin: "22px 0",
-            fontFamily: "Georgia, serif",
-            fontStyle: "italic",
-            color: "var(--mm-white)",
-            fontSize: 15,
-            lineHeight: 1.55,
-          }}
-        >
+        <blockquote className="mm-auth-brand__quote">
           Like smell blindness — you don't notice what's been there all along until someone else points it out.
         </blockquote>
 
-        <p
-          style={{
-            color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)",
-            fontSize: 13,
-            fontStyle: "italic",
-            margin: 0,
-          }}
-        >
-          The methodology wasn't generated. It was built.
-        </p>
+        <p className="mm-auth-brand__aside">The methodology wasn't generated. It was built.</p>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-end",
-            gap: 18,
-            marginTop: 28,
-            paddingTop: 22,
-            borderTop: "1px solid color-mix(in srgb, var(--mm-white) 10.0%, transparent)",
-          }}
-        >
-          {[
-            { n: "5", l: "Systems" },
-            { n: "50", l: "Subsystems" },
-            { n: "200", l: "Questions" },
-          ].map((s, i) => (
-            <div key={s.l} style={{ display: "flex", alignItems: "flex-end", gap: 18 }}>
-              {i > 0 && (
-                <div
-                  style={{
-                    width: 1,
-                    height: 36,
-                    backgroundColor: "color-mix(in srgb, var(--mm-white) 15.0%, transparent)",
-                  }}
-                />
-              )}
+        <div className="mm-auth-brand__stats">
+          {STATS.map((s, i) => (
+            <div key={s.l} className="mm-auth-brand__stat">
+              {i > 0 && <div className="mm-auth-brand__stat-sep" />}
               <div>
-                <div
-                  style={{
-                    fontFamily: "'Instrument Serif', Georgia, serif",
-                    fontSize: 36,
-                    lineHeight: 1,
-                    color: "var(--mm-on-dark)",
-                  }}
-                >
-                  {s.n}
-                </div>
-                <div
-                  style={{
-                    fontSize: 10,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                    color: "color-mix(in srgb, var(--mm-white) 55.0%, transparent)",
-                    marginTop: 6,
-                  }}
-                >
-                  {s.l}
-                </div>
+                <div className="mm-auth-brand__stat-n">{s.n}</div>
+                <div className="mm-auth-brand__stat-l">{s.l}</div>
               </div>
             </div>
           ))}
         </div>
 
-        <p
-          style={{
-            color: "color-mix(in srgb, var(--mm-white) 55.0%, transparent)",
-            fontSize: 12,
-            fontStyle: "italic",
-            marginTop: 18,
-          }}
-        >
-          Start with the Snapshot — 3 subsystems, right now.
-        </p>
+        <p className="mm-auth-brand__cta">Start with the Snapshot — 3 subsystems, right now.</p>
       </div>
 
-      {/* Footer */}
-      <div
-        className="relative z-10"
-        style={{ color: "color-mix(in srgb, var(--mm-white) 35.0%, transparent)", fontSize: 11 }}
-      >
-        © 2026 Marketplace Maven. All rights reserved.
-      </div>
+      <div className="mm-auth-brand__footer">© 2026 Marketplace Maven. All rights reserved.</div>
     </div>
   );
 }
@@ -205,24 +90,15 @@ function TreeBackground() {
       viewBox={`0 0 ${w} ${h}`}
       preserveAspectRatio="xMidYMid slice"
       aria-hidden
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        opacity: 0.07,
-        pointerEvents: "none",
-      }}
+      className="mm-auth-brand__tree"
     >
-      <g fill="none" stroke="var(--mm-white)" strokeLinecap="round">
+      <g fill="none" strokeLinecap="round">
         {/* Root node */}
         <rect x={rootX - 150} y={rootY - 22} width={300} height={44} rx={22} strokeWidth={1.4} />
         <text
           x={rootX}
           y={rootY + 5}
           textAnchor="middle"
-          fill="var(--mm-white)"
-          fontFamily="Inter, sans-serif"
           fontSize={14}
           stroke="none"
         >
@@ -241,8 +117,6 @@ function TreeBackground() {
                 x={sx}
                 y={sysY + 5}
                 textAnchor="middle"
-                fill="var(--mm-white)"
-                fontFamily="Inter, sans-serif"
                 fontSize={13}
                 stroke="none"
               >
