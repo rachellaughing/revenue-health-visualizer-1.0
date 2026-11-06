@@ -1,24 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import type { ViewerContext } from "@/lib/viewer.functions";
 
-const T = {
-  abyss: "var(--mm-abyss)",
-  paper: "var(--mm-paper)",
-  offWhite: "var(--mm-off-white)",
-  ember: "var(--mm-ember)",
-  teal: "var(--mm-teal)",
-  tealBright: "var(--mm-teal-bright)",
-  mid: "var(--mm-mid)",
-  ink: "var(--mm-ink)",
-  white: "var(--mm-white)",
-};
-
 export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
   const tm = viewer.teamMember;
   if (!tm) return null;
 
   const ownerName = tm.ownerFirstName ?? "Your founder";
-  const company = tm.companyName ?? "their company";
   const completed = tm.ownStatus === "completed";
   const inProgress = tm.ownStatus === "in_progress";
 
@@ -27,87 +14,23 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100%",
-        background: T.paper,
-        padding: "48px 24px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 640 }}>
-        <div
-          style={{
-            background: T.abyss,
-            borderRadius: 16,
-            padding: "40px 36px",
-            color: "var(--mm-on-dark)",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              right: -40,
-              top: -40,
-              width: 240,
-              height: 240,
-              background: `radial-gradient(circle, color-mix(in srgb, ${T.tealBright} 9.4%, transparent), transparent 70%)`,
-            }}
-          />
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: T.tealBright,
-                letterSpacing: "0.12em",
-                marginBottom: 16,
-              }}
-            >
-              TEAM HEALTH CHECK
-            </div>
-            <h1
-              style={{
-                fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 30,
-                fontWeight: 400,
-                lineHeight: 1.2,
-                margin: "0 0 28px",
-              }}
-            >
+    <div className="mm-tm-dash">
+      <div className="mm-tm-dash__inner">
+        <div className="mm-tm-hero">
+          <div className="mm-tm-hero__glow" />
+          <div className="mm-tm-hero__content">
+            <div className="mm-tm-hero__kicker">TEAM HEALTH CHECK</div>
+            <h1 className="mm-tm-hero__title">
               Complete your Health Check to unlock the Team Alignment report
               for {ownerName}'s organization.
             </h1>
-            <Link
-              to="/health-check"
-              style={{
-                display: "inline-block",
-                background: T.ember,
-                color: "var(--mm-white)",
-                padding: "14px 28px",
-                borderRadius: 10,
-                fontSize: 14,
-                fontWeight: 700,
-                textDecoration: "none",
-              }}
-            >
+            <Link to="/health-check" className="mm-tm-hero__cta">
               {inProgress ? "Continue Health Check →" : "Start Health Check →"}
             </Link>
           </div>
-
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 12,
-            marginTop: 20,
-          }}
-        >
+        <div className="mm-tm-tiles">
           <InfoTile title="Anonymous" body="Your individual scores are never shown to the founder" />
           <InfoTile title="15–20 mins" body="Estimated time to complete" />
           <InfoTile title="Quarterly" body="You may be invited again each quarter" />
@@ -119,18 +42,9 @@ export function TeamMemberDashboard({ viewer }: { viewer: ViewerContext }) {
 
 function InfoTile({ title, body }: { title: string; body: string }) {
   return (
-    <div
-      style={{
-        background: T.offWhite,
-        border: `1px solid ${T.offWhite}`,
-        borderRadius: 10,
-        padding: "16px 14px",
-      }}
-    >
-      <div style={{ fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 4 }}>
-        {title}
-      </div>
-      <div style={{ fontSize: 11, color: T.mid, lineHeight: 1.5 }}>{body}</div>
+    <div className="mm-tm-tile">
+      <div className="mm-tm-tile__title">{title}</div>
+      <div className="mm-tm-tile__body">{body}</div>
     </div>
   );
 }
@@ -138,7 +52,7 @@ function InfoTile({ title, body }: { title: string; body: string }) {
 export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
   const tm = viewer.teamMember!;
   const ownerName = tm.ownerFirstName ?? "Your founder";
-  
+
   const submittedAt = tm.submittedAt ? new Date(tm.submittedAt) : new Date();
   const lockDate = new Date(submittedAt.getTime() + 7 * 24 * 60 * 60 * 1000);
   const lockDateStr = lockDate.toLocaleDateString("en-US", {
@@ -148,83 +62,27 @@ export function CompletedCard({ viewer }: { viewer: ViewerContext }) {
   });
 
   return (
-    <div
-      style={{
-        minHeight: "100%",
-        background: T.paper,
-        padding: "48px 24px",
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 640 }}>
-        <div
-          style={{
-            background: T.abyss,
-            borderRadius: 16,
-            padding: "40px 36px",
-            color: "var(--mm-on-dark)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              color: T.tealBright,
-              letterSpacing: "0.12em",
-              marginBottom: 16,
-            }}
-          >
-            ✓ HEALTH CHECK COMPLETE
-          </div>
-          <h1
-            style={{
-              fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 28,
-              fontWeight: 400,
-              lineHeight: 1.25,
-              margin: "0 0 20px",
-            }}
-          >
+    <div className="mm-tm-dash">
+      <div className="mm-tm-dash__inner">
+        <div className="mm-tm-hero">
+          <div className="mm-tm-hero__kicker">✓ HEALTH CHECK COMPLETE</div>
+          <h1 className="mm-tm-hero__title mm-tm-hero__title--done">
             Your responses have been added to the Team Alignment report.
           </h1>
-          <p
-            style={{
-              fontSize: 14,
-              lineHeight: 1.65,
-              color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)",
-              margin: "0 0 24px",
-            }}
-          >
+          <p className="mm-tm-hero__body">
             {ownerName} can now see where your perspective adds to the
             leadership view. Your individual responses are always kept
             anonymous.
           </p>
 
           {tm.ownerEmail && (
-            <a
-              href={`mailto:${tm.ownerEmail}`}
-              style={{
-                fontSize: 13,
-                color: T.tealBright,
-                textDecoration: "none",
-                borderBottom: `1px solid color-mix(in srgb, ${T.tealBright} 25.1%, transparent)`,
-              }}
-            >
+            <a href={`mailto:${tm.ownerEmail}`} className="mm-tm-hero__mail">
               Questions? Contact {tm.ownerEmail}
             </a>
           )}
         </div>
 
-        <p
-          style={{
-            marginTop: 18,
-            fontSize: 12,
-            color: T.mid,
-            textAlign: "center",
-            lineHeight: 1.6,
-          }}
-        >
+        <p className="mm-tm-note">
           You can return to update your answers until {lockDateStr}. After that
           your responses will be locked.
         </p>
