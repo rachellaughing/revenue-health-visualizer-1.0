@@ -40,7 +40,7 @@ function CompanyProfilePage() {
 
   if (isLoading) {
     return (
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: 40, color: "var(--mm-mid)" }}>
+      <div className="mm-cp-loading">
         Loading…
       </div>
     );
@@ -222,17 +222,14 @@ function OwnerCompanyForm() {
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto" }}>
+    <div className="mm-cp-wrap">
       <ProgressSteps steps={["Personal Profile", "Company Profile", "Done"]} current={1} />
 
       <div className="mb-7">
-        <h2
-          className="text-2xl mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
-        >
+        <h2 className="mm-cp-title">
           Tell us about your business
         </h2>
-        <p className="text-sm leading-relaxed" style={{ color: "var(--mm-mid)" }}>
+        <p className="text-sm leading-relaxed mm-muted">
           Before we diagnose the revenue system, we need to understand the environment it
           operates in. This establishes the foundational context behind every recommendation,
           risk area, and growth constraint.
@@ -481,7 +478,7 @@ function OwnerCompanyForm() {
       </SectionCard>
 
       {error && (
-        <p className="text-sm mb-4" style={{ color: "var(--mm-eyebrow)" }}>
+        <p className="text-sm mb-4 text-[var(--mm-eyebrow)]">
           {error}
         </p>
       )}
@@ -522,10 +519,7 @@ function SymptomSelector({
 
   return (
     <div>
-      <div
-        className="text-xs font-semibold mb-3"
-        style={{ color: "var(--mm-mid)", letterSpacing: "0.08em" }}
-      >
+      <div className="mm-cp-step">
         STEP 1 — SELECT THE CATEGORIES THAT APPLY
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-5">
@@ -538,31 +532,18 @@ function SymptomSelector({
               key={cat.category}
               type="button"
               onClick={() => toggleCat(cat.category)}
-              className="text-left rounded-[10px] p-3.5 transition-all relative"
-              style={{
-                background: isExpanded ? "var(--mm-abyss)" : "var(--mm-off-white)",
-                border: `1.5px solid ${isExpanded ? "var(--mm-abyss)" : "var(--mm-rule)"}`,
-                cursor: "pointer",
-              }}
+              aria-pressed={isExpanded}
+              className={`mm-cp-opt rounded-[10px] p-3.5 ${isExpanded ? "mm-cp-opt--on" : ""}`}
             >
               <div className="text-base mb-1">{meta.icon}</div>
-              <div
-                className="text-xs font-semibold leading-tight"
-                style={{ color: isExpanded ? "var(--mm-white)" : "var(--mm-ink)" }}
-              >
+              <div className="text-xs font-semibold leading-tight">
                 {cat.category}
               </div>
-              <div
-                className="text-[11px] mt-1 leading-snug"
-                style={{ color: isExpanded ? "color-mix(in srgb, var(--mm-white) 55.0%, transparent)" : "var(--mm-mid)" }}
-              >
+              <div className="mm-cp-opt__desc text-[11px] mt-1 leading-snug">
                 {meta.description}
               </div>
               {count > 0 && (
-                <div
-                  className="absolute top-2 right-2 w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                  style={{ background: "var(--mm-ember)" }}
-                >
+                <div className="mm-cp-rank absolute top-2 right-2 w-[18px] h-[18px] rounded-full text-[10px]">
                   {count}
                 </div>
               )}
@@ -573,10 +554,7 @@ function SymptomSelector({
 
       {expanded.length > 0 && (
         <div>
-          <div
-            className="text-xs font-semibold mb-3"
-            style={{ color: "var(--mm-mid)", letterSpacing: "0.08em" }}
-          >
+          <div className="mm-cp-step">
             STEP 2 — SELECT UP TO 5 (ORDER OF SELECTION = YOUR RANKING)
           </div>
           {categories
@@ -585,10 +563,7 @@ function SymptomSelector({
               const meta = CATEGORY_META[cat.category] ?? { icon: "•", description: "" };
               return (
                 <div key={cat.category} className="mb-4">
-                  <div
-                    className="text-[11px] font-bold mb-2"
-                    style={{ color: "var(--mm-link)", letterSpacing: "0.08em" }}
-                  >
+                  <div className="mm-cp-sub">
                     {meta.icon} {cat.category.toUpperCase()}
                   </div>
                   {cat.symptoms.map((sym) => {
@@ -600,35 +575,14 @@ function SymptomSelector({
                         key={sym.symptom_code}
                         type="button"
                         onClick={() => !maxReached && toggleSymptom(sym.symptom_code)}
-                        className="w-full flex items-center gap-3 px-3.5 py-2.5 mb-1.5 rounded-lg text-left transition-all"
-                        style={{
-                          background: isSelected ? "var(--mm-abyss)" : "var(--mm-off-white)",
-                          border: `1.5px solid ${isSelected ? "var(--mm-abyss)" : "var(--mm-rule)"}`,
-                          cursor: maxReached ? "not-allowed" : "pointer",
-                          opacity: maxReached ? 0.45 : 1,
-                        }}
+                        disabled={maxReached}
+                        aria-pressed={isSelected}
+                        className={`mm-cp-opt mm-cp-sym w-full flex items-center gap-3 px-3.5 py-2.5 mb-1.5 rounded-lg ${isSelected ? "mm-cp-opt--on" : ""}`}
                       >
-                        <div
-                          className="w-[22px] h-[22px] rounded-md flex items-center justify-center shrink-0"
-                          style={{
-                            background: isSelected ? "var(--mm-ember)" : "var(--mm-rule)",
-                          }}
-                        >
-                          {isSelected ? (
-                            <span className="text-[11px] text-white font-bold">{rank}</span>
-                          ) : (
-                            <span className="text-[10px]" style={{ color: "var(--mm-mid)" }}>
-                              +
-                            </span>
-                          )}
+                        <div className={`mm-cp-rank w-[22px] h-[22px] rounded-md ${isSelected ? "text-[11px]" : "mm-cp-rank--empty text-[10px]"}`}>
+                          {isSelected ? rank : "+"}
                         </div>
-                        <span
-                          className="text-[13px]"
-                          style={{
-                            fontWeight: isSelected ? 500 : 400,
-                            color: isSelected ? "var(--mm-white)" : "var(--mm-ink)",
-                          }}
-                        >
+                        <span className="text-[13px]">
                           {sym.symptom}
                         </span>
                       </button>
@@ -641,35 +595,21 @@ function SymptomSelector({
       )}
 
       {selected.length > 0 && (
-        <div
-          className="rounded-lg px-4 py-3 mt-3"
-          style={{
-            background: "color-mix(in srgb, var(--mm-teal) 7.0%, transparent)",
-            border: "1px solid color-mix(in srgb, var(--mm-teal) 20.0%, transparent)",
-          }}
-        >
-          <div
-            className="text-[11px] font-semibold mb-1.5"
-            style={{ color: "var(--mm-link)" }}
-          >
+        <div className="mm-cp-picked">
+          <div className="text-[11px] font-semibold mb-1.5 text-[var(--mm-link)]">
             {selected.length}/5 SELECTED — RANKED BY ORDER CHOSEN
           </div>
           {selected.map((code, i) => (
             <div key={code} className="flex items-center gap-2 mb-1">
-              <div
-                className="w-[18px] h-[18px] rounded shrink-0 flex items-center justify-center"
-                style={{ background: "var(--mm-ember)" }}
-              >
-                <span className="text-[10px] text-white font-bold">{i + 1}</span>
-              </div>
-              <span className="text-xs" style={{ color: "var(--mm-ink)" }}>
+              <div className="mm-cp-rank w-[18px] h-[18px] rounded text-[10px]">{i + 1}</div>
+              <span className="text-xs mm-text">
                 {lookup.get(code) ?? code}
               </span>
               <button
                 type="button"
                 onClick={() => onChange(selected.filter((c) => c !== code))}
-                className="ml-auto text-sm"
-                style={{ color: "var(--mm-mid)", background: "none", border: "none", cursor: "pointer" }}
+                aria-label="Remove"
+                className="mm-cp-x"
               >
                 ×
               </button>
@@ -707,17 +647,7 @@ function ReadOnlyField({ label, value }: { label: string; value: unknown }) {
   return (
     <Field>
       <Label>{label}</Label>
-      <div
-        style={{
-          padding: "11px 14px",
-          background: "var(--mm-off-white)",
-          borderRadius: 8,
-          fontSize: 14,
-          color: "var(--mm-ink)",
-          minHeight: 42,
-          boxSizing: "border-box",
-        }}
-      >
+      <div className="mm-cp-readonly">
         {dash(value)}
       </div>
     </Field>
@@ -818,38 +748,25 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
   }
 
   return (
-    <div style={{ maxWidth: 760, margin: "0 auto" }}>
+    <div className="mm-cp-wrap mm-cp-wrap--wide">
       <ProgressSteps steps={["Personal Profile", "Company Profile", "Done"]} current={1} />
 
       {/* ── Section 1 — Organization Profile (read-only) ── */}
-      <div
-        className="rounded-xl p-7 mb-6"
-        style={{
-          background: "var(--mm-paper)",
-          border: "1px solid var(--mm-rule)",
-          boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
-        }}
-      >
-        <div className="pb-4 mb-5" style={{ borderBottom: "1px solid var(--mm-off-white)" }}>
-          <div
-            className="text-[10px] font-bold mb-1 flex items-center gap-1.5"
-            style={{ color: "var(--mm-mid)", letterSpacing: "0.12em" }}
-          >
-            <Lock size={12} color="var(--mm-ink-soft, var(--mm-mid))" />
+      <div className="mm-section-card mm-cp-card">
+        <div className="mm-section-card__head">
+          <div className="mm-section-card__kicker">
+            <Lock size={12} aria-hidden />
             ORGANIZATION PROFILE
           </div>
-          <h3
-            className="text-[17px] m-0"
-            style={{ fontFamily: "'Instrument Serif', Georgia, serif", color: "var(--mm-ink)" }}
-          >
+          <h3 className="mm-section-card__title">
             Managed by {ownerName}
           </h3>
         </div>
 
         {ownerLoading ? (
-          <div style={{ color: "var(--mm-mid)", fontSize: 14 }}>Loading organization details…</div>
+          <div className="text-sm mm-muted">Loading organization details…</div>
         ) : !ownerCompany && !ownerProfile ? (
-          <div style={{ color: "var(--mm-mid)", fontSize: 14 }}>
+          <div className="text-sm mm-muted">
             Your team owner hasn't completed their company profile yet.
           </div>
         ) : (
@@ -895,25 +812,12 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
       </div>
 
       {/* ── Section 2 — Your Perspective (editable) ── */}
-      <div
-        className="rounded-xl p-7 mb-6"
-        style={{
-          background: "var(--mm-paper)",
-          border: "1px solid var(--mm-rule)",
-          boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
-        }}
-      >
-        <div className="pb-4 mb-5" style={{ borderBottom: "1px solid var(--mm-off-white)" }}>
-          <div
-            className="text-[10px] font-bold mb-1"
-            style={{ color: "var(--mm-mid)", letterSpacing: "0.12em" }}
-          >
+      <div className="mm-section-card mm-cp-card">
+        <div className="mm-section-card__head">
+          <div className="mm-section-card__kicker">
             YOUR PERSPECTIVE
           </div>
-          <h3
-            className="text-[17px] m-0"
-            style={{ fontFamily: "'Instrument Serif', Georgia, serif", color: "var(--mm-ink)" }}
-          >
+          <h3 className="mm-section-card__title">
             Your role and what you're seeing from your seat
           </h3>
         </div>
@@ -971,12 +875,12 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
         </FieldGroup>
 
         {error && (
-          <p className="text-sm mb-3" style={{ color: "var(--mm-eyebrow)" }}>
+          <p className="text-sm mb-3 text-[var(--mm-eyebrow)]">
             {error}
           </p>
         )}
         {saved && !error && (
-          <p className="text-sm mb-3" style={{ color: "var(--mm-link)" }}>
+          <p className="text-sm mb-3 text-[var(--mm-link)]">
             Saved.
           </p>
         )}
@@ -994,10 +898,7 @@ function TeamMemberCompanyView({ personal }: { personal: any }) {
 
 function SectionSubheading({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="text-[11px] font-bold mb-3"
-      style={{ color: "var(--mm-link)", letterSpacing: "0.08em" }}
-    >
+    <div className="mm-cp-sub mm-cp-sub--lg">
       {children?.toString().toUpperCase()}
     </div>
   );
