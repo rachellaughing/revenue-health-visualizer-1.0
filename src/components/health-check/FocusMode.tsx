@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { Area, ChildSystem, ParentSystem } from "@/lib/healthcheck.functions";
 import { getSystemColor } from "@/lib/system-colors";
 import { isAreaDone, type Step } from "@/lib/health-check-progress";
@@ -143,15 +143,12 @@ export function FocusMode({
         {`Question ${posInSystem} of ${systemSteps.length} in ${systemName}`}
       </p>
 
-      <div
-        className="rounded-xl border bg-[var(--mm-off-white)] p-5 md:p-8"
-        style={{ borderColor: "var(--mm-rule)", borderTop: `3px solid ${color}` }}
-      >
+      <div className="mm-fm-card" style={{ "--sys-color": color } as CSSProperties}>
         <div className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[var(--mm-mid)]">
           {systemName} · {step.child.name}
         </div>
         <div className="mb-3 text-xs font-semibold text-[var(--mm-ink)]">{step.area.name}</div>
-        <p className="mb-3 text-lg leading-relaxed text-[var(--mm-ink)] md:text-xl" style={{ fontFamily: "Inter, sans-serif" }}>
+        <p className="mm-fm-question mb-3 text-lg leading-relaxed text-[var(--mm-ink)] md:text-xl">
           {step.area.question_text}
         </p>
         {step.area.helper_text && (
@@ -174,13 +171,7 @@ export function FocusMode({
                 type="button"
                 aria-pressed={sel}
                 onClick={() => chooseHealth(val)}
-                className={`min-h-[44px] rounded-lg border px-3 py-2 text-[13px] leading-tight text-[var(--mm-ink)] transition-colors motion-reduce:transition-none ${FOCUS_RING}`}
-                style={{
-                  borderColor: sel ? color : "var(--mm-rule)",
-                  borderWidth: sel ? 2 : 1,
-                  background: sel ? `color-mix(in srgb, ${color} 10%, var(--mm-paper))` : "var(--mm-paper)",
-                  fontWeight: sel ? 600 : 400,
-                }}
+                className={`mm-fm-opt ${sel ? "mm-fm-opt--sel" : ""} min-h-[44px] rounded-lg px-3 py-2 text-[13px] leading-tight text-[var(--mm-ink)] transition-colors motion-reduce:transition-none ${FOCUS_RING}`}
               >
                 {!isMobile && <span className="mr-1 text-[11px] text-[var(--mm-mid)]">{val}</span>}
                 {label}
@@ -192,8 +183,7 @@ export function FocusMode({
         <button
           type="button"
           onClick={skip}
-          className={`mt-2 min-h-[44px] rounded px-1 text-xs underline ${FOCUS_RING}`}
-          style={{ color: isSkipped ? "var(--mm-ember)" : "var(--mm-mid)" }}
+          className={`mm-fm-skip ${isSkipped ? "mm-fm-skip--on" : ""} mt-2 min-h-[44px] rounded px-1 text-xs underline ${FOCUS_RING}`}
         >
           {isSkipped ? "Skipped" : "Not sure, skip for now"}
         </button>
@@ -210,19 +200,13 @@ export function FocusMode({
                 return (
                   <label
                     key={val}
-                    className="flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-[13px] text-[var(--mm-ink)] focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-[var(--mm-teal)]"
-                    style={{
-                      borderColor: sel ? color : "var(--mm-rule)",
-                      background: sel ? `color-mix(in srgb, ${color} 8%, var(--mm-paper))` : "var(--mm-paper)",
-                      fontWeight: sel ? 500 : 400,
-                    }}
+                    className={`mm-fm-track ${sel ? "mm-fm-track--sel" : ""} flex min-h-[44px] cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-[13px] text-[var(--mm-ink)] focus-within:outline focus-within:outline-[3px] focus-within:outline-offset-2 focus-within:outline-[var(--mm-teal)]`}
                   >
                     <input
                       type="radio"
                       name={`focus-track-${step.area.id}`}
                       checked={sel}
                       onChange={() => chooseTracking(val)}
-                      style={{ accentColor: color }}
                     />
                     {label}
                   </label>
