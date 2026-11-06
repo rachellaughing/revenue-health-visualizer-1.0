@@ -146,14 +146,14 @@ function Page() {
       <main className="mm-page mm-page--narrow">
         <div className="mm-breadcrumb">REVENUE INTELLIGENCE › ROADMAP BUILDER</div>
 
-        <h1 className="mm-heading-lg mm-text mb-2">Roadmap Builder</h1>
-        <p className="mm-body--lg mm-muted mb-7 max-w-[520px]">
+        <h1 className="mm-heading-lg mm-text mm-mb-xs">Roadmap Builder</h1>
+        <p className="mm-body mm-body--lg mm-muted mm-mb-xl mm-max-520">
           This is a sample roadmap. Select initiatives across each time horizon to see the kind of action items, expected outcomes, and KPIs your real roadmap will include.
         </p>
 
-        <div className="mb-8">
+        <div className="mm-mb-2xl">
           <div className="mm-kicker">YOUR 90-DAY FOCUS (SAMPLE)</div>
-          <p className="mm-body mm-muted mb-4">
+          <p className="mm-body mm-muted mm-mb-md">
             Do these three things first. This is opinionated, not a menu — a real 90-Day Focus is derived from your Top Opportunities ranking and current bottleneck.
           </p>
           {NINETY_DAY_FOCUS.map((item, i) => (
