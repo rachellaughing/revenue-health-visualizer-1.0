@@ -630,8 +630,8 @@ function ReturningView({ data }: { data: DashboardData }) {
 
   const fetchSummary = useServerFn(getExecutiveSummary);
   const { data: summary, isLoading: summaryLoading } = useQuery({
-    queryKey: ["report", "executive-summary"],
-    queryFn: () => fetchSummary({ data: {} }),
+    queryKey: ["report", "executive-summary", "scores-only"],
+    queryFn: () => fetchSummary({ data: { skipNarrative: true } }),
   });
 
   const hasSummary = summary && !("error" in summary);

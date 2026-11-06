@@ -475,7 +475,11 @@ export const generateReportNarrative = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 
 const summarySchema = z
-  .object({ assessmentId: z.string().uuid().optional() })
+  .object({
+    assessmentId: z.string().uuid().optional(),
+    // Score-only callers (dashboard) must not wait on AI narrative generation.
+    skipNarrative: z.boolean().optional(),
+  })
   .optional();
 
 export const getExecutiveSummary = createServerFn({ method: "POST" })
@@ -531,7 +535,7 @@ export const getExecutiveSummary = createServerFn({ method: "POST" })
           VIS: (core.narrative as any).narrative_vis ?? null,
         },
       };
-    } else {
+    } else if (!data?.skipNarrative) {
       try {
         narrative = await _generateReportNarrativeImpl(assessmentId!, userId);
       } catch (err) {
