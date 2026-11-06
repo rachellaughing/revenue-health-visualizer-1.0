@@ -790,3 +790,32 @@ a.mm-bill-card:focus-visible { outline: 3px solid var(--mm-teal); outline-offset
   .mm-bill-card, .mm-upsell { padding: 22px 20px; }
   .mm-bill-row { flex-direction: column; align-items: flex-start; }
 }
+
+/* ---------- Team alignment sample ---------- */
+.mm-tone--success { --accent: var(--mm-status-success); }
+.mm-tone--warning { --accent: var(--mm-status-warning); }
+.mm-tone--error   { --accent: var(--mm-status-error); }
+.mm-tone--eyebrow { --accent: var(--mm-eyebrow); }
+.mm-tone--link    { --accent: var(--mm-link); }
+.mm-accent-text { color: var(--accent, var(--mm-text)); }
+.mm-stat {
+  background: var(--mm-surface-sunken); border: 1px solid var(--mm-border-subtle); border-top: 3px solid var(--accent, var(--mm-teal));
+  border-radius: 10px; padding: 16px 18px;
+}
+[data-theme="dark"] .mm-stat { background: var(--mm-surface-raised); }
+.mm-stat__n { font-family: var(--font-display); font-size: 28px; margin-bottom: 4px; color: var(--accent, var(--mm-text)); }
+.mm-stat__l { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--mm-text-muted); margin-bottom: 2px; text-transform: uppercase; }
+.mm-stat__s { font-size: 10px; color: var(--mm-text-muted); }
+.mm-callout-warn {
+  display: flex; align-items: flex-start; gap: 10px; border-radius: 10px; padding: 12px 18px;
+  background: color-mix(in srgb, var(--mm-status-warning) 8%, transparent); border: 1px solid color-mix(in srgb, var(--mm-status-warning) 25%, transparent);
+}
+.mm-callout-warn__icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; color: var(--mm-status-warning); }
+.mm-callout-info.mm-callout--row { display: flex; align-items: flex-start; gap: 10px; padding: 12px 18px; border-radius: 10px; }
+.mm-ta-chart { display: grid; gap: 32px; align-items: center; grid-template-columns: 1fr; }
+.mm-ta-chart--radar { grid-template-columns: auto 1fr; }
+.mm-legend-dash { width: 24px; height: 0; border-top: 2px dashed var(--mm-ember); }
+.mm-legend-line { width: 24px; height: 3px; border-radius: 2px; background: var(--mm-teal-bright); }
+.mm-ta-sysname { font-size: 12px; font-weight: 500; color: var(--mm-text); width: 100px; }
+.mm-cta-band--lg { padding: 24px 28px; }
+@media (max-width: 767px) { .mm-ta-chart--radar { grid-template-columns: 1fr; } }

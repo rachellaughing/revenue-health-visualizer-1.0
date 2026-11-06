@@ -1,13 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
+import { getSystemColor, getSystemClass } from "@/lib/system-colors";
 import { useState } from "react";
 import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
 import {
-  T,
   RadarChart,
   SideBySideBars,
   SystemCard,
-  gapColor,
   gapLabel,
 } from "./reports.team-alignment";
 import type { AlignmentSystem } from "@/lib/report.functions";
@@ -63,97 +61,68 @@ function Page() {
   const [chartView, setChartView] = useState<"radar" | "bars">("radar");
   const [expandedSystem, setExpandedSystem] = useState<string | null>("LFC");
 
+  const overallTone = overallAlignment > 80 ? "success" : overallAlignment > 65 ? "warning" : "error";
+  const STATS = [
+    { label: "Overall Alignment", value: `${overallAlignment}%`, tone: overallTone, sub: "Across all systems" },
+    { label: "Critical Gaps", value: criticalGaps, tone: criticalGaps > 0 ? "error" : "success", sub: "Require immediate attention" },
+    { label: "Leader Sees Stronger", value: leaderHigher, tone: "eyebrow", sub: "Potential blind spots" },
+    { label: "Team Sees Stronger", value: teamHigher, tone: "link", sub: "Hidden organizational strength" },
+  ];
+
   return (
-    <div style={{ background: T.paper, minHeight: "100dvh", fontFamily: "Inter, sans-serif" }}>
+    <div className="mm-page-bg">
       <IllustrativeDataBanner note="Your real Team Alignment report requires the Revenue Health Diagnostic™." />
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "36px 40px 80px" }}>
-        <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
-          REVENUE HEALTH MATRIX™ › TEAM ALIGNMENT
-        </div>
+      <main className="mm-page mm-page--wide">
+        <div className="mm-breadcrumb">REVENUE HEALTH MATRIX™ › TEAM ALIGNMENT</div>
 
-        <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 36, fontWeight: 400, color: T.ink, margin: "0 0 8px" }}>
-          Team Alignment
-        </h1>
-        <p style={{ color: T.mid, fontSize: 14, margin: "0 0 28px" }}>Sample Company · Illustrative</p>
+        <h1 className="mm-report-title mm-report-title--lg">Team Alignment</h1>
+        <p className="text-sm mm-muted mm-mb-xl">Sample Company · Illustrative</p>
 
-        <div
-          style={{
-            background: T.abyss, borderRadius: 14, padding: "24px 28px", marginBottom: 28,
-            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
-          }}
-        >
+        <div className="mm-cta-band mm-cta-band--lg mm-mb-xl">
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 8 }}>
-              SAMPLE REPORT
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 18, fontWeight: 400, color: "var(--mm-on-dark)", margin: "0 0 6px" }}>
-              This is what your Team Alignment report will look like.
-            </h3>
-            <p style={{ fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", margin: 0, lineHeight: 1.6, maxWidth: 480 }}>
+            <div className="mm-cta-band__kicker">SAMPLE REPORT</div>
+            <h3 className="mm-cta-band__title">This is what your Team Alignment report will look like.</h3>
+            <p className="mm-cta-band__body">
               The Team Alignment Report compares how you see your revenue systems versus how your team sees them. Your team completes the Health Check independently, and consultant observations are added during a Revenue Health Diagnostic™ session.
             </p>
           </div>
-          <a
-            href="https://marketplacemaven.com"
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              background: T.ember, color: "var(--mm-white)", border: "none", borderRadius: 8, padding: "12px 22px",
-              whiteSpace: "nowrap", fontSize: 13, fontWeight: 600, textDecoration: "none",
-            }}
-          >
+          <a href="https://marketplacemaven.com" target="_blank" rel="noreferrer" className="mm-cta-band__btn">
             Learn about the Diagnostic™
           </a>
         </div>
 
-        <div
-          style={{
-            background: "color-mix(in srgb, var(--mm-sand) 8.0%, transparent)", border: "1px solid color-mix(in srgb, var(--mm-sand) 25.0%, transparent)", borderRadius: 10,
-            padding: "12px 18px", marginBottom: 28, display: "flex", alignItems: "flex-start", gap: 10,
-          }}
-        >
-          <span style={{ fontSize: 14, flexShrink: 0, color: T.sand, marginTop: 1 }}>ⓘ</span>
-          <div style={{ fontSize: 12, color: T.mid, lineHeight: 1.65 }}>
-            <span style={{ fontWeight: 600, color: T.ink }}>About this report: </span>
+        <div className="mm-callout-info mm-callout--row mm-mb-xl">
+          <span aria-hidden className="text-sm text-[var(--mm-link)]">ⓘ</span>
+          <div className="text-xs leading-[1.65] mm-muted">
+            <span className="font-semibold mm-text">About this report: </span>
             Team members complete the Health Check independently. Their scores are anonymized — no individual responses are shown to the founder. Clusters represent functional groups (Leadership, Sales, Marketing), not named individuals.
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
-          {[
-            { label: "Overall Alignment", value: `${overallAlignment}%`, color: overallAlignment > 80 ? "var(--mm-status-success)" : overallAlignment > 65 ? "var(--mm-sys-visibility)" : T.sand, sub: "Across all systems" },
-            { label: "Critical Gaps", value: criticalGaps, color: criticalGaps > 0 ? "var(--mm-danger)" : "var(--mm-status-success)", sub: "Require immediate attention" },
-            { label: "Leader Sees Stronger", value: leaderHigher, color: "var(--mm-eyebrow)", sub: "Potential blind spots" },
-            { label: "Team Sees Stronger", value: teamHigher, color: "var(--mm-link)", sub: "Hidden organizational strength" },
-          ].map((c, i) => (
-            <div key={i} style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderTop: `3px solid ${c.color}`, borderRadius: 10, padding: "16px 18px" }}>
-              <div style={{ fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif", color: c.color, marginBottom: 4 }}>{c.value}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: T.mid, letterSpacing: "0.06em", marginBottom: 2 }}>{c.label.toUpperCase()}</div>
-              <div style={{ fontSize: 10, color: T.mid }}>{c.sub}</div>
+        <div className="mm-grid mm-grid--4 mm-gap-md mm-mb-xl">
+          {STATS.map((c) => (
+            <div key={c.label} className={`mm-stat mm-tone--${c.tone}`}>
+              <div className="mm-stat__n">{c.value}</div>
+              <div className="mm-stat__l">{c.label}</div>
+              <div className="mm-stat__s">{c.sub}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, marginBottom: 28, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+        <div className="mm-report-card mm-mb-xl">
+          <div className="mm-row mm-row--between mm-mb-lg">
             <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 6 }}>SCORE COMPARISON</div>
-              <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: T.ink, margin: 0 }}>
-                How you see the business vs how your team does.
-              </h2>
+              <div className="mm-kicker mm-mb-xs">SCORE COMPARISON</div>
+              <h2 className="mm-report-h2 m-0">How you see the business vs how your team does.</h2>
             </div>
-            <div style={{ display: "flex", background: T.offWhite, borderRadius: 8, padding: 3, gap: 2 }}>
+            <div className="mm-seg mm-seg--sm" role="tablist">
               {(["radar", "bars"] as const).map((v) => (
                 <button
                   key={v}
+                  role="tab"
+                  aria-selected={chartView === v}
                   onClick={() => setChartView(v)}
-                  style={{
-                    padding: "6px 14px", borderRadius: 6, border: "none", cursor: "pointer",
-                    background: chartView === v ? T.paper : "transparent",
-                    color: chartView === v ? T.ink : T.mid,
-                    fontSize: 11, fontWeight: chartView === v ? 600 : 400,
-                    boxShadow: chartView === v ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
-                  }}
+                  className={`mm-seg__btn ${chartView === v ? "mm-seg__btn--on" : ""}`}
                 >
                   {v === "radar" ? "Radar" : "Side by side"}
                 </button>
@@ -161,31 +130,28 @@ function Page() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: chartView === "radar" ? "auto 1fr" : "1fr", gap: 32, alignItems: "center" }}>
+          <div className={`mm-ta-chart ${chartView === "radar" ? "mm-ta-chart--radar" : ""}`}>
             {chartView === "radar" ? (
               <>
                 <RadarChart data={ILLUSTRATIVE_SYSTEMS} size={280} />
                 <div>
-                  <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 24, height: 0, borderTop: `2px dashed ${T.ember}` }} />
-                      <span style={{ fontSize: 12, color: T.mid }}>Your scores</span>
+                  <div className="mm-row mm-gap-lg mm-mb-lg">
+                    <div className="mm-row mm-gap-xs">
+                      <div className="mm-legend-dash" />
+                      <span className="text-xs mm-muted">Your scores</span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 24, height: 3, background: T.tealBright, borderRadius: 2 }} />
-                      <span style={{ fontSize: 12, color: T.mid }}>Team average</span>
+                    <div className="mm-row mm-gap-xs">
+                      <div className="mm-legend-line" />
+                      <span className="text-xs mm-muted">Team average</span>
                     </div>
                   </div>
-                  {ILLUSTRATIVE_SYSTEMS.map((sys) => {
-                    const gc = gapColor(sys.status);
-                    return (
-                      <div key={sys.code} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: sys.color, flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, fontWeight: 500, color: T.ink, width: 100 }}>{sys.name}</span>
-                        <div style={{ flex: 1, fontSize: 11, color: gc }}>{gapLabel(sys.direction, sys.gap)}</div>
-                      </div>
-                    );
-                  })}
+                  {ILLUSTRATIVE_SYSTEMS.map((sys) => (
+                    <div key={sys.code} className={`mm-row mm-gap-sm mm-mb-xs ${getSystemClass(sys.code)} mm-tone--${GAP_TONE[sys.status]}`}>
+                      <span className="mm-sys-dot mm-dot-8" />
+                      <span className="mm-ta-sysname">{sys.name}</span>
+                      <div className="mm-flex-1 text-[11px] mm-accent-text">{gapLabel(sys.direction, sys.gap)}</div>
+                    </div>
+                  ))}
                 </div>
               </>
             ) : (
@@ -194,10 +160,8 @@ function Page() {
           </div>
         </div>
 
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 16 }}>
-            SYSTEM BY SYSTEM BREAKDOWN
-          </div>
+        <div className="mm-mb-xl">
+          <div className="mm-kicker mm-mb-md">SYSTEM BY SYSTEM BREAKDOWN</div>
           <div>
             {ILLUSTRATIVE_SYSTEMS.map((sys) => (
               <SystemCard
@@ -211,38 +175,28 @@ function Page() {
           </div>
         </div>
 
-        <div
-          style={{
-            background: T.abyss, borderRadius: 12, padding: "24px 28px", display: "flex",
-            alignItems: "center", justifyContent: "space-between", gap: 20, marginBottom: 28,
-          }}
-        >
+        <div className="mm-cta-band mm-cta-band--lg mm-mb-xl">
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: T.tealBright, letterSpacing: "0.12em", marginBottom: 6 }}>
-              REVENUE HEALTH DIAGNOSTIC™
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 17, fontWeight: 400, color: "var(--mm-on-dark)", margin: "0 0 4px" }}>
-              Get your team's real scores and consultant observations.
-            </h3>
-            <p style={{ fontSize: 12, color: "color-mix(in srgb, var(--mm-white) 60.0%, transparent)", margin: 0 }}>
+            <div className="mm-cta-band__kicker">REVENUE HEALTH DIAGNOSTIC™</div>
+            <h3 className="mm-cta-band__title">Get your team's real scores and consultant observations.</h3>
+            <p className="mm-cta-band__body">
               The Diagnostic adds per-system consultant observations and sequenced recommendations, built from your team's actual Health Check results.
             </p>
           </div>
-          <Link
-            to="/diagnostic"
-            style={{
-              background: T.ember, color: "var(--mm-white)", border: "none", borderRadius: 8, padding: "11px 20px",
-              whiteSpace: "nowrap", fontSize: 12, fontWeight: 600, textDecoration: "none",
-            }}
-          >
+          <Link to="/diagnostic" className="mm-cta-band__btn">
             Learn about the Diagnostic™
           </Link>
         </div>
 
-        <div style={{ paddingTop: 24, borderTop: `1px solid ${T.offWhite}`, fontSize: 11, color: T.mid }}>
-          © 2025 Marketplace Maven. All rights reserved.
-        </div>
+        <div className="mm-footer">© 2025 Marketplace Maven. All rights reserved.</div>
       </main>
     </div>
   );
 }
+
+const GAP_TONE: Record<AlignmentSystem["status"], "error" | "warning" | "success"> = {
+  critical_gap: "error",
+  significant_gap: "warning",
+  moderate_gap: "warning",
+  strong_alignment: "success",
+};
