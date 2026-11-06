@@ -140,7 +140,7 @@ function JoinTeamPage() {
     return page(
       <>
         <h1 className="mm-auth-title">Invite link expired</h1>
-        <p className="mm-auth-lede mb-6">
+        <p className="mm-auth-lede mm-mb-lg">
           Your invite link is no longer valid. Ask the person who invited you to send a new one.
         </p>
         <Link to="/login" className="mm-btn-block mm-btn-block--outline">
@@ -154,7 +154,7 @@ function JoinTeamPage() {
     return page(
       <>
         <h1 className="mm-auth-title">No pending invite</h1>
-        <p className="mm-auth-lede mb-6">
+        <p className="mm-auth-lede mm-mb-lg">
           We couldn't find a team invite for your email. {error ? `(${error})` : ""}
         </p>
         <Link to="/dashboard" className="mm-btn-block">
@@ -175,7 +175,7 @@ function JoinTeamPage() {
   return page(
     <>
       <h1 className="mm-auth-title">Join {companyLine}</h1>
-      <p className="mm-auth-lede mb-8">
+      <p className="mm-auth-lede mm-mb-2xl">
         You've been invited to a Revenue Health Diagnostic™ team. Set up your account to continue.
       </p>
       <form onSubmit={onSubmit} className="space-y-4">
