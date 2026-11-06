@@ -1,4 +1,5 @@
 import type { ReactNode, InputHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { ChevronDown } from "lucide-react";
 
 export const ProgressSteps = ({
   steps,
@@ -7,50 +8,25 @@ export const ProgressSteps = ({
   steps: string[];
   current: number;
 }) => (
-  <div className="flex items-center mb-8">
+  <div className="mm-steps">
     {steps.map((step, i) => {
       const done = i < current;
       const active = i === current;
+      const cls = [
+        "mm-step",
+        i < steps.length - 1 && "mm-step--grow",
+        done && "mm-step--done",
+        active && "mm-step--active",
+      ]
+        .filter(Boolean)
+        .join(" ");
       return (
-        <div
-          key={i}
-          className="flex items-center"
-          style={{ flex: i < steps.length - 1 ? 1 : 0 }}
-        >
-          <div className="flex flex-col items-center gap-1.5">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
-              style={{
-                background: done
-                  ? "var(--mm-teal-bright)"
-                  : active
-                    ? "var(--mm-abyss)"
-                    : "var(--mm-off-white)",
-                border: `2px solid ${done ? "var(--mm-teal-bright)" : active ? "var(--mm-abyss)" : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)"}`,
-                color: done || active ? "var(--mm-white)" : "var(--mm-mid)",
-              }}
-            >
-              {done ? "✓" : i + 1}
-            </div>
-            <span
-              className="text-[11px] whitespace-nowrap"
-              style={{
-                fontWeight: active ? 600 : 400,
-                color: active ? "var(--mm-ink)" : "var(--mm-mid)",
-              }}
-            >
-              {step}
-            </span>
+        <div key={i} className={cls}>
+          <div className="mm-step__col">
+            <div className="mm-step__dot">{done ? "✓" : i + 1}</div>
+            <span className="mm-step__label">{step}</span>
           </div>
-          {i < steps.length - 1 && (
-            <div
-              className="flex-1 mx-2 mb-[22px]"
-              style={{
-                height: 2,
-                background: done ? "var(--mm-teal-bright)" : "var(--mm-off-white)",
-              }}
-            />
-          )}
+          {i < steps.length - 1 && <div className="mm-step__line" />}
         </div>
       );
     })}
@@ -66,36 +42,20 @@ export const SectionCard = ({
   subtitle?: string;
   children: ReactNode;
 }) => (
-  <div
-    className="rounded-xl p-7 mb-6"
-    style={{
-      background: "var(--mm-paper)",
-      border: "1px solid var(--mm-rule)",
-      boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)",
-    }}
-  >
-    <div
-      className="pb-4 mb-5"
-      style={{ borderBottom: "1px solid var(--mm-off-white)" }}
-    >
-      {subtitle && (
-        <div
-          className="text-[10px] font-bold mb-1"
-          style={{ color: "var(--mm-mid)", letterSpacing: "0.12em" }}
-        >
-          {subtitle.toUpperCase()}
-        </div>
-      )}
-      <h3
-        className="text-[17px] m-0"
-        style={{ fontFamily: "'Instrument Serif', Georgia, serif", color: "var(--mm-ink)" }}
-      >
-        {title}
-      </h3>
+  <div className="mm-section-card">
+    <div className="mm-section-card__head">
+      {subtitle && <div className="mm-section-card__kicker">{subtitle.toUpperCase()}</div>}
+      <h3 className="mm-section-card__title">{title}</h3>
     </div>
     {children}
   </div>
 );
+
+const COLS: Record<1 | 2 | 3, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+};
 
 export const FieldGroup = ({
   children,
@@ -103,14 +63,7 @@ export const FieldGroup = ({
 }: {
   children: ReactNode;
   columns?: 1 | 2 | 3;
-}) => (
-  <div
-    className="grid gap-5 mb-5"
-    style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
-  >
-    {children}
-  </div>
-);
+}) => <div className={`grid gap-5 mb-5 ${COLS[columns]}`}>{children}</div>;
 
 export const Field = ({ children }: { children: ReactNode }) => <div>{children}</div>;
 
@@ -121,56 +74,21 @@ export const Label = ({
   children: ReactNode;
   required?: boolean;
 }) => (
-  <div
-    className="text-xs font-semibold mb-1.5"
-    style={{ color: "var(--mm-ink)", letterSpacing: "0.02em" }}
-  >
-    {children} {required && <span style={{ color: "var(--mm-eyebrow)" }}>*</span>}
+  <div className="mm-pf-label">
+    {children} {required && <span className="mm-pf-req">*</span>}
   </div>
 );
 
 export const Helper = ({ children }: { children: ReactNode }) => (
-  <div
-    className="text-[11px] mt-1 leading-relaxed"
-    style={{ color: "var(--mm-mid)" }}
-  >
-    {children}
-  </div>
+  <div className="mm-pf-help">{children}</div>
 );
 
-const fieldBase: React.CSSProperties = {
-  width: "100%",
-  background: "var(--mm-off-white)",
-  border: "1.5px solid transparent",
-  borderRadius: 8,
-  padding: "11px 14px",
-  fontSize: 14,
-  color: "var(--mm-ink)",
-  outline: "none",
-  boxSizing: "border-box",
-  transition: "border-color 0.15s",
-};
-
-export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      style={{ ...fieldBase, ...(props.style ?? {}) }}
-      onFocus={(e) => (e.currentTarget.style.borderColor = "var(--mm-teal)")}
-      onBlur={(e) => (e.currentTarget.style.borderColor = "transparent")}
-    />
-  );
+export function TextInput({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...props} className={`mm-pf-input${className ? ` ${className}` : ""}`} />;
 }
 
-export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return (
-    <textarea
-      {...props}
-      style={{ ...fieldBase, resize: "vertical", lineHeight: 1.6, ...(props.style ?? {}) }}
-      onFocus={(e) => (e.currentTarget.style.borderColor = "var(--mm-teal)")}
-      onBlur={(e) => (e.currentTarget.style.borderColor = "transparent")}
-    />
-  );
+export function TextArea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea {...props} className={`mm-pf-input${className ? ` ${className}` : ""}`} />;
 }
 
 export function Select({
@@ -185,27 +103,21 @@ export function Select({
   placeholder: string;
 }) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{
-        ...fieldBase,
-        appearance: "none",
-        cursor: "pointer",
-        color: value ? "var(--mm-ink)" : "var(--mm-mid)",
-        backgroundImage:
-          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888880' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "right 14px center",
-      }}
-    >
-      <option value="">{placeholder}</option>
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </select>
+    <div className="mm-pf-select-wrap">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`mm-pf-input mm-pf-select${value ? "" : " mm-pf-select--empty"}`}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+      <ChevronDown size={14} className="mm-pf-select-icon" aria-hidden />
+    </div>
   );
 }
 
@@ -221,19 +133,7 @@ export function PrimaryButton({
   type?: "button" | "submit";
 }) {
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={!enabled}
-      className="text-sm font-semibold rounded-lg transition-all"
-      style={{
-        background: enabled ? "var(--mm-ember)" : "var(--mm-off-white)",
-        color: enabled ? "var(--mm-white)" : "var(--mm-mid)",
-        padding: "13px 28px",
-        border: "none",
-        cursor: enabled ? "pointer" : "not-allowed",
-      }}
-    >
+    <button type={type} onClick={onClick} disabled={!enabled} className="mm-btn-primary">
       {children}
     </button>
   );
@@ -247,18 +147,7 @@ export function GhostButton({
   onClick?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="text-sm font-medium rounded-lg"
-      style={{
-        background: "transparent",
-        border: "1.5px solid var(--mm-teal)",
-        color: "var(--mm-link)",
-        padding: "12px 22px",
-        cursor: "pointer",
-      }}
-    >
+    <button type="button" onClick={onClick} className="mm-btn-ghost">
       {children}
     </button>
   );
