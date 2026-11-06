@@ -49,25 +49,19 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: "var(--mm-paper)" }}>
-      <div className="w-full max-w-md">
-        <h1 className="text-5xl mb-2" style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}>
-          Set a new password
-        </h1>
-        <p className="text-sm mb-8" style={{ color: "var(--mm-mid)" }}>
+    <div className="mm-auth-page">
+      <div className="mm-auth-box">
+        <h1 className="mm-auth-title">Set a new password</h1>
+        <p className="mm-auth-lede mb-8">
           Choose a new password for your Revenue Health Visualizer™ account.
         </p>
 
-        {!ready && (
-          <p className="text-sm" style={{ color: "var(--mm-mid)" }}>Loading…</p>
-        )}
+        {!ready && <p className="mm-auth-lede">Loading…</p>}
 
         {ready && !hasSession && !success && (
           <div className="space-y-4">
-            <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>
-              This reset link is invalid or has expired.
-            </p>
-            <Link to="/login" className="text-sm font-semibold" style={{ color: "var(--mm-eyebrow)" }}>
+            <p className="mm-text-error">This reset link is invalid or has expired.</p>
+            <Link to="/login" className="mm-link-eyebrow">
               ← Back to sign in
             </Link>
           </div>
@@ -77,23 +71,14 @@ function ResetPasswordPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             <Field label="New password" value={password} onChange={setPassword} required />
             <Field label="Confirm new password" value={confirm} onChange={setConfirm} required />
-            {error && <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>{error}</p>}
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60"
-              style={{ backgroundColor: "var(--mm-ember)" }}
-            >
+            {error && <p className="mm-text-error">{error}</p>}
+            <button type="submit" disabled={saving} className="mm-btn-block">
               {saving ? "Updating…" : "Update password"}
             </button>
           </form>
         )}
 
-        {success && (
-          <p className="text-sm" style={{ color: "var(--mm-ink)" }}>
-            Password updated. Redirecting to sign in…
-          </p>
-        )}
+        {success && <p className="mm-auth-lede mm-text">Password updated. Redirecting to sign in…</p>}
       </div>
     </div>
   );
@@ -104,28 +89,21 @@ function Field({
 }: { label: string; value: string; onChange: (v: string) => void; required?: boolean }) {
   const [show, setShow] = useState(false);
   return (
-    <label className="block">
-      <span className="block text-sm font-medium mb-1" style={{ color: "var(--mm-ink)" }}>{label}</span>
-      <div className="relative">
+    <label className="mm-field">
+      <span className="mm-field__label">{label}</span>
+      <div className="mm-input-wrap">
         <input
           type={show ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           required={required}
-          className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-          style={{
-            backgroundColor: "var(--mm-off-white)",
-            borderColor: "var(--mm-hairline)",
-            color: "var(--mm-ink)",
-            paddingRight: 40,
-          }}
+          className="mm-input mm-input--pw"
         />
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
           aria-label={show ? "Hide password" : "Show password"}
-          className="absolute inset-y-0 right-0 flex items-center px-3"
-          style={{ color: "var(--mm-mid)" }}
+          className="mm-input-toggle"
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
