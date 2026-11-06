@@ -188,8 +188,8 @@ function AuthGate() {
 
   if (loading || !session || viewerQ.isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center" style={{ backgroundColor: "var(--mm-paper)" }}>
-        <p className="text-sm" style={{ color: "var(--mm-mid)" }}>Loading…</p>
+      <div className="mm-app-loading">
+        <p>Loading…</p>
       </div>
     );
   }
@@ -201,7 +201,7 @@ function AuthGate() {
   };
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden" style={{ backgroundColor: "var(--mm-paper)" }}>
+    <div className="mm-app-shell">
       {/* Desktop: inline sidebar */}
       {!isMobile && <AppSidebar collapsed={collapsed} />}
 
@@ -209,49 +209,21 @@ function AuthGate() {
       {isMobile && (
         <>
           {mobileOpen && (
-            <div
-              onClick={() => setMobileOpen(false)}
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "color-mix(in srgb, var(--mm-ink) 50.0%, transparent)",
-                zIndex: 50,
-              }}
-              aria-hidden
-            />
+            <div onClick={() => setMobileOpen(false)} className="mm-drawer-scrim" aria-hidden />
           )}
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: 280,
-              zIndex: 60,
-              transform: mobileOpen ? "translateX(0)" : "translateX(-100%)",
-              transition: "transform 220ms ease",
-              boxShadow: mobileOpen ? "0 0 30px color-mix(in srgb, var(--mm-ink) 30.0%, transparent)" : "none",
-            }}
-          >
+          <div className={`mm-drawer${mobileOpen ? " mm-drawer--open" : ""}`}>
             <AppSidebar collapsed={false} />
           </div>
         </>
       )}
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="mm-app-col">
         <TopBar
           onToggleSidebar={handleToggle}
           firstName={viewerQ.data?.firstName ?? null}
           email={user?.email ?? null}
         />
-        <main
-          className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8"
-          style={
-            isMobile
-              ? { paddingBottom: "calc(56px + env(safe-area-inset-bottom) + 16px)" }
-              : undefined
-          }
-        >
+        <main className={`mm-app-main${isMobile ? " mm-app-main--mobile" : ""}`}>
           <Outlet />
         </main>
       </div>
