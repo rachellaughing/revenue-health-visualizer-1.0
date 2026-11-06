@@ -590,8 +590,7 @@ type ScoreRow = {
   question_id: string;
 };
 
-// TEMPORARY (demo seed 2026-11-06): exported only for a one-off sandbox scoring run. Remove after use.
-export async function _calculateAssessmentScoresImpl(
+async function _calculateAssessmentScoresImpl(
   assessmentId: string,
   userId: string,
 ) {
