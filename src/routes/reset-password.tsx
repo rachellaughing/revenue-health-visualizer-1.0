@@ -61,7 +61,7 @@ function ResetPasswordPage() {
     <div className="mm-auth-page">
       <div className="mm-auth-box">
         <h1 className="mm-auth-title">Set a new password</h1>
-        <p className="mm-auth-lede mb-8">
+        <p className="mm-auth-lede mm-mb-2xl">
           Choose a new password for your Revenue Health Visualizer™ account.
         </p>
 
