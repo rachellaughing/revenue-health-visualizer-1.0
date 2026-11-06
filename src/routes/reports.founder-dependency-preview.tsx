@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
+import { getSystemColor, getSystemClass } from "@/lib/system-colors";
+import { Bar } from "@/components/ui-mm";
 import { useState } from "react";
 import type { FDSystem, FDProcess } from "@/lib/report.functions";
 import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
 import {
-  T,
   DependencyRing,
   DependencySplit,
   BlastRadiusTimeline,
@@ -51,37 +51,29 @@ function Page() {
   ];
 
   return (
-    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div className="mm-page-bg">
       <IllustrativeDataBanner note="Your real Founder Dependency analysis requires the Revenue Health Diagnostic™." />
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "36px 40px 80px" }}>
-        <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
-          REVENUE HEALTH MATRIX™ › FOUNDER DEPENDENCY
-        </div>
+      <main className="mm-page mm-page--wide">
+        <div className="mm-breadcrumb">REVENUE HEALTH MATRIX™ › FOUNDER DEPENDENCY</div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "flex-start", marginBottom: 28 }}>
+        <div className="mm-grid mm-grid--main-aside mm-row--top mm-mb-xl">
           <div>
-            <h1 style={{ fontFamily: "Instrument Serif, Georgia, serif", fontSize: 26, fontWeight: 400, color: T.ink, margin: "0 0 8px" }}>
-              Founder Dependency Analysis
-            </h1>
-            <p style={{ fontFamily: "Inter", fontSize: 14, color: T.mid, margin: 0, lineHeight: 1.65, maxWidth: 540 }}>
+            <h1 className="mm-report-title">Founder Dependency Analysis</h1>
+            <p className="mm-report-lede">
               Every business has founder dependency. The question is whether it is strategic and temporary, or structural and dangerous. This sample shows what your analysis will include — with sample data, not yours.
             </p>
           </div>
           <DependencyRing score={overallIndex} />
         </div>
 
-        <div style={{ display: "flex", gap: 2, background: T.offWhite, borderRadius: 10, padding: 4, marginBottom: 28, width: "fit-content" }}>
+        <div className="mm-seg mm-mb-xl" role="tablist">
           {TABS.map((tab) => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              style={{
-                padding: "8px 18px", borderRadius: 8, border: "none", cursor: "pointer",
-                background: activeTab === tab.id ? T.paper : "transparent",
-                color: activeTab === tab.id ? T.ink : T.mid,
-                fontFamily: "Inter", fontSize: 12, fontWeight: activeTab === tab.id ? 600 : 400,
-                boxShadow: activeTab === tab.id ? "0 1px 4px color-mix(in srgb, var(--mm-ink) 10.0%, transparent)" : "none",
-              }}
+              className={`mm-seg__btn ${activeTab === tab.id ? "mm-seg__btn--on" : ""}`}
             >
               {tab.label}
             </button>
@@ -90,29 +82,23 @@ function Page() {
 
         {activeTab === "overview" && (
           <div>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
-                HEALTHY VS DANGEROUS DEPENDENCY
-              </div>
+            <div className="mm-mb-lg">
+              <div className="mm-kicker">HEALTHY VS DANGEROUS DEPENDENCY</div>
               <DependencySplit processes={ILLUSTRATIVE_PROCESSES} systems={ILLUSTRATIVE_SYSTEMS} />
             </div>
 
-            <div style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
-              <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 16 }}>
-                DEPENDENCY BY SYSTEM
-              </div>
+            <div className="mm-report-card mm-report-card--sm mm-mb-lg">
+              <div className="mm-kicker">DEPENDENCY BY SYSTEM</div>
               {ILLUSTRATIVE_SYSTEMS.map((dep) => (
-                <div key={dep.code} style={{ marginBottom: 14 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: dep.color }} />
-                      <span style={{ fontSize: 12, fontFamily: "Inter", fontWeight: 600, color: T.ink }}>{dep.name}</span>
+                <div key={dep.code} className={`mm-sysbar ${getSystemClass(dep.code)}`}>
+                  <div className="mm-row mm-row--between mm-mb-xs">
+                    <div className="mm-row mm-gap-xs">
+                      <span className="mm-sys-dot mm-dot-8" />
+                      <span className="text-xs font-semibold mm-text">{dep.name}</span>
                     </div>
-                    <span style={{ fontSize: 12, fontFamily: "Inter", fontWeight: 700, color: T.mid }}>{dep.level}</span>
+                    <span className="text-xs font-bold mm-muted">{dep.level}</span>
                   </div>
-                  <div style={{ height: 8, background: T.offWhite, borderRadius: 4, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${dep.level}%`, background: dep.color, borderRadius: 4 }} />
-                  </div>
+                  <Bar pct={dep.level} label={`${dep.name} dependency`} />
                 </div>
               ))}
             </div>
@@ -124,54 +110,29 @@ function Page() {
         )}
 
         {activeTab === "timeline" && (
-          <div style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
-            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
-              BLAST RADIUS TIMELINE
-            </div>
-            <h2 style={{ fontFamily: "Instrument Serif, Georgia, serif", fontSize: 20, fontWeight: 400, color: T.ink, margin: "0 0 6px" }}>
-              If you stepped back today.
-            </h2>
+          <div className="mm-report-card">
+            <div className="mm-kicker">BLAST RADIUS TIMELINE</div>
+            <h2 className="mm-report-h2">If you stepped back today.</h2>
             <BlastRadiusTimeline processes={ILLUSTRATIVE_PROCESSES} systems={ILLUSTRATIVE_SYSTEMS} />
           </div>
         )}
 
         {activeTab === "actions" && (
-          <div style={{ background: T.offWhite, border: "1px solid var(--mm-rule)", borderRadius: 14, padding: 28, boxShadow: "0 2px 8px color-mix(in srgb, var(--mm-abyss) 5.0%, transparent)" }}>
-            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
-              ACTION PLAN
-            </div>
-            <h2 style={{ fontFamily: "Instrument Serif, Georgia, serif", fontSize: 20, fontWeight: 400, color: T.ink, margin: "0 0 6px" }}>
-              Reduce dependency, one process at a time.
-            </h2>
+          <div className="mm-report-card">
+            <div className="mm-kicker">ACTION PLAN</div>
+            <h2 className="mm-report-h2">Reduce dependency, one process at a time.</h2>
             <ActionPlan processes={ILLUSTRATIVE_PROCESSES} systems={ILLUSTRATIVE_SYSTEMS} />
           </div>
         )}
 
-        <div
-          style={{
-            background: T.abyss, borderRadius: 14, padding: "20px 24px", marginTop: 28,
-            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-          }}
-        >
-          <div style={{ color: "var(--mm-on-dark)", fontFamily: "Inter", fontSize: 13 }}>
-            Ready for your real dependency analysis with consultant observations?
-          </div>
-          <a
-            href="https://marketplacemaven.com"
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              background: T.ember, color: "var(--mm-white)", borderRadius: 8, padding: "10px 18px",
-              fontFamily: "Inter", fontSize: 12, fontWeight: 600, textDecoration: "none",
-            }}
-          >
+        <div className="mm-cta-band mm-mt-xl">
+          <div className="text-[13px]">Ready for your real dependency analysis with consultant observations?</div>
+          <a href="https://marketplacemaven.com" target="_blank" rel="noreferrer" className="mm-cta-band__btn">
             Learn about the Diagnostic™
           </a>
         </div>
 
-        <div style={{ paddingTop: 24, borderTop: `1px solid ${T.offWhite}`, fontSize: 11, fontFamily: "Inter", color: T.mid, marginTop: 28 }}>
-          © 2025 Marketplace Maven. All rights reserved.
-        </div>
+        <div className="mm-footer">© 2025 Marketplace Maven. All rights reserved.</div>
       </main>
     </div>
   );
