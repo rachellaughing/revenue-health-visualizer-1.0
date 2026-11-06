@@ -3,15 +3,6 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import rhIconDark from "@/assets/rh-icon-dark.svg.asset.json";
 
-const T = {
-  abyss: "var(--mm-abyss)",
-  paper: "var(--mm-paper)",
-  offWhite: "var(--mm-off-white)",
-  mid: "var(--mm-mid)",
-  white: "var(--mm-white)",
-  ember: "var(--mm-ember)",
-};
-
 const ALLOWED_PREFIXES = ["/dashboard", "/health-check"];
 
 export function TeamMemberShell({ firstName }: { firstName: string | null }) {
@@ -34,71 +25,31 @@ export function TeamMemberShell({ firstName }: { firstName: string | null }) {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col" style={{ background: T.paper }}>
-      {/* Top bar */}
-      <header
-        style={{
-          height: 60,
-          flexShrink: 0,
-          background: T.offWhite,
-          borderBottom: `1px solid ${T.offWhite}`,
-          display: "flex",
-          alignItems: "center",
-          padding: "0 24px",
-          gap: 32,
-        }}
-      >
-        <Link
-          to="/dashboard"
-          style={{ display: "flex", alignItems: "center", textDecoration: "none" }}
-          aria-label="Revenue Health Visualizer"
-        >
-          <img
-            src={rhIconDark.url}
-            alt="Revenue Health Visualizer"
-            style={{ height: 36, width: "auto", display: "block" }}
-          />
+    <div className="mm-tm-shell">
+      <header className="mm-tm-header">
+        <Link to="/dashboard" className="mm-tm-logo" aria-label="Revenue Health Visualizer">
+          <img src={rhIconDark.url} alt="Revenue Health Visualizer" />
         </Link>
 
-
-        <nav style={{ display: "flex", gap: 24 }}>
-          <Link
-            to="/health-check"
-            activeProps={{ style: { color: "var(--mm-text)", fontWeight: 600 } }}
-            inactiveProps={{ style: { color: T.mid, fontWeight: 500 } }}
-            style={{
-              fontSize: 13,
-              textDecoration: "none",
-            }}
-          >
+        <nav className="mm-tm-nav">
+          <Link to="/health-check" activeProps={{ className: "mm-active" }}>
             Health Check
           </Link>
         </nav>
 
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16 }}>
+        <div className="mm-tm-user">
           {firstName && (
-            <span style={{ fontSize: 12, color: T.mid }}>
-              Signed in as <span style={{ color: "var(--mm-text)", fontWeight: 500 }}>{firstName}</span>
+            <span className="mm-tm-user__label">
+              Signed in as <strong>{firstName}</strong>
             </span>
           )}
-          <button
-            onClick={handleSignOut}
-            style={{
-              background: "transparent",
-              border: `1px solid ${T.offWhite}`,
-              color: T.mid,
-              fontSize: 12,
-              padding: "6px 12px",
-              borderRadius: 6,
-              cursor: "pointer",
-            }}
-          >
+          <button type="button" onClick={handleSignOut} className="mm-btn-quiet">
             Sign out
           </button>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="mm-tm-main">
         <Outlet />
       </main>
     </div>
