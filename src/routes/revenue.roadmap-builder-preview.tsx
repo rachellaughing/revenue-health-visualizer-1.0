@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import type { RoadmapItem } from "@/lib/report.functions";
 import { IllustrativeDataBanner } from "@/components/reports/PreviewBanner";
@@ -93,20 +93,12 @@ const NINETY_DAY_FOCUS = SAMPLE_ITEMS.filter((i) =>
 
 function NinetyDayFocusCard({ item, rank }: { item: SampleItem; rank: number }) {
   return (
-    <div style={{
-      background: T.offWhite, border: "1px solid var(--mm-rule)", borderLeft: `3px solid ${item.color}`,
-      borderRadius: 12, padding: "18px 20px", marginBottom: 12, display: "grid",
-      gridTemplateColumns: "32px 1fr", gap: 16, boxShadow: "0 2px 6px color-mix(in srgb, var(--mm-abyss) 4.0%, transparent)",
-    }}>
-      <div style={{
-        width: 32, height: 32, borderRadius: "50%", background: `color-mix(in srgb, ${item.color} 9.4%, transparent)`,
-        border: `1.5px solid color-mix(in srgb, ${item.color} 25.1%, transparent)`, display: "flex", alignItems: "center",
-        justifyContent: "center", fontSize: 13, fontFamily: "Inter", fontWeight: 700, color: item.color,
-      }}>{rank}</div>
+    <div className="mm-focus-card" style={{ "--sys-color": item.color } as React.CSSProperties}>
+      <div className="mm-focus-card__rank">{rank}</div>
       <div>
-        <div style={{ fontSize: 14, fontFamily: "Inter", fontWeight: 600, color: T.ink, marginBottom: 4 }}>{item.title}</div>
-        <div style={{ fontSize: 11, fontFamily: "Inter", color: T.mid, marginBottom: 8 }}>{item.parent} System</div>
-        <p style={{ fontSize: 12, fontFamily: "Inter", color: T.mid, lineHeight: 1.6, margin: 0, fontStyle: "italic" }}>{item.why}</p>
+        <div className="mm-focus-card__title">{item.title}</div>
+        <div className="mm-focus-card__meta">{item.parent} System</div>
+        <p className="mm-focus-card__why">{item.why}</p>
       </div>
     </div>
   );
@@ -149,25 +141,19 @@ function Page() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh", background: T.paper, fontFamily: "Inter, sans-serif" }}>
+    <div className="mm-page-bg">
       <IllustrativeDataBanner note="Your real roadmap is built from your own assessment once you reach the Diagnostic™." />
-      <main style={{ maxWidth: 860, margin: "0 auto", padding: "36px 40px 80px" }}>
-        <div style={{ fontSize: 11, color: T.mid, marginBottom: 20, letterSpacing: "0.08em" }}>
-          REVENUE INTELLIGENCE › ROADMAP BUILDER
-        </div>
+      <main className="mm-page mm-page--narrow">
+        <div className="mm-breadcrumb">REVENUE INTELLIGENCE › ROADMAP BUILDER</div>
 
-        <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 26, fontWeight: 400, color: T.ink, margin: "0 0 8px" }}>
-          Roadmap Builder
-        </h1>
-        <p style={{ fontFamily: "Inter", fontSize: 14, color: T.mid, margin: "0 0 28px", lineHeight: 1.65, maxWidth: 520 }}>
+        <h1 className="mm-heading-lg mm-text mb-2">Roadmap Builder</h1>
+        <p className="mm-body--lg mm-muted mb-7 max-w-[520px]">
           This is a sample roadmap. Select initiatives across each time horizon to see the kind of action items, expected outcomes, and KPIs your real roadmap will include.
         </p>
 
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
-            YOUR 90-DAY FOCUS (SAMPLE)
-          </div>
-          <p style={{ fontSize: 13, fontFamily: "Inter", color: T.mid, margin: "0 0 16px", lineHeight: 1.6 }}>
+        <div className="mb-8">
+          <div className="mm-kicker">YOUR 90-DAY FOCUS (SAMPLE)</div>
+          <p className="mm-body mm-muted mb-4">
             Do these three things first. This is opinionated, not a menu — a real 90-Day Focus is derived from your Top Opportunities ranking and current bottleneck.
           </p>
           {NINETY_DAY_FOCUS.map((item, i) => (
@@ -175,9 +161,7 @@ function Page() {
           ))}
         </div>
 
-        <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: T.mid, letterSpacing: "0.1em", marginBottom: 14 }}>
-          FULL ROADMAP (SAMPLE)
-        </div>
+        <div className="mm-kicker">FULL ROADMAP (SAMPLE)</div>
         {HORIZONS.map((horizon) => (
           <HorizonSection
             key={horizon.id}
@@ -188,32 +172,18 @@ function Page() {
           />
         ))}
 
-        <div style={{
-          background: T.ember, borderRadius: 16, padding: "28px 32px",
-          display: "grid", gridTemplateColumns: "1fr auto", gap: 24, alignItems: "center",
-        }}>
+        <div className="mm-card--ember mm-grid mm-grid--main-aside">
           <div>
-            <div style={{ fontSize: 10, fontFamily: "Inter", fontWeight: 700, color: "color-mix(in srgb, var(--mm-white) 70.0%, transparent)", letterSpacing: "0.12em", marginBottom: 8 }}>
-              GET YOUR REAL ROADMAP
-            </div>
-            <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, fontWeight: 400, color: "var(--mm-white)", margin: "0 0 6px" }}>
-              Turn this sample into a plan built from your own assessment.
-            </h3>
-            <p style={{ fontFamily: "Inter", fontSize: 13, color: "color-mix(in srgb, var(--mm-white) 75.0%, transparent)", margin: 0, lineHeight: 1.6 }}>
+            <div className="mm-kicker">GET YOUR REAL ROADMAP</div>
+            <h3 className="mm-ember-title">Turn this sample into a plan built from your own assessment.</h3>
+            <p className="mm-ember-body">
               The Revenue Health Diagnostic™ delivers a week-by-week 120-day roadmap with assigned owners, sequenced initiatives, and 90-day review checkpoints with Rachel.
             </p>
           </div>
-          <a href="/diagnostic" style={{
-            display: "inline-block", background: T.white, color: "var(--mm-eyebrow)",
-            fontFamily: "Inter", fontSize: 13, fontWeight: 700,
-            padding: "12px 24px", borderRadius: 10,
-            textDecoration: "none", textAlign: "center", whiteSpace: "nowrap",
-          }}>Book a Diagnostic →</a>
+          <Link to="/diagnostic" className="mm-btn-on-ember">Book a Diagnostic →</Link>
         </div>
 
-        <div style={{ paddingTop: 24, borderTop: `1px solid ${T.offWhite}`, marginTop: 32, fontSize: 11, fontFamily: "Inter", color: T.mid }}>
-          © 2025 Marketplace Maven. All rights reserved.
-        </div>
+        <div className="mm-footer">© 2025 Marketplace Maven. All rights reserved.</div>
       </main>
     </div>
   );
