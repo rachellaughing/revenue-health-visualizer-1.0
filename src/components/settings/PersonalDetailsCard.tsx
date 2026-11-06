@@ -59,19 +59,19 @@ export function PersonalDetailsCard() {
     !save.isPending;
 
   return (
-    <section style={cardStyle}>
-      <h2 style={h2Style}>Personal Details</h2>
+    <section className="mm-form-card">
+      <h2 className="mm-form-card__title">Personal Details</h2>
       {isLoading ? (
-        <p style={{ color: "var(--mm-mid)", fontSize: 14 }}>Loading…</p>
+        <p className="mm-muted text-sm">Loading…</p>
       ) : (
-        <div style={{ display: "grid", gap: 16 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div className="mm-form-grid">
+          <div className="mm-grid mm-grid--2 mm-gap-md">
             <Field label="First name" value={firstName} onChange={setFirstName} />
             <Field label="Last name" value={lastName} onChange={setLastName} />
           </div>
           <div>
             <Field label="Email" value={email} onChange={() => {}} disabled />
-            <p style={{ fontSize: 12, color: "var(--mm-mid)", marginTop: 6 }}>
+            <p className="mm-field__help">
               To change your email contact support
             </p>
           </div>
@@ -81,11 +81,7 @@ export function PersonalDetailsCard() {
               type="button"
               onClick={() => save.mutate()}
               disabled={!canSave}
-              style={{
-                ...emberBtn,
-                opacity: canSave ? 1 : 0.5,
-                cursor: canSave ? "pointer" : "not-allowed",
-              }}
+              className="mm-btn-ember"
             >
               {save.isPending ? "Saving…" : "Save Changes"}
             </button>
@@ -108,8 +104,8 @@ function Field({
   disabled?: boolean;
 }) {
   return (
-    <label style={{ display: "block" }}>
-      <span style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6, color: "var(--mm-ink)" }}>
+    <label className="mm-field">
+      <span className="mm-field__label">
         {label}
       </span>
       <input
@@ -117,42 +113,8 @@ function Field({
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: "100%",
-          borderRadius: 8,
-          border: "1px solid var(--mm-hairline)",
-          padding: "10px 12px",
-          fontSize: 14,
-          background: disabled ? "var(--mm-off-white)" : "var(--mm-off-white)",
-          color: disabled ? "var(--mm-mid)" : "var(--mm-ink)",
-          outline: "none",
-        }}
+        className="mm-input"
       />
     </label>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  background: "var(--mm-paper)",
-  border: "1px solid var(--mm-hairline)",
-  borderRadius: 14,
-  padding: "28px 32px",
-};
-
-const h2Style: React.CSSProperties = {
-  fontFamily: "'Instrument Serif', Georgia, serif",
-  fontSize: 26,
-  margin: "0 0 20px",
-  color: "var(--mm-ink)",
-  fontWeight: 400,
-};
-
-const emberBtn: React.CSSProperties = {
-  background: "var(--mm-ember)",
-  color: "var(--mm-white)",
-  border: "none",
-  padding: "12px 24px",
-  borderRadius: 10,
-  fontSize: 14,
-  fontWeight: 700,
-};
