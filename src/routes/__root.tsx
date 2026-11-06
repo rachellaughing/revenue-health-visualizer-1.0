@@ -147,7 +147,8 @@ function RootComponent() {
   );
 }
 
-const PUBLIC_ROUTES = ["/login", "/signup"];
+// Standalone pages that handle the signed-out case themselves (no app shell, no viewer fetch).
+const PUBLIC_ROUTES = ["/login", "/signup", "/reset-password", "/join-team"];
 
 function AuthGate() {
   const [collapsed, setCollapsed] = useState(false);
