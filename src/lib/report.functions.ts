@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { callAnthropic, anthropicModel } from "@/lib/anthropic.server";
 
 export type Tier = "starter" | "pro" | "diagnostic";
 
@@ -311,9 +312,6 @@ async function _generateReportNarrativeImpl(
   assessmentId: string,
   userId: string,
 ): Promise<{ headline: string; body: string; risks: RiskItem[]; systems: SystemNarratives }> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not configured");
-
   const core = await loadCoreData(assessmentId, userId);
   const systems = aggregateByParent(core.scores, core.parents, core.children);
   const overallScore =
@@ -334,37 +332,14 @@ async function _generateReportNarrativeImpl(
     painPoints: (core.company?.pain_points as string[] | null) ?? [],
   });
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-5-20250929",
-      // The prompt asks for a headline, body, 3 risks and 5 system paragraphs.
-      // 800 tokens truncated the response mid-JSON on every real assessment,
-      // which made JSON.parse fail and silently skipped the DB write.
-      max_tokens: 4000,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error("[narrative] anthropic error", response.status, errText);
-    throw new Error(`Anthropic API error ${response.status}`);
-  }
-
-  const json = (await response.json()) as any;
-
-  if (json?.stop_reason === "max_tokens") {
-    console.error("[narrative] response truncated by max_tokens", json?.usage);
+  // The prompt asks for a headline, body, 3 risks and 5 system paragraphs.
+  // 800 tokens truncated the response mid-JSON on every real assessment.
+  const ai = await callAnthropic(prompt, 4000);
+  if (ai.stopReason === "max_tokens") {
+    console.error("[narrative] response truncated by max_tokens");
     throw new Error("Narrative response was truncated (max_tokens)");
   }
-
-  const text: string = json?.content?.[0]?.text ?? "";
+  const text: string = ai.text;
   if (!text) throw new Error("Empty response from Anthropic");
 
 
@@ -397,7 +372,7 @@ async function _generateReportNarrativeImpl(
         narrative_conv: validated.systems.CONV,
         narrative_lfc: validated.systems.LFC,
         narrative_vis: validated.systems.VIS,
-        model_used: "claude-sonnet-4-5-20250929",
+        model_used: anthropicModel(),
         generated_at: new Date().toISOString(),
       },
       { onConflict: "assessment_id" },
@@ -467,6 +442,23 @@ export const generateReportNarrative = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => generateSchema.parse(d))
   .handler(async ({ data, context }) => {
+    // Generate once per assessment: return the cached narrative if one exists.
+    const core = await loadCoreData(data.assessmentId, context.userId);
+    const n = core.narrative as any;
+    if (n?.exec_headline && n?.exec_body && n?.top_risks) {
+      return {
+        headline: n.exec_headline,
+        body: n.exec_body,
+        risks: n.top_risks as RiskItem[],
+        systems: {
+          POS: n.narrative_pos ?? null,
+          AUTH: n.narrative_auth ?? null,
+          CONV: n.narrative_conv ?? null,
+          LFC: n.narrative_lfc ?? null,
+          VIS: n.narrative_vis ?? null,
+        },
+      };
+    }
     return _generateReportNarrativeImpl(data.assessmentId, context.userId);
   });
 
@@ -956,36 +948,9 @@ async function generateOpportunityCopy(
   const out = new Map<string, CardCopy>();
   if (items.length === 0) return out;
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.error("[opportunity-copy] ANTHROPIC_API_KEY is not configured");
-    return out;
-  }
-
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-5-20250929",
-        max_tokens: 4000,
-        messages: [
-          { role: "user", content: buildOpportunityCopyPrompt(companyName, items) },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("[opportunity-copy] anthropic error", response.status, await response.text());
-      return out;
-    }
-
-    const json = (await response.json()) as any;
-    const text: string = json?.content?.[0]?.text ?? "";
+    const ai = await callAnthropic(buildOpportunityCopyPrompt(companyName, items), 4000);
+    const text: string = ai.text;
     if (!text) return out;
 
     const validated = opportunityCopySchema.parse(JSON.parse(stripCodeFences(text)));
@@ -1254,7 +1219,7 @@ export const getTopOpportunities = createServerFn({ method: "POST" })
                 what_we_see: c.whatWeSee,
                 why_it_matters: c.whyItMatters,
                 start_here: c.startHere,
-                model_used: "claude-sonnet-4-5-20250929",
+                model_used: anthropicModel(),
                 generated_at: new Date().toISOString(),
               };
             });
@@ -2335,7 +2300,7 @@ export const getChildSystemActions = createServerFn({ method: "POST" })
             what_we_see: copy.whatWeSee,
             why_it_matters: copy.whyItMatters,
             start_here: copy.startHere,
-            model_used: "claude-sonnet-4-5-20250929",
+            model_used: anthropicModel(),
             generated_at: new Date().toISOString(),
           },
         ],
