@@ -48,7 +48,7 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`rounded-md px-4 py-2 text-sm font-semibold transition-colors ${active ? "bg-[var(--mm-abyss)] text-[var(--mm-on-dark)]" : "bg-transparent text-[var(--mm-text)]"}`}
+      className={`mm-auth-tab ${active ? "mm-auth-tab--active" : ""}`}
     >
       {children}
     </button>

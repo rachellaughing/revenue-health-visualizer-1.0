@@ -242,6 +242,25 @@
 }
 .mm-tab--active { font-weight: 700; color: var(--mm-text); border-bottom-color: var(--mm-ember); }
 .mm-tab:focus-visible { outline: 3px solid var(--mm-teal); outline-offset: -3px; }
+
+/* ---------- Auth tab strip (Sign in / Create account) ---------- */
+.mm-auth-tab {
+  border-radius: 6px; padding: 8px 16px; font-size: 14px; font-weight: 600;
+  background: transparent; color: var(--mm-text); cursor: pointer;
+  transition: background-color 150ms, color 150ms, box-shadow 150ms;
+}
+/* Light: active is the dark chip on the sunken strip (unchanged). */
+.mm-auth-tab--active { background: var(--mm-abyss); color: var(--mm-on-dark); }
+/* Dark: abyss and surface-sunken are near-identical, so the active chip
+   lifts to surface-raised with an ember underline + inset ring. */
+[data-theme="dark"] .mm-auth-tab--active {
+  background: var(--mm-surface-raised);
+  color: var(--mm-text);
+  box-shadow: inset 0 -2px 0 var(--mm-ember), inset 0 0 0 1px color-mix(in srgb, var(--mm-ember) 35%, transparent);
+}
+[data-theme="dark"] .mm-auth-tab:not(.mm-auth-tab--active) { color: var(--mm-text-muted); }
+.mm-auth-tab:focus-visible { outline: 3px solid var(--mm-teal); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .mm-auth-tab { transition: none; } }
 @media (max-width: 767px) { .mm-settings__main { padding: 24px 16px; } }
 
 /* ---------- Forms ---------- */
@@ -434,7 +453,12 @@
 .mm-step--active .mm-step__label { font-weight: 600; color: var(--mm-text); }
 .mm-step__line { flex: 1; height: 2px; margin: 0 8px 22px; background: var(--mm-surface-sunken); }
 .mm-step--done .mm-step__line { background: var(--mm-teal-bright); }
-[data-theme="dark"] .mm-step--active .mm-step__dot { border-color: var(--mm-teal-bright); }
+/* Dark: the page surface is abyss, so an abyss fill would vanish — lift it. */
+[data-theme="dark"] .mm-step--active .mm-step__dot {
+  background: var(--mm-surface-raised);
+  border-color: var(--mm-teal-bright);
+  color: var(--mm-text);
+}
 .mm-section-card {
   border-radius: 12px; padding: 28px; margin-bottom: 24px; background: var(--mm-surface);
   border: 1px solid var(--mm-border-subtle); box-shadow: 0 2px 8px color-mix(in srgb, var(--mm-abyss) 5%, transparent);
