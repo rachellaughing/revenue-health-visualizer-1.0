@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Lock } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Badge } from "@/components/ui-mm";
 import {
   listTeamMembers,
   inviteTeamMember,
@@ -36,80 +36,31 @@ function LockedTeamPanel() {
   });
 
   return (
-    <div style={{ position: "relative" }}>
-      <div style={{ filter: "blur(3px)", pointerEvents: "none", userSelect: "none" }}>
+    <div className="mm-team-locked">
+      <div className="mm-team-locked__blur" aria-hidden>
         <ActiveTeamPanel tier="starter" preview />
       </div>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: "color-mix(in srgb, var(--mm-abyss) 55.0%, transparent)",
-          borderRadius: 14,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            background: "var(--mm-paper)",
-            borderRadius: 14,
-            padding: "32px 36px",
-            maxWidth: 420,
-            textAlign: "center",
-            boxShadow: "0 24px 60px color-mix(in srgb, var(--mm-ink) 25.0%, transparent)",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: "50%",
-              background: "var(--mm-off-white)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 14,
-            }}
-          >
-            <Lock size={20} color="var(--mm-mid)" />
+      <div className="mm-team-locked__scrim">
+        <div className="mm-team-locked__box">
+          <div className="mm-team-locked__icon">
+            <Lock size={20} />
           </div>
-          <h3
-            style={{
-              fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 24,
-              margin: "0 0 10px",
-              color: "var(--mm-ink)",
-              fontWeight: 400,
-            }}
-          >
+          <h3 className="mm-team-locked__title">
             Team collaboration is available in Revenue Health Assessment™ and above
           </h3>
-          <p style={{ fontSize: 14, color: "var(--mm-mid)", margin: "0 0 20px" }}>
+          <p className="mm-team-locked__body">
             Invite teammates to complete the Health Check and unlock the Team Alignment report.
           </p>
           <button
             type="button"
             onClick={() => checkout.mutate()}
             disabled={checkout.isPending}
-            style={{
-              background: "var(--mm-ember)",
-              color: "var(--mm-white)",
-              border: "none",
-              padding: "12px 24px",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: checkout.isPending ? "wait" : "pointer",
-            }}
+            className="mm-btn-ember"
           >
             {checkout.isPending ? "Redirecting…" : "Upgrade to unlock team features"}
           </button>
           {checkout.error && (
-            <div style={{ marginTop: 12, fontSize: 12, color: "var(--mm-danger)" }}>
-              {(checkout.error as Error).message}
-            </div>
+            <div className="mm-field__error mm-mt-sm">{(checkout.error as Error).message}</div>
           )}
         </div>
       </div>
@@ -119,7 +70,6 @@ function LockedTeamPanel() {
 
 function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: boolean }) {
   const qc = useQueryClient();
-  const isMobile = useIsMobile();
   const listFn = useServerFn(listTeamMembers);
   const inviteFn = useServerFn(inviteTeamMember);
   const removeFn = useServerFn(removeTeamMember);
@@ -173,16 +123,16 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
   const isDiag = tier === "diagnostic";
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
-      <section style={card}>
-        <h2 style={h2}>Invite a team member</h2>
+    <div className="mm-stack mm-gap-lg">
+      <section className="mm-team-card">
+        <h2 className="mm-team-h2">Invite a team member</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
             if (!email.trim()) return;
             invite.mutate(email.trim());
           }}
-          style={{ display: "flex", gap: 10, flexDirection: isMobile ? "column" : "row" }}
+          className="mm-team-form"
         >
           <input
             type="email"
@@ -190,159 +140,49 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="teammate@company.com"
+            aria-label="Teammate email"
             disabled={preview}
-            style={{
-              flex: 1,
-              width: isMobile ? "100%" : undefined,
-              borderRadius: 8,
-              border: "1px solid var(--mm-hairline)",
-              padding: "10px 12px",
-              fontSize: 14,
-              background: "var(--mm-off-white)",
-              color: "var(--mm-ink)",
-              outline: "none",
-            }}
+            className="mm-input"
           />
           <button
             type="submit"
             disabled={preview || invite.isPending || !email.trim()}
-            style={{
-              background: "var(--mm-ember)",
-              color: "var(--mm-white)",
-              border: "none",
-              padding: isMobile ? "12px 20px" : "10px 20px",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: invite.isPending ? "wait" : "pointer",
-              opacity: !email.trim() || invite.isPending ? 0.6 : 1,
-              width: isMobile ? "100%" : undefined,
-            }}
+            className="mm-btn-ember"
           >
             {invite.isPending ? "Sending…" : "Send Invite"}
           </button>
         </form>
       </section>
 
-      <section style={card}>
-        <h2 style={h2}>Team members</h2>
+      <section className="mm-team-card">
+        <h2 className="mm-team-h2">Team members</h2>
         {isLoading && !preview ? (
-          <p style={{ color: "var(--mm-mid)", fontSize: 14 }}>Loading…</p>
+          <p className="text-sm mm-muted">Loading…</p>
         ) : demoMembers.length === 0 ? (
-          <p style={{ color: "var(--mm-mid)", fontSize: 14 }}>
+          <p className="text-sm mm-muted">
             No team members yet. Invite your team to get started with the Team Alignment report.
           </p>
         ) : (
-          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 10 }}>
+          <ul className="mm-team-list">
             {demoMembers.map((m: any) => (
-              <li
-                key={m.id}
-                style={{
-                  display: "flex",
-                  flexDirection: isMobile ? "column" : "row",
-                  alignItems: isMobile ? "stretch" : "center",
-                  gap: isMobile ? 10 : 14,
-                  padding: isMobile ? "14px 14px" : "12px 14px",
-                  border: "1px solid var(--mm-hairline)",
-                  borderRadius: 10,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, flex: 1 }}>
-                  <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      background: "var(--mm-teal)",
-                      color: "var(--mm-white)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 13,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {m.initials}
+              <li key={m.id} className="mm-team-row">
+                <div className="mm-team-who">
+                  <div className="mm-team-avatar">{m.initials}</div>
+                  <div className="mm-flex-1">
+                    <div className="mm-team-name">{m.display_name || m.email}</div>
+                    {m.display_name && <div className="mm-team-email">{m.email}</div>}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, color: "var(--mm-ink)", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {m.display_name || m.email}
-                    </div>
-                    {m.display_name && (
-                      <div style={{ fontSize: 12, color: "var(--mm-mid)", overflow: "hidden", textOverflow: "ellipsis" }}>{m.email}</div>
-                    )}
-                  </div>
-                  {!isMobile && (() => {
-                    const palette: Record<string, { bg: string; fg: string }> = {
-                      Completed: { bg: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))", fg: "var(--mm-status-success)" },
-                      "In progress": { bg: "color-mix(in srgb, var(--mm-teal) 12%, var(--mm-off-white))", fg: "var(--mm-teal)" },
-                      Joined: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
-                      Invited: { bg: "color-mix(in srgb, var(--mm-sys-positioning) 12%, var(--mm-off-white))", fg: "var(--mm-sys-positioning)" },
-                    };
-                    const c = palette[m.status as string] ?? palette.Invited;
-                    return (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 700,
-                          letterSpacing: "0.08em",
-                          padding: "4px 10px",
-                          borderRadius: 6,
-                          background: c.bg,
-                          color: c.fg,
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {String(m.status).toUpperCase()}
-                      </span>
-                    );
-                  })()}
                 </div>
-
-                {isMobile && (() => {
-                  const palette: Record<string, { bg: string; fg: string }> = {
-                    Completed: { bg: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))", fg: "var(--mm-status-success)" },
-                    "In progress": { bg: "color-mix(in srgb, var(--mm-teal) 12%, var(--mm-off-white))", fg: "var(--mm-teal)" },
-                    Joined: { bg: "color-mix(in srgb, var(--mm-sys-authority) 12%, var(--mm-off-white))", fg: "var(--mm-sys-authority)" },
-                    Invited: { bg: "color-mix(in srgb, var(--mm-sys-positioning) 12%, var(--mm-off-white))", fg: "var(--mm-sys-positioning)" },
-                  };
-                  const c = palette[m.status as string] ?? palette.Invited;
-                  return (
-                    <span
-                      style={{
-                        alignSelf: "flex-start",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        letterSpacing: "0.08em",
-                        padding: "4px 10px",
-                        borderRadius: 6,
-                        background: c.bg,
-                        color: c.fg,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {String(m.status).toUpperCase()}
-                    </span>
-                  );
-                })()}
-
-                <div style={{ display: "flex", gap: 8, width: isMobile ? "100%" : "auto" }}>
+                <Badge tone={STATUS_TONE[m.status as string] ?? "warning"}>
+                  {String(m.status).toUpperCase()}
+                </Badge>
+                <div className="mm-team-actions">
                   {m.status === "Invited" && (
                     <button
                       type="button"
                       onClick={() => resend.mutate(m.id)}
                       disabled={preview || resend.isPending}
-                      style={{
-                        background: "transparent",
-                        border: "1px solid var(--mm-hairline)",
-                        color: "var(--mm-link)",
-                        padding: isMobile ? "10px 12px" : "6px 12px",
-                        borderRadius: 8,
-                        fontSize: 12,
-                        cursor: resend.isPending ? "wait" : "pointer",
-                        flex: isMobile ? 1 : undefined,
-                      }}
+                      className="mm-team-btn mm-team-btn--link"
                     >
                       {resend.isPending ? "Sending…" : "Resend"}
                     </button>
@@ -351,16 +191,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
                     type="button"
                     onClick={() => remove.mutate(m.id)}
                     disabled={preview || remove.isPending}
-                    style={{
-                      background: "transparent",
-                      border: "1px solid var(--mm-hairline)",
-                      color: "var(--mm-mid)",
-                      padding: isMobile ? "10px 12px" : "6px 12px",
-                      borderRadius: 8,
-                      fontSize: 12,
-                      cursor: "pointer",
-                      flex: isMobile ? 1 : undefined,
-                    }}
+                    className="mm-team-btn"
                   >
                     Remove
                   </button>
@@ -371,17 +202,7 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
         )}
       </section>
 
-      <div
-        style={{
-          background: "color-mix(in srgb, var(--mm-sand) 12%, var(--mm-off-white))",
-          border: "1px solid color-mix(in srgb, var(--mm-sand) 35%, transparent)",
-          borderRadius: 12,
-          padding: "16px 20px",
-          fontSize: 13,
-          color: "var(--mm-sand)",
-          lineHeight: 1.6,
-        }}
-      >
+      <div className="mm-callout-info">
         Team members complete the Health Check independently. Their responses are anonymized in your Team Alignment report.
         {isDiag && " Your Diagnostic includes a facilitated PBJ session with your team."}
       </div>
@@ -389,17 +210,9 @@ function ActiveTeamPanel({ tier, preview = false }: { tier: string; preview?: bo
   );
 }
 
-const card: React.CSSProperties = {
-  background: "var(--mm-paper)",
-  border: "1px solid var(--mm-hairline)",
-  borderRadius: 14,
-  padding: "24px 28px",
-};
-
-const h2: React.CSSProperties = {
-  fontFamily: "'Instrument Serif', Georgia, serif",
-  fontSize: 22,
-  margin: "0 0 16px",
-  color: "var(--mm-ink)",
-  fontWeight: 400,
+const STATUS_TONE: Record<string, "success" | "info" | "neutral" | "warning"> = {
+  Completed: "success",
+  "In progress": "info",
+  Joined: "neutral",
+  Invited: "warning",
 };
