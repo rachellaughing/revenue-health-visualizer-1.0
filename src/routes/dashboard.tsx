@@ -1,6 +1,8 @@
 import { fetchDashboardDataSafe } from "@/lib/viewer-query";
+import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getSystemColor, SYSTEM_COLOR } from "@/lib/system-colors";
+import { getSystemColor, getSystemClass } from "@/lib/system-colors";
+import { Bar, ScoreRing } from "@/components/ui-mm";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -50,8 +52,8 @@ function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-[var(--mm-paper)] p-8">
-        <p className="text-sm text-[var(--mm-mid)]">Loading your dashboard…</p>
+      <div className="flex min-h-full items-center justify-center bg-[var(--mm-surface)] p-8">
+        <p className="text-sm mm-muted">Loading your dashboard…</p>
       </div>
     );
   }
@@ -76,13 +78,13 @@ function DashboardPage() {
   if (!profile) {
     return (
       <div className="p-8">
-        <p className="text-sm text-[var(--mm-mid)]">Setting up your profile…</p>
+        <p className="text-sm mm-muted">Setting up your profile…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full bg-[var(--mm-paper)] px-9 py-8">
+    <div className="min-h-full bg-[var(--mm-surface)] px-9 py-8 max-md:px-0 max-md:py-2">
       <div className="mx-auto max-w-[1140px]">
         {isReturning ? (
           <div className="mx-auto max-w-[880px]">
@@ -157,53 +159,23 @@ function HeroCard({ isStarter }: { isStarter: boolean }) {
     },
   ];
   return (
-    <section className="relative overflow-hidden rounded-[14px] bg-[var(--mm-abyss)] px-8 py-8">
-      <div
-        aria-hidden
-        className="absolute right-0 top-0 bottom-0 w-[280px] opacity-[0.07]"
-        style={{
-          background:
-            "radial-gradient(circle at 80% 50%, var(--mm-teal-bright), transparent 70%)",
-        }}
-      />
+    <section className="mm-dash-dark mm-dash-plain mm-dash-hero">
+      <div aria-hidden className="mm-dash-hero__glow" />
       <div className="relative flex flex-col gap-5">
-        <p
-          className="m-0 text-[22px] leading-[1.25] text-[var(--mm-on-dark)]"
-          style={{ fontFamily: "'Instrument Serif', serif" }}
-        >
+        <p className="mm-dash-hero__title">
           A prompt didn’t create the Revenue Health Matrix™.
         </p>
-        <p className="m-0 max-w-[560px] text-[13px] leading-[1.65] text-[color-mix(in_srgb,var(--mm-on-dark)_65%,transparent)]">
+        <p className="mm-dash-hero__lede">
           Five interconnected systems, built from years of pattern recognition
           inside founder-led companies — not generated. Here’s the shape of it.
         </p>
 
-        <div className="mt-1 flex items-stretch border-t border-white/10 pt-5">
-          {stats.map((s, i) => (
-            <div
-              key={s.label}
-              className="flex-1 px-3"
-              style={{
-                borderLeft: i > 0 ? "1px solid color-mix(in srgb, var(--mm-white) 10.0%, transparent)" : "none",
-              }}
-            >
-              <div
-                className="text-[30px] leading-none"
-                style={{
-                  fontFamily: "'Instrument Serif', serif",
-                  color: s.muted ? "color-mix(in srgb, var(--mm-white) 40.0%, transparent)" : "var(--mm-paper)",
-                }}
-              >
-                {s.num}
-              </div>
-              <div className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-[color-mix(in_srgb,var(--mm-on-dark)_50%,transparent)]">
-                {s.label}
-              </div>
-              {s.note && (
-                <div className="mt-1 text-[10.5px] text-[var(--mm-teal-bright)]">
-                  {s.note}
-                </div>
-              )}
+        <div className="mm-dash-stats">
+          {stats.map((s) => (
+            <div key={s.label} className={`mm-dash-stat ${s.muted ? "mm-dash-stat--muted" : ""}`}>
+              <div className="mm-dash-stat__n">{s.num}</div>
+              <div className="mm-dash-stat__l">{s.label}</div>
+              {s.note && <div className="mm-dash-stat__note">{s.note}</div>}
             </div>
           ))}
         </div>
@@ -246,25 +218,22 @@ function SnapshotIncludesCard({ tier }: { tier: "starter" | "pro" | "diagnostic"
   };
   const c = content[tier] || content.starter;
   return (
-    <section className="rounded-[14px] border border-white/10 bg-[var(--mm-abyss)] p-6 text-[var(--mm-on-dark)]">
-      <h3
-        className="m-0 mb-4 text-[18px]"
-        style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-      >
+    <section className="mm-dash-dark p-6">
+      <h3 className="m-0 mb-4 font-display text-[18px] font-normal">
         {c.title}
       </h3>
       <ul className="m-0 mb-4 list-none space-y-3 p-0">
         {c.items.map((item, i) => (
           <li key={i} className="flex gap-2.5">
-            <div className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full bg-[color-mix(in srgb, var(--mm-teal-bright) 18.0%, transparent)]">
-              <Check className="h-2.5 w-2.5 text-[var(--mm-teal-bright)]" strokeWidth={3} />
+            <div className="mm-dash-check">
+              <Check className="h-2.5 w-2.5" strokeWidth={3} />
             </div>
             <span className="text-[12.5px] leading-[1.5] text-[color-mix(in_srgb,var(--mm-on-dark)_85%,transparent)]">{item}</span>
           </li>
         ))}
       </ul>
       {c.upgradeCta && (
-        <div className="border-t border-white/10 pt-4">
+        <div className="mm-dash-divider pt-4">
           <Link
             to="/settings/billing"
             className="block w-full rounded-lg border-[1.5px] border-[var(--mm-teal-bright)] px-2 py-[9px] text-center text-[12px] font-medium text-[var(--mm-teal-bright)] transition-opacity hover:opacity-85"
@@ -378,51 +347,39 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
   const remaining = 15 - total;
 
   return (
-    <section className="rounded-[14px] border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <section className="mm-dash-card">
       <div className="mb-1 flex items-baseline justify-between">
-        <h3
-          className="m-0 text-[20px] text-[var(--mm-ink)]"
-          style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-        >
+        <h3 className="m-0 font-display text-[20px] font-normal">
           How the Health Check works
         </h3>
-        <div className="text-[13px] font-semibold text-[var(--mm-ink)]">
-          <span style={{ color: complete ? "var(--mm-teal)" : "var(--mm-ember)" }}>
+        <div className="text-[13px] font-semibold">
+          <span className={complete ? "mm-dash-count--done" : "mm-dash-count--todo"}>
             {total}
           </span>
-          <span className="text-[var(--mm-mid)]"> / 15 selected</span>
+          <span className="mm-muted"> / 15 selected</span>
         </div>
       </div>
-      <p className="m-0 mb-5 text-[12.5px] leading-[1.55] text-[var(--mm-mid)]">
+      <p className="m-0 mb-5 text-[12.5px] leading-[1.55] mm-muted">
         Your Snapshot covers 3 subsystems per system. Pick the 3 you most want to
         evaluate — you can revisit any of them next quarter.
       </p>
 
       <div className="space-y-5">
         {parents.map((p) => {
-          const color = getSystemColor(p.code ?? p.name);
+          const sysClass = getSystemClass(p.code ?? p.name);
           const kids = childrenByParent.get(p.id) ?? [];
           const chosen = picks[p.id] ?? [];
           const full = chosen.length >= FREE_LIMIT;
           return (
-            <div key={p.id}>
+            <div key={p.id} className={sysClass}>
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span
-                    className="inline-block h-2 w-2 rounded-full"
-                    style={{ background: color }}
-                  />
-                  <span className="text-[13px] font-semibold text-[var(--mm-ink)]">
+                  <span className="mm-sys-dot mm-dot-8" />
+                  <span className="text-[13px] font-semibold">
                     {p.name}
                   </span>
                 </div>
-                <span
-                  className="text-[11.5px]"
-                  style={{
-                    color: chosen.length === FREE_LIMIT ? color : "var(--mm-mid)",
-                    fontWeight: chosen.length === FREE_LIMIT ? 600 : 400,
-                  }}
-                >
+                <span className={`text-[11.5px] ${chosen.length === FREE_LIMIT ? "font-semibold mm-text" : "mm-muted"}`}>
                   {chosen.length} of {FREE_LIMIT} selected
                 </span>
               </div>
@@ -436,22 +393,8 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
                       type="button"
                       onClick={() => toggle(p.id, c.code)}
                       disabled={disabled}
-                      className="rounded-full border px-3 py-1.5 text-[11.5px] transition"
-                      style={{
-                        borderColor: isChosen
-                          ? color
-                          : disabled
-                          ? "var(--mm-rule)"
-                          : "color-mix(in srgb, var(--mm-ink) 12.0%, transparent)",
-                        background: isChosen ? color : "transparent",
-                        color: isChosen
-                          ? "var(--mm-paper)"
-                          : disabled
-                          ? "color-mix(in srgb, var(--mm-ink) 25.0%, transparent)"
-                          : "var(--mm-ink)",
-                        fontWeight: isChosen ? 600 : 400,
-                        cursor: disabled ? "not-allowed" : "pointer",
-                      }}
+                      aria-pressed={isChosen}
+                      className={`mm-chip ${isChosen ? "mm-chip--on" : ""}`}
                     >
                       {c.name}
                     </button>
@@ -463,9 +406,9 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
         })}
       </div>
 
-      <div className="mt-6 border-t border-[var(--mm-off-white)] pt-4">
+      <div className="mt-6 mm-dash-sep pt-4">
         {error && (
-          <div className="mb-2 text-[11.5px] text-[var(--mm-sys-visibility)]">
+          <div className="mb-2 text-[11.5px] mm-field__error">
             {error}
           </div>
         )}
@@ -473,12 +416,7 @@ function SubsystemPickerCard({ data }: { data: DashboardData }) {
           type="button"
           onClick={() => continueMut.mutate()}
           disabled={!complete || continueMut.isPending}
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-[13px] font-semibold transition"
-          style={{
-            background: complete ? "var(--mm-ember)" : "var(--mm-rule)",
-            color: complete ? "var(--mm-paper)" : "var(--mm-mid)",
-            cursor: complete && !continueMut.isPending ? "pointer" : "not-allowed",
-          }}
+          className="mm-dash-cta"
         >
           {continueMut.isPending
             ? "Saving…"
@@ -516,39 +454,28 @@ function FullAccessCard({ data }: { data: DashboardData }) {
   }, [data.framework.children]);
 
   return (
-    <section className="rounded-[14px] border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
-      <h3
-        className="m-0 mb-1 text-[20px] text-[var(--mm-ink)]"
-        style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-      >
+    <section className="mm-dash-card">
+      <h3 className="m-0 mb-1 font-display text-[20px] font-normal">
         You have full access
       </h3>
-      <p className="m-0 mb-5 text-[12.5px] leading-[1.55] text-[var(--mm-mid)]">
+      <p className="m-0 mb-5 text-[12.5px] leading-[1.55] mm-muted">
         All 50 subsystems included — 200 evaluation areas across every system.
       </p>
 
       <div className="space-y-4">
         {parents.map((p) => {
-          const color = getSystemColor(p.code ?? p.name);
           const kids = childrenByParent.get(p.id) ?? [];
           return (
-            <div key={p.id}>
+            <div key={p.id} className={getSystemClass(p.code ?? p.name)}>
               <div className="mb-2 flex items-center gap-2">
-                <span
-                  className="inline-block h-2 w-2 rounded-full"
-                  style={{ background: color }}
-                />
-                <span className="text-[13px] font-semibold text-[var(--mm-ink)]">
+                <span className="mm-sys-dot mm-dot-8" />
+                <span className="text-[13px] font-semibold">
                   {p.name}
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {kids.map((c) => (
-                  <div
-                    key={c.id}
-                    className="rounded-full px-3 py-1.5 text-[11.5px] font-semibold"
-                    style={{ background: color, color: "var(--mm-white)" }}
-                  >
+                  <div key={c.id} className="mm-chip mm-chip--on mm-chip--static">
                     {c.name}
                   </div>
                 ))}
@@ -558,11 +485,11 @@ function FullAccessCard({ data }: { data: DashboardData }) {
         })}
       </div>
 
-      <div className="mt-6 border-t border-[var(--mm-off-white)] pt-4">
+      <div className="mt-6 mm-dash-sep pt-4">
         <button
           type="button"
           onClick={() => navigate({ to: "/health-check" })}
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--mm-ember)] px-4 py-2.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+          className="mm-dash-cta transition-opacity hover:opacity-90"
         >
           Continue to Health Check <ArrowRight className="h-3.5 w-3.5" />
         </button>
@@ -573,16 +500,13 @@ function FullAccessCard({ data }: { data: DashboardData }) {
 
 function AboutMatrixCard() {
   return (
-    <section className="rounded-[14px] border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <section className="mm-dash-card">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-[720px]">
-          <h3
-            className="m-0 mb-2 text-[18px] text-[var(--mm-ink)]"
-            style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-          >
+          <h3 className="m-0 mb-2 font-display text-[18px] font-normal">
             About the Revenue Health Matrix™
           </h3>
-          <p className="m-0 text-[12.5px] leading-[1.6] text-[var(--mm-mid)]">
+          <p className="m-0 text-[12.5px] leading-[1.6] mm-muted">
             The Matrix is a diagnostic model for founder-led revenue —
             5 systems · 10 subsystems each · 4 evaluation areas · 200 total
             checkpoints — designed to surface the structural gaps most operators
@@ -593,25 +517,25 @@ function AboutMatrixCard() {
           href="https://marketplacemaven.com/revenue-architecture-framework/"
           target="_blank"
           rel="noopener noreferrer"
-          className="whitespace-nowrap text-[12px] font-medium text-[var(--mm-teal)] hover:underline"
+          className="whitespace-nowrap text-[12px] font-medium text-[var(--mm-link)] hover:underline"
         >
           How the Matrix works →
         </a>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-[color-mix(in srgb, var(--mm-ember) 20.0%, transparent)] bg-[color-mix(in srgb, var(--mm-ember) 5.0%, transparent)] px-5 py-4">
+      <div className="mm-dash-callout mm-dash-callout--ember mt-5 flex flex-wrap items-center justify-between gap-4 px-5 py-4">
         <div>
-          <div className="text-[13px] font-semibold text-[var(--mm-ink)]">
+          <div className="text-[13px] font-semibold">
             Want a guided Diagnostic with a consultant?
           </div>
-          <div className="mt-0.5 text-[11.5px] text-[var(--mm-mid)]">
+          <div className="mt-0.5 text-[11.5px] mm-muted">
             Book a Revenue Health Diagnostic™ session and get a tailored
             walkthrough of your results.
           </div>
         </div>
         <Link
           to="/diagnostic"
-          className="whitespace-nowrap rounded-lg bg-[var(--mm-ember)] px-4 py-2.5 text-[12.5px] font-semibold text-white transition-opacity hover:opacity-90"
+          className="whitespace-nowrap rounded-lg bg-[var(--mm-ember)] px-4 py-2.5 text-[12.5px] font-semibold mm-text-white transition-opacity hover:opacity-90"
         >
           Learn about the Diagnostic →
         </Link>
@@ -657,67 +581,36 @@ function GettingStarted({ data }: { data: DashboardData }) {
   const pct = (done / steps.length) * 100;
 
   return (
-    <div className="rounded-xl border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-6 shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]">
+    <div className="mm-dash-card">
       <div className="mb-3.5 flex items-center justify-between">
-        <h3
-          className="m-0 text-[17px] text-[var(--mm-ink)]"
-          style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-        >
-          Getting Started
-        </h3>
-        <span className="text-[11px] text-[var(--mm-mid)]">
+        <h3 className="m-0 font-display text-[17px] font-normal">Getting Started</h3>
+        <span className="text-[11px] mm-muted">
           {done} of {steps.length} complete
         </span>
       </div>
-      <div className="mb-[18px] h-1 rounded-sm bg-[var(--mm-off-white)]">
-        <div
-          className="h-full rounded-sm bg-[var(--mm-teal-bright)] transition-[width] duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Bar pct={pct} className="mm-bar--thin mm-bar--bright mb-[18px]" label="Getting started progress" />
       {steps.map((step, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 py-2.5"
-          style={{
-            borderBottom: i < steps.length - 1 ? "1px solid var(--mm-off-white)" : "none",
-            opacity: step.locked ? 0.4 : 1,
-          }}
+          className={`mm-gs-step ${step.done ? "mm-gs-step--done" : ""} ${step.locked ? "mm-gs-step--locked" : ""}`}
         >
-          <div
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-            style={{
-              background: step.done ? "var(--mm-teal-bright)" : "transparent",
-              border: step.done
-                ? "2px solid var(--mm-teal-bright)"
-                : "2px solid color-mix(in srgb, var(--mm-ink) 15.0%, transparent)",
-            }}
-          >
+          <div className="mm-gs-dot">
             {step.done ? (
-              <Check className="h-3 w-3 text-white" strokeWidth={3} />
+              <Check className="h-3 w-3" strokeWidth={3} />
             ) : (
-              <span className="text-[10px] text-[var(--mm-mid)]">{i + 1}</span>
+              <span className="text-[10px] mm-muted">{i + 1}</span>
             )}
           </div>
-          <span
-            className="flex-1 text-[13px]"
-            style={{
-              fontWeight: step.done ? 400 : 500,
-              color: step.done ? "var(--mm-mid)" : "var(--mm-ink)",
-              textDecoration: step.done ? "line-through" : "none",
-            }}
-          >
-            {step.label}
-          </span>
+          <span className="mm-gs-label">{step.label}</span>
           {!step.done && !step.locked && (
             <Link
               to={step.href}
-              className="whitespace-nowrap text-[12px] font-medium text-[var(--mm-ember)] hover:underline"
+              className="whitespace-nowrap text-[12px] font-medium text-[var(--mm-eyebrow)] hover:underline"
             >
               {step.cta} →
             </Link>
           )}
-          {step.locked && <Lock className="h-3 w-3 text-[var(--mm-mid)]" />}
+          {step.locked && <Lock className="h-3 w-3 mm-muted" />}
         </div>
       ))}
     </div>
@@ -757,54 +650,45 @@ function ReturningView({ data }: { data: DashboardData }) {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <h2
-            className="m-0 mb-1 text-[24px] text-[var(--mm-ink)]"
-            style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400 }}
-          >
+          <h2 className="m-0 mb-1 font-display text-[24px] font-normal">
             Welcome back, {p.first_name}.
           </h2>
-          <p className="m-0 text-[13px] text-[var(--mm-mid)]">
+          <p className="m-0 text-[13px] mm-muted">
             {p.business_name ? `${p.business_name} · ` : ""}Last Health Check: {lastQ.label}
           </p>
         </div>
         <Link
           to="/reports/executive-summary"
-          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[var(--mm-ember)] px-[22px] py-[11px] text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[var(--mm-ember)] px-[22px] py-[11px] text-[13px] font-semibold mm-text-white transition-opacity hover:opacity-90"
         >
           View Full Report <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
 
       {/* Score panel */}
-      <section className="mb-6 grid items-center gap-7 rounded-[14px] bg-[var(--mm-abyss)] px-7 py-6 md:grid-cols-[84px_1fr]">
-        <div className="text-center">
-          <ScoreRing score={overall} color="var(--mm-teal-bright)" size={76} />
-          <div className="mt-1.5 text-[9px] font-bold tracking-[0.1em] text-[color-mix(in_srgb,var(--mm-on-dark)_40%,transparent)]">OVERALL</div>
+      <section className="mm-dash-dark mm-dash-plain mb-6 grid items-center gap-7 px-7 py-6 md:grid-cols-[84px_1fr]">
+        <div className="flex flex-col items-center">
+          <ScoreRing pct={overall} size={76} color="var(--mm-teal-bright)" />
+          <div className="mt-1.5 text-[9px] font-bold tracking-[0.1em] mm-dash-faint">OVERALL</div>
         </div>
         <div className="grid gap-x-7 gap-y-2.5 md:grid-cols-2">
           {systems.map((sys) => {
-            const color = getSystemColor(sys.code);
             const assessed = sys.assessed > 0;
             const val = assessed ? Math.round(sys.healthScore) : 0;
             return (
-              <div key={sys.id}>
+              <div key={sys.id} className={getSystemClass(sys.code)}>
                 <div className="mb-1 flex justify-between">
-                  <span className="text-[11px] font-medium text-[color-mix(in_srgb,var(--mm-on-dark)_70%,transparent)]">{sys.name}</span>
-                  <span className="text-[11px] font-bold" style={{ color: assessed ? color : "color-mix(in srgb, var(--mm-white) 40.0%, transparent)" }}>
+                  <span className="text-[11px] font-medium mm-dash-soft">{sys.name}</span>
+                  <span className={`mm-dash-sysval ${assessed ? "" : "mm-dash-sysval--na"}`}>
                     {assessed ? val : "—"}
                   </span>
                 </div>
-                <div className="h-1 rounded-sm" style={{ background: "color-mix(in srgb, var(--mm-white) 8%, transparent)" }}>
-                  <div
-                    className="h-full rounded-sm"
-                    style={{ width: `${val}%`, background: color }}
-                  />
-                </div>
+                <Bar pct={val} label={`${sys.name} score`} />
               </div>
             );
           })}
           {!hasSummary && !summaryLoading && (
-            <div className="col-span-2 text-[11px] text-[color-mix(in_srgb,var(--mm-on-dark)_50%,transparent)]">
+            <div className="col-span-2 text-[11px] mm-dash-faint">
               Complete your Health Check to see your scores.
             </div>
           )}
@@ -850,18 +734,18 @@ function ReturningView({ data }: { data: DashboardData }) {
       </div>
 
       {/* Reassess nudge */}
-      <div className="flex items-center justify-between gap-4 rounded-[10px] border border-[color-mix(in srgb, var(--mm-teal) 18.0%, transparent)] bg-[color-mix(in srgb, var(--mm-teal) 7.0%, transparent)] px-[22px] py-3.5">
+      <div className="mm-dash-callout mm-dash-callout--teal flex items-center justify-between gap-4 px-[22px] py-3.5">
         <div>
-          <span className="text-[13px] font-medium text-[var(--mm-teal)]">
+          <span className="text-[13px] font-medium text-[var(--mm-link)]">
             Your last Health Check was completed in {lastQ.monthYear}.{" "}
           </span>
-          <span className="text-[12px] text-[var(--mm-mid)]">
+          <span className="text-[12px] mm-muted">
             Ready for your {nextQ.label} Health Check?
           </span>
         </div>
         <Link
           to="/health-check"
-          className="whitespace-nowrap rounded-lg border-[1.5px] border-[var(--mm-teal)] px-4 py-2 text-[12px] font-medium text-[var(--mm-teal)] transition-opacity hover:opacity-85"
+          className="whitespace-nowrap rounded-lg border-[1.5px] border-[var(--mm-link)] px-4 py-2 text-[12px] font-medium text-[var(--mm-link)] transition-opacity hover:opacity-85"
         >
           Start {nextQ.label} Health Check
         </Link>
@@ -888,62 +772,16 @@ function InsightCard({
   href: string;
 }) {
   return (
-    <div
-      className="rounded-xl border border-[var(--mm-rule)] bg-[var(--mm-off-white)] p-[18px] shadow-[0_2px_8px_color-mix(in srgb, var(--mm-abyss) 6.0%, transparent)]"
-      style={{ borderTop: `3px solid ${color}` }}
-    >
-      <div className="mb-1.5 text-[9px] font-bold tracking-[0.1em] text-[var(--mm-mid)]">
+    <div className="mm-dash-card mm-insight" style={{ "--accent": color } as CSSProperties}>
+      <div className="mb-1.5 text-[9px] font-bold tracking-[0.1em] mm-muted">
         {label.toUpperCase()}
       </div>
-      <div
-        className="mb-1 text-[15px] text-[var(--mm-ink)]"
-        style={{ fontFamily: "'Instrument Serif', serif" }}
-      >
-        {title}
-      </div>
-      <div className="mb-1.5 text-[12px] font-bold" style={{ color }}>
-        {value}
-      </div>
-      <p className="m-0 mb-3 text-[11px] leading-[1.5] text-[var(--mm-mid)]">{sub}</p>
-      <Link to={href} className="text-[11px] font-medium text-[var(--mm-teal)] hover:underline">
+      <div className="mb-1 font-display text-[15px]">{title}</div>
+      <div className="mm-insight__value">{value}</div>
+      <p className="m-0 mb-3 text-[11px] leading-[1.5] mm-muted">{sub}</p>
+      <Link to={href} className="text-[11px] font-medium text-[var(--mm-link)] hover:underline">
         {cta} →
       </Link>
     </div>
   );
 }
-
-function ScoreRing({ score, color, size = 56 }: { score: number; color: string; size?: number }) {
-  const r = (size - 8) / 2;
-  const circ = 2 * Math.PI * r;
-  const fill = (Math.max(0, Math.min(100, score)) / 100) * circ;
-  return (
-    <svg width={size} height={size} className="inline-block">
-      <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="color-mix(in srgb, var(--mm-white) 10.0%, transparent)" strokeWidth={4} />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth={4}
-          strokeDasharray={`${fill} ${circ - fill}`}
-          strokeLinecap="round"
-        />
-      </g>
-      <text
-        x="50%"
-        y="50%"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fill="var(--mm-white)"
-        fontSize={size * 0.24}
-        fontFamily="Inter"
-        fontWeight={600}
-      >
-        {Math.round(score)}
-      </text>
-    </svg>
-  );
-}
-
