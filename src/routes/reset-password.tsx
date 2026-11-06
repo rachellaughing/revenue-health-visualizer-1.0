@@ -4,7 +4,16 @@ import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Reset password — Revenue Health Visualizer" }] }),
+  head: () => ({
+    meta: [
+      { title: "Reset password — Revenue Health Visualizer™" },
+      { name: "description", content: "Choose a new password for your Revenue Health Visualizer™ account." },
+      { property: "og:title", content: "Reset password — Revenue Health Visualizer™" },
+      { property: "og:description", content: "Choose a new password for your Revenue Health Visualizer™ account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ResetPasswordPage,
 });
 
