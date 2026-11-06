@@ -9,16 +9,6 @@ import {
 import { validateCoupon, redeemCoupon } from "@/lib/coupon.functions";
 import { fetchViewerContextSafe } from "@/lib/viewer-query";
 
-const T = {
-  abyss: "var(--mm-abyss)",
-  paper: "var(--mm-paper)",
-  offWhite: "var(--mm-off-white)",
-  ember: "var(--mm-ember)",
-  tealBright: "var(--mm-teal-bright)",
-  mid: "var(--mm-mid)",
-  ink: "var(--mm-ink)",
-  white: "var(--mm-white)",
-};
 
 export function BillingTab({ success }: { success?: boolean }) {
   const viewerQ = useQuery({
@@ -97,43 +87,19 @@ export function BillingTab({ success }: { success?: boolean }) {
   const isDiag = tier === "diagnostic";
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
+    <div className="mm-stack mm-gap-lg">
       {success && (
-        <div
-          style={{
-            padding: "14px 18px",
-            background: "color-mix(in srgb, var(--mm-status-success) 12%, var(--mm-off-white))",
-            border: "1px solid color-mix(in srgb, var(--mm-status-success) 35%, transparent)",
-            borderRadius: 10,
-            fontSize: 14,
-            color: "var(--mm-status-success)",
-          }}
-        >
+        <div className="mm-notice--success">
           You're now on Revenue Health Assessment™. All 10 subsystems and full reports are unlocked.
         </div>
       )}
 
       {/* Current plan card */}
-      <div
-        style={{
-          background: T.offWhite,
-          border: `1px solid var(--mm-hairline)`,
-          borderRadius: 14,
-          padding: "24px 28px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+      <div className="mm-bill-card">
+        <div className="mm-row mm-bill-row mm-gap-md justify-between">
           <div>
-            <div style={{ fontSize: 11, color: T.mid, letterSpacing: "0.08em", marginBottom: 6 }}>
-              CURRENT PLAN
-            </div>
-            <div
-              style={{
-                fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 28,
-                color: T.ink,
-              }}
-            >
+            <div className="mm-bill-kicker">CURRENT PLAN</div>
+            <div className="mm-bill-plan">
               {tierQ.isLoading
                 ? "Loading…"
                 : isDiag
@@ -142,7 +108,7 @@ export function BillingTab({ success }: { success?: boolean }) {
                 ? "Revenue Health Assessment™"
                 : "Revenue Health Snapshot™"}
             </div>
-            <div style={{ fontSize: 13, color: T.mid, marginTop: 6 }}>
+            <div className="mm-bill-note">
               {isDiag
                 ? "Full access plus team seats and consultant view."
                 : isPro
@@ -153,7 +119,7 @@ export function BillingTab({ success }: { success?: boolean }) {
           <TierBadge tier={tier} />
         </div>
         {isPro && (
-          <div style={{ fontSize: 12, color: T.mid, marginTop: 16 }}>
+          <div className="mm-bill-note text-xs mm-mt-sm">
             Manage your subscription via Stripe — billing portal coming soon.
           </div>
         )}
@@ -161,54 +127,13 @@ export function BillingTab({ success }: { success?: boolean }) {
 
       {/* Snapshot → upsell to Assessment */}
       {!isPro && !isDiag && (
-        <div
-          style={{
-            background: T.abyss,
-            color: "var(--mm-on-dark)",
-            borderRadius: 14,
-            padding: "28px 32px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              color: T.tealBright,
-              letterSpacing: "0.12em",
-              marginBottom: 10,
-            }}
-          >
-            UPGRADE · $197 ONE-TIME
-          </div>
-          <div
-            style={{
-              fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 30,
-              lineHeight: 1.2,
-              marginBottom: 10,
-            }}
-          >
-            Revenue Health Assessment™
-          </div>
-          <p
-            style={{
-              fontSize: 14,
-              lineHeight: 1.7,
-              color: "color-mix(in srgb, var(--mm-white) 78.0%, transparent)",
-              margin: "0 0 20px",
-            }}
-          >
+        <div className="mm-upsell">
+          <div className="mm-upsell__kicker">UPGRADE · $197 ONE-TIME</div>
+          <div className="mm-upsell__title">Revenue Health Assessment™</div>
+          <p className="mm-upsell__body">
             Unlock all 50 child systems, the full Revenue Health report, PDF export, and Health Check history.
           </p>
-          <ul
-            style={{
-              margin: "0 0 24px",
-              paddingLeft: 20,
-              fontSize: 13,
-              lineHeight: 1.9,
-              color: "color-mix(in srgb, var(--mm-white) 85.0%, transparent)",
-            }}
-          >
+          <ul className="mm-upsell__list">
             <li>All 50 child systems across 5 revenue systems</li>
             <li>Full Revenue Health report with named gaps</li>
             <li>PDF export and quarterly Health Check history</li>
@@ -218,16 +143,7 @@ export function BillingTab({ success }: { success?: boolean }) {
             <button
               onClick={() => redeem.mutate(applied.code)}
               disabled={redeem.isPending}
-              style={{
-                background: T.ember,
-                color: "var(--mm-white)",
-                border: "none",
-                padding: "14px 28px",
-                borderRadius: 10,
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: redeem.isPending ? "wait" : "pointer",
-              }}
+              className="mm-btn-ember"
             >
               {redeem.isPending ? "Redeeming…" : "Redeem code & upgrade — Free"}
             </button>
@@ -235,47 +151,20 @@ export function BillingTab({ success }: { success?: boolean }) {
             <button
               onClick={() => checkout.mutate()}
               disabled={checkout.isPending}
-              style={{
-                background: T.ember,
-                color: "var(--mm-white)",
-                border: "none",
-                padding: "14px 28px",
-                borderRadius: 10,
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: checkout.isPending ? "wait" : "pointer",
-              }}
+              className="mm-btn-ember"
             >
               {checkout.isPending ? "Redirecting to checkout…" : "Upgrade to Assessment™ — $197"}
             </button>
           )}
 
           {checkout.error && (
-            <div style={{ marginTop: 14, fontSize: 13, color: "var(--mm-danger)" }}>
-              {(checkout.error as Error).message}
-            </div>
+            <div className="mm-upsell__err">{(checkout.error as Error).message}</div>
           )}
 
           {/* Coupon row */}
-          <div
-            style={{
-              marginTop: 22,
-              paddingTop: 20,
-              borderTop: "1px solid color-mix(in srgb, var(--mm-white) 12.0%, transparent)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: T.tealBright,
-                letterSpacing: "0.12em",
-                marginBottom: 10,
-              }}
-            >
-              HAVE A CODE?
-            </div>
-            <div style={{ display: "flex", gap: 8 }}>
+          <div className="mm-upsell__coupon">
+            <div className="mm-upsell__kicker">HAVE A CODE?</div>
+            <div className="mm-row mm-gap-xs">
               <input
                 value={codeInput}
                 onChange={(e) => {
@@ -284,47 +173,21 @@ export function BillingTab({ success }: { success?: boolean }) {
                   if (couponMsg) setCouponMsg(null);
                 }}
                 placeholder="Enter beta or promo code"
+                aria-label="Promo code"
                 spellCheck={false}
                 autoCapitalize="characters"
-                style={{
-                  flex: 1,
-                  background: "color-mix(in srgb, var(--mm-white) 6.0%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--mm-white) 18.0%, transparent)",
-                  color: "var(--mm-white)",
-                  padding: "10px 12px",
-                  borderRadius: 8,
-                  fontSize: 14,
-                  letterSpacing: "0.05em",
-                  outline: "none",
-                }}
+                className="mm-upsell__input"
               />
               <button
                 onClick={() => apply.mutate(codeInput.trim())}
                 disabled={!codeInput.trim() || apply.isPending}
-                style={{
-                  background: "transparent",
-                  color: "var(--mm-on-dark)",
-                  border: "1px solid color-mix(in srgb, var(--mm-white) 35.0%, transparent)",
-                  padding: "10px 18px",
-                  borderRadius: 8,
-                  fontWeight: 600,
-                  fontSize: 13,
-                  cursor:
-                    !codeInput.trim() || apply.isPending ? "not-allowed" : "pointer",
-                  opacity: !codeInput.trim() ? 0.5 : 1,
-                }}
+                className="mm-upsell__apply"
               >
                 {apply.isPending ? "Checking…" : "Apply"}
               </button>
             </div>
             {couponMsg && (
-              <div
-                style={{
-                  marginTop: 10,
-                  fontSize: 13,
-                  color: couponMsg.kind === "ok" ? "var(--mm-teal-bright)" : "var(--mm-danger)",
-                }}
-              >
+              <div className={couponMsg.kind === "ok" ? "mm-upsell__ok" : "mm-upsell__err"}>
                 {couponMsg.text}
               </div>
             )}
@@ -333,25 +196,12 @@ export function BillingTab({ success }: { success?: boolean }) {
       )}
 
       {/* Diagnostic muted card — always visible */}
-      <Link
-        to="/diagnostic"
-        style={{
-          display: "block",
-          background: T.offWhite,
-          border: "1px solid var(--mm-hairline)",
-          borderRadius: 14,
-          padding: "20px 24px",
-          color: T.ink,
-          textDecoration: "none",
-        }}
-      >
-        <div style={{ fontSize: 11, color: T.mid, letterSpacing: "0.08em", marginBottom: 4 }}>
-          REVENUE HEALTH DIAGNOSTIC™
-        </div>
-        <div style={{ fontSize: 15, fontWeight: 600 }}>
+      <Link to="/diagnostic" className="mm-bill-card">
+        <div className="mm-bill-kicker">REVENUE HEALTH DIAGNOSTIC™</div>
+        <div className="text-[15px] font-semibold">
           Ready for the full Diagnostic? Book a discovery call →
         </div>
-        <div style={{ fontSize: 13, color: T.mid, marginTop: 4 }}>
+        <div className="mm-bill-note">
           Facilitated PBJ session, consultant view, team seats included.
         </div>
       </Link>
@@ -361,23 +211,8 @@ export function BillingTab({ success }: { success?: boolean }) {
 
 function TierBadge({ tier }: { tier: string }) {
   const label = tier === "diagnostic" ? "DIAGNOSTIC" : tier === "pro" ? "ASSESSMENT" : "SNAPSHOT";
-  const bg = tier === "diagnostic" ? "var(--mm-sys-authority)" : tier === "pro" ? "var(--mm-teal)" : "var(--mm-mid)";
-  return (
-    <span
-      style={{
-        background: bg,
-        color: "var(--mm-white)",
-        fontSize: 10,
-        fontWeight: 700,
-        letterSpacing: "0.1em",
-        padding: "6px 10px",
-        borderRadius: 6,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {label}
-    </span>
-  );
+  const mod = tier === "diagnostic" ? "mm-tier-badge--diagnostic" : tier === "pro" ? "mm-tier-badge--pro" : "";
+  return <span className={`mm-tier-badge ${mod}`}>{label}</span>;
 }
 
 function MemberBillingPanel({
@@ -403,35 +238,17 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
     : null;
 
   return (
-    <div style={{ display: "grid", gap: 20 }}>
+    <div className="mm-stack mm-gap-lg">
       {/* Current plan card */}
-      <div
-        style={{
-          background: T.offWhite,
-          border: `1px solid var(--mm-hairline)`,
-          borderRadius: 14,
-          padding: "24px 28px",
-        }}
-      >
-        <div style={{ fontSize: 11, color: T.mid, letterSpacing: "0.08em", marginBottom: 6 }}>
-          CURRENT PLAN
-        </div>
-        <div
-          style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 28,
-            color: T.ink,
-            marginBottom: 14,
-          }}
-        >
-          Revenue Health Assessment™
-        </div>
-        <div style={{ fontSize: 14, color: T.ink, lineHeight: 1.65 }}>
+      <div className="mm-bill-card">
+        <div className="mm-bill-kicker">CURRENT PLAN</div>
+        <div className="mm-bill-plan mm-mb-sm">Revenue Health Assessment™</div>
+        <div className="mm-bill-body m-0">
           Your access is provided through {ownerFullName}'s organization.
           {ownerEmail ? (
             <>
               {" "}To make changes to your plan, contact {ownerFirst} at{" "}
-              <a href={`mailto:${ownerEmail}`} style={{ color: "var(--mm-eyebrow)", textDecoration: "none" }}>
+              <a href={`mailto:${ownerEmail}`} className="mm-bill-mail">
                 {ownerEmail}
               </a>.
             </>
@@ -442,47 +259,19 @@ I just finished my Revenue Health Check. Based on what I'm seeing from my seat, 
       </div>
 
       {/* Want to go deeper card */}
-      <div
-        style={{
-          background: T.offWhite,
-          border: `1px solid var(--mm-hairline)`,
-          borderRadius: 14,
-          padding: "24px 28px",
-        }}
-      >
-        <div
-          style={{
-            fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 24,
-            color: T.ink,
-            marginBottom: 12,
-          }}
-        >
-          Want to go deeper?
-        </div>
-        <p style={{ fontSize: 14, color: T.ink, lineHeight: 1.7, margin: "0 0 12px" }}>
+      <div className="mm-bill-card">
+        <div className="mm-bill-h">Want to go deeper?</div>
+        <p className="mm-bill-body">
           The Revenue Health Diagnostic™ includes a facilitated session where
           your team's alignment gaps are reviewed together — with a consultant
           in the room.
         </p>
-        <p style={{ fontSize: 14, color: T.ink, lineHeight: 1.7, margin: "0 0 20px" }}>
+        <p className="mm-bill-body mm-mb-lg">
           If you think your organization is ready for that conversation, let{" "}
           {ownerFirst} know.
         </p>
         {mailto && (
-          <a
-            href={mailto}
-            style={{
-              display: "inline-block",
-              background: T.ember,
-              color: "var(--mm-white)",
-              padding: "12px 22px",
-              borderRadius: 10,
-              fontWeight: 700,
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
+          <a href={mailto} className="mm-btn-ember inline-block no-underline">
             Send {ownerFirst} a nudge →
           </a>
         )}
