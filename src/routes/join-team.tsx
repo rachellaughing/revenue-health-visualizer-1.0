@@ -13,7 +13,16 @@ import {
 } from "@/lib/team.functions";
 
 export const Route = createFileRoute("/join-team")({
-  head: () => ({ meta: [{ title: "Join your team — Revenue Health Visualizer" }] }),
+  head: () => ({
+    meta: [
+      { title: "Join your team — Revenue Health Visualizer™" },
+      { name: "description", content: "Accept your team invite and set up your Revenue Health Visualizer™ account." },
+      { property: "og:title", content: "Join your team — Revenue Health Visualizer™" },
+      { property: "og:description", content: "Accept your team invite and set up your Revenue Health Visualizer™ account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: JoinTeamPage,
 });
 
@@ -118,39 +127,23 @@ function JoinTeamPage() {
   }
 
   const page = (children: React.ReactNode) => (
-    <div
-      className="flex min-h-screen items-center justify-center px-4 py-12"
-      style={{ backgroundColor: "var(--mm-paper)" }}
-    >
-      <div className="w-full max-w-md">{children}</div>
+    <div className="mm-auth-page">
+      <div className="mm-auth-box">{children}</div>
     </div>
   );
 
   if (phase === "loading") {
-    return page(
-      <p className="text-sm" style={{ color: "var(--mm-mid)" }}>
-        Verifying your invite…
-      </p>,
-    );
+    return page(<p className="mm-auth-lede">Verifying your invite…</p>);
   }
 
   if (phase === "no-session") {
     return page(
       <>
-        <h1
-          className="text-5xl mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
-        >
-          Invite link expired
-        </h1>
-        <p className="text-sm mb-6" style={{ color: "var(--mm-mid)" }}>
+        <h1 className="mm-auth-title">Invite link expired</h1>
+        <p className="mm-auth-lede mb-6">
           Your invite link is no longer valid. Ask the person who invited you to send a new one.
         </p>
-        <Link
-          to="/login"
-          className="block w-full rounded-md px-4 py-3 font-semibold text-center"
-          style={{ border: "1px solid var(--mm-hairline)", color: "var(--mm-ink)" }}
-        >
+        <Link to="/login" className="mm-btn-block mm-btn-block--outline">
           Back to sign in
         </Link>
       </>,
@@ -160,20 +153,11 @@ function JoinTeamPage() {
   if (phase === "no-invite") {
     return page(
       <>
-        <h1
-          className="text-5xl mb-2"
-          style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
-        >
-          No pending invite
-        </h1>
-        <p className="text-sm mb-6" style={{ color: "var(--mm-mid)" }}>
+        <h1 className="mm-auth-title">No pending invite</h1>
+        <p className="mm-auth-lede mb-6">
           We couldn't find a team invite for your email. {error ? `(${error})` : ""}
         </p>
-        <Link
-          to="/dashboard"
-          className="block w-full rounded-md px-4 py-3 text-white font-semibold text-center"
-          style={{ backgroundColor: "var(--mm-ember)" }}
-        >
+        <Link to="/dashboard" className="mm-btn-block">
           Go to dashboard
         </Link>
       </>,
@@ -190,13 +174,8 @@ function JoinTeamPage() {
 
   return page(
     <>
-      <h1
-        className="text-5xl mb-2"
-        style={{ fontFamily: "'Instrument Serif', serif", color: "var(--mm-ink)" }}
-      >
-        Join {companyLine}
-      </h1>
-      <p className="text-sm mb-8" style={{ color: "var(--mm-mid)" }}>
+      <h1 className="mm-auth-title">Join {companyLine}</h1>
+      <p className="mm-auth-lede mb-8">
         You've been invited to a Revenue Health Diagnostic™ team. Set up your account to continue.
       </p>
       <form onSubmit={onSubmit} className="space-y-4">
@@ -208,11 +187,9 @@ function JoinTeamPage() {
           <Field label="Last name" value={lastName} onChange={setLastName} required />
         </div>
 
-        <label className="block">
-          <span className="block text-sm font-medium mb-1" style={{ color: "var(--mm-ink)" }}>
-            Set a password
-          </span>
-          <div className="relative">
+        <label className="mm-field">
+          <span className="mm-field__label">Set a password</span>
+          <div className="mm-input-wrap">
             <input
               type={showPw ? "text" : "password"}
               value={password}
@@ -222,20 +199,13 @@ function JoinTeamPage() {
               }}
               onBlur={() => setPwBlurInvalid(password.length > 0 && !allRulesMet(password))}
               required
-              className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-              style={{
-                backgroundColor: "var(--mm-off-white)",
-                borderColor: pwBlurInvalid ? "var(--mm-danger)" : "var(--mm-hairline)",
-                color: "var(--mm-ink)",
-                paddingRight: 40,
-              }}
+              className={`mm-input mm-input--pw${pwBlurInvalid ? " mm-input--invalid" : ""}`}
             />
             <button
               type="button"
               onClick={() => setShowPw((s) => !s)}
               aria-label={showPw ? "Hide password" : "Show password"}
-              className="absolute inset-y-0 right-0 flex items-center px-3"
-              style={{ color: "var(--mm-mid)" }}
+              className="mm-input-toggle"
             >
               {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -243,21 +213,9 @@ function JoinTeamPage() {
           <PasswordRequirements password={password} />
         </label>
 
-        {error && (
-          <p className="text-sm" style={{ color: "var(--mm-eyebrow)" }}>
-            {error}
-          </p>
-        )}
+        {error && <p className="mm-text-error">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="w-full rounded-md px-4 py-3 text-white font-semibold disabled:opacity-60"
-          style={{
-            backgroundColor: "var(--mm-ember)",
-            cursor: canSubmit ? "pointer" : "not-allowed",
-          }}
-        >
+        <button type="submit" disabled={!canSubmit} className="mm-btn-block">
           {submitting ? "Joining…" : "Join team"}
         </button>
       </form>
@@ -277,21 +235,14 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <label className="block">
-      <span className="block text-sm font-medium mb-1" style={{ color: "var(--mm-ink)" }}>
-        {label}
-      </span>
+    <label className="mm-field">
+      <span className="mm-field__label">{label}</span>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full rounded-md border px-3 py-2 text-sm outline-none focus:ring-2"
-        style={{
-          backgroundColor: "var(--mm-off-white)",
-          borderColor: "var(--mm-hairline)",
-          color: "var(--mm-ink)",
-        }}
+        className="mm-input"
       />
     </label>
   );
@@ -299,21 +250,9 @@ function Field({
 
 function ReadOnly({ label, value }: { label: string; value: string }) {
   return (
-    <label className="block">
-      <span className="block text-sm font-medium mb-1" style={{ color: "var(--mm-ink)" }}>
-        {label}
-      </span>
-      <input
-        type="text"
-        value={value}
-        disabled
-        className="w-full rounded-md border px-3 py-2 text-sm"
-        style={{
-          backgroundColor: "var(--mm-off-white)",
-          borderColor: "var(--mm-hairline)",
-          color: "var(--mm-mid)",
-        }}
-      />
+    <label className="mm-field">
+      <span className="mm-field__label">{label}</span>
+      <input type="text" value={value} disabled className="mm-input" />
     </label>
   );
 }
