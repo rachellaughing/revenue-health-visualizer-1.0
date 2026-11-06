@@ -478,3 +478,9 @@ textarea.mm-pf-input { resize: vertical; line-height: 1.6; }
 .mm-card--ember .mm-kicker { color: color-mix(in srgb, var(--mm-white) 70%, transparent); letter-spacing: 0.12em; margin-bottom: 8px; }
 .mm-ember-title { font-family: var(--font-display); font-size: 20px; font-weight: 400; margin: 0 0 6px; color: var(--mm-white); }
 .mm-ember-body { font-size: 13px; line-height: 1.6; margin: 0; color: color-mix(in srgb, var(--mm-white) 75%, transparent); }
+
+/* Spacing helpers (unlayered, so they win over component margin resets) */
+.mm-mb-xs { margin-bottom: 8px; } .mm-mb-sm { margin-bottom: 12px; } .mm-mb-md { margin-bottom: 16px; }
+.mm-mb-lg { margin-bottom: 24px; } .mm-mb-xl { margin-bottom: 28px; } .mm-mb-2xl { margin-bottom: 32px; }
+.mm-mt-sm { margin-top: 12px; }
+.mm-max-520 { max-width: 520px; }
