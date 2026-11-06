@@ -32,19 +32,14 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
 
   return (
     <header
-      className="sticky top-0 z-10 flex items-center justify-between px-4"
-      style={{
-        height: 56,
-        backgroundColor: "var(--mm-paper)",
-        borderBottom: "1px solid var(--mm-off-white)",
-      }}
+      className="mm-appbar"
     >
       <button
         onClick={onToggleSidebar}
         className="rounded p-2 transition-colors hover:bg-[var(--mm-off-white)]"
         aria-label="Toggle sidebar"
       >
-        <Menu className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+        <Menu className="mm-ink h-5 w-5" />
       </button>
 
       <div className="flex items-center gap-1">
@@ -55,9 +50,9 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         >
           {theme === "dark" ? (
-            <Moon className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+            <Moon className="mm-ink h-5 w-5" />
           ) : (
-            <Sun className="h-5 w-5" style={{ color: "var(--mm-ink)" }} />
+            <Sun className="mm-ink h-5 w-5" />
           )}
         </button>
 
@@ -67,32 +62,27 @@ export function TopBar({ onToggleSidebar, firstName, email }: Props) {
             className="flex items-center gap-2 rounded-full p-1 pr-2 transition-colors hover:bg-[var(--mm-off-white)]"
             aria-label="User menu"
           >
-            <span
-              className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium text-white"
-              style={{ backgroundColor: "var(--mm-abyss)" }}
-            >
+            <span className="mm-avatar">
               {initial}
             </span>
             <span
-              className="hidden text-sm font-medium sm:inline"
-              style={{ color: "var(--mm-ink)" }}
+              className="mm-ink hidden text-sm font-medium sm:inline"
             >
               {displayName}
             </span>
             <ChevronDown
-              className="hidden h-4 w-4 sm:inline"
-              style={{ color: "var(--mm-mid)" }}
+              className="mm-muted hidden h-4 w-4 sm:inline"
             />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold" style={{ color: "var(--mm-ink)" }}>
+              <span className="mm-ink text-sm font-semibold">
                 {displayName}
               </span>
               {email && (
-                <span className="truncate text-xs font-normal" style={{ color: "var(--mm-mid)" }}>
+                <span className="mm-muted truncate text-xs font-normal">
                   {email}
                 </span>
               )}
