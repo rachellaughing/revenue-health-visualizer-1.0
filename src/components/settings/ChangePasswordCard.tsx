@@ -42,9 +42,9 @@ export function ChangePasswordCard() {
   }
 
   return (
-    <section style={cardStyle}>
-      <h2 style={h2Style}>Change Password</h2>
-      <form onSubmit={onSubmit} style={{ display: "grid", gap: 16 }}>
+    <section className="mm-form-card">
+      <h2 className="mm-form-card__title">Change Password</h2>
+      <form onSubmit={onSubmit} className="mm-form-grid">
         <PasswordField label="Current password" value={current} onChange={setCurrent} />
         <div>
           <PasswordField
@@ -70,17 +70,7 @@ export function ChangePasswordCard() {
           <button
             type="submit"
             disabled={!canSubmit}
-            style={{
-              background: "var(--mm-ember)",
-              color: "var(--mm-white)",
-              border: "none",
-              padding: "12px 24px",
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 700,
-              opacity: canSubmit ? 1 : 0.5,
-              cursor: canSubmit ? "pointer" : "not-allowed",
-            }}
+            className="mm-btn-ember"
           >
             {pending ? "Updating…" : "Change Password"}
           </button>
@@ -107,66 +97,31 @@ function PasswordField({
 }) {
   const [show, setShow] = useState(false);
   return (
-    <label style={{ display: "block" }}>
-      <span style={{ display: "block", fontSize: 13, fontWeight: 500, marginBottom: 6, color: "var(--mm-ink)" }}>
+    <label className="mm-field">
+      <span className="mm-field__label">
         {label}
       </span>
-      <div style={{ position: "relative" }}>
+      <div className="mm-input-wrap">
         <input
           type={show ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           autoComplete="new-password"
-          style={{
-            width: "100%",
-            borderRadius: 8,
-            border: `1px solid ${invalid ? "var(--mm-danger)" : "var(--mm-hairline)"}`,
-            padding: "10px 40px 10px 12px",
-            fontSize: 14,
-            background: "var(--mm-off-white)",
-            color: "var(--mm-ink)",
-            outline: "none",
-          }}
+          className={`mm-input mm-input--pw${invalid ? " mm-input--invalid" : ""}`}
         />
         <button
           type="button"
           onClick={() => setShow((s) => !s)}
           aria-label={show ? "Hide password" : "Show password"}
-          style={{
-            position: "absolute",
-            inset: "0 0 0 auto",
-            display: "flex",
-            alignItems: "center",
-            paddingInline: 10,
-            background: "transparent",
-            border: "none",
-            color: "var(--mm-mid)",
-            cursor: "pointer",
-          }}
+          className="mm-input-toggle"
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
       {helper && (
-        <p style={{ fontSize: 12, color: "var(--mm-danger)", marginTop: 6 }}>{helper}</p>
+        <p className="mm-field__error">{helper}</p>
       )}
     </label>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  background: "var(--mm-paper)",
-  border: "1px solid var(--mm-hairline)",
-  borderRadius: 14,
-  padding: "28px 32px",
-  marginTop: 20,
-};
-
-const h2Style: React.CSSProperties = {
-  fontFamily: "'Instrument Serif', Georgia, serif",
-  fontSize: 26,
-  margin: "0 0 20px",
-  color: "var(--mm-ink)",
-  fontWeight: 400,
-};
